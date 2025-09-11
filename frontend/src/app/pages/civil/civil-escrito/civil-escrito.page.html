@@ -1,0 +1,72 @@
+<ion-content class="civil-content">
+  <!-- Header personalizado -->
+  <div class="custom-header-section">
+    <div class="orange-background">
+      <div class="derecho-civil-container">
+        <img src="assets/image/civil/logo_derecho_civil_escrito.png" alt="Derecho Civil Escrito" class="derecho-civil-image">
+      </div>
+    </div>
+  </div>
+
+  <!-- Resto del contenido -->
+  <div class="content-area">
+    <div class="level-card">
+      <div class="level-header">
+        <ion-icon name="medal-outline" color="warning"></ion-icon>
+        <div class="level-info">
+          <h3>Nivel Intermedio</h3>
+          <p>¡Sigue así! Vas por buen camino</p>
+        </div>
+      </div>
+      
+      <div class="progress-section">
+        <div class="progress-text">
+          <span>Progreso al siguiente nivel</span>
+          <span class="percentage">70%</span>
+        </div>
+        <ion-progress-bar value="0.7" color="warning"></ion-progress-bar>
+        <p class="progress-hint">Necesitas 81% para alcanzar el Nivel Avanzado</p>
+      </div>
+    </div>
+
+    <div class="progress-summary">
+      <h4>Tu progreso en Modo Escrito</h4>
+      <p>65% completado • 13 de 20 sesiones</p>
+    </div>
+
+    <div class="section">
+      <h3>Práctica Rápida</h3>
+      <ion-button expand="block" fill="solid" color="primary" (click)="goToQuickPractice()">
+        <ion-icon name="play-outline" slot="start"></ion-icon>
+        Inicio Rápido
+      </ion-button>
+    </div>
+
+    <div class="section">
+      <h3>Sesiones Completas</h3>
+      <ion-button expand="block" fill="outline" color="medium" (click)="goToStandardSession()">
+        <ion-icon name="book-outline" slot="start"></ion-icon>
+        Sesión Estándar
+      </ion-button>
+    </div>
+
+    <div class="section">
+      <h3>Personalizada</h3>
+      <ion-button expand="block" fill="clear" color="medium" (click)="goToConfiguration()">
+        <ion-icon name="settings-outline" slot="start"></ion-icon>
+        Configurar Sesión
+      </ion-button>
+    </div>
+
+    <div class="stats-section">
+      <div class="stat-item">
+        <div class="stat-value primary">85%</div>
+        <div class="stat-label">Promedio</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value secondary">247</div>
+        <div class="stat-label">Preguntas</div>
+      </div>
+    </div>
+  </div>
+</ion-content>

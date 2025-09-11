@@ -1,3 +1,35 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-tabs>
+    <ion-tab-bar slot="bottom" class="custom-tab-bar">
+      <!-- Background image -->
+      <div class="tab-background">
+        <img src="assets/image/menu/base_menu.png" alt="Menu Background">
+      </div>
+      
+      <!-- Tab buttons -->
+      <ion-tab-button tab="home" class="custom-tab-button">
+        <img src="assets/image/menu/casa.png" alt="Home" class="tab-icon">
+      </ion-tab-button>
+      
+      <ion-tab-button tab="stats" class="custom-tab-button">
+        <img src="assets/image/menu/progreso.png" alt="Progreso" class="tab-icon">
+      </ion-tab-button>
+      
+      <ion-tab-button tab="add" class="custom-tab-button add-button">
+        <div class="add-icon-container">
+          <img src="assets/image/menu/mas.png" alt="Más" class="tab-icon-add">
+        </div>
+      </ion-tab-button>
+      
+      <ion-tab-button tab="notifications" class="custom-tab-button">
+        <img src="assets/image/menu/campana.png" alt="Notificaciones" class="tab-icon">
+      </ion-tab-button>
+      
+      <ion-tab-button tab="profile" class="custom-tab-button">
+        <img src="assets/image/menu/perfil.png" alt="Perfil" class="tab-icon">
+      </ion-tab-button>
+    </ion-tab-bar>
+    
+    <ion-router-outlet></ion-router-outlet>
+  </ion-tabs>
 </ion-app>

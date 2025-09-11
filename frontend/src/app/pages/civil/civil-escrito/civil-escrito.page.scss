@@ -1,0 +1,276 @@
+.civil-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_app_naranjo.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.custom-header-section {
+  .orange-background {
+    background: transparent;
+    padding: 20px 16px 90px 16px;
+    border-radius: 0 0 30px 30px;
+    position: relative;
+    overflow: hidden;
+
+    .derecho-civil-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform: translateY(10px);
+      padding: 0;      
+      position: relative;
+      z-index: 3;
+
+      .derecho-civil-image {
+        display: block;
+        height: 95px; 
+        width: auto;
+        max-width: none;
+        object-fit: contain;
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
+      }
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-header-section .orange-background {
+    padding: 30px 24px 110px 24px; /* más fondo para tablet */
+
+    .derecho-civil-container {
+      transform: translateY(-14px);
+
+      .derecho-civil-image {
+        height: 110px;   /* ⟵ más grande en tablet */
+        max-width: none;
+      }
+    }
+  }
+}
+
+
+.content-area {
+  padding: 20px 0;
+  margin-top: -80px;
+  position: relative;
+  z-index: 2;
+  background: transparent; 
+  border-radius: 30px 30px 0 0;
+}
+
+.level-card {
+  background: linear-gradient(135deg, #F39C12, #E67E22);
+  margin: 16px;
+  border-radius: 20px;
+  padding: 24px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(230, 126, 34, 0.3);
+  
+  .level-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    ion-icon {
+      font-size: 2.2rem;
+      margin-right: 16px;
+      color: #FFF;
+    }
+    
+    .level-info {
+      flex: 1;
+      
+      h3 {
+        margin: 0 0 4px 0;
+        font-weight: bold;
+        font-size: 1.3rem;
+      }
+      
+      p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+      }
+    }
+  }
+  
+  .progress-section {
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      
+      .percentage {
+        font-weight: bold;
+        font-size: 1.4rem;
+      }
+    }
+    
+    ion-progress-bar {
+      margin-bottom: 16px;
+      height: 10px;
+      border-radius: 5px;
+      --progress-background: rgba(255,255,255,0.9);
+      --background: rgba(255,255,255,0.2);
+    }
+    
+    .progress-hint {
+      margin: 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+}
+
+.progress-summary {
+  margin: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border: 1px solid rgba(230, 126, 34, 0.1);
+  
+  h4 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  
+  p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+  }
+}
+
+.section {
+  margin: 16px;
+  
+  h3 {
+    margin: 0 0 16px 0;
+    color: #2c3e50;
+    font-weight: 700;
+  }
+  
+  ion-button {
+    --border-radius: 16px;
+    height: 70px;
+    margin: 10px 0;
+    position: relative;
+    
+    &[fill="solid"] {
+      --background: linear-gradient(135deg, #3498db, #2980b9);
+      --color: white;
+      box-shadow: 0 4px 16px rgba(52, 152, 219, 0.3);
+    }
+    
+    &[fill="outline"] {
+      --border-color: #bdc3c7;
+      --color: #34495e;
+    }
+    
+    &[fill="clear"] {
+      --color: #7f8c8d;
+    }
+    
+    .button-subtitle {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      display: block;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+    
+    ion-icon[slot="start"] {
+      margin-right: 12px;
+      font-size: 1.3rem;
+    }
+    
+    ion-icon[slot="end"] {
+      margin-left: 12px;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.stats-section {
+  display: flex;
+  justify-content: space-around;
+  margin: 24px 16px;
+  padding: 24px 0;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  
+  .stat-item {
+    text-align: center;
+    
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      
+      &.primary, &.secondary {
+        background: linear-gradient(135deg, #E67E22, #D35400);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    }
+    
+    .stat-label {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// Efectos de hover para mejor interactividad
+ion-button:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.level-card:hover {
+  transform: translateY(-3px);
+  transition: all 0.3s ease;
+}
+
+// Responsividad para tablet
+@media (min-width: 768px) {
+  .custom-header-section .orange-background {
+    padding: 30px 24px 80px 24px;
+    
+    .derecho-civil-container {
+      padding: 16px 0; // Aumentado padding
+      
+      .derecho-civil-image {
+        height: 60px; // Aumentado de 55px a 60px
+        max-width: 320px; // Añadido límite de ancho
+      }
+    }
+  }
+  
+  .level-card {
+    margin: 24px;
+    padding: 32px;
+  }
+  
+  .section {
+    margin: 24px;
+    
+    ion-button {
+      height: 75px;
+    }
+  }
+}
