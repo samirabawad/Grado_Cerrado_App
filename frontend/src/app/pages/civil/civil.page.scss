@@ -18,7 +18,7 @@ ion-content.civil-content {
 }
 
 // ========================================
-// HEADER FIJO CON IMAGEN NARANJA
+// HEADER FIJO CON IMAGEN RESPONSIVA EXTREMO A EXTREMO
 // ========================================
 .custom-header-section {
   position: fixed;  
@@ -30,30 +30,30 @@ ion-content.civil-content {
   
   .orange-background {
     background: transparent;
-    padding: 15px 16px 0px 16px; /* Reducir padding inferior */
-    border-radius: 0; /* Sin bordes redondeados */
+    padding: 0; /* Sin padding para que llegue a los extremos */
+    border-radius: 0;
     position: relative;
-    overflow: visible; /* Permitir overflow */
+    overflow: hidden; /* Evitar desbordamiento */
+    width: 100vw; /* Ancho completo de la ventana */
 
-    .derecho-civil-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transform: translateY(0px);
-      padding: 0;      
+    .derecho-civil-container-full {
+      display: block;
+      width: 100%;
+      height: auto;
       position: relative;
       z-index: 3;
 
-      .derecho-civil-image {
+      .derecho-civil-image-responsive {
         display: block;
-        height: 200px; /* Altura ajustada */
-        width: auto;
-        max-width: none;
-        object-fit: contain;
+        width: 100vw; /* Ancho completo de la ventana */
+        height: auto; /* Altura automática para mantener proporción */
+        min-height: 120px; /* Altura mínima */
+        max-height: 200px; /* Altura máxima */
+        object-fit: cover; /* Cubrir todo el ancho manteniendo proporción */
+        object-position: center; /* Centrar la imagen */
         filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
       }
     }
-    
   }
 }
 
@@ -61,7 +61,7 @@ ion-content.civil-content {
 // CONTENIDO PRINCIPAL
 // ========================================
 .content-area {
-  margin-top: 130px; /* Espacio para header fijo */
+  margin-top: 140px; /* Espacio ajustado para header responsivo */
   padding: 20px 0 100px 0;
   position: relative;
   z-index: 2;
@@ -69,7 +69,6 @@ ion-content.civil-content {
   border-radius: 30px 30px 0 0;
   min-height: calc(100vh - 100px);
 }
-
 // ========================================
 // CARDS Y ELEMENTOS
 // ========================================
@@ -133,6 +132,8 @@ ion-content.civil-content {
   
   .progreso-content {
     flex: 1;
+    margin-left: 20px;        /* NUEVO: Mueve el texto más hacia la derecha */
+    padding-right: 10px;      /* NUEVO: Da espacio para el mapache */
     
     .progreso-icon {
       ion-icon {
@@ -155,6 +156,7 @@ ion-content.civil-content {
       color: #666;
     }
     
+    
     .progress-bar {
       width: 100%;
       height: 8px;
@@ -172,17 +174,17 @@ ion-content.civil-content {
     }
     
     .progress-text {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: #888;
     }
   }
   
-  .mapache-container {
-    margin-left: 16px;
+    .mapache-container {
+    margin-left: 20px;
     
     .mapache-image {
-      width: 60px;
-      height: 60px;
+      width: 150px !important;
+      height: 150px !important;
       object-fit: contain;
     }
   }
@@ -279,31 +281,18 @@ ion-content.civil-content {
   }
 }
 
-// ========================================
-// RESPONSIVE DESIGN
-// ========================================
 @media (min-width: 768px) {
   .custom-header-section .orange-background {
-    
-    .naranja-superior-container {
-      width: 100vw; /* Ancho completo de la ventana */
-      height: 50px; /* Altura mayor en tablet para mostrar bien la imagen */
-      left: 50%;
-      transform: translateX(-50%); /* Mantener centrado */
-    }
-
-    .derecho-civil-container {
-      padding: 20px 24px; /* Padding mayor en tablet */
-      transform: translateY(0px);
-
-      .derecho-civil-image {
-        height: 100px; /* Logo más grande en tablet */
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 150px; /* Altura mínima mayor en tablet */
+        max-height: 250px; /* Altura máxima mayor en tablet */
       }
     }
   }
   
   .content-area {
-    margin-top: 150px; /* Más espacio en tablet */
+    margin-top: 180px; /* Más espacio en tablet */
   }
   
   .test-nivelacion-card,
@@ -335,3 +324,18 @@ ion-content.civil-content {
   }
 }
 
+// Media query para pantallas pequeñas
+@media (max-width: 480px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 100px;
+        max-height: 160px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 120px;
+  }
+}
