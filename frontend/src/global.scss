@@ -36,12 +36,35 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
 
-/* Fix scroll para Ionic 8+ */
+/* =================================================
+   ARREGLO DEFINITIVO PARA EL SCROLL EN IONIC
+   ================================================= */
+
+/* Fix scroll para Ionic 8+ - SOLUCIÓN MEJORADA */
 ion-content {
   --overflow: auto !important;
+  overflow: auto !important;
+  scroll-behavior: smooth;
 }
 
-/* Agregar contenido extra para forzar scroll */
+/* Asegurar que el contenedor principal también sea scrolleable */
+.ion-page {
+  overflow: auto !important;
+}
+
+/* Arreglo específico para contenido civil */
+.civil-content {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  max-height: 100vh;
+}
+
+/* Contenido extra para testing - REMOVER CUANDO EL SCROLL FUNCIONE */
 .civil-content .stats-section {
   margin-bottom: 200px !important;
+}
+
+/* Prevenir que otros elementos bloqueen el scroll */
+* {
+  touch-action: auto !important;
 }
