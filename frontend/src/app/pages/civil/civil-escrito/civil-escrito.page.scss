@@ -2,10 +2,15 @@
   --background: transparent;
   background-image: url('/assets/image/fondo_app_naranjo.png');
   background-repeat: no-repeat;
-  background-position: center center;
+  background-position: center top;  /* CAMBIO: de "center center" a "center top" */
   background-size: cover;
   background-attachment: fixed;
   min-height: 100vh;
+}
+/* AGREGADO: Asegurar que ion-content sea scrollable */
+ion-content.civil-content {
+  --overflow: auto;
+  height: 100%;
 }
 
 .custom-header-section {
@@ -39,27 +44,28 @@
 
 @media (min-width: 768px) {
   .custom-header-section .orange-background {
-    padding: 30px 24px 110px 24px; /* más fondo para tablet */
+    padding: 30px 24px 110px 24px;
 
     .derecho-civil-container {
       transform: translateY(-14px);
 
       .derecho-civil-image {
-        height: 110px;   /* ⟵ más grande en tablet */
+        height: 110px;
         max-width: none;
       }
     }
   }
 }
 
-
 .content-area {
-  padding: 20px 0;
+  padding: 20px 0 100px 0; /* AGREGADO: padding-bottom para espacio extra */
   margin-top: -80px;
   position: relative;
   z-index: 2;
   background: transparent; 
   border-radius: 30px 30px 0 0;
+  /* AGREGADO: Mínima altura para asegurar scroll */
+  min-height: calc(100vh - 100px);
 }
 
 .level-card {
@@ -206,7 +212,7 @@
 .stats-section {
   display: flex;
   justify-content: space-around;
-  margin: 24px 16px;
+  margin: 24px 16px 32px 16px; /* AGREGADO: margin-bottom extra */
   padding: 24px 0;
   background: rgba(255, 255, 255, 0.6);
   border-radius: 16px;
@@ -252,11 +258,11 @@ ion-button:hover {
     padding: 30px 24px 80px 24px;
     
     .derecho-civil-container {
-      padding: 16px 0; // Aumentado padding
+      padding: 16px 0;
       
       .derecho-civil-image {
-        height: 60px; // Aumentado de 55px a 60px
-        max-width: 320px; // Añadido límite de ancho
+        height: 60px;
+        max-width: 320px;
       }
     }
   }

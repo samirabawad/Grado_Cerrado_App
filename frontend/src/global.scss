@@ -35,3 +35,13 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+/* Fix scroll para Ionic 8+ */
+ion-content {
+  --overflow: auto !important;
+}
+
+/* Agregar contenido extra para forzar scroll */
+.civil-content .stats-section {
+  margin-bottom: 200px !important;
+}
