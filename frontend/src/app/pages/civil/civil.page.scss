@@ -1,58 +1,78 @@
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
 .civil-content {
   --background: transparent;
-  background-image: url('/assets/image/fondo_app_naranjo.png');
+  background-image: url('/assets/image/fondo_blanco_app.png');
   background-repeat: no-repeat;
-  background-position: center top;  /* CAMBIO: de "center center" a "center top" */
+  background-position: center top;
   background-size: cover;
   background-attachment: fixed;
   min-height: 100vh;
 }
 
-/* AGREGADO: Asegurar que ion-content sea scrollable */
+/* Asegurar que ion-content sea scrollable */
 ion-content.civil-content {
   --overflow: auto;
   height: 100%;
 }
 
+// ========================================
+// HEADER FIJO CON IMAGEN NARANJA
+// ========================================
 .custom-header-section {
+  position: fixed;  
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;   
+  background: transparent;
+  
   .orange-background {
     background: transparent;
-    padding: 20px 16px 90px 16px;
-    border-radius: 0 0 30px 30px;
+    padding: 15px 16px 0px 16px; /* Reducir padding inferior */
+    border-radius: 0; /* Sin bordes redondeados */
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* Permitir overflow */
 
     .derecho-civil-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      transform: translateY(10px);
+      transform: translateY(0px);
       padding: 0;      
       position: relative;
       z-index: 3;
 
       .derecho-civil-image {
         display: block;
-        height: 95px; 
+        height: 200px; /* Altura ajustada */
         width: auto;
         max-width: none;
         object-fit: contain;
         filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
       }
     }
+    
   }
 }
 
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
 .content-area {
-  padding: 20px 0 100px 0; /* AGREGADO: padding-bottom para espacio extra */
-  margin-top: -80px;
+  margin-top: 130px; /* Espacio para header fijo */
+  padding: 20px 0 100px 0;
   position: relative;
   z-index: 2;
   background: transparent; 
   border-radius: 30px 30px 0 0;
-  /* AGREGADO: Mínima altura para asegurar scroll */
   min-height: calc(100vh - 100px);
 }
+
+// ========================================
+// CARDS Y ELEMENTOS
+// ========================================
 
 // Test de Nivelación Card
 .test-nivelacion-card {
@@ -259,19 +279,31 @@ ion-content.civil-content {
   }
 }
 
-// Responsividad para tablet
+// ========================================
+// RESPONSIVE DESIGN
+// ========================================
 @media (min-width: 768px) {
   .custom-header-section .orange-background {
-    padding: 30px 24px 110px 24px;
+    
+    .naranja-superior-container {
+      width: 100vw; /* Ancho completo de la ventana */
+      height: 50px; /* Altura mayor en tablet para mostrar bien la imagen */
+      left: 50%;
+      transform: translateX(-50%); /* Mantener centrado */
+    }
 
     .derecho-civil-container {
-      transform: translateY(-14px);
+      padding: 20px 24px; /* Padding mayor en tablet */
+      transform: translateY(0px);
 
       .derecho-civil-image {
-        height: 110px;
-        max-width: none;
+        height: 100px; /* Logo más grande en tablet */
       }
     }
+  }
+  
+  .content-area {
+    margin-top: 150px; /* Más espacio en tablet */
   }
   
   .test-nivelacion-card,
