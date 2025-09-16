@@ -14,6 +14,18 @@ const routes: Routes = [
         .then(m => m.ConfiguracionPageModule)
   },
   {
+    path: 'resumen-test',
+    loadChildren: () =>
+      import('./resumen-test/resumen-test.module')
+        .then(m => m.ResumenTestPageModule)
+  },
+  {
+    path: 'test-escrito-civil',
+    loadChildren: () =>
+      import('./test-escrito-civil/test-escrito-civil.module')
+        .then(m => m.TestEscritoCivilPageModule)
+  },
+  {
     path: 'practica-rapida',
     loadChildren: () =>
       import('./practica-rapida/practica-rapida.module')

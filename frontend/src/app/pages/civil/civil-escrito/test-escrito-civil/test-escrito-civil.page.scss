@@ -1,0 +1,485 @@
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
+.test-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Asegurar que ion-content sea scrollable */
+ion-content.test-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// HEADER FIJO CON IMAGEN RESPONSIVA
+// ========================================
+.custom-header-section {
+  position: fixed;  
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;   
+  background: transparent;
+  
+  .orange-background {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+
+    .derecho-civil-container-full {
+      display: block;
+      width: 100%;
+      height: auto;
+      position: relative;
+      z-index: 3;
+
+      .derecho-civil-image-responsive {
+        display: block;
+        width: 100vw;
+        height: auto;
+        min-height: 120px;
+        max-height: 200px;
+        object-fit: cover;
+        object-position: center;
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
+      }
+    }
+    
+    // Botón de opciones (tres puntos)
+    .header-options {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 4;
+      
+      .options-menu-button {
+        --background: rgba(255, 255, 255, 0.9);
+        --color: #666;
+        --border-radius: 50%;
+        --padding: 8px;
+        width: 40px;
+        height: 40px;
+        
+        ion-icon {
+          font-size: 1.2rem;
+        }
+      }
+    }
+  }
+}
+
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
+.content-area {
+  margin-top: 140px;
+  padding: 20px 16px 120px 16px; // Más padding bottom para el botón flotante
+  position: relative;
+  z-index: 2;
+  background: transparent; 
+  border-radius: 30px 30px 0 0;
+  min-height: calc(100vh - 100px);
+}
+
+// ========================================
+// SECCIÓN DE PROGRESO
+// ========================================
+.progress-section {
+  margin-bottom: 20px;
+  
+  .progress-text {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #E0E0E0;
+    border-radius: 3px;
+    overflow: hidden;
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4CAF50, #2E7D32);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+  }
+}
+
+// ========================================
+// CHIP DE CATEGORÍA
+// ========================================
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  
+  ion-icon {
+    font-size: 1rem;
+    color: white;
+    margin-right: 6px;
+  }
+  
+  span {
+    font-size: 0.85rem;
+    color: white;
+    font-weight: 500;
+  }
+}
+
+// ========================================
+// BADGE DE CATEGORÍA VERDE
+// ========================================
+.category-badge {
+  display: inline-block;
+  margin-bottom: 16px;
+  
+  span {
+    background: #4CAF50;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+// ========================================
+// NÚMERO Y TEXTO DE PREGUNTA
+// ========================================
+.question-number {
+  margin-bottom: 16px;
+  
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #4CAF50;
+    margin: 0;
+  }
+}
+
+.question-text {
+  margin-bottom: 24px;
+  
+  p {
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+// ========================================
+// OPCIONES DE RESPUESTA
+// ========================================
+.options-container {
+  margin-bottom: 24px;
+}
+
+.option-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  &.selected {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.05);
+    
+    .option-letter {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .option-text {
+      color: #2E7D32;
+      font-weight: 600;
+    }
+  }
+  
+  .option-letter {
+    background: #F5F5F5;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-right: 16px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .option-text {
+    flex: 1;
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.4;
+    transition: all 0.3s ease;
+  }
+}
+
+// ========================================
+// BOTÓN FLOTANTE
+// ========================================
+.floating-next-container {
+  position: fixed;
+  bottom: 20px;
+  left: 16px;
+  right: 16px;
+  z-index: 1000;
+  
+  .next-button {
+    --background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    --color: white;
+    --border-radius: 25px;
+    --padding-top: 18px;
+    --padding-bottom: 18px;
+    --box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    
+    ion-icon {
+      font-size: 1.2rem;
+      margin-right: 8px;
+    }
+    
+    &:hover {
+      --box-shadow: 0 8px 24px rgba(76, 175, 80, 0.5);
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+    }
+    
+    &:active {
+      transform: translateY(0);
+      --box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE DESIGN
+// ========================================
+@media (min-width: 768px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 150px;
+        max-height: 250px;
+      }
+    }
+    
+    .header-options {
+      top: 30px;
+      right: 30px;
+      
+      .options-menu-button {
+        width: 44px;
+        height: 44px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 180px;
+    padding: 24px 32px 120px 32px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .question-text p {
+    font-size: 1.2rem;
+  }
+  
+  .option-card {
+    padding: 20px;
+    margin-bottom: 16px;
+    
+    .option-letter {
+      width: 36px;
+      height: 36px;
+      font-size: 1rem;
+    }
+    
+    .option-text {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .floating-next-container {
+    left: 32px;
+    right: 32px;
+    
+    .next-button {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 100px;
+        max-height: 160px;
+      }
+    }
+    
+    .header-options {
+      top: 16px;
+      right: 16px;
+      
+      .options-menu-button {
+        width: 36px;
+        height: 36px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 120px;
+    padding: 16px 12px 100px 12px;
+  }
+  
+  .question-text p {
+    font-size: 1rem;
+  }
+  
+  .option-card {
+    padding: 14px;
+    
+    .option-letter {
+      width: 28px;
+      height: 28px;
+      font-size: 0.8rem;
+      margin-right: 12px;
+    }
+    
+    .option-text {
+      font-size: 0.95rem;
+    }
+  }
+  
+  .floating-next-container {
+    left: 12px;
+    right: 12px;
+    
+    .next-button {
+      --padding-top: 16px;
+      --padding-bottom: 16px;
+      font-size: 1rem;
+    }
+  }
+}
+
+// ========================================
+// ANIMACIONES
+// ========================================
+.progress-section {
+  animation: slideInDown 0.4s ease-out;
+}
+
+.category-chip {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.question-number {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.question-text {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.option-card {
+  animation: slideInUp 0.7s ease-out;
+  
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+  &:nth-child(4) { animation-delay: 0.4s; }
+}
+
+.floating-next-container {
+  animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -2,71 +2,129 @@
   <!-- Header personalizado -->
   <div class="custom-header-section">
     <div class="orange-background">
-      <div class="derecho-civil-container">
-        <img src="assets/image/civil/logo_derecho_civil_escrito.png" alt="Derecho Civil Escrito" class="derecho-civil-image">
+      <!-- Imagen de extremo a extremo -->
+      <div class="derecho-civil-container-full">
+        <img src="assets/image/civil/logo_derecho_civil_escrito.png" alt="Derecho Civil Escrito" class="derecho-civil-image-responsive">
       </div>
     </div>
   </div>
 
   <!-- Resto del contenido -->
   <div class="content-area">
-    <div class="level-card">
-      <div class="level-header">
-        <ion-icon name="medal-outline" color="warning"></ion-icon>
-        <div class="level-info">
-          <h3>Nivel Intermedio</h3>
-          <p>¡Sigue así! Vas por buen camino</p>
-        </div>
+    
+    <!-- Card de Nivel Actual -->
+    <div class="level-progress-card">
+      <div class="level-badge">
+        <ion-icon name="trophy"></ion-icon>
+        <span class="level-text">{{ currentLevel }}</span>
       </div>
+      <p class="congratulation-text">{{ congratulationMessage }}</p>
       
       <div class="progress-section">
-        <div class="progress-text">
-          <span>Progreso al siguiente nivel</span>
-          <span class="percentage">70%</span>
+        <div class="progress-header">
+          <span class="progress-label">Progreso al siguiente nivel</span>
+          <span class="progress-percentage">{{ progressPercentage }}%</span>
         </div>
-        <ion-progress-bar value="0.7" color="warning"></ion-progress-bar>
-        <p class="progress-hint">Necesitas 81% para alcanzar el Nivel Avanzado</p>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+        </div>
+        <p class="next-level-text">{{ nextLevelProgress }}</p>
       </div>
     </div>
 
-    <div class="progress-summary">
-      <h4>Tu progreso en Modo Escrito</h4>
-      <p>65% completado • 13 de 20 sesiones</p>
+    <!-- Card de Progreso en Modo Escrito -->
+    <div class="written-mode-card">
+      <div class="written-mode-content">
+        <h4>Tu progreso en Modo Escrito</h4>
+        <div class="written-progress">
+          <div class="written-progress-bar">
+            <div class="written-progress-fill" [style.width.%]="writtenModeProgress"></div>
+          </div>
+          <div class="written-stats">
+            <span class="written-percentage">{{ writtenModeProgress }}% completado</span>
+            <span class="written-sessions">{{ writtenModeSessions }}</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="section">
-      <h3>Práctica Rápida</h3>
-      <ion-button expand="block" fill="solid" color="primary" (click)="goToQuickPractice()">
-        <ion-icon name="play-outline" slot="start"></ion-icon>
-        Inicio Rápido
-      </ion-button>
+    <!-- Sección de Práctica Rápida -->
+    <div class="practice-section">
+      <div class="practice-header">
+        <ion-icon name="flash"></ion-icon>
+        <h3>Práctica Rápida</h3>
+      </div>
+      
+      <div class="quick-practice-card" (click)="goToQuickPractice()">
+        <div class="practice-icon">
+          <ion-icon name="timer"></ion-icon>
+        </div>
+        <div class="practice-info">
+          <h4>Inicio Rápido</h4>
+          <p>5 preguntas • 10 minutos</p>
+        </div>
+        <div class="practice-arrow">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </div>
+      </div>
     </div>
 
-    <div class="section">
-      <h3>Sesiones Completas</h3>
-      <ion-button expand="block" fill="outline" color="medium" (click)="goToStandardSession()">
-        <ion-icon name="book-outline" slot="start"></ion-icon>
-        Sesión Estándar
-      </ion-button>
+    <!-- Sección de Sesiones Completas -->
+    <div class="sessions-section">
+      <div class="sessions-header">
+        <ion-icon name="book"></ion-icon>
+        <h3>Sesiones Completas</h3>
+      </div>
+      
+      <div class="standard-session-card" (click)="goToStandardSession()">
+        <div class="session-icon">
+          <ion-icon name="library"></ion-icon>
+        </div>
+        <div class="session-info">
+          <h4>Sesión Estándar</h4>
+          <p>15 preguntas • 30 minutos</p>
+        </div>
+        <div class="session-arrow">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </div>
+      </div>
     </div>
 
-    <div class="section">
-      <h3>Personalizada</h3>
-      <ion-button expand="block" fill="clear" color="medium" (click)="goToConfiguration()">
-        <ion-icon name="settings-outline" slot="start"></ion-icon>
-        Configurar Sesión
-      </ion-button>
+    <!-- Sección Personalizada -->
+    <div class="personalized-section">
+      <div class="personalized-header">
+        <ion-icon name="settings"></ion-icon>
+        <h3>Personalizada</h3>
+      </div>
+      
+      <div class="configuration-card" (click)="goToConfiguration()">
+        <div class="config-icon">
+          <ion-icon name="cog"></ion-icon>
+        </div>
+        <div class="config-info">
+          <h4>Configurar Sesión</h4>
+          <p>Temas, tiempo y dificultad</p>
+        </div>
+        <div class="config-arrow">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </div>
+      </div>
     </div>
 
-    <div class="stats-section">
+    <!-- Estadísticas -->
+    <div class="stats-bottom">
       <div class="stat-item">
-        <div class="stat-value primary">85%</div>
+        <div class="stat-value">{{ averageScore }}%</div>
         <div class="stat-label">Promedio</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value secondary">247</div>
+        <div class="stat-value">{{ totalQuestions }}</div>
         <div class="stat-label">Preguntas</div>
       </div>
+      <div class="stats-trophy">
+        <img src="assets/image/mok.png" alt="Trophy" class="trophy-image">
+      </div>
     </div>
+
   </div>
 </ion-content>
