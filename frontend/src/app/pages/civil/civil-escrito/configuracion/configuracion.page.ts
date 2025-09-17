@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ApiService } from '../../../../services/api.service'; // 
 
 @Component({
   selector: 'app-configuracion',
@@ -22,7 +23,9 @@ export class ConfiguracionPage implements OnInit {
   questionOptions = [5, 10, 20, 30];
   difficultyOptions = ['Fácil', 'Intermedio', 'Difícil'];
 
-  constructor(private router: Router) { }
+  constructor(private router: Router,
+              private apiService: ApiService
+  ) { }
 
   ngOnInit() {
     // Cargar configuración guardada del usuario si existe
@@ -73,28 +76,49 @@ export class ConfiguracionPage implements OnInit {
   }
 
   // Iniciar sesión personalizada
-  startCustomSession() {
-    console.log('Configuración de sesión:', this.sessionConfig);
-    
-    // Guardar configuración antes de iniciar
-    this.saveConfiguration();
-    
-    // Navegar a la página de resumen del test
-    this.router.navigate(['/civil/civil-escrito/resumen-test'], {
-      queryParams: {
-        numberOfQuestions: this.sessionConfig.numberOfQuestions,
-        difficulty: this.sessionConfig.difficulty,
-        adaptiveMode: this.sessionConfig.adaptiveMode,
-        immediateFeedback: this.sessionConfig.immediateFeedback,
-        onlyFailedQuestions: this.sessionConfig.onlyFailedQuestions
+    async startCustomSession() {
+      try {
+        console.log('Iniciando sesión con backend...');
+        
+        const sessionData = {
+          userId: null,
+          legalAreas: ['Derecho Civil'],
+          difficulty: this.mapDifficultyToNumber(this.sessionConfig.difficulty),
+          questionCount: this.sessionConfig.numberOfQuestions
+        };
+        
+        const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
+        console.log('Sesión iniciada exitosamente:', sessionResponse);
+        
+        this.apiService.setCurrentSession(sessionResponse);
+        
+        // ✅ Navegar a test-escrito-civil
+        this.router.navigate(['/civil/civil-escrito/test-escrito-civil']);
+        
+      } catch (error) {
+        console.error('Error iniciando sesión:', error);
       }
-    });
-  }
+    }
 
   // Volver a la página anterior
   goBack() {
     this.router.navigate(['/civil/civil-escrito']);
   }
+
+  // Convertir dificultad de español a inglés
+    private mapDifficultyToNumber(difficulty: string): number {
+      switch (difficulty) {
+        case 'Fácil':
+          return 0;  // Basic
+        case 'Intermedio':
+          return 1;  // Intermediate
+        case 'Difícil':
+          return 2;  // Advanced
+        default:
+          return 1;  // Default: Intermediate
+      }
+    }
+
 
   // Obtener el color del valor según el tipo
   getValueColor(type: string): string {

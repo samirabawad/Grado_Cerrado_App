@@ -30,12 +30,12 @@
     <!-- Chip de categoría -->
     <div class="category-chip" [style.background-color]="getCategoryColor()">
       <ion-icon name="document-text"></ion-icon>
-      <span>Pregunta {{ currentQuestionNumber }} de {{ totalQuestions }} • {{ getCurrentQuestion().category }}</span>
+      <span>Pregunta {{ currentQuestionNumber }} de {{ totalQuestions }} • {{ getCurrentQuestionCategory() }}</span>
     </div>
 
     <!-- Chip verde de categoría -->
     <div class="category-badge">
-      <span>{{ getCurrentQuestion().category }}</span>
+      <span>{{ getCurrentQuestionCategory() }}</span>
     </div>
 
     <!-- Número de pregunta -->
@@ -45,13 +45,13 @@
 
     <!-- Texto de la pregunta -->
     <div class="question-text">
-      <p>{{ getCurrentQuestion().text }}</p>
+      <p>{{ getCurrentQuestionText() }}</p>
     </div>
 
     <!-- Opciones de respuesta -->
     <div class="options-container">
       <div 
-        *ngFor="let option of getCurrentQuestion().options" 
+        *ngFor="let option of getCurrentQuestionOptions()"
         class="option-card"
         [class.selected]="isOptionSelected(option.id)"
         (click)="selectAnswer(option.id)">
