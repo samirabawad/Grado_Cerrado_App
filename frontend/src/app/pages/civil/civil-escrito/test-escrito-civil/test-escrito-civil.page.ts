@@ -1,17 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ApiService } from '../../../../services/api.service'; // Ajusta la ruta según tu estructura
+import { AlertController } from '@ionic/angular';
+import { ApiService } from '../../../../services/api.service';
 
 interface Question {
-  id: string; // Cambié a string para compatibilidad con backend
-  text: string; // Mantener 'text' para compatibilidad con template
-  questionText: string; // También mantener questionText para backend
-  type: number; // QuestionType del backend
-  category: string; // Agregar category para template
+  id: string;
+  text: string;
+  questionText: string;
+  type: number;
+  category: string;
   options: {
     id: string;
     text: string;
-  }[]; // Mantener formato de opciones del template original
+  }[];
   correctAnswer: string;
   explanation: string;
   legalArea: string;
@@ -65,7 +66,8 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private apiService: ApiService // ✅ Inyectar ApiService
+    private apiService: ApiService,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
@@ -78,12 +80,11 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ CARGAR SESIÓN DESDE EL BACKEND
+  // CARGAR SESIÓN DESDE EL BACKEND
   async loadSessionFromBackend() {
     try {
       this.isLoading = true;
       
-      // Obtener la sesión actual del ApiService
       this.currentSession = this.apiService.getCurrentSession();
       
       if (!this.currentSession) {
@@ -95,19 +96,16 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
       console.log('Sesión cargada:', this.currentSession);
       
-      // Configurar datos del test desde la sesión
       this.sessionId = this.currentSession.session.id;
       this.totalQuestions = this.currentSession.totalQuestions;
       this.currentQuestionIndex = this.currentSession.currentQuestionIndex;
       this.currentQuestionNumber = this.currentQuestionIndex + 1;
       
-      // Convertir preguntas del backend al formato del frontend
       this.questions = this.convertBackendQuestions(this.currentSession.questions);
       
       console.log('Preguntas convertidas:', this.questions);
       
-      // Configurar timer (usar valor por defecto si no viene en la sesión)
-      this.timeRemaining = this.testConfig.timeLimit * 60; // 25 minutos por defecto
+      this.timeRemaining = this.testConfig.timeLimit * 60;
       
       this.isLoading = false;
       this.startTimer();
@@ -119,23 +117,21 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ CONVERTIR PREGUNTAS DEL BACKEND AL FORMATO DEL FRONTEND
+  // CONVERTIR PREGUNTAS DEL BACKEND AL FORMATO DEL FRONTEND
   convertBackendQuestions(backendQuestions: any[]): Question[] {
     return backendQuestions.map(bq => {
-      // Generar opciones para preguntas de opción múltiple
       let options: { id: string; text: string; }[] = [];
       
-      if (bq.type === 0) { // MultipleChoice
-        // Si el backend no envía opciones, las generamos basadas en la respuesta correcta
+      if (bq.type === 0) {
         options = this.generateOptionsForQuestion(bq);
       }
 
       return {
         id: bq.id,
-        text: bq.questionText, // Usar questionText del backend como text para el template
+        text: bq.questionText,
         questionText: bq.questionText,
         type: bq.type,
-        category: bq.legalArea || 'Derecho Civil', // Usar legalArea como category
+        category: bq.legalArea || 'Derecho Civil',
         options: options,
         correctAnswer: bq.correctAnswer,
         explanation: bq.explanation || '',
@@ -146,23 +142,19 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     });
   }
 
-  // ✅ GENERAR OPCIONES PARA PREGUNTAS (si no vienen del backend)
+  // GENERAR OPCIONES PARA PREGUNTAS
   generateOptionsForQuestion(question: any): { id: string; text: string; }[] {
-    // Si el backend ya envía opciones en el formato correcto, usarlas
     if (question.options && question.options.length > 0) {
-      // Si las opciones ya vienen con id y text
       if (typeof question.options[0] === 'object' && question.options[0].id) {
         return question.options;
       }
       
-      // Si las opciones son solo strings, convertirlas
       return question.options.map((opt: string, index: number) => ({
-        id: String.fromCharCode(65 + index), // A, B, C, D
+        id: String.fromCharCode(65 + index),
         text: opt
       }));
     }
 
-    // Si no, generar opciones básicas (esto deberías mejorarlo según tu lógica)
     return [
       { id: 'A', text: question.correctAnswer },
       { id: 'B', text: 'Opción alternativa 1' },
@@ -198,10 +190,16 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
   // Seleccionar respuesta
   selectAnswer(optionId: string) {
+    if (!this.canSelectOption()) {
+      return;
+    }
+    
     this.selectedAnswer = optionId;
     if (this.questions[this.currentQuestionIndex]) {
       this.questions[this.currentQuestionIndex].userAnswer = optionId;
     }
+    
+    console.log('Respuesta seleccionada:', optionId);
   }
 
   // Verificar si hay respuesta seleccionada
@@ -209,7 +207,7 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return this.selectedAnswer !== '';
   }
 
-  // ✅ SIGUIENTE PREGUNTA (actualizada para enviar respuesta al backend)
+  // SIGUIENTE PREGUNTA
   async nextQuestion() {
     if (!this.hasSelectedAnswer()) {
       return;
@@ -219,14 +217,13 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     if (!currentQuestion) return;
 
     try {
-      // Enviar respuesta al backend
       const answerData = {
         questionId: currentQuestion.id,
         userAnswer: this.selectedAnswer,
         correctAnswer: currentQuestion.correctAnswer,
         explanation: currentQuestion.explanation,
         questionType: currentQuestion.type,
-        timeSpentSeconds: 30, // Puedes calcular el tiempo real
+        timeSpentSeconds: 30,
         generateFollowUp: false,
         originalQuestionText: currentQuestion.questionText,
         legalArea: currentQuestion.legalArea,
@@ -238,46 +235,134 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
     } catch (error) {
       console.error('Error enviando respuesta:', error);
-      // Continuar aunque falle el envío al backend
     }
 
-    // Avanzar a la siguiente pregunta
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
       this.currentQuestionNumber++;
       this.selectedAnswer = this.questions[this.currentQuestionIndex].userAnswer || '';
       
-      // Actualizar índice en el servicio
       this.apiService.updateCurrentQuestionIndex(this.currentQuestionIndex);
     } else {
       this.finishTest();
     }
   }
 
-  // ✅ FINALIZAR TEST (actualizado para limpiar sesión)
-  finishTest() {
+  // FINALIZAR TEST CON POPUP DE RESULTADOS
+  async finishTest() {
     this.isTestCompleted = true;
     if (this.timer) {
       clearInterval(this.timer);
     }
 
-    // Calcular resultados
     const correctAnswers = this.questions.filter(q => q.userAnswer === q.correctAnswer).length;
+    const incorrectAnswers = this.questions.length - correctAnswers;
     const percentage = Math.round((correctAnswers / this.questions.length) * 100);
+    const timeUsed = this.testConfig.timeLimit * 60 - this.timeRemaining;
 
-    // Limpiar sesión del servicio
+    const suggestedLevel = this.calculateSuggestedLevel(percentage);
+
+    await this.showResultsPopup({
+      correctAnswers,
+      incorrectAnswers,
+      totalQuestions: this.questions.length,
+      percentage,
+      timeUsed,
+      suggestedLevel
+    });
+  }
+
+  // CALCULAR NIVEL SUGERIDO BASADO EN RESULTADOS
+  calculateSuggestedLevel(percentage: number): string {
+    if (percentage >= 90) {
+      return 'Experto';
+    } else if (percentage >= 75) {
+      return 'Avanzado';
+    } else if (percentage >= 60) {
+      return 'Intermedio';
+    } else if (percentage >= 40) {
+      return 'Básico';
+    } else {
+      return 'Principiante';
+    }
+  }
+
+  // GUARDAR RESULTADOS EN STORAGE LOCAL
+  saveTestResults(results: any) {
+    const resultsToSave = {
+      correctAnswers: results.correctAnswers,
+      incorrectAnswers: results.incorrectAnswers,
+      percentage: results.percentage,
+      suggestedLevel: results.suggestedLevel,
+      timestamp: new Date().toISOString(),
+      hasResults: true
+    };
+    
+    localStorage.setItem('lastTestResults', JSON.stringify(resultsToSave));
+    console.log('Resultados guardados:', resultsToSave);
+  }
+
+  // MOSTRAR POPUP DE RESULTADOS CON GUARDADO
+  async showResultsPopup(results: any) {
+    // Guardar resultados antes de mostrar el popup
+    this.saveTestResults(results);
+    
+    const alert = await this.alertController.create({
+      header: 'Resultados del Test',
+      message: `
+        Correctas: ${results.correctAnswers}
+        Incorrectas: ${results.incorrectAnswers}
+        Porcentaje: ${results.percentage}%
+        Nivel: ${results.suggestedLevel}
+        Tiempo: ${this.formatTimeUsed(results.timeUsed)}
+      `,
+      buttons: [
+        {
+          text: 'Ver Detalles',
+          handler: () => {
+            this.goToDetailedResults(results);
+          }
+        },
+        {
+          text: 'Continuar',
+          handler: () => {
+            this.goBackToMenu();
+          }
+        }
+      ],
+      backdropDismiss: false
+    });
+
+    await alert.present();
+  }
+
+  // FORMATEAR TIEMPO USADO
+  formatTimeUsed(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  // IR A RESULTADOS DETALLADOS
+  goToDetailedResults(results: any) {
     this.apiService.clearCurrentSession();
 
-    // Navegar a la página de resultados
     this.router.navigate(['/civil/civil-escrito/resultados'], {
       queryParams: {
-        correctAnswers,
-        totalQuestions: this.questions.length,
-        percentage,
-        timeUsed: this.testConfig.timeLimit * 60 - this.timeRemaining,
-        sessionId: this.sessionId
+        correctAnswers: results.correctAnswers,
+        totalQuestions: results.totalQuestions,
+        percentage: results.percentage,
+        timeUsed: results.timeUsed,
+        sessionId: this.sessionId,
+        suggestedLevel: results.suggestedLevel
       }
     });
+  }
+
+  // VOLVER AL MENÚ PRINCIPAL
+  goBackToMenu() {
+    this.apiService.clearCurrentSession();
+    this.router.navigate(['/civil/civil-escrito']);
   }
 
   // Obtener progreso
@@ -290,7 +375,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     const question = this.getCurrentQuestion();
     if (!question) return '#9C27B0';
     
-    // Usar tanto category como legalArea para determinar el color
     const area = question.category || question.legalArea;
     switch (area) {
       case 'Contratos':
@@ -315,53 +399,112 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return this.selectedAnswer === optionId;
   }
 
-  // ✅ SALIR DEL TEST (actualizado para limpiar sesión)
+  // MÉTODOS PARA FEEDBACK VISUAL
+
+  hasAnsweredCurrentQuestion(): boolean {
+    return this.selectedAnswer !== '';
+  }
+
+  isCorrectAnswer(optionId: string): boolean {
+    const currentQuestion = this.getCurrentQuestion();
+    return currentQuestion ? currentQuestion.correctAnswer === optionId : false;
+  }
+
+  isIncorrectAnswer(optionId: string): boolean {
+    return this.hasAnsweredCurrentQuestion() && 
+           this.isOptionSelected(optionId) && 
+           !this.isCorrectAnswer(optionId);
+  }
+
+  getOptionState(optionId: string): 'default' | 'selected' | 'correct' | 'incorrect' {
+    if (!this.hasAnsweredCurrentQuestion()) {
+      return this.isOptionSelected(optionId) ? 'selected' : 'default';
+    }
+    
+    if (this.isCorrectAnswer(optionId)) {
+      return 'correct';
+    }
+    
+    if (this.isIncorrectAnswer(optionId)) {
+      return 'incorrect';
+    }
+    
+    return 'default';
+  }
+
+  shouldShowOptionIcon(optionId: string): boolean {
+    return this.hasAnsweredCurrentQuestion();
+  }
+
+  getOptionIcon(optionId: string): string {
+    if (!this.hasAnsweredCurrentQuestion()) {
+      return '';
+    }
+    
+    if (this.isCorrectAnswer(optionId)) {
+      return 'checkmark-circle';
+    }
+    
+    if (this.isIncorrectAnswer(optionId)) {
+      return 'close-circle';
+    }
+    
+    return '';
+  }
+
+  getOptionIconColor(optionId: string): string {
+    if (this.isCorrectAnswer(optionId)) {
+      return '#4CAF50';
+    }
+    
+    if (this.isIncorrectAnswer(optionId)) {
+      return '#F44336';
+    }
+    
+    return '';
+  }
+
+  canSelectOption(): boolean {
+    return !this.hasAnsweredCurrentQuestion();
+  }
+
+  // SALIR DEL TEST
   exitTest() {
     if (confirm('¿Estás seguro de que quieres salir del test? Se perderá tu progreso.')) {
       if (this.timer) {
         clearInterval(this.timer);
       }
       
-      // Limpiar sesión
       this.apiService.clearCurrentSession();
-      
       this.router.navigate(['/civil/civil-escrito']);
     }
   }
 
-  // ✅ MÉTODOS AUXILIARES PARA LA VISTA
+  // MÉTODOS AUXILIARES PARA LA VISTA
 
-  // Verificar si las preguntas están cargando
   isQuestionsLoading(): boolean {
     return this.isLoading;
   }
 
-  // Verificar si hay error de carga
   hasLoadingError(): boolean {
     return this.loadingError;
   }
 
-  // Reintentar carga
   retryLoading() {
     this.loadingError = false;
     this.loadSessionFromBackend();
   }
 
-  // ✅ MÉTODOS AUXILIARES PARA EL TEMPLATE (agregar estos)
-  
-  // Obtener categoría de forma segura
   getCurrentQuestionCategory(): string {
     const question = this.getCurrentQuestion();
     return question?.category || question?.legalArea || 'Sin categoría';
   }
 
-  // Obtener texto de pregunta de forma segura  
   getCurrentQuestionText(): string {
     const question = this.getCurrentQuestion();
     return question?.text || question?.questionText || '';
   }
 
-  // Obtener opciones de forma segura
   getCurrentQuestionOptions(): { id: string; text: string; }[] {
     const question = this.getCurrentQuestion();
     return question?.options || [];

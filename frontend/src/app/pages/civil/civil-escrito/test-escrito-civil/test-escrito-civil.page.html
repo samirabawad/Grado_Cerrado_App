@@ -6,13 +6,6 @@
       <div class="derecho-civil-container-full">
         <img src="assets/image/civil/logo_derecho_civil_escrito.png" alt="Derecho Civil Escrito" class="derecho-civil-image-responsive">
       </div>
-      
-      <!-- Botón de opciones (tres puntos) -->
-      <div class="header-options">
-        <ion-button fill="clear" class="options-menu-button" (click)="exitTest()">
-          <ion-icon name="ellipsis-horizontal"></ion-icon>
-        </ion-button>
-      </div>
     </div>
   </div>
 
@@ -48,16 +41,38 @@
       <p>{{ getCurrentQuestionText() }}</p>
     </div>
 
-    <!-- Opciones de respuesta -->
+    <!-- Opciones de respuesta con feedback visual -->
     <div class="options-container">
       <div 
         *ngFor="let option of getCurrentQuestionOptions()"
         class="option-card"
-        [class.selected]="isOptionSelected(option.id)"
+        [class.selected]="isOptionSelected(option.id) && !hasAnsweredCurrentQuestion()"
+        [class.correct]="getOptionState(option.id) === 'correct'"
+        [class.incorrect]="getOptionState(option.id) === 'incorrect'"
+        [class.disabled]="!canSelectOption()"
         (click)="selectAnswer(option.id)">
         
         <div class="option-letter">{{ option.id }}</div>
         <div class="option-text">{{ option.text }}</div>
+        
+        <!-- Ícono de feedback (checkmark o cruz) -->
+        <div class="option-feedback" *ngIf="shouldShowOptionIcon(option.id)">
+          <ion-icon 
+            [name]="getOptionIcon(option.id)"
+            [style.color]="getOptionIconColor(option.id)">
+          </ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explicación de la respuesta (mostrar después de responder) -->
+    <div class="explanation-container" *ngIf="hasAnsweredCurrentQuestion() && getCurrentQuestion()?.explanation">
+      <div class="explanation-header">
+        <ion-icon name="bulb" color="warning"></ion-icon>
+        <span>Explicación</span>
+      </div>
+      <div class="explanation-text">
+        {{ getCurrentQuestion()?.explanation }}
       </div>
     </div>
 
