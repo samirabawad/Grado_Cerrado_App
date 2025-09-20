@@ -203,4 +203,20 @@ export class ApiService {
     
     return mockQuestions;
   }
+  // NUEVO: Método para registrar usuario
+registerUser(userData: { name: string, email: string }): Observable<any> {
+  const url = `${this.API_URL}/study/register`;
+  
+  return this.http.post<any>(url, userData, this.httpOptions)
+    .pipe(
+      map(response => {
+        console.log('Usuario registrado exitosamente:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error al registrar usuario:', error);
+        throw error;
+      })
+    );
+  }
 }

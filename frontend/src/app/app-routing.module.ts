@@ -30,6 +30,12 @@ const routes: Routes = [
     loadChildren: () => import('./pages/welcome2/welcome2.module').then( m => m.Welcome2PageModule)
   },
 
+  // Páginas de autenticación
+  {
+    path: 'registro',
+    loadChildren: () => import('./pages/registro/registro.module').then( m => m.RegistroPageModule)
+  },
+
   // Contenedor CIVIL (lazy)
   {
     path: 'civil',
@@ -37,7 +43,7 @@ const routes: Routes = [
       import('./pages/civil/civil.module').then(m => m.CivilPageModule)
   },
 
-  // Fallback
+  // Fallback - SIEMPRE AL FINAL
   { path: '**', redirectTo: '/welcome' }
 ];
 

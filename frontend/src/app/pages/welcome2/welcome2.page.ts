@@ -17,13 +17,12 @@ export class Welcome2Page implements OnInit {
   }
 
   iniciarSesion() {
-    // Navegar a la página de login cuando esté lista
-    this.router.navigate(['/civil']); // Por ahora va a civil
+    // Por ahora ir a civil, después cambiar a /login
+    this.router.navigate(['/civil']);
   }
 
   registro() {
-    // Navegar a la página de registro cuando esté lista  
-    this.router.navigate(['/civil']); // Por ahora va a civil
+    this.router.navigate(['/registro']);
   }
 
 }
