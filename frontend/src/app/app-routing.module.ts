@@ -25,6 +25,10 @@ const routes: Routes = [
     path: 'onboarding3',
     loadChildren: () => import('./pages/onboarding/onboarding3/onboarding3.module').then( m => m.Onboarding3PageModule)
   },
+  {
+    path: 'welcome2',
+    loadChildren: () => import('./pages/welcome2/welcome2.module').then( m => m.Welcome2PageModule)
+  },
 
   // Contenedor CIVIL (lazy)
   {

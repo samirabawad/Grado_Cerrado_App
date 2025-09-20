@@ -18,58 +18,56 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 60px 40px 20px 40px;
+  padding: 60px 20px 20px 20px;
 }
 
 .main-logo {
-  max-width: 80%;
-  max-height: 200px;
-  width: auto;
+  max-width: 80% !important;  // Cambiar de 200% a 80%
+  max-height: 250px !important;  // Aumentar de 200px a 250px
+  width: auto !important;  // Cambiar de 100px a auto
   height: auto;
   object-fit: contain;
 }
 
-.mascot-container {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  display: flex;
-  justify-content: center;
+// Mapache de extremo a extremo
+  .mascot-container {
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+  
+  .mascot-image {
+    width: 100vw !important;
+    height: 300px !important;
+    object-fit: cover;
+    object-position: center bottom;
+  }
 }
 
-.mascot-image {
-  max-width: 60%;
-  max-height: 300px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
-
-// Responsive adjustments
+// Responsive
 @media (max-width: 480px) {
-  .main-logo {
-    max-width: 85%;
-    max-height: 150px;
+  .logo-container .main-logo {
+    width: auto !important;  // Cambiar de 280px a auto
+    max-width: 85% !important;  // Agregar max-width
+    max-height: 200px !important;  // Agregar max-height
   }
   
-  .mascot-image {
-    max-width: 70%;
-    max-height: 250px;
+  .buttons-container {
+    bottom: 180px;
   }
   
-  .logo-container {
-    padding: 40px 20px 20px 20px;
-  }
-}
-
-@media (max-height: 600px) {
-  .main-logo {
-    max-height: 120px;
+  .action-btn {
+    width: 250px;
+    padding: 16px 20px;
+    font-size: 16px;
   }
   
-  .mascot-image {
-    max-height: 200px;
+  .mascot-container .mascot-image {
+    width: 100vw !important;
+    height: 350px !important;
   }
 }

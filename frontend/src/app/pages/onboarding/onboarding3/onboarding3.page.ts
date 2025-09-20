@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 
 @Component({
@@ -10,9 +11,17 @@ import { IonicModule } from '@ionic/angular';
 })
 export class Onboarding3Page implements OnInit {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
   }
+
+  selectAction(action: string) {
+  if (action === 'empezar') {
+    this.router.navigate(['/welcome2']); // Cambiar a welcome2
+  } else if (action === 'atras') {
+    this.router.navigate(['/onboarding2']);
+  }
+}
 
 }

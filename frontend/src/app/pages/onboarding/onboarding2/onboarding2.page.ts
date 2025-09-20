@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 
 @Component({
@@ -10,9 +11,18 @@ import { IonicModule } from '@ionic/angular';
 })
 export class Onboarding2Page implements OnInit {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
+  }
+
+  selectAction(action: string) {
+    // Navegar directamente sin estado de selección
+    if (action === 'continuar') {
+      this.router.navigate(['/onboarding3']);
+    } else if (action === 'atras') {
+      this.router.navigate(['/onboarding1']);
+    }
   }
 
 }
