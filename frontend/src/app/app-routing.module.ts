@@ -12,6 +12,20 @@ const routes: Routes = [
       import('./pages/welcome/welcome.module').then(m => m.WelcomePageModule)
   },
 
+  // Onboarding
+  {
+    path: 'onboarding1',
+    loadChildren: () => import('./pages/onboarding/onboarding1/onboarding1.module').then( m => m.Onboarding1PageModule)
+  },
+  {
+    path: 'onboarding2',
+    loadChildren: () => import('./pages/onboarding/onboarding2/onboarding2.module').then( m => m.Onboarding2PageModule)
+  },
+  {
+    path: 'onboarding3',
+    loadChildren: () => import('./pages/onboarding/onboarding3/onboarding3.module').then( m => m.Onboarding3PageModule)
+  },
+
   // Contenedor CIVIL (lazy)
   {
     path: 'civil',
