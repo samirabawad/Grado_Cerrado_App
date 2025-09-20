@@ -345,3 +345,181 @@
     padding: 18px 20px 105px 20px;
   }
 }
+
+v// AGREGAR al final de test-escrito-civil.page.scss
+
+// ========================================
+// ESTILOS PARA POPUP DE RESULTADOS
+// ========================================
+
+:host ::ng-deep .results-popup {
+  .alert-wrapper {
+    max-width: 400px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .alert-head {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #FF6F00, #E65100);
+    color: white;
+    
+    h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+  }
+  
+  .alert-message {
+    padding: 0;
+  }
+}
+
+.results-container {
+  padding: 20px;
+  text-align: center;
+  
+  .score-section {
+    margin-bottom: 20px;
+    
+    .main-score {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #FF6F00;
+      line-height: 1;
+    }
+    
+    .score-label {
+      font-size: 1.1rem;
+      color: #666;
+      margin-top: 5px;
+    }
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+    
+    .stat-item {
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: 600;
+        
+        &.correct {
+          color: #4CAF50;
+        }
+        
+        &.incorrect {
+          color: #F44336;
+        }
+      }
+      
+      .stat-label {
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 2px;
+      }
+    }
+  }
+  
+  .level-section {
+    margin-bottom: 15px;
+    
+    .level-badge {
+      display: inline-block;
+      background: #4CAF50;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .time-used {
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+  
+  .progress-bar {
+    height: 8px;
+    background: #E0E0E0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      transition: width 0.5s ease;
+    }
+  }
+}
+
+:host ::ng-deep .results-popup .alert-button-group {
+  .details-button {
+    color: #666;
+    font-weight: 500;
+  }
+  
+  .continue-button {
+    background: #FF6F00;
+    color: white;
+    font-weight: 600;
+  }
+}
+
+// ========================================
+// ESTILOS PARA POPUP DE RESULTADOS DETALLADOS
+// ========================================
+
+:host ::ng-deep .detailed-results-popup {
+  .alert-wrapper {
+    max-width: 500px;
+    max-height: 80vh;
+    border-radius: 16px;
+  }
+  
+  .alert-message {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+}
+
+.detailed-results {
+  padding: 15px;
+  
+  h4 {
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .incorrect-question {
+    background: #FFF3E0;
+    border: 1px solid #FFE0B2;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    text-align: left;
+    
+    strong {
+      color: #E65100;
+    }
+    
+    .user-answer {
+      color: #F44336;
+      font-weight: 500;
+    }
+    
+    .correct-answer {
+      color: #4CAF50;
+      font-weight: 500;
+    }
+  }
+}

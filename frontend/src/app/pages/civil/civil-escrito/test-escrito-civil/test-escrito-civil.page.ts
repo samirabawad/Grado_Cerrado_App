@@ -9,15 +9,12 @@ interface Question {
   questionText: string;
   type: number;
   category: string;
-  options: {
-    id: string;
-    text: string;
-  }[];
-  correctAnswer: string;
-  explanation: string;
   legalArea: string;
   difficulty: number;
+  correctAnswer: string;
+  explanation: string;
   userAnswer?: string;
+  [key: string]: any; // Permite cualquier propiedad adicional
 }
 
 interface BackendSession {
@@ -35,7 +32,7 @@ interface BackendSession {
 })
 export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
-  // Configuración del test
+  // Configuración básica
   testConfig = {
     numberOfQuestions: 10,
     difficulty: 'Intermedio',
@@ -59,7 +56,7 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   totalQuestions = 10;
   currentQuestionNumber = 1;
 
-  // Datos de la sesión del backend
+  // Datos de la sesión
   currentSession: BackendSession | null = null;
   sessionId: string = '';
 
@@ -68,9 +65,12 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private apiService: ApiService,
     private alertController: AlertController
-  ) { }
+  ) { 
+    console.log('TestEscritoCivilPage constructor inicializado');
+  }
 
   ngOnInit() {
+    console.log('TestEscritoCivilPage ngOnInit iniciado');
     this.loadSessionFromBackend();
   }
 
@@ -80,253 +80,320 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
   }
 
-  // CARGAR SESIÓN DESDE EL BACKEND
+  // CARGAR SESIÓN - Versión simplificada y segura
   async loadSessionFromBackend() {
     try {
+      console.log('Iniciando carga de sesión...');
       this.isLoading = true;
       
-      this.currentSession = this.apiService.getCurrentSession();
-      
-      if (!this.currentSession) {
-        console.error('No hay sesión activa');
-        this.loadingError = true;
-        this.router.navigate(['/civil/civil-escrito/configuracion']);
-        return;
-      }
+      // Esperar un poco para que el localStorage esté disponible
+      setTimeout(() => {
+        this.currentSession = this.apiService.getCurrentSession();
+        console.log('Sesión obtenida del ApiService:', this.currentSession);
+        
+        if (!this.currentSession) {
+          console.error('No hay sesión activa, redirigiendo...');
+          this.loadingError = true;
+          this.isLoading = false;
+          // No redirigir inmediatamente, mostrar error
+          return;
+        }
 
-      console.log('Sesión cargada:', this.currentSession);
-      
-      this.sessionId = this.currentSession.session.id;
-      this.totalQuestions = this.currentSession.totalQuestions;
-      this.currentQuestionIndex = this.currentSession.currentQuestionIndex;
-      this.currentQuestionNumber = this.currentQuestionIndex + 1;
-      
-      this.questions = this.convertBackendQuestions(this.currentSession.questions);
-      
-      console.log('Preguntas convertidas:', this.questions);
-      
-      this.timeRemaining = this.testConfig.timeLimit * 60;
-      
-      this.isLoading = false;
-      this.startTimer();
+        try {
+          // Configurar datos básicos de forma segura
+          this.sessionId = this.currentSession?.session?.id || 'sin-id';
+          this.totalQuestions = this.currentSession?.totalQuestions || 10;
+          this.currentQuestionIndex = this.currentSession?.currentQuestionIndex || 0;
+          this.currentQuestionNumber = this.currentQuestionIndex + 1;
+          
+          // Convertir preguntas de forma segura
+          const backendQuestions = this.currentSession?.questions || [];
+          this.questions = this.convertBackendQuestions(backendQuestions);
+          console.log('Preguntas convertidas exitosamente:', this.questions.length);
+          
+          if (this.questions.length === 0) {
+            console.error('No se cargaron preguntas');
+            this.loadingError = true;
+            this.isLoading = false;
+            return;
+          }
+          
+          this.startTimer();
+          this.isLoading = false;
+          console.log('Carga de sesión completada exitosamente');
+          
+        } catch (conversionError) {
+          console.error('Error en conversión de preguntas:', conversionError);
+          this.loadingError = true;
+          this.isLoading = false;
+        }
+      }, 100); // Pequeño delay para asegurar que localStorage esté disponible
       
     } catch (error) {
-      console.error('Error cargando sesión:', error);
+      console.error('Error en loadSessionFromBackend:', error);
       this.loadingError = true;
       this.isLoading = false;
     }
   }
 
-  // CONVERTIR PREGUNTAS DEL BACKEND AL FORMATO DEL FRONTEND
+  // CONVERTIR PREGUNTAS - Versión simplificada y segura
   convertBackendQuestions(backendQuestions: any[]): Question[] {
-    return backendQuestions.map(bq => {
-      let options: { id: string; text: string; }[] = [];
+    console.log('Convirtiendo preguntas del backend, cantidad:', backendQuestions?.length || 0);
+    
+    if (!Array.isArray(backendQuestions)) {
+      console.error('backendQuestions no es un array:', backendQuestions);
+      return [];
+    }
+    
+    return backendQuestions.map((q: any, index: number) => {
+      console.log(`Procesando pregunta ${index + 1}:`, q);
       
-      if (bq.type === 0) {
-        options = this.generateOptionsForQuestion(bq);
+      const convertedQuestion: Question = {
+        id: q.id || `temp-${index}`,
+        text: q.questionText || q.text || q.enunciado || 'Texto no disponible',
+        questionText: q.questionText || q.text || q.enunciado || 'Texto no disponible',
+        type: q.type || 1,
+        category: q.category || q.legalArea || 'Sin categoría',
+        legalArea: q.legalArea || q.category || 'General',
+        difficulty: q.difficulty || 3,
+        correctAnswer: q.correctAnswer || 'A',
+        explanation: q.explanation || 'Explicación no disponible'
+      };
+
+      // Agregar todas las propiedades originales de forma segura
+      try {
+        Object.keys(q || {}).forEach(key => {
+          if (!(key in convertedQuestion)) {
+            (convertedQuestion as any)[key] = q[key];
+          }
+        });
+      } catch (error) {
+        console.warn('Error copiando propiedades adicionales:', error);
       }
 
-      return {
-        id: bq.id,
-        text: bq.questionText,
-        questionText: bq.questionText,
-        type: bq.type,
-        category: bq.legalArea || 'Derecho Civil',
-        options: options,
-        correctAnswer: bq.correctAnswer,
-        explanation: bq.explanation || '',
-        legalArea: bq.legalArea || 'Derecho Civil',
-        difficulty: bq.difficulty || 1,
-        userAnswer: undefined
-      };
+      return convertedQuestion;
     });
   }
 
-  // GENERAR OPCIONES PARA PREGUNTAS
-  generateOptionsForQuestion(question: any): { id: string; text: string; }[] {
-    if (question.options && question.options.length > 0) {
-      if (typeof question.options[0] === 'object' && question.options[0].id) {
-        return question.options;
-      }
-      
-      return question.options.map((opt: string, index: number) => ({
+  // OBTENER PREGUNTA ACTUAL
+  getCurrentQuestion(): Question | null {
+    if (this.currentQuestionIndex >= 0 && this.currentQuestionIndex < this.questions.length) {
+      return this.questions[this.currentQuestionIndex];
+    }
+    return null;
+  }
+
+  // OBTENER OPCIONES - Versión muy simplificada
+  getCurrentQuestionOptions(): { id: string; text: string; }[] {
+    const question = this.getCurrentQuestion();
+    
+    if (!question) {
+      console.log('No hay pregunta actual');
+      return [];
+    }
+
+    console.log('=== DEBUGGING OPCIONES ===');
+    console.log('Pregunta completa:', question);
+    console.log('Propiedades disponibles:', Object.keys(question));
+
+    const questionData = question as any;
+
+    // Formato 1: Array de opciones
+    if (questionData.options && Array.isArray(questionData.options)) {
+      console.log('Usando formato options array:', questionData.options);
+      return questionData.options.map((option: any, index: number) => ({
         id: String.fromCharCode(65 + index),
-        text: opt
+        text: typeof option === 'string' ? option : (option.text || option.content || `Opción ${index + 1}`)
       }));
     }
 
+    // Formato 2: Propiedades individuales
+    const individualOptions = [];
+    if (questionData.optionA) individualOptions.push({ id: 'A', text: questionData.optionA });
+    if (questionData.optionB) individualOptions.push({ id: 'B', text: questionData.optionB });
+    if (questionData.optionC) individualOptions.push({ id: 'C', text: questionData.optionC });
+    if (questionData.optionD) individualOptions.push({ id: 'D', text: questionData.optionD });
+    
+    if (individualOptions.length > 0) {
+      console.log('Usando formato opciones individuales:', individualOptions);
+      return individualOptions;
+    }
+
+    // Formato 3: Buscar en otras propiedades posibles
+    const possibleArrayProps = ['choices', 'answers', 'alternativas'];
+    for (const prop of possibleArrayProps) {
+      if (questionData[prop] && Array.isArray(questionData[prop]) && questionData[prop].length > 0) {
+        console.log(`Usando ${prop} array:`, questionData[prop]);
+        return questionData[prop].map((option: any, index: number) => ({
+          id: String.fromCharCode(65 + index),
+          text: typeof option === 'string' ? option : (option.text || option.content || `Opción ${index + 1}`)
+        }));
+      }
+    }
+
+    // Formato 4: Opciones de debug
+    console.warn('No se encontraron opciones, usando opciones de debug');
+    console.log('Estructura completa de la pregunta:', question);
+    
     return [
-      { id: 'A', text: question.correctAnswer },
-      { id: 'B', text: 'Opción alternativa 1' },
-      { id: 'C', text: 'Opción alternativa 2' }, 
-      { id: 'D', text: 'Opción alternativa 3' }
+      { id: 'A', text: 'Debug: No se encontraron opciones reales' },
+      { id: 'B', text: 'Revisa la consola para ver la estructura' },
+      { id: 'C', text: 'Contacta al desarrollador con esta info' },
+      { id: 'D', text: `Total propiedades: ${Object.keys(question).length}` }
     ];
   }
 
-  // Iniciar el temporizador
+  // MÉTODOS BÁSICOS DE FUNCIONALIDAD
+
   startTimer() {
-    this.timer = setInterval(() => {
-      this.timeRemaining--;
-      if (this.timeRemaining <= 0) {
-        this.finishTest();
-      }
-    }, 1000);
-  }
-
-  // Formatear tiempo restante
-  getFormattedTime(): string {
-    const minutes = Math.floor(this.timeRemaining / 60);
-    const seconds = this.timeRemaining % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-
-  // Obtener pregunta actual
-  getCurrentQuestion(): Question | null {
-    if (this.questions.length === 0 || this.currentQuestionIndex >= this.questions.length) {
-      return null;
+    if (this.testConfig.timeLimit > 0) {
+      this.timeRemaining = this.testConfig.timeLimit * 60;
+      this.timer = setInterval(() => {
+        this.timeRemaining--;
+        if (this.timeRemaining <= 0) {
+          this.completeTest();
+        }
+      }, 1000);
     }
-    return this.questions[this.currentQuestionIndex];
   }
 
-  // Seleccionar respuesta
   selectAnswer(optionId: string) {
     if (!this.canSelectOption()) {
       return;
     }
-    
+
     this.selectedAnswer = optionId;
-    if (this.questions[this.currentQuestionIndex]) {
-      this.questions[this.currentQuestionIndex].userAnswer = optionId;
-    }
     
+    const currentQuestion = this.getCurrentQuestion();
+    if (currentQuestion) {
+      currentQuestion.userAnswer = optionId;
+    }
+
     console.log('Respuesta seleccionada:', optionId);
   }
 
-  // Verificar si hay respuesta seleccionada
-  hasSelectedAnswer(): boolean {
-    return this.selectedAnswer !== '';
-  }
-
-  // SIGUIENTE PREGUNTA
-  async nextQuestion() {
-    if (!this.hasSelectedAnswer()) {
-      return;
-    }
-
-    const currentQuestion = this.getCurrentQuestion();
-    if (!currentQuestion) return;
-
-    try {
-      const answerData = {
-        questionId: currentQuestion.id,
-        userAnswer: this.selectedAnswer,
-        correctAnswer: currentQuestion.correctAnswer,
-        explanation: currentQuestion.explanation,
-        questionType: currentQuestion.type,
-        timeSpentSeconds: 30,
-        generateFollowUp: false,
-        originalQuestionText: currentQuestion.questionText,
-        legalArea: currentQuestion.legalArea,
-        difficulty: currentQuestion.difficulty
-      };
-
-      const response = await this.apiService.answerQuestion(answerData).toPromise();
-      console.log('Respuesta enviada al backend:', response);
-
-    } catch (error) {
-      console.error('Error enviando respuesta:', error);
-    }
-
+  nextQuestion() {
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
       this.currentQuestionNumber++;
-      this.selectedAnswer = this.questions[this.currentQuestionIndex].userAnswer || '';
+      this.selectedAnswer = '';
       
       this.apiService.updateCurrentQuestionIndex(this.currentQuestionIndex);
+      console.log('Avanzando a pregunta:', this.currentQuestionNumber);
     } else {
-      this.finishTest();
+      this.completeTest();
     }
   }
 
-  // FINALIZAR TEST CON POPUP DE RESULTADOS
-  async finishTest() {
-    this.isTestCompleted = true;
+  // MÉTODO COMPLETO DE FINALIZAR TEST CON POPUP
+  async completeTest() {
     if (this.timer) {
       clearInterval(this.timer);
     }
+    
+    this.isTestCompleted = true;
+    console.log('Test completado, calculando resultados...');
+    
+    // Calcular resultados
+    const results = this.calculateResults();
+    console.log('Resultados calculados:', results);
+    
+    // Mostrar popup con resultados
+    await this.showResultsPopup(results);
+  }
 
-    const correctAnswers = this.questions.filter(q => q.userAnswer === q.correctAnswer).length;
-    const incorrectAnswers = this.questions.length - correctAnswers;
-    const percentage = Math.round((correctAnswers / this.questions.length) * 100);
+  // CALCULAR RESULTADOS DEL TEST
+  calculateResults() {
+    let correctAnswers = 0;
+    let totalAnswered = 0;
+    const incorrectQuestions: any[] = [];
+    
+    this.questions.forEach((question, index) => {
+      if (question.userAnswer) {
+        totalAnswered++;
+        if (question.userAnswer === question.correctAnswer) {
+          correctAnswers++;
+        } else {
+          incorrectQuestions.push({
+            number: index + 1,
+            question: question.questionText,
+            userAnswer: question.userAnswer,
+            correctAnswer: question.correctAnswer,
+            explanation: question.explanation
+          });
+        }
+      }
+    });
+    
+    const percentage = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
     const timeUsed = this.testConfig.timeLimit * 60 - this.timeRemaining;
-
-    const suggestedLevel = this.calculateSuggestedLevel(percentage);
-
-    await this.showResultsPopup({
+    
+    return {
       correctAnswers,
-      incorrectAnswers,
-      totalQuestions: this.questions.length,
+      incorrectAnswers: totalAnswered - correctAnswers,
+      totalQuestions: this.totalQuestions,
+      totalAnswered,
       percentage,
       timeUsed,
-      suggestedLevel
-    });
-  }
-
-  // CALCULAR NIVEL SUGERIDO BASADO EN RESULTADOS
-  calculateSuggestedLevel(percentage: number): string {
-    if (percentage >= 90) {
-      return 'Experto';
-    } else if (percentage >= 75) {
-      return 'Avanzado';
-    } else if (percentage >= 60) {
-      return 'Intermedio';
-    } else if (percentage >= 40) {
-      return 'Básico';
-    } else {
-      return 'Principiante';
-    }
-  }
-
-  // GUARDAR RESULTADOS EN STORAGE LOCAL
-  saveTestResults(results: any) {
-    const resultsToSave = {
-      correctAnswers: results.correctAnswers,
-      incorrectAnswers: results.incorrectAnswers,
-      percentage: results.percentage,
-      suggestedLevel: results.suggestedLevel,
-      timestamp: new Date().toISOString(),
-      hasResults: true
+      timeUsedFormatted: this.formatTime(timeUsed),
+      grade: this.getGradeFromPercentage(percentage),
+      level: this.getLevelFromPercentage(percentage),
+      incorrectQuestions,
+      sessionId: this.sessionId
     };
-    
-    localStorage.setItem('lastTestResults', JSON.stringify(resultsToSave));
-    console.log('Resultados guardados:', resultsToSave);
   }
 
-  // MOSTRAR POPUP DE RESULTADOS CON GUARDADO
+  // MOSTRAR POPUP CON RESULTADOS
   async showResultsPopup(results: any) {
-    // Guardar resultados antes de mostrar el popup
-    this.saveTestResults(results);
-    
     const alert = await this.alertController.create({
-      header: 'Resultados del Test',
+      header: '🎉 Test Completado',
+      cssClass: 'results-popup',
       message: `
-        Correctas: ${results.correctAnswers}
-        Incorrectas: ${results.incorrectAnswers}
-        Porcentaje: ${results.percentage}%
-        Nivel: ${results.suggestedLevel}
-        Tiempo: ${this.formatTimeUsed(results.timeUsed)}
+        <div class="results-container">
+          <div class="score-section">
+            <div class="main-score">${results.percentage}%</div>
+            <div class="score-label">${results.grade}</div>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-number correct">${results.correctAnswers}</div>
+              <div class="stat-label">Correctas</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number incorrect">${results.incorrectAnswers}</div>
+              <div class="stat-label">Incorrectas</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${results.totalAnswered}</div>
+              <div class="stat-label">Respondidas</div>
+            </div>
+          </div>
+          
+          <div class="level-section">
+            <div class="level-badge">${results.level}</div>
+            <div class="time-used">Tiempo: ${results.timeUsedFormatted}</div>
+          </div>
+          
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${results.percentage}%"></div>
+          </div>
+        </div>
       `,
       buttons: [
         {
           text: 'Ver Detalles',
+          role: 'secondary',
+          cssClass: 'details-button',
           handler: () => {
-            this.goToDetailedResults(results);
+            this.showDetailedResults(results);
           }
         },
         {
           text: 'Continuar',
+          cssClass: 'continue-button',
           handler: () => {
-            this.goBackToMenu();
+            this.saveResultsAndNavigate(results);
           }
         }
       ],
@@ -336,74 +403,145 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  // FORMATEAR TIEMPO USADO
-  formatTimeUsed(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
-
-  // IR A RESULTADOS DETALLADOS
-  goToDetailedResults(results: any) {
-    this.apiService.clearCurrentSession();
-
-    this.router.navigate(['/civil/civil-escrito/resultados'], {
-      queryParams: {
-        correctAnswers: results.correctAnswers,
-        totalQuestions: results.totalQuestions,
-        percentage: results.percentage,
-        timeUsed: results.timeUsed,
-        sessionId: this.sessionId,
-        suggestedLevel: results.suggestedLevel
-      }
+  // MOSTRAR RESULTADOS DETALLADOS
+  async showDetailedResults(results: any) {
+    let detailsMessage = '<div class="detailed-results">';
+    
+    if (results.incorrectQuestions.length > 0) {
+      detailsMessage += '<h4>Preguntas Incorrectas:</h4>';
+      results.incorrectQuestions.forEach((q: any) => {
+        detailsMessage += `
+          <div class="incorrect-question">
+            <strong>Pregunta ${q.number}:</strong><br>
+            ${q.question}<br>
+            <span class="user-answer">Tu respuesta: ${q.userAnswer}</span><br>
+            <span class="correct-answer">Respuesta correcta: ${q.correctAnswer}</span>
+          </div>
+        `;
+      });
+    } else {
+      detailsMessage += '<h4>¡Perfecto! Todas las respuestas fueron correctas.</h4>';
+    }
+    
+    detailsMessage += '</div>';
+    
+    const detailAlert = await this.alertController.create({
+      header: 'Resultados Detallados',
+      message: detailsMessage,
+      cssClass: 'detailed-results-popup',
+      buttons: [
+        {
+          text: 'Cerrar',
+          handler: () => {
+            this.saveResultsAndNavigate(results);
+          }
+        }
+      ]
     });
+
+    await detailAlert.present();
   }
 
-  // VOLVER AL MENÚ PRINCIPAL
-  goBackToMenu() {
+  // GUARDAR RESULTADOS Y NAVEGAR
+  saveResultsAndNavigate(results: any) {
+    // Guardar resultados en localStorage para mostrar en la página principal
+    const sessionResults = {
+      date: new Date().toISOString(),
+      percentage: results.percentage,
+      correctAnswers: results.correctAnswers,
+      totalQuestions: results.totalQuestions,
+      timeUsed: results.timeUsed,
+      level: results.level,
+      grade: results.grade,
+      sessionId: results.sessionId
+    };
+    
+    // Obtener resultados anteriores
+    const previousResults = JSON.parse(localStorage.getItem('civil_escrito_results') || '[]');
+    previousResults.unshift(sessionResults); // Agregar al principio
+    
+    // Mantener solo los últimos 10 resultados
+    if (previousResults.length > 10) {
+      previousResults.splice(10);
+    }
+    
+    // Guardar resultados actualizados
+    localStorage.setItem('civil_escrito_results', JSON.stringify(previousResults));
+    
+    // Actualizar estadísticas generales
+    this.updateGeneralStats(results);
+    
+    // Limpiar sesión actual
     this.apiService.clearCurrentSession();
+    
+    // Navegar de vuelta a civil-escrito
     this.router.navigate(['/civil/civil-escrito']);
   }
 
-  // Obtener progreso
-  getProgress(): number {
-    return (this.currentQuestionNumber / this.totalQuestions) * 100;
-  }
-
-  // Obtener color de la categoría
-  getCategoryColor(): string {
-    const question = this.getCurrentQuestion();
-    if (!question) return '#9C27B0';
+  // ACTUALIZAR ESTADÍSTICAS GENERALES
+  updateGeneralStats(results: any) {
+    const currentStats = JSON.parse(localStorage.getItem('civil_escrito_stats') || '{}');
     
-    const area = question.category || question.legalArea;
-    switch (area) {
-      case 'Contratos':
-        return '#4CAF50';
-      case 'Obligaciones':
-        return '#2196F3';
-      case 'Derechos Reales':
-        return '#FF9800';
-      case 'Derecho Civil':
-        return '#FF6F00';
-      case 'Familia':
-        return '#E91E63';
-      case 'Sucesiones':
-        return '#9C27B0';
-      default:
-        return '#9C27B0';
-    }
+    const updatedStats = {
+      totalTests: (currentStats.totalTests || 0) + 1,
+      totalQuestions: (currentStats.totalQuestions || 0) + results.totalAnswered,
+      totalCorrect: (currentStats.totalCorrect || 0) + results.correctAnswers,
+      averagePercentage: 0,
+      bestScore: Math.max(currentStats.bestScore || 0, results.percentage),
+      currentLevel: results.level,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    // Calcular promedio
+    updatedStats.averagePercentage = updatedStats.totalQuestions > 0 
+      ? Math.round((updatedStats.totalCorrect / updatedStats.totalQuestions) * 100)
+      : 0;
+    
+    localStorage.setItem('civil_escrito_stats', JSON.stringify(updatedStats));
+    console.log('Estadísticas actualizadas:', updatedStats);
   }
 
-  // Verificar si una opción está seleccionada
-  isOptionSelected(optionId: string): boolean {
-    return this.selectedAnswer === optionId;
-  }
+  // MÉTODOS DE ESTADO
 
-  // MÉTODOS PARA FEEDBACK VISUAL
-
-  hasAnsweredCurrentQuestion(): boolean {
+  hasSelectedAnswer(): boolean {
     return this.selectedAnswer !== '';
   }
+
+  hasAnsweredCurrentQuestion(): boolean {
+    const currentQuestion = this.getCurrentQuestion();
+    return currentQuestion ? !!currentQuestion.userAnswer : false;
+  }
+
+  isOptionSelected(optionId: string): boolean {
+    const currentQuestion = this.getCurrentQuestion();
+    return currentQuestion ? currentQuestion.userAnswer === optionId : false;
+  }
+
+  canSelectOption(): boolean {
+    return !this.hasAnsweredCurrentQuestion();
+  }
+
+  // MÉTODOS PARA LA VISTA
+
+  getProgress(): number {
+    return this.totalQuestions > 0 ? (this.currentQuestionIndex / this.totalQuestions) * 100 : 0;
+  }
+
+  getCategoryColor(): string {
+    return '#FF6F00';
+  }
+
+  getCurrentQuestionCategory(): string {
+    const question = this.getCurrentQuestion();
+    return question?.category || question?.legalArea || 'Sin categoría';
+  }
+
+  getCurrentQuestionText(): string {
+    const question = this.getCurrentQuestion();
+    return question?.text || question?.questionText || 'Pregunta no disponible';
+  }
+
+  // MÉTODOS DE ESTADOS DE OPCIONES
 
   isCorrectAnswer(optionId: string): boolean {
     const currentQuestion = this.getCurrentQuestion();
@@ -416,7 +554,7 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
            !this.isCorrectAnswer(optionId);
   }
 
-  getOptionState(optionId: string): 'default' | 'selected' | 'correct' | 'incorrect' {
+  getOptionState(optionId: string): string {
     if (!this.hasAnsweredCurrentQuestion()) {
       return this.isOptionSelected(optionId) ? 'selected' : 'default';
     }
@@ -437,10 +575,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   getOptionIcon(optionId: string): string {
-    if (!this.hasAnsweredCurrentQuestion()) {
-      return '';
-    }
-    
     if (this.isCorrectAnswer(optionId)) {
       return 'checkmark-circle';
     }
@@ -464,23 +598,13 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return '';
   }
 
-  canSelectOption(): boolean {
-    return !this.hasAnsweredCurrentQuestion();
-  }
+  // MÉTODOS DE CONTROL
 
-  // SALIR DEL TEST
   exitTest() {
-    if (confirm('¿Estás seguro de que quieres salir del test? Se perderá tu progreso.')) {
-      if (this.timer) {
-        clearInterval(this.timer);
-      }
-      
-      this.apiService.clearCurrentSession();
-      this.router.navigate(['/civil/civil-escrito']);
-    }
+    console.log('Saliendo del test...');
+    this.apiService.clearCurrentSession();
+    this.router.navigate(['/civil/civil-escrito']);
   }
-
-  // MÉTODOS AUXILIARES PARA LA VISTA
 
   isQuestionsLoading(): boolean {
     return this.isLoading;
@@ -492,21 +616,42 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
   retryLoading() {
     this.loadingError = false;
+    this.isLoading = true;
     this.loadSessionFromBackend();
   }
 
-  getCurrentQuestionCategory(): string {
-    const question = this.getCurrentQuestion();
-    return question?.category || question?.legalArea || 'Sin categoría';
+  // MÉTODOS AUXILIARES
+
+  getGradeFromPercentage(percentage: number): string {
+    if (percentage >= 90) return 'Excelente';
+    if (percentage >= 80) return 'Muy Bien';
+    if (percentage >= 70) return 'Bien';
+    if (percentage >= 60) return 'Regular';
+    if (percentage >= 50) return 'Suficiente';
+    return 'Insuficiente';
   }
 
-  getCurrentQuestionText(): string {
-    const question = this.getCurrentQuestion();
-    return question?.text || question?.questionText || '';
+  getLevelFromPercentage(percentage: number): string {
+    if (percentage >= 90) return 'Experto';
+    if (percentage >= 75) return 'Avanzado';
+    if (percentage >= 60) return 'Intermedio';
+    if (percentage >= 40) return 'Básico';
+    return 'Principiante';
   }
 
-  getCurrentQuestionOptions(): { id: string; text: string; }[] {
+  formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  // MÉTODO DE DEBUG
+  debugCurrentQuestion() {
     const question = this.getCurrentQuestion();
-    return question?.options || [];
+    console.log('=== DEBUG PREGUNTA ACTUAL ===');
+    console.log('Pregunta completa:', question);
+    console.log('Opciones mapeadas:', this.getCurrentQuestionOptions());
+    console.log('Estado de carga:', { isLoading: this.isLoading, loadingError: this.loadingError });
+    console.log('===============================');
   }
 }

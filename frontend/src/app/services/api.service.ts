@@ -10,6 +10,7 @@ export class ApiService {
   
   private readonly API_URL = 'http://localhost:5183/api';
   private currentSession: any = null;
+  private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
 
   private httpOptions = {
     headers: new HttpHeaders({
@@ -18,27 +19,71 @@ export class ApiService {
     })
   };
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { 
+    // Cargar sesión desde localStorage al inicializar
+    this.loadSessionFromStorage();
+  }
 
-  // Método para obtener la sesión actual
+  // MÉTODOS DE SESIÓN MEJORADOS CON PERSISTENCIA
+
+  // Cargar sesión desde localStorage
+  private loadSessionFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.SESSION_STORAGE_KEY);
+      if (stored) {
+        this.currentSession = JSON.parse(stored);
+        console.log('Sesión cargada desde localStorage:', this.currentSession);
+      }
+    } catch (error) {
+      console.error('Error cargando sesión desde localStorage:', error);
+      this.currentSession = null;
+    }
+  }
+
+  // Guardar sesión en localStorage
+  private saveSessionToStorage(): void {
+    try {
+      if (this.currentSession) {
+        localStorage.setItem(this.SESSION_STORAGE_KEY, JSON.stringify(this.currentSession));
+        console.log('Sesión guardada en localStorage');
+      }
+    } catch (error) {
+      console.error('Error guardando sesión en localStorage:', error);
+    }
+  }
+
+  // Método para obtener la sesión actual (MEJORADO)
   getCurrentSession(): any {
+    if (!this.currentSession) {
+      console.log('Sesión no encontrada en memoria, intentando cargar desde localStorage...');
+      this.loadSessionFromStorage();
+    }
+    
+    console.log('getCurrentSession retorna:', this.currentSession);
     return this.currentSession;
   }
 
-  // Método para establecer la sesión actual
+  // Método para establecer la sesión actual (MEJORADO)
   setCurrentSession(session: any): void {
+    console.log('setCurrentSession recibida:', session);
     this.currentSession = session;
+    this.saveSessionToStorage();
+    console.log('Sesión establecida y guardada');
   }
 
-  // Método para limpiar la sesión
+  // Método para limpiar la sesión (MEJORADO)
   clearCurrentSession(): void {
+    console.log('Limpiando sesión actual');
     this.currentSession = null;
+    localStorage.removeItem(this.SESSION_STORAGE_KEY);
   }
 
-  // Método para actualizar el índice de pregunta actual
+  // Método para actualizar el índice de pregunta actual (MEJORADO)
   updateCurrentQuestionIndex(index: number): void {
     if (this.currentSession) {
       this.currentSession.currentQuestionIndex = index;
+      this.saveSessionToStorage(); // Persistir cambios
+      console.log('Índice de pregunta actualizado a:', index);
     }
   }
 
@@ -106,49 +151,56 @@ export class ApiService {
       );
   }
 
+  // Método de debug para verificar el estado de la sesión
+  debugSession(): void {
+    console.log('=== DEBUG SESIÓN ===');
+    console.log('Sesión en memoria:', this.currentSession);
+    console.log('Sesión en localStorage:', localStorage.getItem(this.SESSION_STORAGE_KEY));
+    console.log('==================');
+  }
+
   // Fallback: generar sesión mock si el backend no está disponible
   private generateMockSession(sessionData: any): Observable<any> {
-    console.warn('Usando datos mock - backend no disponible');
+    console.warn('Usando datos mock porque el backend no está disponible');
     
     const mockSession = {
       session: {
-        id: 'mock-session-' + Date.now(),
+        id: 'mock-session-id',
         userId: sessionData.userId,
-        legalAreas: sessionData.legalAreas,
-        difficulty: sessionData.difficulty,
-        questionCount: sessionData.questionCount
+        startTime: new Date(),
+        difficulty: sessionData.difficulty
       },
-      questions: this.generateMockQuestions(sessionData.questionCount),
+      questions: this.generateMockQuestions(sessionData.questionCount || 5),
       currentQuestionIndex: 0,
-      totalQuestions: sessionData.questionCount
+      totalQuestions: sessionData.questionCount || 5
     };
-
+    
     return of(mockSession);
   }
 
-  // Generar preguntas mock para pruebas
+  // Generar preguntas mock para testing
   private generateMockQuestions(count: number): any[] {
-    const questions = [];
-    const areas = ['Contratos', 'Obligaciones', 'Derechos Reales', 'Familia', 'Sucesiones'];
+    const mockQuestions = [];
     
     for (let i = 0; i < count; i++) {
-      const area = areas[i % areas.length];
-      questions.push({
+      mockQuestions.push({
         id: `mock-question-${i + 1}`,
-        questionText: `Pregunta ${i + 1} sobre ${area}: ¿Cuál de las siguientes afirmaciones es correcta respecto a los ${area.toLowerCase()}?`,
-        type: 0, // MultipleChoice
-        legalArea: area,
-        difficulty: Math.floor(Math.random() * 3), // 0, 1, 2
+        questionText: `¿Cuál de las siguientes afirmaciones sobre Derecho Civil es correcta? (Pregunta ${i + 1})`,
+        type: 1,
+        category: 'Derecho Civil',
+        legalArea: 'Civil',
+        difficulty: 1,
         correctAnswer: 'A',
-        explanation: `La respuesta correcta es A porque en ${area} se establece que...`,
+        explanation: 'Esta es una explicación mock para propósitos de testing.',
         options: [
-          { id: 'A', text: `Opción correcta sobre ${area}` },
-          { id: 'B', text: `Opción incorrecta 1 sobre ${area}` },
-          { id: 'C', text: `Opción incorrecta 2 sobre ${area}` },
-          { id: 'D', text: `Opción incorrecta 3 sobre ${area}` }
+          'Opción A - Correcta (mock)',
+          'Opción B - Incorrecta (mock)', 
+          'Opción C - Incorrecta (mock)',
+          'Opción D - Incorrecta (mock)'
         ]
       });
     }
-    return questions;
+    
+    return mockQuestions;
   }
 }
