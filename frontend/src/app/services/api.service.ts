@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  
-  private readonly API_URL = 'http://localhost:5184/api';
-  private currentSession: any = null;
+  private API_URL = environment.apiUrl;
   private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
+  private currentSession: any = null;
 
   private httpOptions = {
     headers: new HttpHeaders({
@@ -19,130 +19,105 @@ export class ApiService {
     })
   };
 
-  constructor(private http: HttpClient) { 
-    // Cargar sesión desde localStorage al inicializar
+  constructor(private http: HttpClient) {
     this.loadSessionFromStorage();
+    console.log('ApiService inicializado con URL:', this.API_URL);
   }
 
-  // MÉTODOS DE SESIÓN MEJORADOS CON PERSISTENCIA
-
-  // Cargar sesión desde localStorage
-  private loadSessionFromStorage(): void {
-    try {
-      const stored = localStorage.getItem(this.SESSION_STORAGE_KEY);
-      if (stored) {
-        this.currentSession = JSON.parse(stored);
-        console.log('Sesión cargada desde localStorage:', this.currentSession);
-      }
-    } catch (error) {
-      console.error('Error cargando sesión desde localStorage:', error);
-      this.currentSession = null;
-    }
-  }
-
-  // Guardar sesión en localStorage
-  private saveSessionToStorage(): void {
-    try {
-      if (this.currentSession) {
-        localStorage.setItem(this.SESSION_STORAGE_KEY, JSON.stringify(this.currentSession));
-        console.log('Sesión guardada en localStorage');
-      }
-    } catch (error) {
-      console.error('Error guardando sesión en localStorage:', error);
-    }
-  }
-
-  // Método para obtener la sesión actual (MEJORADO)
-  getCurrentSession(): any {
-    if (!this.currentSession) {
-      console.log('Sesión no encontrada en memoria, intentando cargar desde localStorage...');
-      this.loadSessionFromStorage();
-    }
+  // REGISTRO DE USUARIO - CONECTA CON BACKEND
+  registerUser(userData: { name: string, email: string }): Observable<any> {
+    const url = `${this.API_URL}/Study/register`;
     
-    console.log('getCurrentSession retorna:', this.currentSession);
-    return this.currentSession;
+    console.log('Enviando registro a:', url, userData);
+    
+    return this.http.post<any>(url, userData, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('✅ Usuario registrado exitosamente:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('❌ Error al registrar usuario:', error);
+          throw error;
+        })
+      );
   }
 
-  // Método para establecer la sesión actual (MEJORADO)
-  setCurrentSession(session: any): void {
-    console.log('setCurrentSession recibida:', session);
-    this.currentSession = session;
-    this.saveSessionToStorage();
-    console.log('Sesión establecida y guardada');
+  // OBTENER USUARIOS REGISTRADOS
+  getRegisteredUsers(): Observable<any> {
+    const url = `${this.API_URL}/Study/registered-users`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('✅ Usuarios obtenidos:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('❌ Error obteniendo usuarios:', error);
+          throw error;
+        })
+      );
   }
 
-  // Método para limpiar la sesión (MEJORADO)
-  clearCurrentSession(): void {
-    console.log('Limpiando sesión actual');
-    this.currentSession = null;
-    localStorage.removeItem(this.SESSION_STORAGE_KEY);
+  // TEST DE CONEXIÓN
+  testConnection(): Observable<any> {
+    const url = `${this.API_URL}/Database/status`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('✅ Conexión exitosa al backend:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('❌ Error de conexión:', error);
+          throw error;
+        })
+      );
   }
 
-  // Método para actualizar el índice de pregunta actual (MEJORADO)
-  updateCurrentQuestionIndex(index: number): void {
-    if (this.currentSession) {
-      this.currentSession.currentQuestionIndex = index;
-      this.saveSessionToStorage(); // Persistir cambios
-      console.log('Índice de pregunta actualizado a:', index);
-    }
-  }
-
-  // Método para iniciar sesión de estudio
+  // MÉTODOS DE SESIÓN (existentes)
   startStudySession(sessionData: any): Observable<any> {
-    const url = `${this.API_URL}/study/start-session`;
+    const url = `${this.API_URL}/Study/start-session`;
     
     return this.http.post<any>(url, sessionData, this.httpOptions)
       .pipe(
-        map(response => {
-          console.log('Respuesta del backend:', response);
+        map((response: any) => {
+          console.log('Sesión iniciada:', response);
+          this.setCurrentSession(response);
           return response;
         }),
-        catchError(error => {
+        catchError((error: any) => {
           console.error('Error al iniciar sesión:', error);
-          // Fallback a datos mock si el backend falla
           return this.generateMockSession(sessionData);
         })
       );
   }
 
-  // Método para enviar respuesta
-  answerQuestion(answerData: any): Observable<any> {
-    const url = `${this.API_URL}/study/answer-question`;
-    
-    return this.http.post<any>(url, answerData, this.httpOptions)
-      .pipe(
-        map(response => {
-          console.log('Respuesta enviada al backend:', response);
-          return response;
-        }),
-        catchError(error => {
-          console.error('Error al enviar respuesta:', error);
-          // Fallback a respuesta mock
-          return of({
-            success: true,
-            correct: answerData.userAnswer === answerData.correctAnswer,
-            explanation: answerData.explanation
-          });
-        })
-      );
+  getCurrentSession(): any {
+    return this.currentSession;
   }
 
-  // Método para obtener preguntas
-  getQuestions(params: any): Observable<any> {
-    const url = `${this.API_URL}/study/questions`;
-    
-    return this.http.get<any>(url, { ...this.httpOptions, params })
-      .pipe(
-        catchError(error => {
-          console.error('Error al obtener preguntas:', error);
-          return of([]);
-        })
-      );
+  setCurrentSession(session: any): void {
+    this.currentSession = session;
+    this.saveSessionToStorage(session);
   }
 
-  // Método para verificar conexión con el backend
+  updateCurrentQuestionIndex(index: number): void {
+    if (this.currentSession) {
+      this.currentSession.currentQuestionIndex = index;
+      this.saveSessionToStorage(this.currentSession);
+    }
+  }
+
+  clearCurrentSession(): void {
+    this.currentSession = null;
+    localStorage.removeItem(this.SESSION_STORAGE_KEY);
+  }
+
   checkConnection(): Observable<boolean> {
-    const url = `${this.API_URL}/health`;
+    const url = `${this.API_URL}/Database/status`;
     
     return this.http.get(url)
       .pipe(
@@ -151,24 +126,47 @@ export class ApiService {
       );
   }
 
-  // Método de debug para verificar el estado de la sesión
-  debugSession(): void {
-    console.log('=== DEBUG SESIÓN ===');
-    console.log('Sesión en memoria:', this.currentSession);
-    console.log('Sesión en localStorage:', localStorage.getItem(this.SESSION_STORAGE_KEY));
-    console.log('==================');
+  answerQuestion(answerData: any): Observable<any> {
+    const url = `${this.API_URL}/Study/answer-question`;
+    
+    return this.http.post<any>(url, answerData, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Respuesta enviada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error al enviar respuesta:', error);
+          return of({
+            success: true,
+            correct: answerData.userAnswer === answerData.correctAnswer,
+            explanation: answerData.explanation || 'Respuesta procesada (modo offline)'
+          });
+        })
+      );
   }
 
-  // Fallback: generar sesión mock si el backend no está disponible
+  private saveSessionToStorage(session: any): void {
+    this.currentSession = session;
+    localStorage.setItem(this.SESSION_STORAGE_KEY, JSON.stringify(session));
+  }
+
+  private loadSessionFromStorage(): void {
+    const savedSession = localStorage.getItem(this.SESSION_STORAGE_KEY);
+    if (savedSession) {
+      this.currentSession = JSON.parse(savedSession);
+    }
+  }
+
   private generateMockSession(sessionData: any): Observable<any> {
     console.warn('Usando datos mock porque el backend no está disponible');
     
     const mockSession = {
       session: {
         id: 'mock-session-id',
-        userId: sessionData.userId,
+        userId: sessionData.userId || 'mock-user',
         startTime: new Date(),
-        difficulty: sessionData.difficulty
+        difficulty: sessionData.difficulty || 1
       },
       questions: this.generateMockQuestions(sessionData.questionCount || 5),
       currentQuestionIndex: 0,
@@ -178,7 +176,6 @@ export class ApiService {
     return of(mockSession);
   }
 
-  // Generar preguntas mock para testing
   private generateMockQuestions(count: number): any[] {
     const mockQuestions = [];
     
@@ -203,20 +200,12 @@ export class ApiService {
     
     return mockQuestions;
   }
-  // NUEVO: Método para registrar usuario
-registerUser(userData: { name: string, email: string }): Observable<any> {
-  const url = `${this.API_URL}/study/register`;
-  
-  return this.http.post<any>(url, userData, this.httpOptions)
-    .pipe(
-      map(response => {
-        console.log('Usuario registrado exitosamente:', response);
-        return response;
-      }),
-      catchError(error => {
-        console.error('Error al registrar usuario:', error);
-        throw error;
-      })
-    );
+
+  debugSession(): void {
+    console.log('=== DEBUG SESIÓN ===');
+    console.log('Backend URL:', this.API_URL);
+    console.log('Sesión en memoria:', this.currentSession);
+    console.log('Sesión en localStorage:', localStorage.getItem(this.SESSION_STORAGE_KEY));
+    console.log('==================');
   }
 }
