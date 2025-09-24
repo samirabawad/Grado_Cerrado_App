@@ -43,6 +43,10 @@ const routes: Routes = [
     path: 'felicidades',
     loadChildren: () => import('./pages/felicidades/felicidades.module').then( m => m.FelicidadesPageModule)
   },
+  {
+    path: 'home',
+    loadChildren: () => import('./pages/home/home.module').then( m => m.HomePageModule)
+  },
 
   // Contenedor CIVIL (lazy)
   {

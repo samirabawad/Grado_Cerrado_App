@@ -36,6 +36,6 @@ export class FelicidadesPage implements OnInit {
   goToHome() {
     // Navegar a la página principal de la app
     // Por ahora navegar a civil, después cambiaremos a /home
-    this.router.navigate(['/civil']);
+    this.router.navigate(['/home']);
   }
 }

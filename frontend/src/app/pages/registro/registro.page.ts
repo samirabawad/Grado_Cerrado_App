@@ -109,11 +109,8 @@ export class RegistroPage implements OnInit {
       // Guardar datos del usuario en localStorage
       localStorage.setItem('currentUser', JSON.stringify(response));
       
-      // Mostrar éxito
-      await this.showSuccessAlert();
-      
-      // Navegar a civil
-      this.router.navigate(['/civil']);
+      // Navegar a la página de felicidades
+      this.router.navigate(['/felicidades']);
       
     } catch (error: any) {
       console.error('❌ Error en registro:', error);
@@ -132,22 +129,6 @@ export class RegistroPage implements OnInit {
       
       await this.showAlert('Error en el registro', errorMessage);
     }
-  }
-
-  // Mostrar alerta de éxito
-  private async showSuccessAlert() {
-    const alert = await this.alertController.create({
-      header: '¡Felicidades!',
-      message: 'Ya estás un poco más adelante para aprobar.',
-      buttons: [{
-        text: 'Continuar',
-        handler: () => {
-          alert.dismiss();
-        }
-      }]
-    });
-    
-    await alert.present();
   }
 
   // Mostrar alertas generales

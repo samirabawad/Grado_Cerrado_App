@@ -97,7 +97,7 @@ export class LoginPage implements OnInit {
       localStorage.setItem('currentUser', JSON.stringify(userData));
       
       // Navegar a civil (página principal)
-      this.router.navigate(['/civil']);
+      this.router.navigate(['/home']);
       
     } catch (error: any) {
       console.error('❌ Error en login:', error);
