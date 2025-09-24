@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
+import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component'; // AGREGADO
 
 @Component({
   selector: 'app-civil',
   templateUrl: './civil.page.html',
   styleUrls: ['./civil.page.scss'],
-  standalone: false
+  standalone: true, // CAMBIO: de false a true para usar imports
+  imports: [IonicModule, CommonModule, BottomNavComponent] // AGREGADO
 })
 export class CivilPage implements OnInit {
   

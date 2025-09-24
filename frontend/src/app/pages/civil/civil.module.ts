@@ -13,8 +13,9 @@ import { CivilPage } from './civil.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    CivilPageRoutingModule
-  ],
-  declarations: [CivilPage]
+    CivilPageRoutingModule,
+    CivilPage  // CAMBIO: Importar en lugar de declarar
+  ]
+  // ELIMINADO: declarations: [CivilPage]
 })
 export class CivilPageModule {}

@@ -11,9 +11,10 @@ import { CivilEscritoPage } from './civil-escrito.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    CivilEscritoPageRoutingModule
+    CivilEscritoPageRoutingModule,
+    CivilEscritoPage  // CAMBIO: Importar en lugar de declarar
   ],
-  declarations: [CivilEscritoPage],
+  // ELIMINADO: declarations: [CivilEscritoPage],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class CivilEscritoPageModule {}
