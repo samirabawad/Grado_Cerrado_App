@@ -44,7 +44,12 @@ const routes: Routes = [
   },
 
   // Fallback - SIEMPRE AL FINAL
-  { path: '**', redirectTo: '/welcome' }
+  { path: '**', redirectTo: '/welcome' },
+  {
+    path: 'felicidades',
+    loadChildren: () => import('./pages/felicidades/felicidades.module').then( m => m.FelicidadesPageModule)
+  }
+  
 ];
 
 @NgModule({
