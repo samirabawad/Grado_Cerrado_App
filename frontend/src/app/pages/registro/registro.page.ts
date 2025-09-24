@@ -168,6 +168,6 @@ export class RegistroPage implements OnInit {
 
   // Navegar a iniciar sesión
   irAIniciarSesion() {
-    this.router.navigate(['/civil']);
+    this.router.navigate(['/login']);
   }
 }

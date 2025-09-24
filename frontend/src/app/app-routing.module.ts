@@ -35,6 +35,14 @@ const routes: Routes = [
     path: 'registro',
     loadChildren: () => import('./pages/registro/registro.module').then( m => m.RegistroPageModule)
   },
+  {
+    path: 'login',
+    loadChildren: () => import('./pages/login/login.module').then( m => m.LoginPageModule)
+  },
+  {
+    path: 'felicidades',
+    loadChildren: () => import('./pages/felicidades/felicidades.module').then( m => m.FelicidadesPageModule)
+  },
 
   // Contenedor CIVIL (lazy)
   {
@@ -44,12 +52,7 @@ const routes: Routes = [
   },
 
   // Fallback - SIEMPRE AL FINAL
-  { path: '**', redirectTo: '/welcome' },
-  {
-    path: 'felicidades',
-    loadChildren: () => import('./pages/felicidades/felicidades.module').then( m => m.FelicidadesPageModule)
-  }
-  
+  { path: '**', redirectTo: '/welcome' }
 ];
 
 @NgModule({

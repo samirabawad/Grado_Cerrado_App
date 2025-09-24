@@ -18,7 +18,7 @@ export class Welcome2Page implements OnInit {
 
   iniciarSesion() {
     // Por ahora ir a civil, después cambiar a /login
-    this.router.navigate(['/civil']);
+    this.router.navigate(['/login']);
   }
 
   registro() {
