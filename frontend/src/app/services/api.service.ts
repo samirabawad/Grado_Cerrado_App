@@ -77,23 +77,33 @@ export class ApiService {
       );
   }
 
-  // MÉTODOS DE SESIÓN (existentes)
-  startStudySession(sessionData: any): Observable<any> {
-    const url = `${this.API_URL}/Study/start-session`;
-    
-    return this.http.post<any>(url, sessionData, this.httpOptions)
-      .pipe(
-        map((response: any) => {
-          console.log('Sesión iniciada:', response);
-          this.setCurrentSession(response);
-          return response;
-        }),
-        catchError((error: any) => {
-          console.error('Error al iniciar sesión:', error);
-          return this.generateMockSession(sessionData);
-        })
-      );
-  }
+  // MÉTODO DE SESIÓN CORREGIDO
+startStudySession(sessionData: any): Observable<any> {
+  const url = `${this.API_URL}/Study/start-session`;
+  
+  // Datos correctos que espera el backend
+  const requestData = {
+    studentId: sessionData.studentId || "00000000-0000-0000-0000-000000000001", // GUID válido
+    difficulty: sessionData.difficulty || "basico",
+    legalAreas: sessionData.legalAreas || ["Derecho Civil"]
+  };
+  
+  console.log('Enviando datos al backend:', requestData);
+  
+  return this.http.post<any>(url, requestData, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Sesión iniciada exitosamente:', response);
+        this.setCurrentSession(response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error al iniciar sesión:', error);
+        // Ya no usar datos mock, mostrar el error real
+        throw error;
+      })
+    );
+}
 
   getCurrentSession(): any {
     return this.currentSession;
