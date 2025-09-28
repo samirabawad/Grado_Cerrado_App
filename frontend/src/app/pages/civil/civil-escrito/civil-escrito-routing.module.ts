@@ -14,10 +14,10 @@ const routes: Routes = [
         .then(m => m.ConfiguracionPageModule)
   },
   {
-    path: 'resumen-test',
+    path: 'resumen-test-civil',
     loadChildren: () =>
-      import('./resumen-test/resumen-test.module')
-        .then(m => m.ResumenTestPageModule)
+      import('./resumen-test-civil/resumen-test-civil.module')
+        .then(m => m.ResumenTestCivilPageModule)
   },
   {
     path: 'test-escrito-civil',

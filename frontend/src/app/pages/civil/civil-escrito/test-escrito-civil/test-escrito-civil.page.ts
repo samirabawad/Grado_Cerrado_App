@@ -285,23 +285,50 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
   }
 
-  // MÉTODO COMPLETO DE FINALIZAR TEST CON POPUP
-  async completeTest() {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
-    
-    this.isTestCompleted = true;
-    console.log('Test completado, calculando resultados...');
-    
-    // Calcular resultados
-    const results = this.calculateResults();
-    console.log('Resultados calculados:', results);
-    
-    // Mostrar popup con resultados
-    await this.showResultsPopup(results);
+  // MÉTODO COMPLETO DE FINALIZAR TEST SIN POPUP
+async completeTest() {
+  if (this.timer) {
+    clearInterval(this.timer);
   }
+  
+  this.isTestCompleted = true;
+  console.log('Test completado, calculando resultados...');
+  
+  // Calcular resultados
+  const results = this.calculateResults();
+  console.log('Resultados calculados:', results);
+  
+  // Guardar resultados y navegar directamente al resumen
+  this.saveResultsAndNavigateToSummary(results);
+}
 
+// GUARDAR RESULTADOS Y NAVEGAR AL RESUMEN
+saveResultsAndNavigateToSummary(results: any) {
+  // Guardar resultados para el resumen
+  const sessionResults = {
+    date: new Date().toISOString(),
+    percentage: results.percentage,
+    correctAnswers: results.correctAnswers,
+    totalQuestions: results.totalQuestions,
+    timeUsed: results.timeUsed,
+    level: results.level,
+    grade: results.grade,
+    sessionId: results.sessionId,
+    incorrectQuestions: results.incorrectQuestions
+  };
+  
+  // Guardar en localStorage para que el resumen pueda acceder
+  localStorage.setItem('current_test_results', JSON.stringify(sessionResults));
+  
+  // Actualizar estadísticas generales
+  this.updateGeneralStats(results);
+  
+  // Limpiar sesión actual
+  this.apiService.clearCurrentSession();
+  
+  // Navegar al resumen del test
+  this.router.navigate(['/civil/civil-escrito/resumen-test-civil']);
+}
   // CALCULAR RESULTADOS DEL TEST
   calculateResults() {
     let correctAnswers = 0;
