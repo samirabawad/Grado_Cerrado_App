@@ -76,18 +76,17 @@
       </div>
     </div>
 
-  </div>
+    <!-- Botón justo después de la explicación -->
+    <div class="static-next-container" *ngIf="hasSelectedAnswer()">
+      <ion-button 
+        expand="block" 
+        shape="round" 
+        class="next-button-static"
+        (click)="nextQuestion()">
+        <ion-icon name="checkmark" slot="start"></ion-icon>
+        {{ currentQuestionIndex < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar Test' }}
+      </ion-button>
+    </div>
 
-  <!-- Botón flotante de siguiente pregunta -->
-  <div class="floating-next-container" *ngIf="hasSelectedAnswer()">
-    <ion-button 
-      expand="block" 
-      shape="round" 
-      class="next-button"
-      (click)="nextQuestion()">
-      <ion-icon name="checkmark" slot="start"></ion-icon>
-      {{ currentQuestionIndex < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar Test' }}
-    </ion-button>
   </div>
-
 </ion-content>

@@ -56,60 +56,62 @@ export class LoginPage implements OnInit {
   }
 
   // Método principal de login
-  async iniciarSesion() {
-    if (!this.isFormValid()) {
-      await this.showAlert('Error de validación', 'Por favor, completa correctamente todos los campos.');
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Iniciando sesión...',
-      spinner: 'circles'
-    });
-    
-    await loading.present();
-    this.isLoading = true;
-
-    // Datos para enviar al backend
-    const loginData = {
-      email: this.correoElectronico.toLowerCase().trim(),
-      password: this.contrasena
-    };
-
-    try {
-      // LLAMADA REAL AL BACKEND para login
-      // const response = await this.apiService.loginUser(loginData).toPromise();
-      
-      // POR AHORA simulamos login exitoso
-      console.log('✅ Iniciando sesión con:', loginData);
-      
-      await loading.dismiss();
-      this.isLoading = false;
-      
-      // Simular datos del usuario
-      const userData = {
-        id: 1,
-        name: 'Usuario',
-        email: this.correoElectronico
-      };
-      
-      // Guardar datos del usuario en localStorage
-      localStorage.setItem('currentUser', JSON.stringify(userData));
-      
-      // Navegar a civil (página principal)
-      this.router.navigate(['/home']);
-      
-    } catch (error: any) {
-      console.error('❌ Error en login:', error);
-      
-      await loading.dismiss();
-      this.isLoading = false;
-      
-      let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
-      
-      await this.showAlert('Error en el inicio de sesión', errorMessage);
-    }
+async iniciarSesion() {
+  if (!this.isFormValid()) {
+    await this.showAlert('Error de validación', 'Por favor, completa correctamente todos los campos.');
+    return;
   }
+
+  const loading = await this.loadingController.create({
+    message: 'Iniciando sesión...',
+    spinner: 'circles'
+  });
+  
+  await loading.present();
+  this.isLoading = true;
+
+  // Datos para enviar al backend
+  const loginData = {
+    email: this.correoElectronico.toLowerCase().trim(),
+    password: this.contrasena
+  };
+
+  try {
+    // LLAMADA REAL AL BACKEND para login
+    const response = await this.apiService.loginUser(loginData).toPromise();
+    
+    console.log('Login exitoso:', response);
+    
+    await loading.dismiss();
+    this.isLoading = false;
+    
+    if (response.success) {
+      // Guardar datos del usuario en localStorage
+      localStorage.setItem('currentUser', JSON.stringify(response.user));
+      
+      // Navegar a la página principal
+      this.router.navigate(['/home']);
+    } else {
+      await this.showAlert('Error en el login', response.message || 'Error desconocido');
+    }
+    
+  } catch (error: any) {
+    console.error('Error en login:', error);
+    
+    await loading.dismiss();
+    this.isLoading = false;
+    
+    let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+    
+    if (error.status === 400) {
+      errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+    } else if (error.status === 0) {
+      errorMessage = 'No se puede conectar al servidor. Verifica tu conexión.';
+    }
+    
+    await this.showAlert('Error en el inicio de sesión', errorMessage);
+  }
+}
 
   // Mostrar alertas
   private async showAlert(header: string, message: string) {

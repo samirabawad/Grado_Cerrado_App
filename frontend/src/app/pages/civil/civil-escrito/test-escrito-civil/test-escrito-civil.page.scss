@@ -274,6 +274,29 @@
     }
   }
 }
+// ========================================
+// BOTÓN ESTÁTICO BAJO LA EXPLICACIÓN
+// ========================================
+.static-next-container {
+  margin-top: 30px;
+  margin-bottom: 20px;
+  padding: 10 0px;
+  
+  .next-button-static {
+    --background: #4CAF50;
+    --background-activated: #45A049;
+    --color: white;
+    --border-radius: 25px;
+    height: 48px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    
+    ion-icon {
+      margin-right: 6px;
+    }
+  }
+}
 
 // ========================================
 // ANIMACIONES PARA FEEDBACK
