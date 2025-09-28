@@ -285,7 +285,7 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
   }
 
-  // MÉTODO COMPLETO DE FINALIZAR TEST SIN POPUP
+// MÉTODO COMPLETO DE FINALIZAR TEST SIN POPUP
 async completeTest() {
   if (this.timer) {
     clearInterval(this.timer);
@@ -304,18 +304,31 @@ async completeTest() {
 
 // GUARDAR RESULTADOS Y NAVEGAR AL RESUMEN
 saveResultsAndNavigateToSummary(results: any) {
-  // Guardar resultados para el resumen
+  // Guardar resultados COMPLETOS para el resumen
   const sessionResults = {
     date: new Date().toISOString(),
     percentage: results.percentage,
     correctAnswers: results.correctAnswers,
     totalQuestions: results.totalQuestions,
+    totalAnswered: results.totalAnswered,
+    incorrectAnswers: results.incorrectAnswers,
     timeUsed: results.timeUsed,
+    timeUsedFormatted: results.timeUsedFormatted,
     level: results.level,
     grade: results.grade,
     sessionId: results.sessionId,
-    incorrectQuestions: results.incorrectQuestions
+    // ✅ AGREGAR: Detalles de cada pregunta para los círculos
+    incorrectQuestions: results.incorrectQuestions || [],
+    allQuestions: this.questions.map((q, index) => ({
+      questionNumber: index + 1,
+      isCorrect: q.userAnswer === q.correctAnswer,
+      userAnswer: q.userAnswer,
+      correctAnswer: q.correctAnswer,
+      questionText: q.questionText || q.text
+    }))
   };
+  
+  console.log('Guardando resultados completos:', sessionResults);
   
   // Guardar en localStorage para que el resumen pueda acceder
   localStorage.setItem('current_test_results', JSON.stringify(sessionResults));

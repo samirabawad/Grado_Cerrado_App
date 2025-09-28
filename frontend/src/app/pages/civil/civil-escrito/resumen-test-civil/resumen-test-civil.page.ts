@@ -22,12 +22,12 @@ export class ResumenTestCivilPage implements OnInit {
   questionsStatus: QuestionResult[] = [];
   
   // Datos calculados para mostrar
-  correctAnswers = 8;
-  incorrectAnswers = 2;
-  totalQuestions = 10;
-  percentage = 80;
-  level = 'INTERMEDIO';
-  celebrationMessage = '¡Excelente progreso!';
+  correctAnswers = 0;
+  incorrectAnswers = 0;
+  totalQuestions = 0;
+  percentage = 0;
+  level = 'BÁSICO';
+  celebrationMessage = '¡Sigue practicando!';
 
   constructor(
     private router: Router,
@@ -46,20 +46,46 @@ export class ResumenTestCivilPage implements OnInit {
       if (results) {
         this.testResults = JSON.parse(results);
         
-        // Actualizar datos con los resultados reales
-        this.correctAnswers = this.testResults.correctAnswers || 8;
-        this.totalQuestions = this.testResults.totalQuestions || 10;
-        this.incorrectAnswers = this.totalQuestions - this.correctAnswers;
-        this.percentage = this.testResults.percentage || 80;
-        this.level = this.testResults.level || 'INTERMEDIO';
+        // ✅ Usar datos reales del test
+        this.correctAnswers = this.testResults.correctAnswers || 0;
+        this.totalQuestions = this.testResults.totalQuestions || 0;
+        this.incorrectAnswers = this.testResults.incorrectAnswers || (this.totalQuestions - this.correctAnswers);
+        this.percentage = this.testResults.percentage || 0;
+        this.level = this.testResults.level || 'BÁSICO';
+        
+        // Mensaje según el porcentaje
+        if (this.percentage >= 80) {
+          this.celebrationMessage = '¡Excelente progreso!';
+        } else if (this.percentage >= 60) {
+          this.celebrationMessage = '¡Buen trabajo!';
+        } else {
+          this.celebrationMessage = '¡Sigue practicando!';
+        }
         
         console.log('Resultados cargados:', this.testResults);
+        console.log('Datos para mostrar:', {
+          correctas: this.correctAnswers,
+          incorrectas: this.incorrectAnswers,
+          total: this.totalQuestions,
+          porcentaje: this.percentage
+        });
       } else {
-        // Datos de ejemplo si no hay resultados guardados
+        // Si no hay resultados, usar datos de ejemplo
         console.log('No hay resultados guardados, usando datos de ejemplo');
+        this.correctAnswers = 0;
+        this.incorrectAnswers = 5;
+        this.totalQuestions = 5;
+        this.percentage = 0;
+        this.level = 'BÁSICO';
+        this.celebrationMessage = '¡Sigue practicando!';
       }
     } catch (error) {
       console.error('Error cargando resultados:', error);
+      // Usar datos de ejemplo en caso de error
+      this.correctAnswers = 0;
+      this.incorrectAnswers = 5;
+      this.totalQuestions = 5;
+      this.percentage = 0;
     }
   }
 
@@ -67,18 +93,16 @@ export class ResumenTestCivilPage implements OnInit {
   generateQuestionsStatus() {
     this.questionsStatus = [];
     
-    // Si tenemos resultados detallados, usarlos
-    if (this.testResults && this.testResults.incorrectQuestions) {
-      const incorrectQuestionNumbers = this.testResults.incorrectQuestions.map((q: any) => q.number);
-      
-      for (let i = 1; i <= this.totalQuestions; i++) {
-        this.questionsStatus.push({
-          questionNumber: i,
-          isCorrect: !incorrectQuestionNumbers.includes(i)
-        });
-      }
+    // ✅ Si tenemos resultados detallados del test, usarlos
+    if (this.testResults && this.testResults.allQuestions) {
+      this.questionsStatus = this.testResults.allQuestions.map((q: any) => ({
+        questionNumber: q.questionNumber,
+        isCorrect: q.isCorrect,
+        userAnswer: q.userAnswer,
+        correctAnswer: q.correctAnswer
+      }));
     } else {
-      // Generar estado basado en correctas/incorrectas
+      // ✅ Generar estado basado en correctas/incorrectas reales
       for (let i = 1; i <= this.totalQuestions; i++) {
         this.questionsStatus.push({
           questionNumber: i,
