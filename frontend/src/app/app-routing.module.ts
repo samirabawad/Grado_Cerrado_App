@@ -56,7 +56,11 @@ const routes: Routes = [
   },
 
   // Fallback - SIEMPRE AL FINAL
-  { path: '**', redirectTo: '/welcome' }
+  { path: '**', redirectTo: '/welcome' },
+  {
+  path: 'racha',
+  loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
+},
 ];
 
 @NgModule({
