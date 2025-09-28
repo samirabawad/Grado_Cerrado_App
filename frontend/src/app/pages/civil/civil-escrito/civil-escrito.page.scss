@@ -1,5 +1,5 @@
 // ========================================
-// CONFIGURACIÓN BÁSICA
+// CONFIGURACIÓN BÁSICA - IGUAL QUE OTRAS PÁGINAS
 // ========================================
 .civil-content {
   --background: transparent;
@@ -11,14 +11,13 @@
   min-height: 100vh;
 }
 
-/* Asegurar que ion-content sea scrollable */
 ion-content.civil-content {
   --overflow: auto;
   height: 100%;
 }
 
 // ========================================
-// HEADER FIJO CON IMAGEN RESPONSIVA
+// HEADER FIJO - EXACTO COMO OTRAS PÁGINAS
 // ========================================
 .custom-header-section {
   position: fixed;  
@@ -71,140 +70,87 @@ ion-content.civil-content {
 }
 
 // ========================================
-// CARD DE NIVEL Y PROGRESO
+// CARD DE PROGRESO - MEJORADA Y BONITA
 // ========================================
 .level-progress-card {
   background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
   border-radius: 20px;
   padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.3);
-  
-  .level-badge {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-    
-    ion-icon {
-      font-size: 1.8rem;
-      color: #FF8F00;
-      margin-right: 8px;
-    }
-    
-    .level-text {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #E65100;
-    }
-  }
-  
-  .congratulation-text {
-    font-size: 1rem;
-    color: #5D4037;
-    margin: 0 0 20px 0;
-    font-weight: 500;
-  }
-  
-  .progress-section {
-    .progress-header {
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 183, 77, 0.3);
+
+  .level-content {
+    .level-badge {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      
-      .progress-label {
-        font-size: 0.9rem;
-        color: #6D4C41;
-        font-weight: 500;
+      background: linear-gradient(135deg, #FF8F00, #F57C00);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 25px;
+      margin-bottom: 15px;
+      width: fit-content;
+      box-shadow: 0 3px 10px rgba(255, 143, 0, 0.3);
+
+      .trophy-icon {
+        font-size: 1.2rem;
+        margin-right: 8px;
       }
-      
-      .progress-percentage {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #E65100;
-      }
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 12px;
-      background: #EFEBE9;
-      border-radius: 6px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #FF8F00, #FF6F00);
-        border-radius: 6px;
-        transition: width 0.3s ease;
+
+      .level-text {
+        font-size: 0.95rem;
+        font-weight: 600;
       }
     }
-    
-    .next-level-text {
-      font-size: 0.8rem;
+
+    .level-message {
+      font-size: 0.9rem;
       color: #8D6E63;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      
-      &::before {
-        content: "🎯";
-        margin-right: 6px;
-      }
+      margin-bottom: 20px;
+      font-style: italic;
     }
-  }
-}
 
-// ========================================
-// CARD DE PROGRESO EN MODO ESCRITO
-// ========================================
-.written-mode-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  
-  .written-mode-content {
-    h4 {
-      margin: 0 0 16px 0;
-      font-size: 1.1rem;
-      color: #333;
-      font-weight: 600;
-    }
-    
-    .written-progress {
-      .written-progress-bar {
-        width: 100%;
-        height: 8px;
-        background: #E0E0E0;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 12px;
-        
-        .written-progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #4CAF50, #2E7D32);
-          border-radius: 4px;
-          transition: width 0.3s ease;
-        }
+    .written-mode-content {
+      h4 {
+        margin: 0 0 16px 0;
+        font-size: 1.1rem;
+        color: #5D4037;
+        font-weight: 600;
       }
       
-      .written-stats {
-        display: flex;
-        justify-content: space-between;
-        
-        .written-percentage {
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: #2E7D32;
+      .written-progress {
+        .written-progress-bar {
+          width: 100%;
+          height: 10px;
+          background: rgba(255, 255, 255, 0.7);
+          border-radius: 5px;
+          overflow: hidden;
+          margin-bottom: 12px;
+          box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+          
+          .written-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #2E7D32);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+          }
         }
         
-        .written-sessions {
-          font-size: 0.9rem;
-          color: #666;
+        .written-stats {
+          display: flex;
+          justify-content: space-between;
+          
+          .written-percentage {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2E7D32;
+          }
+          
+          .written-sessions {
+            font-size: 0.9rem;
+            color: #8D6E63;
+          }
         }
       }
     }
@@ -212,20 +158,20 @@ ion-content.civil-content {
 }
 
 // ========================================
-// SECCIONES DE PRÁCTICA
+// SECCIÓN PRÁCTICA
 // ========================================
-.practice-section, .sessions-section, .personalized-section {
-  margin-bottom: 24px;
+.practice-section {
+  margin-bottom: 30px;
   
-  .practice-header, .sessions-header, .personalized-header {
+  .practice-header {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     
     ion-icon {
       font-size: 1.4rem;
       color: #FF6F00;
-      margin-right: 8px;
+      margin-right: 10px;
     }
     
     h3 {
@@ -238,59 +184,50 @@ ion-content.civil-content {
 }
 
 // ========================================
-// CARDS INTERACTIVAS
+// BOTÓN PRINCIPAL - MEJORADO
 // ========================================
-.quick-practice-card, .standard-session-card, .configuration-card {
-  background: rgba(255, 255, 255, 0.95);
+.quick-practice-card {
+  background: linear-gradient(135deg, #FF5722, #D84315);
   border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
   cursor: pointer;
   transition: all 0.3s ease;
-  
-  &:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
-  }
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  }
-}
-
-// Específicos para Quick Practice
-.quick-practice-card {
-  background: linear-gradient(135deg, #FF5722, #D84315);
   color: white;
   
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 8px rgba(255, 87, 34, 0.4);
+  }
+
   .practice-icon {
+    margin-right: 16px;
+
     ion-icon {
       font-size: 2.2rem;
       color: white;
-      margin-right: 16px;
     }
   }
-  
+
   .practice-info {
     flex: 1;
-    
+
     h4 {
       margin: 0 0 4px 0;
       font-size: 1.2rem;
       font-weight: 600;
       color: white;
     }
-    
+
     p {
       margin: 0;
       font-size: 0.9rem;
       opacity: 0.9;
     }
   }
-  
+
   .practice-arrow {
     ion-icon {
       font-size: 1.4rem;
@@ -299,117 +236,121 @@ ion-content.civil-content {
   }
 }
 
-// Específicos para Standard Session
-.standard-session-card {
-  background: linear-gradient(135deg, #2196F3, #1565C0);
-  color: white;
-  
-  .session-icon {
-    ion-icon {
-      font-size: 2.2rem;
-      color: white;
-      margin-right: 16px;
+// ========================================
+// SECCIÓN MAPACHE - CENTRADA Y ARMONIOSA
+// ========================================
+.mapache-section {
+  margin-top: 40px;
+  text-align: center;
+
+  .mapache-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .mapache-character {
+      position: relative;
+      margin-bottom: 15px;
+      cursor: pointer;
+
+      .mapache-face {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #8D6E63, #5D4037);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        animation: gentleBounce 4s infinite ease-in-out;
+        border: 4px solid white;
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+
+      .speech-bubble {
+        position: absolute;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 12px 18px;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        font-size: 0.85rem;
+        color: #333;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+        transition: all 0.3s ease;
+        font-weight: 500;
+
+        &.show {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-top: 8px solid white;
+        }
+      }
     }
-  }
-  
-  .session-info {
-    flex: 1;
-    
-    h4 {
-      margin: 0 0 4px 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: white;
-    }
-    
-    p {
-      margin: 0;
+
+    .mapache-message {
       font-size: 0.9rem;
-      opacity: 0.9;
-    }
-  }
-  
-  .session-arrow {
-    ion-icon {
-      font-size: 1.4rem;
-      color: white;
+      color: #8D6E63;
+      font-style: italic;
+      font-weight: 500;
     }
   }
 }
 
-// Específicos para Configuration
-.configuration-card {
-  background: linear-gradient(135deg, #9C27B0, #6A1B9A);
-  color: white;
-  
-  .config-icon {
-    ion-icon {
-      font-size: 2.2rem;
-      color: white;
-      margin-right: 16px;
-    }
+@keyframes gentleBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
   }
-  
-  .config-info {
-    flex: 1;
-    
-    h4 {
-      margin: 0 0 4px 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: white;
-    }
-    
-    p {
-      margin: 0;
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
+  40% {
+    transform: translateY(-8px);
   }
-  
-  .config-arrow {
-    ion-icon {
-      font-size: 1.4rem;
-      color: white;
-    }
+  60% {
+    transform: translateY(-4px);
   }
 }
 
 // ========================================
-// ESTADÍSTICAS EN LA PARTE INFERIOR
+// CUSTOM LOADING STYLES
 // ========================================
-.stats-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  padding: 20px;
-  margin-top: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  
-  .stat-item {
-    text-align: center;
+:global(.custom-loading) {
+  --backdrop-opacity: 0.6;
+  --background: rgba(255, 255, 255, 0.95);
+  --color: #FF6F00;
+  border-radius: 15px;
+
+  .loading-wrapper {
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
     
-    .stat-value {
-      font-size: 1.8rem;
-      font-weight: 700;
+    .loading-content {
+      font-size: 1rem;
+      font-weight: 500;
       color: #FF6F00;
-      display: block;
     }
     
-    .stat-label {
-      font-size: 0.9rem;
-      color: #666;
-      margin-top: 4px;
-    }
-  }
-  
-  .stats-trophy {
-    .trophy-image {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
+    .loading-spinner {
+      --color: #FF6F00;
     }
   }
 }
@@ -432,9 +373,18 @@ ion-content.civil-content {
     padding: 24px 32px 100px 32px;
   }
   
-  .level-progress-card,
-  .written-mode-card {
+  .level-progress-card {
     padding: 32px;
+  }
+
+  .quick-practice-card {
+    padding: 24px;
+  }
+
+  .mapache-section .mapache-container .mapache-character .mapache-face {
+    width: 90px;
+    height: 90px;
+    font-size: 2.8rem;
   }
 }
 
@@ -453,23 +403,17 @@ ion-content.civil-content {
     padding: 16px 12px 80px 12px;
   }
   
-  .level-progress-card,
-  .written-mode-card {
+  .level-progress-card {
     padding: 20px;
   }
-  
-  .stats-bottom {
-    .stat-item {
-      .stat-value {
-        font-size: 1.5rem;
-      }
-    }
-    
-    .stats-trophy {
-      .trophy-image {
-        width: 50px;
-        height: 50px;
-      }
-    }
+
+  .quick-practice-card {
+    padding: 16px;
+  }
+
+  .mapache-section .mapache-container .mapache-character .mapache-face {
+    width: 70px;
+    height: 70px;
+    font-size: 2.2rem;
   }
 }

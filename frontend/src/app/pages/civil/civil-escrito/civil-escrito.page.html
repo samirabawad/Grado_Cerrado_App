@@ -1,10 +1,10 @@
 <ion-content class="civil-content">
-  <!-- Header personalizado -->
+  <!-- Header personalizado EXACTO como civil.page.html -->
   <div class="custom-header-section">
     <div class="orange-background">
       <!-- Imagen de extremo a extremo -->
       <div class="derecho-civil-container-full">
-        <img src="assets/image/civil/logo_derecho_civil_escrito.png" alt="Derecho Civil Escrito" class="derecho-civil-image-responsive">
+        <img src="assets/image/civil/logo_civil.png" alt="Derecho Civil" class="derecho-civil-image-responsive">
       </div>
     </div>
   </div>
@@ -12,56 +12,45 @@
   <!-- Resto del contenido -->
   <div class="content-area">
     
-    <!-- Card de Nivel Actual -->
+    <!-- Card de progreso mejorada -->
     <div class="level-progress-card">
-      <div class="level-badge">
-        <ion-icon name="trophy"></ion-icon>
-        <span class="level-text">{{ currentLevel }}</span>
-      </div>
-      <p class="congratulation-text">{{ congratulationMessage }}</p>
-      
-      <div class="progress-section">
-        <div class="progress-header">
-          <span class="progress-label">Progreso al siguiente nivel</span>
-          <span class="progress-percentage">{{ progressPercentage }}%</span>
+      <div class="level-content">
+        <div class="level-badge">
+          <ion-icon name="trophy" class="trophy-icon"></ion-icon>
+          <span class="level-text">Intermedio</span>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
-        </div>
-        <p class="next-level-text">{{ nextLevelProgress }}</p>
-      </div>
-    </div>
-
-    <!-- Card de Progreso en Modo Escrito -->
-    <div class="written-mode-card">
-      <div class="written-mode-content">
-        <h4>Tu progreso en Modo Escrito</h4>
-        <div class="written-progress">
-          <div class="written-progress-bar">
-            <div class="written-progress-fill" [style.width.%]="writtenModeProgress"></div>
-          </div>
-          <div class="written-stats">
-            <span class="written-percentage">{{ writtenModeProgress }}% completado</span>
-            <span class="written-sessions">{{ writtenModeSessions }}</span>
+        <div class="level-message">¡Sigue así! Vas por buen camino</div>
+        
+        <div class="written-mode-content">
+          <h4>Tu progreso en Modo Escrito</h4>
+          <div class="written-progress">
+            <div class="written-progress-bar">
+              <div class="written-progress-fill" [style.width.%]="65"></div>
+            </div>
+            <div class="written-stats">
+              <span class="written-percentage">65% completado</span>
+              <span class="written-sessions">13 de 20 sesiones</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Sección de Práctica Rápida -->
+    <!-- Sección Cómo vamos a practicar -->
     <div class="practice-section">
       <div class="practice-header">
         <ion-icon name="flash"></ion-icon>
-        <h3>Práctica Rápida</h3>
+        <h3>Cómo vamos a practicar</h3>
       </div>
       
-      <div class="quick-practice-card" (click)="goToQuickPractice()">
+      <!-- Botón principal de inicio -->
+      <div class="quick-practice-card" (click)="startQuickPractice()">
         <div class="practice-icon">
-          <ion-icon name="timer"></ion-icon>
+          <ion-icon name="stopwatch"></ion-icon>
         </div>
         <div class="practice-info">
-          <h4>Inicio Rápido</h4>
-          <p>5 preguntas • 10 minutos</p>
+          <h4>Empecemos tu test</h4>
+          <p>Procedamos con la interrogación</p>
         </div>
         <div class="practice-arrow">
           <ion-icon name="chevron-forward"></ion-icon>
@@ -69,65 +58,22 @@
       </div>
     </div>
 
-    <!-- Sección de Sesiones Completas -->
-    <div class="sessions-section">
-      <div class="sessions-header">
-        <ion-icon name="book"></ion-icon>
-        <h3>Sesiones Completas</h3>
-      </div>
-      
-      <div class="standard-session-card" (click)="goToStandardSession()">
-        <div class="session-icon">
-          <ion-icon name="library"></ion-icon>
+    <!-- Mapache centrado y armonioso -->
+    <div class="mapache-section">
+      <div class="mapache-container">
+        <div class="mapache-character" (click)="mapacheSpeak()">
+          <div class="mapache-face">🦝</div>
+          <div class="speech-bubble" [class.show]="showSpeech">
+            {{ currentMessage }}
+          </div>
         </div>
-        <div class="session-info">
-          <h4>Sesión Estándar</h4>
-          <p>15 preguntas • 30 minutos</p>
-        </div>
-        <div class="session-arrow">
-          <ion-icon name="chevron-forward"></ion-icon>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sección Personalizada -->
-    <div class="personalized-section">
-      <div class="personalized-header">
-        <ion-icon name="settings"></ion-icon>
-        <h3>Personalizada</h3>
-      </div>
-      
-      <div class="configuration-card" (click)="goToConfiguration()">
-        <div class="config-icon">
-          <ion-icon name="cog"></ion-icon>
-        </div>
-        <div class="config-info">
-          <h4>Configurar Sesión</h4>
-          <p>Temas, tiempo y dificultad</p>
-        </div>
-        <div class="config-arrow">
-          <ion-icon name="chevron-forward"></ion-icon>
-        </div>
-      </div>
-    </div>
-
-    <!-- Estadísticas -->
-    <div class="stats-bottom">
-      <div class="stat-item">
-        <div class="stat-value">{{ averageScore }}%</div>
-        <div class="stat-label">Promedio</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">{{ totalQuestions }}</div>
-        <div class="stat-label">Preguntas</div>
-      </div>
-      <div class="stats-trophy">
-        <img src="assets/image/mok.png" alt="Trophy" class="trophy-image">
+        <div class="mapache-message">Tu compañero de estudio</div>
       </div>
     </div>
 
   </div>
-  <!-- Bottom Navigation Component -->
-<app-bottom-nav></app-bottom-nav>
+
+  <!-- Bottom Navigation Component EXACTO como otras páginas -->
+  <app-bottom-nav></app-bottom-nav>
 
 </ion-content>
