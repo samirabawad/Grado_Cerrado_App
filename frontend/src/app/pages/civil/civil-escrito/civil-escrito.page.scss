@@ -1,0 +1,475 @@
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
+.civil-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Asegurar que ion-content sea scrollable */
+ion-content.civil-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// HEADER FIJO CON IMAGEN RESPONSIVA
+// ========================================
+.custom-header-section {
+  position: fixed;  
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;   
+  background: transparent;
+  
+  .orange-background {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+
+    .derecho-civil-container-full {
+      display: block;
+      width: 100%;
+      height: auto;
+      position: relative;
+      z-index: 3;
+
+      .derecho-civil-image-responsive {
+        display: block;
+        width: 100vw;
+        height: auto;
+        min-height: 120px;
+        max-height: 200px;
+        object-fit: cover;
+        object-position: center;
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
+      }
+    }
+  }
+}
+
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
+.content-area {
+  margin-top: 140px;
+  padding: 20px 16px 100px 16px;
+  position: relative;
+  z-index: 2;
+  background: transparent; 
+  border-radius: 30px 30px 0 0;
+  min-height: calc(100vh - 100px);
+}
+
+// ========================================
+// CARD DE NIVEL Y PROGRESO
+// ========================================
+.level-progress-card {
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  
+  .level-badge {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    
+    ion-icon {
+      font-size: 1.8rem;
+      color: #FF8F00;
+      margin-right: 8px;
+    }
+    
+    .level-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #E65100;
+    }
+  }
+  
+  .congratulation-text {
+    font-size: 1rem;
+    color: #5D4037;
+    margin: 0 0 20px 0;
+    font-weight: 500;
+  }
+  
+  .progress-section {
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      
+      .progress-label {
+        font-size: 0.9rem;
+        color: #6D4C41;
+        font-weight: 500;
+      }
+      
+      .progress-percentage {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #E65100;
+      }
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #EFEBE9;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #FF8F00, #FF6F00);
+        border-radius: 6px;
+        transition: width 0.3s ease;
+      }
+    }
+    
+    .next-level-text {
+      font-size: 0.8rem;
+      color: #8D6E63;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      
+      &::before {
+        content: "🎯";
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+// ========================================
+// CARD DE PROGRESO EN MODO ESCRITO
+// ========================================
+.written-mode-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  
+  .written-mode-content {
+    h4 {
+      margin: 0 0 16px 0;
+      font-size: 1.1rem;
+      color: #333;
+      font-weight: 600;
+    }
+    
+    .written-progress {
+      .written-progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #E0E0E0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 12px;
+        
+        .written-progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #4CAF50, #2E7D32);
+          border-radius: 4px;
+          transition: width 0.3s ease;
+        }
+      }
+      
+      .written-stats {
+        display: flex;
+        justify-content: space-between;
+        
+        .written-percentage {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #2E7D32;
+        }
+        
+        .written-sessions {
+          font-size: 0.9rem;
+          color: #666;
+        }
+      }
+    }
+  }
+}
+
+// ========================================
+// SECCIONES DE PRÁCTICA
+// ========================================
+.practice-section, .sessions-section, .personalized-section {
+  margin-bottom: 24px;
+  
+  .practice-header, .sessions-header, .personalized-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    
+    ion-icon {
+      font-size: 1.4rem;
+      color: #FF6F00;
+      margin-right: 8px;
+    }
+    
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+}
+
+// ========================================
+// CARDS INTERACTIVAS
+// ========================================
+.quick-practice-card, .standard-session-card, .configuration-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Específicos para Quick Practice
+.quick-practice-card {
+  background: linear-gradient(135deg, #FF5722, #D84315);
+  color: white;
+  
+  .practice-icon {
+    ion-icon {
+      font-size: 2.2rem;
+      color: white;
+      margin-right: 16px;
+    }
+  }
+  
+  .practice-info {
+    flex: 1;
+    
+    h4 {
+      margin: 0 0 4px 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  }
+  
+  .practice-arrow {
+    ion-icon {
+      font-size: 1.4rem;
+      color: white;
+    }
+  }
+}
+
+// Específicos para Standard Session
+.standard-session-card {
+  background: linear-gradient(135deg, #2196F3, #1565C0);
+  color: white;
+  
+  .session-icon {
+    ion-icon {
+      font-size: 2.2rem;
+      color: white;
+      margin-right: 16px;
+    }
+  }
+  
+  .session-info {
+    flex: 1;
+    
+    h4 {
+      margin: 0 0 4px 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  }
+  
+  .session-arrow {
+    ion-icon {
+      font-size: 1.4rem;
+      color: white;
+    }
+  }
+}
+
+// Específicos para Configuration
+.configuration-card {
+  background: linear-gradient(135deg, #9C27B0, #6A1B9A);
+  color: white;
+  
+  .config-icon {
+    ion-icon {
+      font-size: 2.2rem;
+      color: white;
+      margin-right: 16px;
+    }
+  }
+  
+  .config-info {
+    flex: 1;
+    
+    h4 {
+      margin: 0 0 4px 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  }
+  
+  .config-arrow {
+    ion-icon {
+      font-size: 1.4rem;
+      color: white;
+    }
+  }
+}
+
+// ========================================
+// ESTADÍSTICAS EN LA PARTE INFERIOR
+// ========================================
+.stats-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  
+  .stat-item {
+    text-align: center;
+    
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #FF6F00;
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 4px;
+    }
+  }
+  
+  .stats-trophy {
+    .trophy-image {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE DESIGN
+// ========================================
+@media (min-width: 768px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 150px;
+        max-height: 250px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 180px;
+    padding: 24px 32px 100px 32px;
+  }
+  
+  .level-progress-card,
+  .written-mode-card {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 100px;
+        max-height: 160px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 120px;
+    padding: 16px 12px 80px 12px;
+  }
+  
+  .level-progress-card,
+  .written-mode-card {
+    padding: 20px;
+  }
+  
+  .stats-bottom {
+    .stat-item {
+      .stat-value {
+        font-size: 1.5rem;
+      }
+    }
+    
+    .stats-trophy {
+      .trophy-image {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  }
+}

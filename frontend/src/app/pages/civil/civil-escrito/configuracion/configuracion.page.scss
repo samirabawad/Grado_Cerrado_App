@@ -1,0 +1,378 @@
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
+.config-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Asegurar que ion-content sea scrollable */
+ion-content.config-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// HEADER FIJO CON IMAGEN RESPONSIVA
+// ========================================
+.custom-header-section {
+  position: fixed;  
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;   
+  background: transparent;
+  
+  .orange-background {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+
+    .derecho-civil-container-full {
+      display: block;
+      width: 100%;
+      height: auto;
+      position: relative;
+      z-index: 3;
+
+      .derecho-civil-image-responsive {
+        display: block;
+        width: 100vw;
+        height: auto;
+        min-height: 120px;
+        max-height: 200px;
+        object-fit: cover;
+        object-position: center;
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
+      }
+    }
+  }
+}
+
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
+.content-area {
+  margin-top: 140px;
+  padding: 20px 16px 100px 16px;
+  position: relative;
+  z-index: 2;
+  background: transparent; 
+  border-radius: 30px 30px 0 0;
+  min-height: calc(100vh - 100px);
+}
+
+// ========================================
+// HEADER DE SECCIÓN
+// ========================================
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 4px;
+  
+  .settings-icon {
+    font-size: 1.8rem;
+    color: #666;
+    margin-right: 12px;
+  }
+  
+  h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+// ========================================
+// SECCIÓN DE CONFIGURACIÓN
+// ========================================
+.config-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.config-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #F5F5F5;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .config-label {
+    flex: 1;
+    
+    span {
+      font-size: 1rem;
+      color: #333;
+      font-weight: 500;
+    }
+  }
+  
+  .config-value {
+    span {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #FF6F00;
+    }
+  }
+}
+
+// Selectores ocultos (para uso programático)
+.config-selector {
+  display: none;
+  --background: transparent;
+  --padding: 0;
+  --min-height: 0;
+  
+  ion-select {
+    --padding: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// ========================================
+// SECCIÓN DE OPCIONES AVANZADAS
+// ========================================
+.advanced-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  
+  .advanced-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 24px 16px 24px;
+    border-bottom: 1px solid #F5F5F5;
+    
+    .advanced-icon {
+      font-size: 1.4rem;
+      color: #E91E63;
+      margin-right: 8px;
+    }
+    
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid #F5F5F5;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .toggle-info {
+    flex: 1;
+    
+    .toggle-label {
+      font-size: 1rem;
+      color: #333;
+      font-weight: 500;
+    }
+  }
+  
+  .toggle-control {
+    ion-toggle {
+      --background: #E0E0E0;
+      --background-checked: #FF8F00;
+      --handle-background: #FFFFFF;
+      --handle-background-checked: #FFFFFF;
+      transform: scale(0.9);
+    }
+  }
+}
+
+// ========================================
+// BOTÓN DE INICIAR SESIÓN
+// ========================================
+.start-button-container {
+  padding: 0 8px;
+  
+  .start-button {
+    --background: linear-gradient(135deg, #FF6F00, #E65100);
+    --color: white;
+    --border-radius: 20px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    --box-shadow: 0 4px 20px rgba(230, 81, 0, 0.3);
+    
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    
+    ion-icon {
+      font-size: 1.2rem;
+      margin-right: 8px;
+    }
+    
+    &:hover {
+      --box-shadow: 0 6px 24px rgba(230, 81, 0, 0.4);
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+    }
+    
+    &:active {
+      transform: translateY(0);
+      --box-shadow: 0 2px 12px rgba(230, 81, 0, 0.3);
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE DESIGN
+// ========================================
+@media (min-width: 768px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 150px;
+        max-height: 250px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 180px;
+    padding: 24px 32px 100px 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .config-section,
+  .advanced-section {
+    padding: 0;
+  }
+  
+  .config-item {
+    padding: 24px 32px;
+  }
+  
+  .toggle-item {
+    padding: 20px 32px;
+  }
+  
+  .advanced-section .advanced-header {
+    padding: 24px 32px 20px 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 100px;
+        max-height: 160px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 140px; // Ajuste para pantallas pequeñas
+    padding: 16px 12px 80px 12px;
+  }
+  
+  .section-header {
+    margin-bottom: 20px;
+    
+    h2 {
+      font-size: 1.2rem;
+    }
+  }
+  
+  .config-item {
+    padding: 18px 20px;
+    
+    .config-label span,
+    .config-value span {
+      font-size: 0.95rem;
+    }
+  }
+  
+  .toggle-item {
+    padding: 16px 20px;
+    
+    .toggle-label {
+      font-size: 0.95rem;
+    }
+  }
+  
+  .advanced-section .advanced-header {
+    padding: 18px 20px 14px 20px;
+    
+    h3 {
+      font-size: 1rem;
+    }
+  }
+  
+  .start-button-container {
+    .start-button {
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-size: 1rem;
+    }
+  }
+}
+
+// ========================================
+// ANIMACIONES ADICIONALES
+// ========================================
+.config-item,
+.toggle-item {
+  transition: background-color 0.2s ease;
+  
+  &:active {
+    background-color: rgba(255, 111, 0, 0.05);
+  }
+}
+
+.advanced-section {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.start-button-container {
+  animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

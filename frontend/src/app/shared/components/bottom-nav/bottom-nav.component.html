@@ -1,0 +1,24 @@
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <div class="nav-item" [class.active]="isActive('/home')" (click)="goToHome()">
+    <ion-icon name="home"></ion-icon>
+  </div>
+  
+  <div class="nav-item" (click)="goToStats()">
+    <ion-icon name="bar-chart"></ion-icon>
+  </div>
+  
+  <div class="nav-item center-item">
+    <div class="center-button" (click)="openAddMenu()">
+      <ion-icon name="add"></ion-icon>
+    </div>
+  </div>
+  
+  <div class="nav-item" (click)="goToNotifications()">
+    <ion-icon name="notifications"></ion-icon>
+  </div>
+  
+  <div class="nav-item" (click)="goToProfile()">
+    <img src="assets/image/Mreloj.png" alt="Profile" class="profile-nav-icon">
+  </div>
+</div>

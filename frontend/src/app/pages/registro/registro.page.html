@@ -1,0 +1,126 @@
+<ion-content [fullscreen]="true" class="registro-content">
+  <div class="registro-container">
+    
+    <!-- Header con imagen de fondo y mapache -->
+    <div class="header-section">
+      <!-- Imagen de fondo gris -->
+      <div class="background-image">
+        <img src="assets/image/superior_gris.png" alt="Background" class="superior-gris">
+      </div>
+      
+      <!-- Botón de volver -->
+      <ion-button 
+        fill="clear" 
+        size="small" 
+        class="back-button"
+        (click)="goBack()">
+        <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      
+      <!-- Mapache sobre la imagen gris -->
+      <div class="mapache-container">
+        <img src="assets/image/msombra.png" alt="Mapache" class="mapache-image">
+      </div>
+    </div>
+
+    <!-- Formulario de registro -->
+    <div class="form-container">
+      
+      <!-- Campo Nombre Completo -->
+      <div class="form-field">
+        <label class="field-label">Nombre Completo</label>
+        <ion-item lines="none" class="custom-input">
+          <ion-input 
+            [(ngModel)]="nombreCompleto"
+            placeholder="Ingresa tu nombre completo"
+            type="text"
+            [class.error]="nombreCompleto.length > 0 && !isNameValid()">
+          </ion-input>
+        </ion-item>
+        <div class="error-message" *ngIf="nombreCompleto.length > 0 && !isNameValid()">
+          El nombre debe tener al menos 2 caracteres
+        </div>
+      </div>
+
+      <!-- Campo Correo Electrónico -->
+      <div class="form-field">
+        <label class="field-label">Correo Electrónico</label>
+        <ion-item lines="none" class="custom-input">
+          <ion-icon name="mail-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-input 
+            [(ngModel)]="correoElectronico"
+            placeholder="ejemplo@correo.com"
+            type="email"
+            [class.error]="correoElectronico.length > 0 && !isEmailValid()">
+          </ion-input>
+        </ion-item>
+        <div class="error-message" *ngIf="correoElectronico.length > 0 && !isEmailValid()">
+          Ingresa un correo electrónico válido
+        </div>
+      </div>
+
+      <!-- Campo Contraseña -->
+      <div class="form-field">
+        <label class="field-label">Contraseña</label>
+        <ion-item lines="none" class="custom-input">
+          <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-input 
+            [(ngModel)]="contrasena"
+            placeholder="Mínimo 6 caracteres"
+            [type]="showPassword ? 'text' : 'password'"
+            [class.error]="contrasena.length > 0 && !isPasswordValid()">
+          </ion-input>
+          <ion-icon 
+            [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" 
+            slot="end" 
+            class="password-toggle"
+            (click)="togglePasswordVisibility()">
+          </ion-icon>
+        </ion-item>
+        <div class="error-message" *ngIf="contrasena.length > 0 && !isPasswordValid()">
+          La contraseña debe tener al menos 6 caracteres
+        </div>
+      </div>
+
+      <!-- Campo Confirmar Contraseña -->
+      <div class="form-field">
+        <label class="field-label">Confirmar Contraseña</label>
+        <ion-item lines="none" class="custom-input">
+          <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-input 
+            [(ngModel)]="confirmarContrasena"
+            placeholder="Repite tu contraseña"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            [class.error]="confirmarContrasena.length > 0 && !doPasswordsMatch()">
+          </ion-input>
+          <ion-icon 
+            [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" 
+            slot="end" 
+            class="password-toggle"
+            (click)="toggleConfirmPasswordVisibility()">
+          </ion-icon>
+        </ion-item>
+        <div class="error-message" *ngIf="confirmarContrasena.length > 0 && !doPasswordsMatch()">
+          Las contraseñas no coinciden
+        </div>
+      </div>
+
+      <!-- Botón de registro -->
+      <ion-button 
+        expand="block" 
+        class="registro-btn"
+        [disabled]="!isFormValid() || isLoading"
+        (click)="registrarse()">
+        <ion-spinner *ngIf="isLoading" name="circles"></ion-spinner>
+        <span *ngIf="!isLoading">Continuar</span>
+      </ion-button>
+
+      <!-- Link para iniciar sesión -->
+      <div class="login-link">
+        <span>Ya tienes cuenta? </span>
+        <a (click)="irAIniciarSesion()" class="link-text">Inicia Sesión</a>
+      </div>
+
+    </div>
+  </div>
+</ion-content>

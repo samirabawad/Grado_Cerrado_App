@@ -1,0 +1,132 @@
+<ion-content class="test-summary-content">
+  <!-- Header personalizado -->
+  <div class="custom-header-section">
+    <div class="orange-background">
+      <!-- Imagen de extremo a extremo -->
+      <div class="derecho-civil-container-full">
+        <img src="assets/image/civil/logo_derecho_civil_escrito.png" alt="Derecho Civil Escrito" class="derecho-civil-image-responsive">
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="content-area">
+    
+    <!-- Imagen del mapache -->
+    <div class="mapache-container">
+      <img src="assets/image/mok.png" alt="Mapache" class="mapache-image">
+    </div>
+
+    <!-- Botón de modo opciones -->
+    <div class="options-button-container">
+      <ion-button 
+        fill="clear" 
+        shape="round" 
+        class="options-button"
+        (click)="goToOptions()">
+        <ion-icon name="checkmark" slot="start"></ion-icon>
+        MODO OPCIONES
+      </ion-button>
+    </div>
+
+    <!-- Título principal -->
+    <div class="main-title">
+      <h1>¡Hora del Test!</h1>
+      <p>Pon a prueba tus conocimientos en <strong>Derecho Civil</strong> y mejora tu nivel</p>
+    </div>
+
+    <!-- Card de nivel actual -->
+    <div class="current-level-card">
+      <div class="level-badge">
+        <ion-icon name="trophy"></ion-icon>
+        <span class="level-text">Tu Nivel Actual: {{ userLevel }}</span>
+      </div>
+      <p class="level-description">¡Puedes alcanzar el nivel Avanzado con {{ progressToAdvanced }}%!</p>
+    </div>
+
+    <!-- Configuración del test -->
+    <div class="test-config-grid">
+      
+      <!-- Número de preguntas -->
+      <div class="config-card">
+        <div class="config-icon">
+          <ion-icon name="checkmark"></ion-icon>
+        </div>
+        <div class="config-value">{{ testConfig.numberOfQuestions }}</div>
+        <div class="config-label">PREGUNTAS</div>
+      </div>
+
+      <!-- Tiempo límite -->
+      <div class="config-card">
+        <div class="config-icon">
+          <ion-icon name="time"></ion-icon>
+        </div>
+        <div class="config-value">{{ timeLimit }} min</div>
+        <div class="config-label">TIEMPO LÍMITE</div>
+      </div>
+
+      <!-- Porcentaje para aprobar -->
+      <div class="config-card">
+        <div class="config-icon">
+          <ion-icon name="trending-up"></ion-icon>
+        </div>
+        <div class="config-value">{{ passPercentage }}%</div>
+        <div class="config-label">PARA APROBAR</div>
+      </div>
+
+      <!-- Dificultad -->
+      <div class="config-card">
+        <div class="config-icon">
+          <ion-icon name="bar-chart"></ion-icon>
+        </div>
+        <div class="config-value" [style.color]="getLevelColor()">{{ testConfig.difficulty }}</div>
+        <div class="config-label">DIFICULTAD</div>
+      </div>
+
+    </div>
+
+    <!-- Consejos para el test -->
+    <div class="tips-section">
+      <div class="tips-header">
+        <ion-icon name="checkmark" class="tips-icon"></ion-icon>
+        <h3>Consejos para el Test de Opciones</h3>
+      </div>
+      
+      <div class="tips-list">
+        <div class="tip-item">
+          <ion-icon name="checkmark" class="tip-check"></ion-icon>
+          <span>Lee todas las opciones antes de responder</span>
+        </div>
+        
+        <div class="tip-item">
+          <ion-icon name="checkmark" class="tip-check"></ion-icon>
+          <span>Elimina las opciones claramente incorrectas</span>
+        </div>
+        
+        <div class="tip-item">
+          <ion-icon name="checkmark" class="tip-check"></ion-icon>
+          <span>Puedes cambiar tu respuesta antes de continuar</span>
+        </div>
+        
+        <div class="tip-item">
+          <ion-icon name="checkmark" class="tip-check"></ion-icon>
+          <span>Al final verás un análisis detallado</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Botón flotante de iniciar -->
+  <div class="floating-start-container">
+    <ion-button 
+      expand="block" 
+      shape="round" 
+      class="start-test-button"
+      (click)="startTest()">
+      <ion-icon name="play" slot="start"></ion-icon>
+      Iniciar Prueba
+    </ion-button>
+  </div>
+
+</ion-content>

@@ -1,0 +1,341 @@
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
+.civil-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Asegurar que ion-content sea scrollable */
+ion-content.civil-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// HEADER FIJO CON IMAGEN RESPONSIVA EXTREMO A EXTREMO
+// ========================================
+.custom-header-section {
+  position: fixed;  
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;   
+  background: transparent;
+  
+  .orange-background {
+    background: transparent;
+    padding: 0; /* Sin padding para que llegue a los extremos */
+    border-radius: 0;
+    position: relative;
+    overflow: hidden; /* Evitar desbordamiento */
+    width: 100vw; /* Ancho completo de la ventana */
+
+    .derecho-civil-container-full {
+      display: block;
+      width: 100%;
+      height: auto;
+      position: relative;
+      z-index: 3;
+
+      .derecho-civil-image-responsive {
+        display: block;
+        width: 100vw; /* Ancho completo de la ventana */
+        height: auto; /* Altura automática para mantener proporción */
+        min-height: 120px; /* Altura mínima */
+        max-height: 200px; /* Altura máxima */
+        object-fit: cover; /* Cubrir todo el ancho manteniendo proporción */
+        object-position: center; /* Centrar la imagen */
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
+      }
+    }
+  }
+}
+
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
+.content-area {
+  margin-top: 140px; /* Espacio ajustado para header responsivo */
+  padding: 20px 0 100px 0;
+  position: relative;
+  z-index: 2;
+  background: transparent; 
+  border-radius: 30px 30px 0 0;
+  min-height: calc(100vh - 100px);
+}
+// ========================================
+// CARDS Y ELEMENTOS
+// ========================================
+
+// Test de Nivelación Card
+.test-nivelacion-card {
+  background: linear-gradient(135deg, #F39C12, #E67E22);
+  margin: 16px;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(230, 126, 34, 0.3);
+  
+  .test-content {
+    display: flex;
+    align-items: center;
+    color: white;
+    
+    .test-icon {
+      ion-icon {
+        font-size: 2.5rem;
+        color: white;
+        margin-right: 16px;
+      }
+    }
+    
+    .test-info {
+      flex: 1;
+      
+      h3 {
+        margin: 0 0 8px 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+    }
+    
+    .test-arrow {
+      ion-icon {
+        font-size: 1.5rem;
+        color: white;
+      }
+    }
+  }
+}
+
+// Progreso Civil Card
+.progreso-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 16px;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  
+  .progreso-content {
+    flex: 1;
+    margin-left: 20px;        /* NUEVO: Mueve el texto más hacia la derecha */
+    padding-right: 10px;      /* NUEVO: Da espacio para el mapache */
+    
+    .progreso-icon {
+      ion-icon {
+        font-size: 2rem;
+        color: #F39C12;
+        margin-bottom: 8px;
+      }
+    }
+    
+    h4 {
+      margin: 0 0 4px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    p {
+      margin: 0 0 12px 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #E0E0E0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #F39C12, #E67E22);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+    }
+    
+    .progress-text {
+      font-size: 0.7rem;
+      color: #888;
+    }
+  }
+  
+    .mapache-container {
+    margin-left: 20px;
+    
+    .mapache-image {
+      width: 150px !important;
+      height: 150px !important;
+      object-fit: contain;
+    }
+  }
+}
+
+// Botones de Material
+.material-buttons {
+  margin: 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 8px;
+  
+  .material-image-button {
+    flex: 1;
+    width: auto;
+    height: auto;
+    max-height: 120px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    border: none;
+    background: transparent;
+    
+    &:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// Botones de Práctica
+.practice-buttons {
+  margin: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
+  .practice-image-button {
+    width: 100%;
+    height: auto;
+    max-height: 120px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    border: none;
+    background: transparent;
+    
+    &:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// Sección de Estadísticas
+.stats-section {
+  margin: 24px 16px 16px 16px;
+  
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .stats-content {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 120px;
+    position: relative;
+    
+    .mapache-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      
+      .mapache-stats {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+      }
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 150px; /* Altura mínima mayor en tablet */
+        max-height: 250px; /* Altura máxima mayor en tablet */
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 180px; /* Más espacio en tablet */
+  }
+  
+  .test-nivelacion-card,
+  .progreso-card {
+    margin: 24px;
+    padding: 28px;
+  }
+  
+  .material-buttons {
+    margin: 24px;
+    gap: 16px;
+    
+    .material-image-button {
+      border-radius: 16px;
+    }
+  }
+  
+  .practice-buttons {
+    margin: 24px;
+    gap: 16px;
+    
+    .practice-image-button {
+      border-radius: 16px;
+    }
+  }
+  
+  .stats-section {
+    margin: 32px 24px 24px 24px;
+  }
+}
+
+// Media query para pantallas pequeñas
+@media (max-width: 480px) {
+  .custom-header-section .orange-background {
+    .derecho-civil-container-full {
+      .derecho-civil-image-responsive {
+        min-height: 100px;
+        max-height: 160px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 120px;
+  }
+}
