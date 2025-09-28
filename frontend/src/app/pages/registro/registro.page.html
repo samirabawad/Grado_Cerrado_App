@@ -23,104 +23,134 @@
       </div>
     </div>
 
+     
+
     <!-- Formulario de registro -->
     <div class="form-container">
       
-      <!-- Campo Nombre Completo -->
-      <div class="form-field">
-        <label class="field-label">Nombre Completo</label>
-        <ion-item lines="none" class="custom-input">
+      <!-- Grid para nombres (horizontal) -->
+      <div class="name-grid">
+        <div class="form-field half-width">
+          <label class="field-label">Nombre</label>
           <ion-input 
-            [(ngModel)]="nombreCompleto"
-            placeholder="Ingresa tu nombre completo"
-            type="text"
-            [class.error]="nombreCompleto.length > 0 && !isNameValid()">
+            class="custom-input compact"
+            type="text" 
+            placeholder="Tu nombre"
+            [(ngModel)]="nombre"
+            maxlength="100">
           </ion-input>
-        </ion-item>
-        <div class="error-message" *ngIf="nombreCompleto.length > 0 && !isNameValid()">
-          El nombre debe tener al menos 2 caracteres
+        </div>
+        
+        <div class="form-field half-width">
+          <label class="field-label">Segundo nombre</label>
+          <ion-input 
+            class="custom-input compact"
+            type="text" 
+            placeholder="Opcional"
+            [(ngModel)]="segundoNombre"
+            maxlength="100">
+          </ion-input>
         </div>
       </div>
 
-      <!-- Campo Correo Electrónico -->
-      <div class="form-field">
-        <label class="field-label">Correo Electrónico</label>
-        <ion-item lines="none" class="custom-input">
-          <ion-icon name="mail-outline" slot="start" class="input-icon"></ion-icon>
+      <!-- Grid para apellidos (horizontal) -->
+      <div class="name-grid">
+        <div class="form-field half-width">
+          <label class="field-label">Apellido paterno</label>
           <ion-input 
-            [(ngModel)]="correoElectronico"
-            placeholder="ejemplo@correo.com"
-            type="email"
-            [class.error]="correoElectronico.length > 0 && !isEmailValid()">
+            class="custom-input compact"
+            type="text" 
+            placeholder="Apellido paterno"
+            [(ngModel)]="apellidoPaterno"
+            maxlength="100">
           </ion-input>
-        </ion-item>
-        <div class="error-message" *ngIf="correoElectronico.length > 0 && !isEmailValid()">
-          Ingresa un correo electrónico válido
+        </div>
+        
+        <div class="form-field half-width">
+          <label class="field-label">Apellido materno</label>
+          <ion-input 
+            class="custom-input compact"
+            type="text" 
+            placeholder="Apellido materno"
+            [(ngModel)]="apellidoMaterno"
+            maxlength="100">
+          </ion-input>
         </div>
       </div>
 
-      <!-- Campo Contraseña -->
+      <!-- Email (ancho completo) -->
+      <div class="form-field">
+        <label class="field-label">Correo electrónico</label>
+        <ion-input 
+          class="custom-input"
+          type="email" 
+          placeholder="ejemplo@correo.com"
+          [(ngModel)]="correoElectronico"
+          maxlength="100">
+        </ion-input>
+        <div class="error-message" *ngIf="!isEmailValid() && correoElectronico.length > 0">
+          Ingresa un email válido
+        </div>
+      </div>
+
+      <!-- Contraseña (ancho completo) -->
       <div class="form-field">
         <label class="field-label">Contraseña</label>
-        <ion-item lines="none" class="custom-input">
-          <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
-          <ion-input 
-            [(ngModel)]="contrasena"
-            placeholder="Mínimo 6 caracteres"
-            [type]="showPassword ? 'text' : 'password'"
-            [class.error]="contrasena.length > 0 && !isPasswordValid()">
-          </ion-input>
-          <ion-icon 
-            [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" 
+        <ion-input 
+          class="custom-input"
+          [type]="showPassword ? 'text' : 'password'"
+          placeholder="Mínimo 6 caracteres"
+          [(ngModel)]="contrasena"
+          maxlength="255">
+          <ion-button 
+            fill="clear" 
             slot="end" 
-            class="password-toggle"
             (click)="togglePasswordVisibility()">
-          </ion-icon>
-        </ion-item>
-        <div class="error-message" *ngIf="contrasena.length > 0 && !isPasswordValid()">
-          La contraseña debe tener al menos 6 caracteres
-        </div>
+            <ion-icon [name]="showPassword ? 'eye-off' : 'eye'"></ion-icon>
+          </ion-button>
+        </ion-input>
       </div>
 
-      <!-- Campo Confirmar Contraseña -->
+      <!-- Confirmar Contraseña (ancho completo) -->
       <div class="form-field">
-        <label class="field-label">Confirmar Contraseña</label>
-        <ion-item lines="none" class="custom-input">
-          <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
-          <ion-input 
-            [(ngModel)]="confirmarContrasena"
-            placeholder="Repite tu contraseña"
-            [type]="showConfirmPassword ? 'text' : 'password'"
-            [class.error]="confirmarContrasena.length > 0 && !doPasswordsMatch()">
-          </ion-input>
-          <ion-icon 
-            [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" 
+        <label class="field-label">Confirmar contraseña</label>
+        <ion-input 
+          class="custom-input"
+          [type]="showConfirmPassword ? 'text' : 'password'"
+          placeholder="Repite tu contraseña"
+          [(ngModel)]="confirmarContrasena">
+          <ion-button 
+            fill="clear" 
             slot="end" 
-            class="password-toggle"
             (click)="toggleConfirmPasswordVisibility()">
-          </ion-icon>
-        </ion-item>
-        <div class="error-message" *ngIf="confirmarContrasena.length > 0 && !doPasswordsMatch()">
+            <ion-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'"></ion-icon>
+          </ion-button>
+        </ion-input>
+        <div class="error-message" *ngIf="!isPasswordMatchValid() && confirmarContrasena.length > 0">
           Las contraseñas no coinciden
         </div>
       </div>
 
-      <!-- Botón de registro -->
-      <ion-button 
-        expand="block" 
-        class="registro-btn"
-        [disabled]="!isFormValid() || isLoading"
-        (click)="registrarse()">
-        <ion-spinner *ngIf="isLoading" name="circles"></ion-spinner>
-        <span *ngIf="!isLoading">Continuar</span>
-      </ion-button>
-
-      <!-- Link para iniciar sesión -->
-      <div class="login-link">
-        <span>Ya tienes cuenta? </span>
-        <a (click)="irAIniciarSesion()" class="link-text">Inicia Sesión</a>
-      </div>
-
     </div>
+
+    <!-- Botón de registro VERDE -->
+    <ion-button 
+      expand="block" 
+      shape="round" 
+      class="registro-btn-green"
+      [disabled]="!isFormValid() || isLoading"
+      (click)="registrarUsuario()">
+      <ion-spinner name="circles" *ngIf="isLoading"></ion-spinner>
+      {{ isLoading ? 'Registrando...' : 'Continuar' }}
+    </ion-button>
+
+
+  <!-- Link de inicio de sesión -->
+  <div class="login-link">
+    <span>¿Ya tienes cuenta? </span>
+    <span class="link-text" (click)="irAIniciarSesion()">Inicia Sesión</span>
   </div>
+
+</div> <!-- Cierre de content-area -->
+
 </ion-content>
