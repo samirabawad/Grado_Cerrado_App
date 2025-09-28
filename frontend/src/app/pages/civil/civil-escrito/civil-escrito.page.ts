@@ -4,6 +4,7 @@ import { IonicModule, LoadingController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-civil-escrito',
@@ -28,7 +29,7 @@ export class CivilEscritoPage implements OnInit {
     '¡No te rindas!'
   ];
 
-  constructor(private router: Router, private loadingController: LoadingController) { }
+  constructor(private router: Router, private loadingController: LoadingController, private apiService: ApiService) { }
 
   ngOnInit() {
     // Mostrar mensaje inicial del mapache después de 3 segundos
@@ -38,41 +39,93 @@ export class CivilEscritoPage implements OnInit {
   }
 
   // ========================================
-  // FUNCIÓN PRINCIPAL - INICIAR TEST CON LOADING
+  // FUNCIÓN PRINCIPAL - INICIAR TEST CON SESIÓN
   // ========================================
   
   async startQuickPractice() {
     console.log('Iniciando test civil escrito...');
     
-    // Mostrar loading
+    // Mostrar loading SIN duración fija
     const loading = await this.loadingController.create({
       message: 'Preparando tu test...',
       spinner: 'crescent',
-      duration: 2000, // Máximo 2 segundos
       cssClass: 'custom-loading'
+      // Sin duration - se cerrará manualmente cuando esté listo
     });
     
     await loading.present();
     
     try {
-      // Simular tiempo de carga (puedes quitar esto si no es necesario)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 1. CREAR LA SESIÓN PRIMERO
+      console.log('Creando sesión de estudio...');
       
-      // Navegar al test
+      const sessionData = {
+        studentId: "00000000-0000-0000-0000-000000000001",
+        difficulty: "intermedio",
+        legalAreas: ["Derecho Civil"],
+        numberOfQuestions: 5
+      };
+      
+      console.log('Enviando datos de sesión:', sessionData);
+      
+      // Llamar al backend para crear sesión
+      const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
+      console.log('Sesión creada exitosamente:', sessionResponse);
+      
+      // 2. GUARDAR LA SESIÓN
+      this.apiService.setCurrentSession(sessionResponse);
+      
+      // 3. NAVEGAR AL TEST
       await this.router.navigate(['/civil/civil-escrito/test-escrito-civil']);
       
-      console.log('Navegación exitosa al test civil escrito');
+      // 4. ESPERAR A QUE LAS PREGUNTAS SE CARGUEN
+      console.log('Esperando a que las preguntas se carguen...');
+      
+      // Polling para verificar que las preguntas están cargadas
+      let attempts = 0;
+      const maxAttempts = 30; // 15 segundos máximo (500ms * 30)
+      
+      const checkQuestionsLoaded = () => {
+        return new Promise<void>((resolve, reject) => {
+          const interval = setInterval(() => {
+            attempts++;
+            
+            // Verificar si las preguntas ya están disponibles
+            const currentSession = this.apiService.getCurrentSession();
+            const hasQuestions = currentSession?.questions && currentSession.questions.length > 0;
+            
+            console.log(`Intento ${attempts}: Preguntas cargadas = ${hasQuestions}`);
+            
+            if (hasQuestions) {
+              clearInterval(interval);
+              console.log('Preguntas detectadas, cerrando loading');
+              resolve();
+            } else if (attempts >= maxAttempts) {
+              clearInterval(interval);
+              console.log('Timeout esperando preguntas');
+              reject(new Error('Timeout cargando preguntas'));
+            }
+          }, 500); // Verificar cada 500ms
+        });
+      };
+      
+      // Esperar a que se carguen las preguntas
+      await checkQuestionsLoaded();
+      
+      // Pequeña pausa adicional para asegurar renderizado
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Test completamente cargado');
       
     } catch (error) {
-      console.error('Error al navegar al test:', error);
+      console.error('Error al crear sesión o cargar preguntas:', error);
       
-      // Mostrar error si es necesario
-      await loading.dismiss();
-      alert('Error al cargar el test. Inténtalo nuevamente.');
+      alert('Error al cargar el test. Verifica tu conexión e inténtalo nuevamente.');
       
     } finally {
-      // Asegurar que el loading se cierre
+      // Cerrar loading cuando todo esté listo
       await loading.dismiss();
+      console.log('Loading cerrado');
     }
   }
 
