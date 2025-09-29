@@ -48,16 +48,28 @@ const routes: Routes = [
     loadChildren: () => import('./pages/home/home.module').then( m => m.HomePageModule)
   },
 
-  // 🆕 NUEVA RUTA DEL DASHBOARD
+  // Dashboard
   {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
   },
 
-  // 🆕 NUEVA RUTA DE NOTIFICACIONES
+  // Notificaciones
   {
     path: 'notifications',
     loadComponent: () => import('./pages/notifications/notifications.page').then(m => m.NotificationsPage)
+  },
+
+  // Racha
+  {
+    path: 'racha',
+    loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
+  },
+
+  // NUEVA: Perfil
+  {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
   },
 
   // Contenedor CIVIL (lazy)
@@ -65,11 +77,6 @@ const routes: Routes = [
     path: 'civil',
     loadChildren: () =>
       import('./pages/civil/civil.module').then(m => m.CivilPageModule)
-  },
-
-  {
-    path: 'racha',
-    loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
   },
 
   // Fallback - SIEMPRE AL FINAL
