@@ -51,9 +51,8 @@ export class BottomNavComponent implements OnInit {
 
   // Navegar a Notificaciones
   goToNotifications() {
-    console.log('Ir a notificaciones - Por implementar');
-    // Cuando tengas la página de notifications:
-    // this.router.navigate(['/notifications']);
+    console.log('Navegando a Notificaciones...');
+    this.router.navigate(['/notifications']);
   }
 
   // Navegar a Perfil

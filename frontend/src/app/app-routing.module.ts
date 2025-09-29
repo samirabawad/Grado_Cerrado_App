@@ -54,6 +54,12 @@ const routes: Routes = [
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
   },
 
+  // 🆕 NUEVA RUTA DE NOTIFICACIONES
+  {
+    path: 'notifications',
+    loadComponent: () => import('./pages/notifications/notifications.page').then(m => m.NotificationsPage)
+  },
+
   // Contenedor CIVIL (lazy)
   {
     path: 'civil',
