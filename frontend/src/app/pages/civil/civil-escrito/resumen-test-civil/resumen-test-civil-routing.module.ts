@@ -7,6 +7,7 @@ const routes: Routes = [
     path: '',
     component: ResumenTestCivilPage
   }
+  // ELIMINADAS: las rutas que causaban errores
 ];
 
 @NgModule({
