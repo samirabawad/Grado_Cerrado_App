@@ -31,11 +31,10 @@ export class BottomNavComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  // Navegar a Estadísticas
+  // 🆕 ACTUALIZADO: Navegar a Dashboard (Estadísticas)
   goToStats() {
-    console.log('Ir a estadísticas - Por implementar');
-    // Cuando tengas la página de stats:
-    // this.router.navigate(['/stats']);
+    console.log('Navegando a Dashboard...');
+    this.router.navigate(['/dashboard']);
   }
 
   // Navegar a Racha

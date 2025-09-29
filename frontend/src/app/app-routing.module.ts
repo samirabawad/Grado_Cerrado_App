@@ -48,6 +48,12 @@ const routes: Routes = [
     loadChildren: () => import('./pages/home/home.module').then( m => m.HomePageModule)
   },
 
+  // 🆕 NUEVA RUTA DEL DASHBOARD
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
+  },
+
   // Contenedor CIVIL (lazy)
   {
     path: 'civil',
@@ -55,12 +61,13 @@ const routes: Routes = [
       import('./pages/civil/civil.module').then(m => m.CivilPageModule)
   },
 
-  // Fallback - SIEMPRE AL FINAL
-  { path: '**', redirectTo: '/welcome' },
   {
-  path: 'racha',
-  loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
-},
+    path: 'racha',
+    loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
+  },
+
+  // Fallback - SIEMPRE AL FINAL
+  { path: '**', redirectTo: '/welcome' }
 ];
 
 @NgModule({
