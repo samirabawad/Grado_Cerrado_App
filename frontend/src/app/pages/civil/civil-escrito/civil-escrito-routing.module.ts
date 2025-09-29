@@ -8,34 +8,16 @@ const routes: Routes = [
     component: CivilEscritoPage
   },
   {
-    path: 'configuracion',
-    loadChildren: () =>
-      import('./configuracion/configuracion.module')
-        .then(m => m.ConfiguracionPageModule)
-  },
-  {
-    path: 'resumen-test',
-    loadChildren: () =>
-      import('./resumen-test/resumen-test.module')
-        .then(m => m.ResumenTestPageModule)
-  },
-  {
     path: 'test-escrito-civil',
     loadChildren: () =>
       import('./test-escrito-civil/test-escrito-civil.module')
         .then(m => m.TestEscritoCivilPageModule)
   },
   {
-    path: 'practica-rapida',
+    path: 'resumen-test-civil',
     loadChildren: () =>
-      import('./practica-rapida/practica-rapida.module')
-        .then(m => m.PracticaRapidaPageModule)
-  },
-  {
-    path: 'progreso',
-    loadChildren: () =>
-      import('./progreso/progreso.module')
-        .then(m => m.ProgresoPageModule)
+      import('./resumen-test-civil/resumen-test-civil.module')
+        .then(m => m.ResumenTestCivilPageModule)
   }
 ];
 

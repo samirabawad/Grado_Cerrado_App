@@ -1,17 +1,17 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-
-import { PracticaRapidaPage } from './practica-rapida.page';
+import { ResumenTestCivilPage } from './resumen-test-civil.page';
 
 const routes: Routes = [
   {
     path: '',
-    component: PracticaRapidaPage
+    component: ResumenTestCivilPage
   }
+  // ELIMINADAS: las rutas que causaban errores
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class PracticaRapidaPageRoutingModule {}
+export class ResumenTestCivilPageRoutingModule {}

@@ -1,20 +1,18 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { IonicModule } from '@ionic/angular';
 
-import { ConfiguracionPageRoutingModule } from './configuracion-routing.module';
-
-import { ConfiguracionPage } from './configuracion.page';
+import { TestOralCivilPageRoutingModule } from './test-oral-civil-routing.module';
+import { TestOralCivilPage } from './test-oral-civil.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    ConfiguracionPageRoutingModule
+    TestOralCivilPageRoutingModule
   ],
-  declarations: [ConfiguracionPage]
+  declarations: [TestOralCivilPage]
 })
-export class ConfiguracionPageModule {}
+export class TestOralCivilPageModule {}

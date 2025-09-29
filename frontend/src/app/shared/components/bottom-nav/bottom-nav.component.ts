@@ -21,28 +21,39 @@ export class BottomNavComponent implements OnInit {
     return this.router.url.includes(route);
   }
 
-  // Navegación
+  // Navegar a Home
   goToHome() {
+    console.log('Navegando a Home...');
     this.router.navigate(['/home']);
   }
 
+  // Navegar a Dashboard (Estadísticas)
   goToStats() {
-    console.log('Ir a estadísticas');
-    // this.router.navigate(['/stats']);
+    console.log('Navegando a Dashboard...');
+    this.router.navigate(['/dashboard']);
   }
 
+  // Navegar a Racha
+  goToRacha() {
+    console.log('Navegando a Racha...');
+    this.router.navigate(['/racha']);
+  }
+
+  // Abrir menú de agregar
   openAddMenu() {
     console.log('Abrir menú de agregar');
-    // Aquí puedes abrir un modal o menú
   }
 
+  // Navegar a Notificaciones
   goToNotifications() {
-    console.log('Ir a notificaciones');
-    // this.router.navigate(['/notifications']);
+    console.log('Navegando a Notificaciones...');
+    this.router.navigate(['/notifications']);
   }
 
+  // Navegar a Perfil
   goToProfile() {
-    console.log('Ir a perfil');
-    // this.router.navigate(['/profile']);
+    console.log('Navegando a Perfil...');
+    this.router.navigate(['/profile']);
   }
+
 }
