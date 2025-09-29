@@ -1,14 +1,14 @@
-<ion-content class="resumen-content">
-  <!-- Header personalizado -->
+<ion-content class="civil-content">
+  <!-- Header personalizado EXACTO como civil.page.html -->
   <div class="custom-header-section">
     <div class="orange-background">
+      <!-- Imagen de extremo a extremo -->
       <div class="derecho-civil-container-full">
         <img src="assets/image/civil/logo_civil.png" alt="Derecho Civil" class="derecho-civil-image-responsive">
       </div>
     </div>
   </div>
-
-  <!-- Contenido principal -->
+  <!-- Resto del contenido igual -->
   <div class="content-area">
     
     <!-- Resultado principal -->
@@ -62,17 +62,17 @@
 
     <!-- Botones de acción -->
     <div class="action-buttons">
-      <ion-button expand="block" fill="outline" class="review-btn">
+      <ion-button expand="block" fill="outline" class="review-btn" (click)="reviewIncorrect()">
         <ion-icon name="eye-outline" slot="start"></ion-icon>
         Revisar Respuestas Incorrectas
       </ion-button>
       
-      <ion-button expand="block" class="new-test-btn">
+      <ion-button expand="block" class="new-test-btn" (click)="takeNewTest()">
         <ion-icon name="refresh-outline" slot="start"></ion-icon>
         Hacer Nuevo Test Oral
       </ion-button>
       
-      <ion-button expand="block" fill="clear" class="back-btn">
+      <ion-button expand="block" fill="clear" class="back-btn" (click)="goBack()">
         <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
         Volver al Inicio
       </ion-button>
@@ -89,4 +89,7 @@
     </div>
 
   </div>
+
+  <!-- Bottom Navigation Component -->
+  <app-bottom-nav></app-bottom-nav>
 </ion-content>
