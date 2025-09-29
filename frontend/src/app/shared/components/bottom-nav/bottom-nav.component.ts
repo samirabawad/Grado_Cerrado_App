@@ -31,7 +31,7 @@ export class BottomNavComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  // 🆕 ACTUALIZADO: Navegar a Dashboard (Estadísticas)
+  // ACTUALIZADO: Navegar a Dashboard (Estadísticas)
   goToStats() {
     console.log('Navegando a Dashboard...');
     this.router.navigate(['/dashboard']);
@@ -43,7 +43,7 @@ export class BottomNavComponent implements OnInit {
     this.router.navigate(['/racha']);
   }
 
-  // Abrir menú de agregar (función original)
+  // Abrir menú de agregar
   openAddMenu() {
     console.log('Abrir menú de agregar');
     // Aquí puedes abrir un modal o menú
