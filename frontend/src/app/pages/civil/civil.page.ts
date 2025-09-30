@@ -36,9 +36,9 @@ export class CivilPage implements OnInit {
 
 
   goToPlanEstudio() {
-    console.log('Ir a Plan de Estudio');
-    // Aquí puedes agregar la navegación cuando esté listo
-  }
+  this.router.navigate(['/civil/plan-estudio-civil']);
+}
+
 
   goToDestacados() {
     console.log('Ir a Destacados');

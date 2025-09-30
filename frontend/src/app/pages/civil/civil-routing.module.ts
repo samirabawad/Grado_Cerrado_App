@@ -22,7 +22,14 @@ const routes: Routes = [
     loadComponent: () =>
       import('./material-estudio-civil/material-estudio-civil.page')
         .then(m => m.MaterialEstudioCivilPage)
+  },
+  {
+  path: 'plan-estudio-civil',
+  loadComponent: () =>
+    import('./plan-estudio-civil/plan-estudio-civil.page')
+      .then(m => m.PlanEstudioCivilPage)  
   }
+
 ];
 
 @NgModule({
