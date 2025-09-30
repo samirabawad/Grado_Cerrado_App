@@ -31,9 +31,9 @@ export class CivilPage implements OnInit {
   }
 
   goToMaterialEstudio() {
-    console.log('Ir a Material de Estudio');
-    // Aquí puedes agregar la navegación cuando esté listo
-  }
+  this.router.navigate(['/civil/material-estudio-civil']);
+}
+
 
   goToPlanEstudio() {
     console.log('Ir a Plan de Estudio');

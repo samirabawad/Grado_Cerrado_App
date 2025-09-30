@@ -1,13 +1,17 @@
 <ion-content class="racha-content">
   
   <!-- Header con botón de regreso -->
-  <div class="racha-header">
+ <!-- Header con imagen personalizada -->
+  <div class="racha-header-custom">
+    <div class="racha-background-container">
+      <img src="assets/image/racha.png" alt="Racha" class="racha-header-image">
+    </div>
+    
     <ion-button fill="clear" (click)="goBack()" class="back-button">
       <ion-icon name="chevron-back"></ion-icon>
     </ion-button>
-    <h1>Tu Racha</h1>
-    <div class="spacer"></div>
   </div>
+  
 
   <!-- Contenido principal -->
   <div class="racha-main">
