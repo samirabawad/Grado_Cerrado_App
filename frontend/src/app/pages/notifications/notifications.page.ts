@@ -14,35 +14,17 @@ import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-na
 })
 export class NotificationsPage implements OnInit {
 
-  // Vista actual: 'list' o 'settings'
-  currentView: string = 'list';
-  
-  // Notificaciones
   notifications: any[] = [];
   unreadCount: number = 0;
-  
-  // Configuración de recordatorios
-  reminderSettings = {
-    dailyReminder: true,
-    dailyReminderTime: '20:00',
-    streakReminder: true,
-    achievementAlerts: true,
-    studyGoalReminder: true,
-    weeklyReport: true,
-    pushNotifications: true,
-    emailNotifications: false
-  };
 
   constructor(private router: Router) { }
 
   ngOnInit() {
     this.loadNotifications();
-    this.loadSettings();
   }
 
   // Cargar notificaciones
   loadNotifications() {
-    // Datos de ejemplo (después conectar con API)
     this.notifications = [
       {
         id: 1,
@@ -104,25 +86,6 @@ export class NotificationsPage implements OnInit {
     this.unreadCount = this.notifications.filter(n => !n.read).length;
   }
 
-  // Cargar configuración
-  loadSettings() {
-    const saved = localStorage.getItem('notificationSettings');
-    if (saved) {
-      this.reminderSettings = JSON.parse(saved);
-    }
-  }
-
-  // Guardar configuración
-  saveSettings() {
-    localStorage.setItem('notificationSettings', JSON.stringify(this.reminderSettings));
-    console.log('Configuración guardada:', this.reminderSettings);
-  }
-
-  // Cambiar vista
-  switchView(view: string) {
-    this.currentView = view;
-  }
-
   // Marcar notificación como leída
   markAsRead(notification: any) {
     if (!notification.read) {
@@ -130,7 +93,6 @@ export class NotificationsPage implements OnInit {
       this.unreadCount--;
     }
     
-    // Si tiene acción, navegar
     if (notification.action) {
       this.router.navigate([notification.action]);
     }
@@ -144,7 +106,7 @@ export class NotificationsPage implements OnInit {
 
   // Eliminar notificación
   deleteNotification(notification: any, event: Event) {
-    event.stopPropagation(); // Evitar que se ejecute markAsRead
+    event.stopPropagation();
     const index = this.notifications.indexOf(notification);
     if (index > -1) {
       this.notifications.splice(index, 1);
@@ -154,19 +116,19 @@ export class NotificationsPage implements OnInit {
     }
   }
 
-  // Limpiar todas las notificaciones
+  // Limpiar todas
   clearAll() {
     this.notifications = [];
     this.unreadCount = 0;
   }
 
-  // Volver
+  // Volver a home
   goBack() {
     this.router.navigate(['/home']);
   }
 
-  // Método para actualizar configuración (se llama automáticamente con ngModel)
-  onSettingChange() {
-    this.saveSettings();
+  // Ir a configuración
+  goToSettings() {
+    this.router.navigate(['/settings']);
   }
 }

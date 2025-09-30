@@ -1,6 +1,6 @@
 <ion-content class="notifications-content">
   
-  <!-- Header con fondo gris igual que home -->
+  <!-- Header con fondo gris -->
   <div class="header-section">
     <div class="background-image">
       <img src="assets/image/superior_gris.png" alt="Background" class="superior-gris">
@@ -13,9 +13,14 @@
       
       <h1>Notificaciones</h1>
       
-      <div class="bell-container">
-        <ion-icon name="notifications" class="bell-icon"></ion-icon>
-        <div class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</div>
+      <div class="header-right">
+        <ion-button fill="clear" (click)="goToSettings()" class="config-btn">
+          <ion-icon name="settings-outline"></ion-icon>
+        </ion-button>
+        <div class="bell-container">
+          <ion-icon name="notifications" class="bell-icon"></ion-icon>
+          <div class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -23,26 +28,8 @@
   <!-- Contenido scrollable -->
   <div class="scrollable-content">
 
-    <!-- Tabs de navegación -->
-    <div class="tabs-container">
-      <button 
-        class="tab-btn" 
-        [class.active]="currentView === 'list'"
-        (click)="switchView('list')">
-        <ion-icon name="notifications"></ion-icon>
-        <span>Notificaciones</span>
-      </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="currentView === 'settings'"
-        (click)="switchView('settings')">
-        <ion-icon name="settings"></ion-icon>
-        <span>Configuración</span>
-      </button>
-    </div>
-
-    <!-- Vista de Lista de Notificaciones -->
-    <div *ngIf="currentView === 'list'" class="notifications-list">
+    <!-- Lista de Notificaciones -->
+    <div class="notifications-list">
       
       <div class="list-header" *ngIf="notifications.length > 0">
         <button class="action-btn" (click)="markAllAsRead()">
@@ -82,140 +69,6 @@
           <h3>No tienes notificaciones</h3>
           <p>Cuando tengas nuevas notificaciones aparecerán aquí</p>
         </div>
-      </div>
-    </div>
-
-    <!-- Vista de Configuración -->
-    <div *ngIf="currentView === 'settings'" class="settings-view">
-      
-      <div class="settings-section">
-        <h3>Recordatorios de estudio</h3>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="alarm"></ion-icon>
-            <div class="setting-text">
-              <h4>Recordatorio diario</h4>
-              <p>Recibe una notificación para estudiar cada día</p>
-            </div>
-          </div>
-          <ion-toggle 
-            [(ngModel)]="reminderSettings.dailyReminder"
-            (ionChange)="onSettingChange()">
-          </ion-toggle>
-        </div>
-
-        <div class="setting-item time-picker" *ngIf="reminderSettings.dailyReminder">
-          <div class="setting-info">
-            <ion-icon name="time"></ion-icon>
-            <div class="setting-text">
-              <h4>Hora del recordatorio</h4>
-              <p>¿A qué hora prefieres estudiar?</p>
-            </div>
-          </div>
-          <input 
-            type="time" 
-            [(ngModel)]="reminderSettings.dailyReminderTime"
-            (change)="onSettingChange()"
-            class="time-input">
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="flame"></ion-icon>
-            <div class="setting-text">
-              <h4>Alerta de racha</h4>
-              <p>Te avisamos si estás por perder tu racha</p>
-            </div>
-          </div>
-          <ion-toggle 
-            [(ngModel)]="reminderSettings.streakReminder"
-            (ionChange)="onSettingChange()">
-          </ion-toggle>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="flag"></ion-icon>
-            <div class="setting-text">
-              <h4>Recordatorio de meta</h4>
-              <p>Notificación cuando estés cerca de tu meta</p>
-            </div>
-          </div>
-          <ion-toggle 
-            [(ngModel)]="reminderSettings.studyGoalReminder"
-            (ionChange)="onSettingChange()">
-          </ion-toggle>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Alertas y logros</h3>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="trophy"></ion-icon>
-            <div class="setting-text">
-              <h4>Logros desbloqueados</h4>
-              <p>Notificaciones cuando alcances un logro</p>
-            </div>
-          </div>
-          <ion-toggle 
-            [(ngModel)]="reminderSettings.achievementAlerts"
-            (ionChange)="onSettingChange()">
-          </ion-toggle>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="stats-chart"></ion-icon>
-            <div class="setting-text">
-              <h4>Reporte semanal</h4>
-              <p>Resumen de tu progreso cada semana</p>
-            </div>
-          </div>
-          <ion-toggle 
-            [(ngModel)]="reminderSettings.weeklyReport"
-            (ionChange)="onSettingChange()">
-          </ion-toggle>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Canales de notificación</h3>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="phone-portrait"></ion-icon>
-            <div class="setting-text">
-              <h4>Notificaciones push</h4>
-              <p>Recibe notificaciones en tu dispositivo</p>
-            </div>
-          </div>
-          <ion-toggle 
-            [(ngModel)]="reminderSettings.pushNotifications"
-            (ionChange)="onSettingChange()">
-          </ion-toggle>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="mail"></ion-icon>
-            <div class="setting-text">
-              <h4>Notificaciones por email</h4>
-              <p>Recibe actualizaciones por correo</p>
-            </div>
-          </div>
-          <ion-toggle 
-            [(ngModel)]="reminderSettings.emailNotifications"
-            (ionChange)="onSettingChange()">
-          </ion-toggle>
-        </div>
-      </div>
-
-      <div class="save-info">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        <p>Los cambios se guardan automáticamente</p>
       </div>
     </div>
 

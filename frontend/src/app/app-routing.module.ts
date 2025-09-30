@@ -60,13 +60,19 @@ const routes: Routes = [
     loadComponent: () => import('./pages/notifications/notifications.page').then(m => m.NotificationsPage)
   },
 
+  // Settings
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage)
+  },
+
   // Racha
   {
     path: 'racha',
     loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
   },
 
-  // NUEVA: Perfil
+  // Perfil
   {
     path: 'profile',
     loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)

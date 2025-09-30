@@ -216,4 +216,7 @@ export class DashboardPage implements OnInit {
     // Para números mayores, redondear al siguiente múltiplo de 50
     return Math.ceil(questions / 50) * 50;
   }
+    goBack() {
+    this.router.navigate(['/home']);
+  }
 }

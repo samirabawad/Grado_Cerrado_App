@@ -1,16 +1,20 @@
 <ion-content class="dashboard-content">
   <!-- Header FIJO igual que home -->
   <div class="header-section">
-    <!-- Imagen de fondo gris igual que home -->
     <div class="background-image">
       <img src="assets/image/superior_gris.png" alt="Background" class="superior-gris">
     </div>
 
-    <!-- Saludo del usuario -->
-    <div class="user-greeting">
-      <div class="avatar-container">
-        <img src="assets/image/msombra.png" alt="Avatar" class="user-avatar">
-      </div>
+  <!-- Saludo del usuario -->
+  <div class="user-greeting">
+    <!-- AGREGAR ESTE BOTÓN AQUÍ -->
+    <ion-button fill="clear" (click)="goBack()" class="back-button">
+      <ion-icon name="chevron-back"></ion-icon>
+    </ion-button>
+    
+    <div class="avatar-container">
+      <img src="assets/image/msombra.png" alt="Avatar" class="user-avatar">
+    </div>
       <div class="greeting-text">
         <h1 class="greeting-title">¡Hola {{ userName }}!</h1>
         <p class="greeting-subtitle">Tu progreso</p>
