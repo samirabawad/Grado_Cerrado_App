@@ -183,65 +183,51 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return null;
   }
 
-  // OBTENER OPCIONES - Versión muy simplificada
-  getCurrentQuestionOptions(): { id: string; text: string; }[] {
-    const question = this.getCurrentQuestion();
-    
-    if (!question) {
-      console.log('No hay pregunta actual');
-      return [];
-    }
+  // OBTENER OPCIONES - FIX: conservar IDs reales y mostrar letra en UI
+getCurrentQuestionOptions(): { id: string; text: string; letter?: string }[] {
+  const question = this.getCurrentQuestion();
+  if (!question) return [];
 
-    console.log('=== DEBUGGING OPCIONES ===');
-    console.log('Pregunta completa:', question);
-    console.log('Propiedades disponibles:', Object.keys(question));
+  const q: any = question;
 
-    const questionData = question as any;
+  // Formato 1: Array de opciones del backend (con id, text, isCorrect)
+  if (Array.isArray(q.options)) {
+    return q.options.map((opt: any, idx: number) => ({
+      id: String(opt?.id ?? String.fromCharCode(65 + idx)), // ← usa el ID real para la lógica
+      text: typeof opt === 'string' ? opt : (opt?.text ?? opt?.content ?? `Opción ${idx + 1}`),
+      letter: String.fromCharCode(65 + idx),                 // ← letra solo para mostrar en la UI
+    }));
+  }
 
-    // Formato 1: Array de opciones
-    if (questionData.options && Array.isArray(questionData.options)) {
-      console.log('Usando formato options array:', questionData.options);
-      return questionData.options.map((option: any, index: number) => ({
-        id: String.fromCharCode(65 + index),
-        text: typeof option === 'string' ? option : (option.text || option.content || `Opción ${index + 1}`)
+  // Formato 2: Campos sueltos (optionA/optionB/…)
+  const individualOptions: { id: string; text: string; letter: string }[] = [];
+  if (q.optionA) individualOptions.push({ id: 'A', text: q.optionA, letter: 'A' });
+  if (q.optionB) individualOptions.push({ id: 'B', text: q.optionB, letter: 'B' });
+  if (q.optionC) individualOptions.push({ id: 'C', text: q.optionC, letter: 'C' });
+  if (q.optionD) individualOptions.push({ id: 'D', text: q.optionD, letter: 'D' });
+  if (individualOptions.length > 0) return individualOptions;
+
+  // Formato 3: Otros arreglos posibles
+  const possibleArrayProps = ['choices', 'answers', 'alternativas'];
+  for (const prop of possibleArrayProps) {
+    if (Array.isArray(q[prop]) && q[prop].length > 0) {
+      return q[prop].map((opt: any, idx: number) => ({
+        id: String(opt?.id ?? String.fromCharCode(65 + idx)),
+        text: typeof opt === 'string' ? opt : (opt?.text ?? opt?.content ?? `Opción ${idx + 1}`),
+        letter: String.fromCharCode(65 + idx),
       }));
     }
-
-    // Formato 2: Propiedades individuales
-    const individualOptions = [];
-    if (questionData.optionA) individualOptions.push({ id: 'A', text: questionData.optionA });
-    if (questionData.optionB) individualOptions.push({ id: 'B', text: questionData.optionB });
-    if (questionData.optionC) individualOptions.push({ id: 'C', text: questionData.optionC });
-    if (questionData.optionD) individualOptions.push({ id: 'D', text: questionData.optionD });
-    
-    if (individualOptions.length > 0) {
-      console.log('Usando formato opciones individuales:', individualOptions);
-      return individualOptions;
-    }
-
-    // Formato 3: Buscar en otras propiedades posibles
-    const possibleArrayProps = ['choices', 'answers', 'alternativas'];
-    for (const prop of possibleArrayProps) {
-      if (questionData[prop] && Array.isArray(questionData[prop]) && questionData[prop].length > 0) {
-        console.log(`Usando ${prop} array:`, questionData[prop]);
-        return questionData[prop].map((option: any, index: number) => ({
-          id: String.fromCharCode(65 + index),
-          text: typeof option === 'string' ? option : (option.text || option.content || `Opción ${index + 1}`)
-        }));
-      }
-    }
-
-    // Formato 4: Opciones de debug
-    console.warn('No se encontraron opciones, usando opciones de debug');
-    console.log('Estructura completa de la pregunta:', question);
-    
-    return [
-      { id: 'A', text: 'Debug: No se encontraron opciones reales' },
-      { id: 'B', text: 'Revisa la consola para ver la estructura' },
-      { id: 'C', text: 'Contacta al desarrollador con esta info' },
-      { id: 'D', text: `Total propiedades: ${Object.keys(question).length}` }
-    ];
   }
+
+  // Fallback de debug
+  return [
+    { id: 'A', text: 'Debug: No se encontraron opciones reales', letter: 'A' },
+    { id: 'B', text: 'Revisa la consola para ver la estructura', letter: 'B' },
+    { id: 'C', text: 'Contacta al desarrollador con esta info', letter: 'C' },
+    { id: 'D', text: `Total props: ${Object.keys(question).length}`, letter: 'D' },
+  ];
+}
+
 
   // MÉTODOS BÁSICOS DE FUNCIONALIDAD
 
@@ -584,9 +570,12 @@ saveResultsAndNavigateToSummary(results: any) {
   // MÉTODOS DE ESTADOS DE OPCIONES
 
   isCorrectAnswer(optionId: string): boolean {
-    const currentQuestion = this.getCurrentQuestion();
-    return currentQuestion ? currentQuestion.correctAnswer === optionId : false;
-  }
+  const currentQuestion = this.getCurrentQuestion();
+  return currentQuestion
+    ? String(currentQuestion.correctAnswer).trim() === String(optionId).trim()
+    : false;
+}
+
 
   isIncorrectAnswer(optionId: string): boolean {
     return this.hasAnsweredCurrentQuestion() && 
