@@ -4,6 +4,30 @@ import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
+
+// ========================================
+// INTERFACES 
+// ========================================
+
+export interface SubmitAnswerRequest {
+  testId: number;
+  preguntaId: number;
+  userAnswer: string;
+  correctAnswer: string;
+  explanation: string;
+  timeSpent: string; 
+  numeroOrden: number;
+  isCorrect: boolean;
+}
+
+export interface SubmitAnswerResponse {
+  success: boolean;
+  isCorrect: boolean;
+  respuestaId: number;
+  explanation: string;
+  correctAnswer: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -305,5 +329,35 @@ export class ApiService {
     });
   }
 
+  // ========================================
+// ENVÍO DE RESPUESTAS AL BACKEND
+// ========================================
+
+submitAnswer(answerData: SubmitAnswerRequest): Observable<SubmitAnswerResponse> {
+  const url = `${this.API_URL}/Study/submit-answer`;
+  
+  console.log('📤 Enviando respuesta al backend:', answerData);
+  
+  return this.http.post<SubmitAnswerResponse>(url, answerData, this.httpOptions)
+    .pipe(
+      map((response: SubmitAnswerResponse) => {
+        console.log('✅ Respuesta guardada:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error enviando respuesta:', error);
+        
+        let errorMessage = 'Error al guardar la respuesta';
+        
+        if (error.status === 0) {
+          errorMessage = 'No se puede conectar al servidor';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        throw { ...error, friendlyMessage: errorMessage };
+      })
+    );
+}
   
 }
