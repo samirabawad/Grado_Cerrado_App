@@ -14,8 +14,11 @@ import { ApiService } from '../../services/api.service';
 })
 export class RegistroPage implements OnInit {
 
-  // Datos del formulario
-  nombreCompleto: string = '';
+  // Campos del formulario según tu base de datos
+  nombre: string = '';
+  segundoNombre: string = '';
+  apellidoPaterno: string = '';
+  apellidoMaterno: string = '';
   correoElectronico: string = '';
   contrasena: string = '';
   confirmarContrasena: string = '';
@@ -38,48 +41,43 @@ export class RegistroPage implements OnInit {
   ngOnInit() {
   }
 
-  // Validación de email
+  // Validaciones
+  isNombreValid(): boolean {
+    return this.nombre.trim().length > 0;
+  }
+
   isEmailValid(): boolean {
     return this.emailPattern.test(this.correoElectronico);
   }
 
-  // Validación de contraseña
   isPasswordValid(): boolean {
     return this.contrasena.length >= 6;
   }
 
-  // Validación de confirmación de contraseña
-  doPasswordsMatch(): boolean {
+  isPasswordMatchValid(): boolean {
     return this.contrasena === this.confirmarContrasena;
   }
 
-  // Validación de nombre
-  isNameValid(): boolean {
-    return this.nombreCompleto.trim().length >= 2;
-  }
-
-  // Validación completa del formulario
   isFormValid(): boolean {
-    return this.isNameValid() && 
+    return this.isNombreValid() && 
            this.isEmailValid() && 
            this.isPasswordValid() && 
-           this.doPasswordsMatch();
+           this.isPasswordMatchValid();
   }
 
-  // Toggle para mostrar/ocultar contraseña
+  // Toggle para mostrar/ocultar contraseñas
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
 
-  // Toggle para mostrar/ocultar confirmación de contraseña
   toggleConfirmPasswordVisibility() {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  // Método principal de registro - CONECTADO AL BACKEND REAL
-  async registrarse() {
+  // Método principal de registro
+  async registrarUsuario() {
     if (!this.isFormValid()) {
-      await this.showAlert('Error de validación', 'Por favor, completa correctamente todos los campos.');
+      await this.showAlert('Error de validación', 'Por favor, completa correctamente todos los campos obligatorios.');
       return;
     }
 
@@ -91,29 +89,40 @@ export class RegistroPage implements OnInit {
     await loading.present();
     this.isLoading = true;
 
+    // Crear nombre completo para enviar al backend
+    const nombreCompleto = this.buildNombreCompleto();
+
     // Datos para enviar al backend
     const registerData = {
-      name: this.nombreCompleto.trim(),
-      email: this.correoElectronico.toLowerCase().trim()
+      name: nombreCompleto,
+      email: this.correoElectronico.toLowerCase().trim(),
+      password: this.contrasena // Agregar la contraseña al registro
     };
 
     try {
       // LLAMADA REAL AL BACKEND usando ApiService
       const response = await this.apiService.registerUser(registerData).toPromise();
       
-      console.log('✅ Usuario registrado exitosamente en BD:', response);
+      console.log('Usuario registrado exitosamente en BD:', response);
       
       await loading.dismiss();
       this.isLoading = false;
       
-      // Guardar datos del usuario en localStorage
-      localStorage.setItem('currentUser', JSON.stringify(response));
-      
-      // Navegar a la página de felicidades
-      this.router.navigate(['/felicidades']);
+      if (response.success) {
+        // Guardar datos del usuario en localStorage
+        localStorage.setItem('currentUser', JSON.stringify(response.user));
+        
+        // Mostrar mensaje de éxito
+        await this.showAlert('Registro exitoso', 'Tu cuenta ha sido creada correctamente. ¡Bienvenido!');
+        
+        // Navegar a la página principal
+        this.router.navigate(['/home']);
+      } else {
+        await this.showAlert('Error en el registro', response.message || 'Error desconocido');
+      }
       
     } catch (error: any) {
-      console.error('❌ Error en registro:', error);
+      console.error('Error en registro:', error);
       
       await loading.dismiss();
       this.isLoading = false;
@@ -129,6 +138,18 @@ export class RegistroPage implements OnInit {
       
       await this.showAlert('Error en el registro', errorMessage);
     }
+  }
+
+  // Construir nombre completo
+  private buildNombreCompleto(): string {
+    const partes = [
+      this.nombre.trim(),
+      this.segundoNombre.trim(),
+      this.apellidoPaterno.trim(),
+      this.apellidoMaterno.trim()
+    ].filter(parte => parte.length > 0);
+
+    return partes.join(' ');
   }
 
   // Mostrar alertas generales

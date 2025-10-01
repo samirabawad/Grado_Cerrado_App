@@ -18,7 +18,7 @@ ion-content.civil-content {
 }
 
 // ========================================
-// HEADER FIJO CON IMAGEN RESPONSIVA EXTREMO A EXTREMO
+// HEADER FIJO CON IMAGEN RESPONSIVA
 // ========================================
 .custom-header-section {
   position: fixed;  
@@ -30,11 +30,11 @@ ion-content.civil-content {
   
   .orange-background {
     background: transparent;
-    padding: 0; /* Sin padding para que llegue a los extremos */
+    padding: 0;
     border-radius: 0;
     position: relative;
-    overflow: hidden; /* Evitar desbordamiento */
-    width: 100vw; /* Ancho completo de la ventana */
+    overflow: hidden;
+    width: 100vw;
 
     .derecho-civil-container-full {
       display: block;
@@ -45,12 +45,12 @@ ion-content.civil-content {
 
       .derecho-civil-image-responsive {
         display: block;
-        width: 100vw; /* Ancho completo de la ventana */
-        height: auto; /* Altura automática para mantener proporción */
-        min-height: 120px; /* Altura mínima */
-        max-height: 200px; /* Altura máxima */
-        object-fit: cover; /* Cubrir todo el ancho manteniendo proporción */
-        object-position: center; /* Centrar la imagen */
+        width: 100vw;
+        height: auto;
+        min-height: 120px;
+        max-height: 200px;
+        object-fit: cover;
+        object-position: center;
         filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
       }
     }
@@ -61,270 +61,304 @@ ion-content.civil-content {
 // CONTENIDO PRINCIPAL
 // ========================================
 .content-area {
-  margin-top: 140px; /* Espacio ajustado para header responsivo */
-  padding: 20px 0 100px 0;
+  margin-top: 140px;
+  padding: 20px 16px 100px 16px;
   position: relative;
   z-index: 2;
   background: transparent; 
   border-radius: 30px 30px 0 0;
   min-height: calc(100vh - 100px);
 }
-// ========================================
-// CARDS Y ELEMENTOS
-// ========================================
 
-// Test de Nivelación Card
+// ========================================
+// CARD DE TEST DE NIVELACIÓN
+// ========================================
 .test-nivelacion-card {
-  background: linear-gradient(135deg, #F39C12, #E67E22);
-  margin: 16px;
+  background: white;
   border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(230, 126, 34, 0.3);
-  
+  padding: 0;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
   .test-content {
     display: flex;
     align-items: center;
-    color: white;
-    
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(74, 144, 226, 0.05);
+    }
+
     .test-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #4a90e2, #357abd);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      flex-shrink: 0;
+
       ion-icon {
-        font-size: 2.5rem;
         color: white;
-        margin-right: 16px;
+        font-size: 24px;
       }
     }
-    
+
     .test-info {
       flex: 1;
-      
+
       h3 {
-        margin: 0 0 8px 0;
-        font-size: 1.3rem;
+        margin: 0 0 5px 0;
+        font-size: 18px;
         font-weight: 600;
+        color: #333;
       }
-      
+
       p {
         margin: 0;
-        font-size: 0.9rem;
-        opacity: 0.9;
+        font-size: 14px;
+        color: #666;
       }
     }
-    
+
     .test-arrow {
-      ion-icon {
-        font-size: 1.5rem;
-        color: white;
-      }
+      color: #4a90e2;
+      font-size: 20px;
     }
   }
 }
 
-// Progreso Civil Card
+// ========================================
+// CARD DE PROGRESO
+// ========================================
 .progreso-card {
-  background: rgba(255, 255, 255, 0.95);
-  margin: 16px;
+  background: white;
   border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  position: relative;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
-  
+  justify-content: space-between;
+
   .progreso-content {
     flex: 1;
-    margin-left: 20px;        /* NUEVO: Mueve el texto más hacia la derecha */
-    padding-right: 10px;      /* NUEVO: Da espacio para el mapache */
-    
+
     .progreso-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #FFB74D, #FF9800);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+
       ion-icon {
-        font-size: 2rem;
-        color: #F39C12;
-        margin-bottom: 8px;
+        color: white;
+        font-size: 20px;
       }
     }
-    
-    h4 {
-      margin: 0 0 4px 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
-    }
-    
-    p {
-      margin: 0 0 12px 0;
-      font-size: 0.9rem;
-      color: #666;
-    }
-    
-    
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #E0E0E0;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 8px;
-      
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #F39C12, #E67E22);
+
+    .progreso-info {
+      h4 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      p {
+        margin: 0 0 8px 0;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #E0E0E0;
         border-radius: 4px;
-        transition: width 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 5px;
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #FFB74D, #FF9800);
+          transition: width 0.3s ease;
+        }
       }
-    }
-    
-    .progress-text {
-      font-size: 0.7rem;
-      color: #888;
+
+      .progress-text {
+        font-size: 11px;
+        color: #888;
+      }
     }
   }
-  
-    .mapache-container {
-    margin-left: 20px;
-    
+
+  .mapache-container {
     .mapache-image {
-      width: 150px !important;
-      height: 150px !important;
+      width: 60px;
+      height: 60px;
       object-fit: contain;
     }
   }
 }
 
-// Botones de Material
+// ========================================
+// BOTONES DE MATERIAL (SIN FONDO)
+// ========================================
 .material-buttons {
-  margin: 16px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 8px;
-  
-  .material-image-button {
-    flex: 1;
-    width: auto;
-    height: auto;
-    max-height: 120px;
-    object-fit: contain;
-    cursor: pointer;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    border: none;
-    background: transparent;
-    
-    &:active {
-      transform: scale(0.95);
-      opacity: 0.8;
-    }
-    
-    &:hover {
-      transform: translateY(-2px);
-    }
-  }
-}
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
 
-// Botones de Práctica
-.practice-buttons {
-  margin: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  
-  .practice-image-button {
+  .material-image-button {
     width: 100%;
     height: auto;
-    max-height: 120px;
-    object-fit: contain;
     cursor: pointer;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    border: none;
-    background: transparent;
-    
-    &:active {
-      transform: scale(0.95);
-      opacity: 0.8;
-    }
-    
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    background: transparent !important; // Quitar fondo blanco
+    box-shadow: none; // Quitar sombra que sugiere fondo
+
     &:hover {
       transform: translateY(-2px);
+      filter: brightness(1.1); // Efecto hover sin sombra
     }
   }
 }
 
-// Sección de Estadísticas
-.stats-section {
-  margin: 24px 16px 16px 16px;
-  
-  h4 {
-    margin: 0 0 16px 0;
-    font-size: 1.2rem;
-    color: #333;
-    font-weight: 600;
-    text-align: center;
-  }
-  
-  .stats-content {
-    background: rgba(255, 255, 255, 0.6);
+// ========================================
+// BOTONES DE DERECHO (ESTILO COMO HOME)
+// ========================================
+.derecho-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+
+  .derecho-card {
+    background: white;
     border-radius: 16px;
     padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0);
+    transition: all 0.3s ease;
+    cursor: pointer;
     min-height: 120px;
-    position: relative;
-    
-    .mapache-bottom {
-      position: absolute;
-      bottom: 0;
-      left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .derecho-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      font-size: 48px;
+    }
+
+    .derecho-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    // Estilo específico para Derecho Civil (naranja)
+    &.civil {
+      background: linear-gradient(135deg, #FF6F00, #E65100);
+      color: white;
       
-      .mapache-stats {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
+      .derecho-title {
+        color: white;
+      }
+    }
+
+    // Estilo específico para Derecho Procesal (azul)
+    &.procesal {
+      background: linear-gradient(135deg, #2196F3, #1976D2);
+      color: white;
+      
+      .derecho-title {
+        color: white;
       }
     }
   }
 }
 
+// ========================================
+// SECCIÓN DE ESTADÍSTICAS
+// ========================================
+.stats-section {
+  margin-top: 30px;
+
+  h4 {
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-left: 5px;
+  }
+
+  .stats-content {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    .mapache-bottom {
+      .mapache-stats {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE DESIGN
+// ========================================
 @media (min-width: 768px) {
   .custom-header-section .orange-background {
     .derecho-civil-container-full {
       .derecho-civil-image-responsive {
-        min-height: 150px; /* Altura mínima mayor en tablet */
-        max-height: 250px; /* Altura máxima mayor en tablet */
+        min-height: 150px;
+        max-height: 250px;
       }
     }
   }
   
   .content-area {
-    margin-top: 180px; /* Más espacio en tablet */
-  }
-  
-  .test-nivelacion-card,
-  .progreso-card {
-    margin: 24px;
-    padding: 28px;
+    margin-top: 180px;
+    padding: 24px 32px 100px 32px;
   }
   
   .material-buttons {
-    margin: 24px;
-    gap: 16px;
-    
-    .material-image-button {
-      border-radius: 16px;
-    }
+    gap: 20px;
   }
   
-  .practice-buttons {
-    margin: 24px;
-    gap: 16px;
-    
-    .practice-image-button {
-      border-radius: 16px;
-    }
-  }
-  
-  .stats-section {
-    margin: 32px 24px 24px 24px;
+  .derecho-buttons {
+    gap: 20px;
   }
 }
 
-// Media query para pantallas pequeñas
 @media (max-width: 480px) {
   .custom-header-section .orange-background {
     .derecho-civil-container-full {
@@ -337,5 +371,24 @@ ion-content.civil-content {
   
   .content-area {
     margin-top: 120px;
+    padding: 16px 12px 80px 12px;
+  }
+  
+  .derecho-buttons {
+    gap: 12px;
+    
+    .derecho-card {
+      padding: 16px;
+      min-height: 100px;
+      
+      .derecho-icon {
+        font-size: 40px;
+        margin-bottom: 8px;
+      }
+      
+      .derecho-title {
+        font-size: 13px;
+      }
+    }
   }
 }
