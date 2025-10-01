@@ -505,131 +505,160 @@ getTimerMessage(): string {
 
   // ENVIAR RESPUESTA - FIN DEL INTERROGATORIO
   // ========================================
-  async submitVoiceAnswer() {
-    if (!this.hasRecording || !this.audioBlob) {
-      const alert = await this.alertController.create({
-        header: 'Sin grabación',
-        message: 'Por favor, graba tu respuesta antes de enviar.',
-        buttons: ['OK']
-      });
-      await alert.present();
-      return;
-    }
-    
-    const question = this.getCurrentQuestion();
-    if (!question) return;
+async submitVoiceAnswer() {
+  if (!this.hasRecording || !this.audioBlob) {
+    const alert = await this.alertController.create({
+      header: 'Sin grabación',
+      message: 'Por favor, graba tu respuesta antes de enviar.',
+      buttons: ['OK']
+    });
+    await alert.present();
+    return;
+  }
+  
+  const question = this.getCurrentQuestion();
+  if (!question) return;
 
-    // ⏱️ CALCULAR TIEMPO TOTAL DE RESPUESTA
-    if (this.questionReadyTime > 0) {
-      const now = Date.now();
-      this.questionResponseTime = Math.round((now - this.questionReadyTime) / 1000);
+  if (this.questionReadyTime > 0) {
+    const now = Date.now();
+    this.questionResponseTime = Math.round((now - this.questionReadyTime) / 1000);
+    
+    const thinkingTime = this.responseStartTime > 0 
+      ? Math.round((this.responseStartTime - this.questionReadyTime) / 1000)
+      : 0;
+    
+    console.log('⏱️ ===== ANÁLISIS DEL INTERROGATORIO =====');
+    console.log(`⏱️ Tiempo TOTAL de respuesta: ${this.questionResponseTime}s`);
+    console.log(`⏱️   • Tiempo pensando: ${thinkingTime}s`);
+    console.log('⏱️ ========================================');
+  } else {
+    this.questionResponseTime = 0;
+  }
+  
+  this.stopResponseTimer();
+  
+  try {
+    const loading = await this.loadingController.create({
+      message: 'Procesando tu respuesta...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+    
+    // 1️⃣ TRANSCRIBIR AUDIO
+    const response = await this.audioService.uploadAudio(
+      this.audioBlob,
+      question.id,
+      this.sessionId,
+      this.currentQuestionNumber,
+      this.questionResponseTime
+    );
+    
+    console.log('✅ Transcripción recibida:', response);
+    
+    // 2️⃣ EVALUAR RESPUESTA
+    let isCorrect = false;
+    let confidence = 0;
+    let feedback = '';
+    let correctAnswerText = '';
+    
+    if (response.success && response.transcription) {
+      loading.message = 'Evaluando tu respuesta...';
       
-      // Calcular tiempo de pensamiento (desde que terminó pregunta hasta que grabó)
-      const thinkingTime = this.responseStartTime > 0 
-        ? Math.round((this.responseStartTime - this.questionReadyTime) / 1000)
-        : 0;
-      
-      // Duración de la grabación
-      const recordingTime = this.recordingDuration;
-      
-      console.log('⏱️ ===== ANÁLISIS DEL INTERROGATORIO =====');
-      console.log(`⏱️ Tiempo TOTAL de respuesta: ${this.questionResponseTime}s`);
-      console.log(`⏱️   • Tiempo pensando: ${thinkingTime}s`);
-      console.log(`⏱️   • Tiempo grabando: ${recordingTime}s`);
-      console.log(`⏱️   • Otros (reproducir/revisar): ${this.questionResponseTime - thinkingTime - recordingTime}s`);
-      console.log('⏱️ ========================================');
-      
-    } else {
-      this.questionResponseTime = 0;
-      console.warn('⚠️ El timer no se inició correctamente');
+      try {
+        const evaluation = await this.apiService.evaluateOralAnswer({
+          testId: parseInt(this.sessionId),
+          preguntaGeneradaId: parseInt(question.id),
+          numeroOrden: this.currentQuestionNumber,
+          transcription: response.transcription
+        }).toPromise();
+        
+        console.log('📊 Evaluación recibida:', evaluation);
+        
+        isCorrect = evaluation.isCorrect;
+        confidence = evaluation.confidence;
+        feedback = evaluation.feedback;
+        correctAnswerText = evaluation.correctAnswer;
+        
+      } catch (evalError) {
+        console.error('⚠️ Error al evaluar respuesta:', evalError);
+        isCorrect = false;
+        confidence = 0;
+        feedback = 'No se pudo evaluar la respuesta automáticamente.';
+      }
     }
     
-    // Detener contador visual
+    await loading.dismiss();
+    
+    // 3️⃣ GUARDAR RESPUESTA
+    this.userAnswers[question.id] = JSON.stringify({
+      type: 'voice',
+      transcription: response.transcription || 'Texto no disponible',
+      audioId: response.audioId || 'voice_' + this.currentQuestionNumber,
+      timestamp: new Date().toISOString(),
+      responseTime: this.questionResponseTime,
+      recordingDuration: this.recordingDuration,
+      size: this.audioBlob.size,
+      confidence: confidence,
+      isCorrect: isCorrect,
+      feedback: feedback,
+      correctAnswer: correctAnswerText
+    });
+    
+    this.questionReadyTime = 0;
+    this.responseStartTime = 0;
+    this.questionResponseTime = 0;
+    this.elapsedResponseTime = '00:00';
+    
+    this.audioService.clearRecording();
+    
+    if (this.recordingAudio) {
+      this.recordingAudio.pause();
+      this.recordingAudio = null;
+      this.isPlayingRecording = false;
+    }
+    
+    // 4️⃣ MOSTRAR RESULTADO
+    const transcription = response.transcription || 'No se pudo transcribir el audio';
+    
+    const alert = await this.alertController.create({
+      header: isCorrect ? '✅ ¡Respuesta Correcta!' : '❌ Respuesta Incorrecta',
+      message: `
+        <div style="text-align: left;">
+          <p><strong>Tu respuesta:</strong><br/>"${transcription}"</p>
+          ${!isCorrect ? `<p><strong>Respuesta correcta:</strong><br/>${correctAnswerText}</p>` : ''}
+          ${feedback ? `<p style="margin-top: 10px;"><em>${feedback}</em></p>` : ''}
+          ${confidence > 0 ? `<p style="font-size: 0.9em; color: #666;">Confianza: ${confidence}%</p>` : ''}
+        </div>
+      `,
+      cssClass: isCorrect ? 'alert-correct' : 'alert-incorrect',
+      buttons: ['Continuar']
+    });
+    await alert.present();
+    
+    await alert.onDidDismiss();
+    
+    setTimeout(() => {
+      this.nextQuestion();
+    }, 500);
+    
+  } catch (error: any) {
+    console.error('❌ Error al enviar respuesta:', error);
+    
     this.stopResponseTimer();
     
-    console.log('📝 Enviando respuesta con tiempo:', this.questionResponseTime, 'segundos');
-    
-    try {
-      const loading = await this.loadingController.create({
-        message: 'Procesando tu respuesta...',
-        spinner: 'crescent'
-      });
-      await loading.present();
-      
-      // ✅ ENVIAR AL BACKEND con el tiempo correcto
-      const response = await this.audioService.uploadAudio(
-        this.audioBlob,
-        question.id,
-        this.sessionId,
-        this.currentQuestionNumber,
-        this.questionResponseTime  // Tiempo desde que terminó la pregunta
-      );
-      
+    const loading = await this.loadingController.getTop();
+    if (loading) {
       await loading.dismiss();
-      
-      console.log('✅ Respuesta del backend:', response);
-      
-      // Guardar respuesta con métricas completas
-      this.userAnswers[question.id] = JSON.stringify({
-        type: 'voice',
-        transcription: response.text || response.transcription || 'Texto no disponible',
-        audioId: response.audioId || 'voice_' + this.currentQuestionNumber,
-        timestamp: new Date().toISOString(),
-        responseTime: this.questionResponseTime,  // Tiempo total
-        recordingDuration: this.recordingDuration, // Solo grabación
-        size: this.audioBlob.size,
-        confidence: response.confidence || null
-      });
-      
-      // Resetear timers
-      this.questionReadyTime = 0;
-      this.responseStartTime = 0;
-      this.questionResponseTime = 0;
-      this.elapsedResponseTime = '00:00';
-      
-      this.audioService.clearRecording();
-      
-      if (this.recordingAudio) {
-        this.recordingAudio.pause();
-        this.recordingAudio = null;
-        this.isPlayingRecording = false;
-      }
-      
-      const transcription = response.text || response.transcription || 'No se pudo transcribir el audio';
-      
-      const alert = await this.alertController.create({
-        header: 'Respuesta procesada',
-        message: `Tu respuesta: "${transcription}"`,
-        buttons: ['OK']
-      });
-      await alert.present();
-      
-      setTimeout(() => {
-        this.nextQuestion();
-      }, 1500);
-      
-    } catch (error: any) {
-      console.error('❌ Error al enviar respuesta:', error);
-      
-      // Detener timer en caso de error
-      this.stopResponseTimer();
-      
-      const loading = await this.loadingController.getTop();
-      if (loading) {
-        await loading.dismiss();
-      }
-      
-      const errorMessage = error.message || 'Hubo un problema al procesar tu respuesta.';
-      
-      const alert = await this.alertController.create({
-        header: 'Error',
-        message: errorMessage,
-        buttons: ['OK']
-      });
-      await alert.present();
     }
+    
+    const alert = await this.alertController.create({
+      header: 'Error',
+      message: error.message || 'Hubo un problema al procesar tu respuesta.',
+      buttons: ['OK']
+    });
+    await alert.present();
   }
-
+}
 
   // ========================================
   // NAVEGACIÓN
