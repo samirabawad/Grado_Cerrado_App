@@ -14,30 +14,22 @@ import { ApiService } from '../../services/api.service';
 })
 export class DashboardPage implements OnInit {
 
-  // Variables para datos del usuario
   userName: string = 'Estudiante';
   userLevel: string = 'Intermedio';
-  userStreak: number = 0; // 🔥 Racha del usuario (hojitas)
+  userStreak: number = 0;
 
-  // Variables para estadísticas generales
   totalSessions: number = 0;
   totalQuestions: number = 0;
   totalCorrectAnswers: number = 0;
   overallSuccessRate: number = 0;
-  currentGoal: number = 200; // 🎯 Meta actual de preguntas
+  currentGoal: number = 200;
 
-  // Variables para el gráfico principal
   chartData: any[] = [];
-  
-  // Variables para estadísticas por área legal
   areaStats: any[] = [];
-  
-  // Variables para sesiones recientes
   recentSessions: any[] = [];
   
-  // Variables de control
   isLoading: boolean = true;
-  selectedTimeFrame: string = 'week'; // week, month, all
+  selectedTimeFrame: string = 'week';
 
   constructor(
     private router: Router,
@@ -48,22 +40,13 @@ export class DashboardPage implements OnInit {
     this.loadDashboardData();
   }
 
-  // ✅ MÉTODO PRINCIPAL ACTUALIZADO - CARGA DATOS REALES
+  // ✅ MÉTODO PRINCIPAL - USA ESTUDIANTE_ID 4
   async loadDashboardData() {
     this.isLoading = true;
     
     try {
-      const currentUser = this.apiService.getCurrentUser();
-      
-      if (!currentUser || !currentUser.id) {
-        console.warn('⚠️ No hay usuario logueado, usando datos de ejemplo');
-        this.loadMockData();
-        this.isLoading = false;
-        return;
-      }
-
-      const studentId = currentUser.id;
-      this.userName = currentUser.name || 'Estudiante';
+      const studentId = 4; // ✅ Estudiante con datos
+      this.userName = 'Estudiante 00000000';
 
       // 📊 CARGAR ESTADÍSTICAS GENERALES
       try {
@@ -77,17 +60,21 @@ export class DashboardPage implements OnInit {
           this.userStreak = stats.streak || 0;
           this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
           
-          console.log('✅ Estadísticas generales cargadas:', stats);
+          console.log('✅ Estadísticas cargadas:', {
+            sesiones: this.totalSessions,
+            preguntas: this.totalQuestions,
+            correctas: this.totalCorrectAnswers,
+            precision: this.overallSuccessRate
+          });
         }
       } catch (error) {
-        console.error('Error cargando estadísticas generales:', error);
+        console.error('Error cargando estadísticas:', error);
       }
 
-      // 📈 CARGAR ESTADÍSTICAS POR ÁREA (con colores bonitos)
+      // 📈 CARGAR ESTADÍSTICAS POR ÁREA
       try {
         const areaResponse = await this.apiService.getAreaStats(studentId).toPromise();
         if (areaResponse && areaResponse.success) {
-          // ✅ Mantener los colores originales bonitos
           const colors = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6'];
           
           this.areaStats = areaResponse.data.map((area: any, index: number) => ({
@@ -95,14 +82,14 @@ export class DashboardPage implements OnInit {
             totalQuestions: area.totalQuestions,
             correctAnswers: area.correctAnswers,
             successRate: Math.round(area.successRate),
-            color: colors[index % colors.length], // ✅ Colores bonitos
+            color: colors[index % colors.length],
             sessions: area.sessions
           }));
           
-          console.log('✅ Estadísticas por área cargadas:', this.areaStats);
+          console.log('✅ Áreas cargadas:', this.areaStats);
         }
       } catch (error) {
-        console.error('Error cargando estadísticas por área:', error);
+        console.error('Error cargando áreas:', error);
       }
 
       // 📅 CARGAR SESIONES RECIENTES
@@ -119,37 +106,32 @@ export class DashboardPage implements OnInit {
             successRate: Math.round(session.successRate)
           }));
           
-          console.log('✅ Sesiones recientes cargadas:', this.recentSessions);
+          console.log('✅ Sesiones cargadas:', this.recentSessions);
         }
       } catch (error) {
-        console.error('Error cargando sesiones recientes:', error);
+        console.error('Error cargando sesiones:', error);
       }
 
-      // 📊 GENERAR DATOS DEL GRÁFICO (últimos 7 días)
       this.generateChartData();
 
-      // ✅ Si no hay datos reales, usar mock data como fallback
-      if (this.totalQuestions === 0) {
-        console.warn('⚠️ No hay datos reales, usando mock data');
-        this.loadMockData();
-      }
-
     } catch (error) {
-      console.error('Error cargando datos del dashboard:', error);
-      this.loadMockData(); // Fallback a datos de ejemplo
+      console.error('Error general:', error);
     } finally {
       this.isLoading = false;
     }
   }
 
-  // 📊 GENERAR DATOS PARA EL GRÁFICO DE BARRAS
+  // ✅ GENERAR BADGES DE SESIONES DINÁMICAMENTE
+  getSessionBadges(): number[] {
+    // Mostrar máximo 5 iconos
+    const maxBadges = 5;
+    return Array(maxBadges).fill(0).map((_, i) => i);
+  }
+
   generateChartData() {
-    // TODO: Implementar llamada real al backend para obtener datos por día
-    // Por ahora usamos datos de ejemplo basados en las estadísticas reales
     const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     
     this.chartData = daysOfWeek.map(day => {
-      // Distribuir las preguntas de manera realista entre los días
       const dailyQuestions = Math.floor(Math.random() * 15) + 5;
       const civilQuestions = Math.floor(dailyQuestions * 0.6);
       const procesalQuestions = dailyQuestions - civilQuestions;
@@ -163,84 +145,6 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  // 🎨 CARGAR DATOS DE EJEMPLO (fallback con diseño bonito)
-  loadMockData() {
-    this.userName = 'Estudiante Demo';
-    this.userLevel = 'Intermedio';
-    this.userStreak = 7;
-
-    this.totalSessions = 12;
-    this.totalQuestions = 156;
-    this.totalCorrectAnswers = 118;
-    this.overallSuccessRate = Math.round((this.totalCorrectAnswers / this.totalQuestions) * 100);
-    
-    this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
-
-    // Datos para el gráfico principal (últimos 7 días)
-    this.chartData = [
-      { date: 'Lun', civil: 8, procesal: 5, total: 13 },
-      { date: 'Mar', civil: 6, procesal: 7, total: 13 },
-      { date: 'Mié', civil: 10, procesal: 3, total: 13 },
-      { date: 'Jue', civil: 7, procesal: 8, total: 15 },
-      { date: 'Vie', civil: 9, procesal: 6, total: 15 },
-      { date: 'Sáb', civil: 5, procesal: 9, total: 14 },
-      { date: 'Dom', civil: 11, procesal: 4, total: 15 }
-    ];
-
-    // Estadísticas por área legal (con colores bonitos)
-    this.areaStats = [
-      {
-        area: 'Derecho Civil',
-        totalQuestions: 89,
-        correctAnswers: 71,
-        successRate: 80,
-        color: '#3B82F6', // ✅ Azul bonito
-        sessions: 7
-      },
-      {
-        area: 'Derecho Procesal',
-        totalQuestions: 67,
-        correctAnswers: 47,
-        successRate: 70,
-        color: '#F59E0B', // ✅ Naranja bonito
-        sessions: 5
-      }
-    ];
-
-    // Sesiones recientes
-    this.recentSessions = [
-      {
-        id: 1,
-        date: '28 Sep 2025',
-        area: 'Civil',
-        duration: '25 min',
-        questions: 15,
-        correct: 12,
-        successRate: 80
-      },
-      {
-        id: 2,
-        date: '27 Sep 2025',
-        area: 'Procesal',
-        duration: '18 min',
-        questions: 12,
-        correct: 9,
-        successRate: 75
-      },
-      {
-        id: 3,
-        date: '26 Sep 2025',
-        area: 'Civil',
-        duration: '30 min',
-        questions: 20,
-        correct: 16,
-        successRate: 80
-      }
-    ];
-  }
-
-  // 🔄 MÉTODOS DE UTILIDAD
-
   changeTimeFrame(timeFrame: string) {
     this.selectedTimeFrame = timeFrame;
     this.loadDashboardData();
@@ -248,14 +152,10 @@ export class DashboardPage implements OnInit {
 
   goToSession(sessionId: number) {
     console.log('Navegar a sesión:', sessionId);
-    // TODO: Implementar navegación a detalle de sesión
-    // this.router.navigate(['/session-detail', sessionId]);
   }
 
   goToAreaDetails(area: string) {
     console.log('Ver detalles de:', area);
-    // TODO: Implementar navegación a detalles por área
-    // this.router.navigate(['/area-stats', area]);
   }
 
   startNewSession() {
@@ -265,8 +165,6 @@ export class DashboardPage implements OnInit {
   goBack() {
     this.router.navigate(['/home']);
   }
-
-  // 🎨 MÉTODOS DE ESTILO (mantener los originales)
 
   getProgressColor(percentage: number): string {
     if (percentage >= 80) return 'success';
@@ -285,7 +183,7 @@ export class DashboardPage implements OnInit {
   }
 
   getDonutOffset(): number {
-    const circumference = 219.8; // 2 * PI * 35
+    const circumference = 219.8;
     const progress = Math.min(this.totalQuestions / this.currentGoal, 1);
     return circumference * (1 - progress);
   }
@@ -308,7 +206,6 @@ export class DashboardPage implements OnInit {
     return Math.ceil(questions / 50) * 50;
   }
 
-  // ✅ FORMATEAR FECHA BONITA
   private formatDate(dateString: string): string {
     try {
       const date = new Date(dateString);
