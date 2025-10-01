@@ -51,6 +51,18 @@
       </div>
     </div>
 
+<div class="response-timer" *ngIf="audioCompleted && questionReadyTime > 0">
+  <div class="timer-container">
+    <ion-icon name="timer-outline" class="timer-icon"></ion-icon>
+    <div class="timer-info">
+      <span class="timer-label">Tiempo de respuesta</span>
+      <span class="timer-display" [class.warning]="getTimerWarning()">
+        {{ elapsedResponseTime }}
+      </span>
+    </div>
+  </div>
+</div>
+
     <!-- Sección de grabación de respuesta -->
     <div class="recording-section">
       <div class="recording-controls">

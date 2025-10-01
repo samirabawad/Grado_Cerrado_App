@@ -158,13 +158,12 @@ export class AudioService {
     });
   }
 
-async uploadAudio(
+  async uploadAudio(
   audioBlob: Blob, 
   questionId: string, 
   sessionId: string,
   numeroOrden: number,
   tiempoRespuestaSegundos: number 
-
 ): Promise<any> {
   const formData = new FormData();
   
@@ -185,12 +184,15 @@ async uploadAudio(
   formData.append('testId', testIdNumber.toString());
   formData.append('preguntaGeneradaId', preguntaIdNumber.toString());
   formData.append('numeroOrden', numeroOrden.toString());
+  
+  // 🆕 ¡ESTA ERA LA LÍNEA QUE FALTABA!
+  formData.append('tiempoRespuestaSegundos', tiempoRespuestaSegundos.toString());
 
-  console.log('Enviando al backend:', {
+  console.log('📤 Enviando al backend:', {
     testId: testIdNumber,
     preguntaGeneradaId: preguntaIdNumber,
     numeroOrden: numeroOrden,
-    tiempoRespuestaSegundos,  // 🆕 LOG
+    tiempoRespuestaSegundos: tiempoRespuestaSegundos,  // ✅ Ahora se envía
     audioSize: audioBlob.size
   });
 
@@ -200,11 +202,11 @@ async uploadAudio(
       formData
     ).toPromise();
 
-    console.log('Respuesta del backend:', response);
+    console.log('✅ Respuesta del backend:', response);
     return response;
 
   } catch (error: any) {
-    console.error('Error enviando audio:', error);
+    console.error('❌ Error enviando audio:', error);
     console.error('Detalles completos:', error.error);
     
     throw {

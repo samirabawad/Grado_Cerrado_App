@@ -48,12 +48,23 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   audioUrl: string | null = null;
   isPlayingRecording: boolean = false;
   recordingAudio: HTMLAudioElement | null = null;
+
     // 🆕 AGREGAR ESTAS DOS VARIABLES
-  private questionStartTime: number = 0;
-  private questionResponseTime: number = 0;
-  
+  private questionStartTime: number = 0;  
   // Subscription al estado de grabación
   private recordingStateSubscription: Subscription | null = null;
+
+    // 🎓 TIMERS PARA SIMULAR INTERROGATORIO REAL
+  // ⚠️ CAMBIAR DE private A public PARA QUE EL TEMPLATE PUEDA ACCEDERLOS
+  public questionReadyTime: number = 0;        // Cuando termina de reproducirse la pregunta
+  public responseStartTime: number = 0;        // Cuando empieza a grabar
+  public questionResponseTime: number = 0;     // Tiempo total de respuesta
+  
+  
+  // Variables auxiliares para UI
+  private responseTimer: any;
+  public elapsedResponseTime: string = '00:00'; // Para mostrar en pantalla
+  
   
   // Variables del backend
   private sessionId: string = '';
@@ -204,6 +215,8 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.stopResponseTimer();
+    
     if (this.recordingStateSubscription) {
       this.recordingStateSubscription.unsubscribe();
     }
@@ -234,6 +247,41 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     return question ? question.text : '';
   }
 
+  // ========================================
+// MÉTODOS HELPER PARA EL TEMPLATE
+// ========================================
+
+/**
+ * Determina si debe mostrar advertencia de tiempo
+ * @returns true si el tiempo excede el límite (2 minutos)
+ */
+getTimerWarning(): boolean {
+  if (this.questionReadyTime === 0) return false;
+  
+  const elapsed = Math.floor((Date.now() - this.questionReadyTime) / 1000);
+  return elapsed > 120; // Advertir después de 2 minutos
+}
+
+/**
+ * Obtiene un mensaje según el tiempo transcurrido
+ * @returns Mensaje de estado del tiempo
+ */
+getTimerMessage(): string {
+  if (this.questionReadyTime === 0) return '';
+  
+  const elapsed = Math.floor((Date.now() - this.questionReadyTime) / 1000);
+  
+  if (elapsed < 30) {
+    return '⚡ Buen ritmo';
+  } else if (elapsed < 60) {
+    return '👍 Tiempo razonable';
+  } else if (elapsed < 120) {
+    return '⏰ Considera finalizar pronto';
+  } else {
+    return '⚠️ Tiempo extenso';
+  }
+}
+
   getProgress(): number {
     return (this.currentQuestionNumber / this.totalQuestions) * 100;
   }
@@ -252,7 +300,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
 
   playAudio() {
     const questionText = this.getCurrentQuestionText();
-    console.log('Reproduciendo pregunta:', questionText);
+    console.log('🎙️ Reproduciendo pregunta:', questionText);
     
     this.isPlaying = true;
     
@@ -261,10 +309,19 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       utterance.lang = 'es-ES';
       utterance.rate = 0.9;
       
+      // 🎓 CUANDO TERMINA LA PREGUNTA = INICIA EL INTERROGATORIO
       utterance.onend = () => {
         this.isPlaying = false;
         this.audioCompleted = true;
         this.audioProgress = 'Completado';
+        
+        // ⏱️ AQUÍ EMPIEZA EL TIEMPO DEL ESTUDIANTE
+        this.questionReadyTime = Date.now();
+        this.startResponseTimer(); // Mostrar contador en pantalla
+        
+        console.log('⏱️ INTERROGATORIO INICIADO - El estudiante puede empezar a pensar/responder');
+        console.log('⏱️ Hora de inicio:', new Date(this.questionReadyTime).toLocaleTimeString());
+        
         this.cdr.detectChanges();
       };
       
@@ -276,14 +333,49 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       
       window.speechSynthesis.speak(utterance);
     } else {
+      // Fallback si no hay speech synthesis
       setTimeout(() => {
         this.isPlaying = false;
         this.audioCompleted = true;
         this.audioProgress = 'Completado';
+        
+        this.questionReadyTime = Date.now();
+        this.startResponseTimer();
+        
+        console.log('⏱️ INTERROGATORIO INICIADO (fallback)');
         this.cdr.detectChanges();
       }, 3000);
     }
   }
+
+    stopResponseTimer() {
+    if (this.responseTimer) {
+      clearInterval(this.responseTimer);
+      this.responseTimer = null;
+    }
+  }
+
+  // ========================================
+  // CONTADOR VISUAL (OPCIONAL PERO RECOMENDADO)
+  // ========================================
+  startResponseTimer() {
+    // Limpiar timer anterior si existe
+    if (this.responseTimer) {
+      clearInterval(this.responseTimer);
+    }
+    
+    // Actualizar cada segundo para mostrar al usuario
+    this.responseTimer = setInterval(() => {
+      if (this.questionReadyTime > 0) {
+        const elapsed = Math.floor((Date.now() - this.questionReadyTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        this.elapsedResponseTime = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        this.cdr.detectChanges();
+      }
+    }, 1000);
+  }
+
 
   pauseAudio() {
     console.log('Pausando audio');
@@ -308,6 +400,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     return 'Escuchar pregunta';
   }
 
+
   // ========================================
   // CONTROL DE GRABACIÓN
   // ========================================
@@ -321,7 +414,15 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   startRecording() {
-    console.log('Iniciando grabacion de respuesta');
+    console.log('🎤 Iniciando grabación de respuesta');
+    
+    // Registrar primera interacción (opcional, para análisis)
+    if (this.responseStartTime === 0 && this.questionReadyTime > 0) {
+      this.responseStartTime = Date.now();
+      const thinkingTime = Math.round((this.responseStartTime - this.questionReadyTime) / 1000);
+      console.log(`💭 Tiempo de pensamiento: ${thinkingTime} segundos`);
+    }
+    
     this.audioService.startRecording();
   }
 
@@ -402,114 +503,133 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     return this.isPlayingRecording ? 'Pausar' : 'Reproducir';
   }
 
+  // ENVIAR RESPUESTA - FIN DEL INTERROGATORIO
   // ========================================
-  // ENVÍO DE RESPUESTA
-  // ========================================
-  
-async submitVoiceAnswer() {
-  if (!this.hasRecording || !this.audioBlob) {
-    console.warn('No hay grabacion para enviar');
+  async submitVoiceAnswer() {
+    if (!this.hasRecording || !this.audioBlob) {
+      const alert = await this.alertController.create({
+        header: 'Sin grabación',
+        message: 'Por favor, graba tu respuesta antes de enviar.',
+        buttons: ['OK']
+      });
+      await alert.present();
+      return;
+    }
     
-    const alert = await this.alertController.create({
-      header: 'Sin grabacion',
-      message: 'Por favor, graba tu respuesta antes de enviar.',
-      buttons: ['OK']
-    });
-    await alert.present();
-    return;
-  }
-  
-  const question = this.getCurrentQuestion();
-  if (!question) return;
+    const question = this.getCurrentQuestion();
+    if (!question) return;
 
-  // 🆕 CALCULAR TIEMPO DE RESPUESTA
-  if (this.questionStartTime > 0) {
-    const elapsedMs = Date.now() - this.questionStartTime;
-    this.questionResponseTime = Math.round(elapsedMs / 1000);
-    console.log(`⏱️ Tiempo de respuesta: ${this.questionResponseTime} segundos`);
-  } else {
-    this.questionResponseTime = 0;
-    console.warn('⚠️ Timer no iniciado');
-  }
-  
-  console.log('Enviando respuesta de voz para pregunta:', this.currentQuestionNumber);
-  console.log('Tamaño del audio:', this.audioBlob.size, 'bytes');
-  console.log('Tipo de audio:', this.audioBlob.type);
-  
-  try {
-    const loading = await this.loadingController.create({
-      message: 'Procesando tu respuesta...',
-      spinner: 'crescent'
-    });
-    await loading.present();
-    
-    // ✅ LLAMADA CORRECTA CON 5 PARÁMETROS
-    const response = await this.audioService.uploadAudio(
-      this.audioBlob,
-      question.id,
-      this.sessionId,
-      this.currentQuestionNumber,
-      this.questionResponseTime
-    );
-    
-    await loading.dismiss();
-    
-    console.log('Respuesta del backend:', response);
-    
-    this.userAnswers[question.id] = JSON.stringify({
-      type: 'voice',
-      transcription: response.text || response.transcription || 'Texto no disponible',
-      audioId: response.audioId || 'voice_' + this.currentQuestionNumber,
-      timestamp: new Date().toISOString(),
-      duration: this.recordingDuration,
-      responseTime: this.questionResponseTime,
-      size: this.audioBlob.size,
-      confidence: response.confidence || null
-    });
-    
-    // 🆕 RESETEAR TIMER
-    this.questionStartTime = 0;
-    this.questionResponseTime = 0;
-    
-    this.audioService.clearRecording();
-    
-    if (this.recordingAudio) {
-      this.recordingAudio.pause();
-      this.recordingAudio = null;
-      this.isPlayingRecording = false;
+    // ⏱️ CALCULAR TIEMPO TOTAL DE RESPUESTA
+    if (this.questionReadyTime > 0) {
+      const now = Date.now();
+      this.questionResponseTime = Math.round((now - this.questionReadyTime) / 1000);
+      
+      // Calcular tiempo de pensamiento (desde que terminó pregunta hasta que grabó)
+      const thinkingTime = this.responseStartTime > 0 
+        ? Math.round((this.responseStartTime - this.questionReadyTime) / 1000)
+        : 0;
+      
+      // Duración de la grabación
+      const recordingTime = this.recordingDuration;
+      
+      console.log('⏱️ ===== ANÁLISIS DEL INTERROGATORIO =====');
+      console.log(`⏱️ Tiempo TOTAL de respuesta: ${this.questionResponseTime}s`);
+      console.log(`⏱️   • Tiempo pensando: ${thinkingTime}s`);
+      console.log(`⏱️   • Tiempo grabando: ${recordingTime}s`);
+      console.log(`⏱️   • Otros (reproducir/revisar): ${this.questionResponseTime - thinkingTime - recordingTime}s`);
+      console.log('⏱️ ========================================');
+      
+    } else {
+      this.questionResponseTime = 0;
+      console.warn('⚠️ El timer no se inició correctamente');
     }
     
-    const transcription = response.text || response.transcription || 'No se pudo transcribir el audio';
+    // Detener contador visual
+    this.stopResponseTimer();
     
-    const alert = await this.alertController.create({
-      header: 'Respuesta procesada',
-      message: `Tu respuesta: "${transcription}"`,
-      buttons: ['OK']
-    });
-    await alert.present();
+    console.log('📝 Enviando respuesta con tiempo:', this.questionResponseTime, 'segundos');
     
-    setTimeout(() => {
-      this.nextQuestion();
-    }, 1500);
-    
-  } catch (error: any) {
-    console.error('Error al enviar respuesta:', error);
-    
-    const loading = await this.loadingController.getTop();
-    if (loading) {
+    try {
+      const loading = await this.loadingController.create({
+        message: 'Procesando tu respuesta...',
+        spinner: 'crescent'
+      });
+      await loading.present();
+      
+      // ✅ ENVIAR AL BACKEND con el tiempo correcto
+      const response = await this.audioService.uploadAudio(
+        this.audioBlob,
+        question.id,
+        this.sessionId,
+        this.currentQuestionNumber,
+        this.questionResponseTime  // Tiempo desde que terminó la pregunta
+      );
+      
       await loading.dismiss();
+      
+      console.log('✅ Respuesta del backend:', response);
+      
+      // Guardar respuesta con métricas completas
+      this.userAnswers[question.id] = JSON.stringify({
+        type: 'voice',
+        transcription: response.text || response.transcription || 'Texto no disponible',
+        audioId: response.audioId || 'voice_' + this.currentQuestionNumber,
+        timestamp: new Date().toISOString(),
+        responseTime: this.questionResponseTime,  // Tiempo total
+        recordingDuration: this.recordingDuration, // Solo grabación
+        size: this.audioBlob.size,
+        confidence: response.confidence || null
+      });
+      
+      // Resetear timers
+      this.questionReadyTime = 0;
+      this.responseStartTime = 0;
+      this.questionResponseTime = 0;
+      this.elapsedResponseTime = '00:00';
+      
+      this.audioService.clearRecording();
+      
+      if (this.recordingAudio) {
+        this.recordingAudio.pause();
+        this.recordingAudio = null;
+        this.isPlayingRecording = false;
+      }
+      
+      const transcription = response.text || response.transcription || 'No se pudo transcribir el audio';
+      
+      const alert = await this.alertController.create({
+        header: 'Respuesta procesada',
+        message: `Tu respuesta: "${transcription}"`,
+        buttons: ['OK']
+      });
+      await alert.present();
+      
+      setTimeout(() => {
+        this.nextQuestion();
+      }, 1500);
+      
+    } catch (error: any) {
+      console.error('❌ Error al enviar respuesta:', error);
+      
+      // Detener timer en caso de error
+      this.stopResponseTimer();
+      
+      const loading = await this.loadingController.getTop();
+      if (loading) {
+        await loading.dismiss();
+      }
+      
+      const errorMessage = error.message || 'Hubo un problema al procesar tu respuesta.';
+      
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: errorMessage,
+        buttons: ['OK']
+      });
+      await alert.present();
     }
-    
-    const errorMessage = error.message || 'Hubo un problema al procesar tu respuesta. Por favor, intenta nuevamente.';
-    
-    const alert = await this.alertController.create({
-      header: 'Error',
-      message: errorMessage,
-      buttons: ['OK']
-    });
-    await alert.present();
   }
-}
+
 
   // ========================================
   // NAVEGACIÓN
@@ -546,6 +666,9 @@ async submitVoiceAnswer() {
     }
   }
 
+  // ========================================
+  // RESETEAR ESTADO PARA NUEVA PREGUNTA
+  // ========================================
   resetQuestionState() {
     this.isPlaying = false;
     this.audioCompleted = false;
@@ -567,8 +690,19 @@ async submitVoiceAnswer() {
     }
     
     this.audioService.clearRecording();
+    
+    // 🎓 RESETEAR TIMERS DEL INTERROGATORIO
+    this.stopResponseTimer();
+    this.questionReadyTime = 0;
+    this.responseStartTime = 0;
+    this.questionResponseTime = 0;
+    this.elapsedResponseTime = '00:00';
+    
+    console.log('🔄 Estado reseteado para pregunta', this.currentQuestionNumber);
+    
     this.cdr.detectChanges();
   }
+
 
   // ========================================
   // FINALIZACIÓN DEL TEST
