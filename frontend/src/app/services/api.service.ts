@@ -89,6 +89,58 @@ export class ApiService {
       );
   }
 
+  
+// ========================================
+// ESTADÍSTICAS DEL DASHBOARD
+// ========================================
+
+getDashboardStats(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/stats/${studentId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Estadísticas del dashboard:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo estadísticas:', error);
+        throw error;
+      })
+    );
+}
+
+getRecentSessions(studentId: number, limit: number = 10): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/recent-sessions/${studentId}?limit=${limit}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Sesiones recientes:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo sesiones:', error);
+        throw error;
+      })
+    );
+}
+
+getAreaStats(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/area-stats/${studentId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Estadísticas por área:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo stats por área:', error);
+        throw error;
+      })
+    );
+}
   // ✅ LOGIN DE USUARIO MEJORADO
   loginUser(loginData: { email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/auth/login`;
