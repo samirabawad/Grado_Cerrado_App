@@ -763,34 +763,82 @@ async submitVoiceAnswer() {
     this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
   }
 
-  calculateResults() {
-    const totalQuestions = this.questions.length;
-    const answeredQuestions = Object.keys(this.userAnswers).length;
-    const correctAnswers = answeredQuestions;
-    const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+calculateResults() {
+  const totalQuestions = this.questions.length;
+  const answeredQuestions = Object.keys(this.userAnswers).length;
+  
+  // Calcular respuestas correctas REALES basadas en la evaluación
+  let correctAnswers = 0;
+  
+  const questionDetails = this.questions.map((question, index) => {
+    const answerData = this.userAnswers[question.id];
     
-    const questionDetails = this.questions.map((question, index) => {
-      const answered = !!this.userAnswers[question.id];
+    if (answerData) {
+      try {
+        const parsedAnswer = JSON.parse(answerData);
+        const isCorrect = parsedAnswer.isCorrect || false;
+        
+        if (isCorrect) {
+          correctAnswers++;
+        }
+        
+        return {
+          questionNumber: index + 1,
+          question: question.text,
+          answered: true,
+          correct: isCorrect,
+          userAnswer: parsedAnswer.transcription || 'Sin respuesta',
+          correctAnswer: parsedAnswer.correctAnswer || question.correctAnswer || 'N/A',
+          feedback: parsedAnswer.feedback || '',
+          confidence: parsedAnswer.confidence || 0,
+          responseTime: parsedAnswer.responseTime || 0
+        };
+      } catch (error) {
+        console.error('Error parseando respuesta:', error);
+        return {
+          questionNumber: index + 1,
+          question: question.text,
+          answered: false,
+          correct: false,
+          userAnswer: 'Error al procesar',
+          correctAnswer: question.correctAnswer || 'N/A',
+          responseTime: 0
+        };
+      }
+    } else {
       return {
         questionNumber: index + 1,
         question: question.text,
-        answered: answered,
-        correct: answered,
-        userAnswer: answered ? 'Respuesta de voz' : 'Sin respuesta',
-        correctAnswer: question.correctAnswer || 'N/A'
+        answered: false,
+        correct: false,
+        userAnswer: 'Sin respuesta',
+        correctAnswer: question.correctAnswer || 'N/A',
+        responseTime: 0
       };
-    });
+    }
+  });
 
-    return {
-      totalQuestions,
-      correctAnswers,
-      incorrectAnswers: totalQuestions - correctAnswers,
-      percentage,
-      questionDetails,
-      testType: 'oral',
-      completedAt: new Date().toISOString()
-    };
-  }
+  const percentage = totalQuestions > 0 
+    ? Math.round((correctAnswers / totalQuestions) * 100) 
+    : 0;
+
+  console.log('📊 RESULTADOS FINALES:', {
+    total: totalQuestions,
+    correctas: correctAnswers,
+    incorrectas: totalQuestions - correctAnswers,
+    porcentaje: percentage
+  });
+
+  return {
+    totalQuestions,
+    correctAnswers,
+    incorrectAnswers: totalQuestions - correctAnswers,
+    percentage,
+    questionDetails,
+    testType: 'oral',
+    completedAt: new Date().toISOString()
+  };
+}
 
   // ========================================
   // ALERTAS DE ERROR

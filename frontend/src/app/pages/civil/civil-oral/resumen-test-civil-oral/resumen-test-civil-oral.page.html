@@ -18,7 +18,7 @@
       </div>
       <h2 class="result-title">¡Test Oral Completado!</h2>
       <div class="percentage-display">
-        <span class="percentage-number">85%</span>
+        <span class="percentage-number">{{ percentage }}%</span>
         <span class="percentage-label">de respuestas correctas</span>
       </div>
     </div>
@@ -29,34 +29,33 @@
       
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-number correct">4</div>
+          <div class="stat-number correct">{{ correctAnswers }}</div>
           <div class="stat-label">Correctas</div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number incorrect">1</div>
+          <div class="stat-item">
+          <div class="stat-number incorrect">{{ incorrectAnswers }}</div>
           <div class="stat-label">Incorrectas</div>
         </div>
         <div class="stat-item">
           <div class="stat-number total">5</div>
-          <div class="stat-label">Total</div>
+          <div class="stat-number total">{{ totalQuestions }}</div>
         </div>
       </div>
       
       <div class="time-used">
         <ion-icon name="time-outline"></ion-icon>
-        <span>Tiempo utilizado: 8:45 min</span>
+        <span>Tiempo utilizado: {{ timeUsed }} min</span>
       </div>
     </div>
 
     <!-- Indicadores de preguntas -->
     <div class="questions-status">
       <h4>Estado de tus respuestas</h4>
-      <div class="questions-circles">
-        <div class="question-circle correct">1</div>
-        <div class="question-circle correct">2</div>
-        <div class="question-circle correct">3</div>
-        <div class="question-circle incorrect">4</div>
-        <div class="question-circle correct">5</div>
+      <div class="question-circle" 
+          [class.correct]="status.isCorrect" 
+          [class.incorrect]="!status.isCorrect"
+          *ngFor="let status of questionsStatus">
+        {{ status.questionNumber }}
       </div>
     </div>
 
