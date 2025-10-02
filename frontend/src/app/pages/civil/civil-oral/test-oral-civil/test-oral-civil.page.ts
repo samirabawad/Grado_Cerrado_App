@@ -123,12 +123,12 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     );
   }
 
-  async loadQuestionsFromBackend() {
+async loadQuestionsFromBackend() {
   try {
     console.log('Cargando preguntas desde el backend...');
     this.isLoading = true;
     
-    setTimeout(() => {
+    setTimeout(async () => { // ⚠️ Hacer async
       this.currentSession = this.apiService.getCurrentSession();
       console.log('Sesión obtenida del ApiService:', this.currentSession);
       
@@ -156,9 +156,15 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
         
         this.isLoading = false;
         
-        // 🆕 INICIAR TIMER PARA PRIMERA PREGUNTA
+        // Iniciar timer para primera pregunta
         this.questionStartTime = Date.now();
         console.log('⏱️ Timer iniciado para primera pregunta');
+        
+        // 🆕 REPRODUCIR AUTOMÁTICAMENTE LA PRIMERA PREGUNTA
+        setTimeout(() => {
+          this.playAudio();
+          console.log('🔊 Reproduciendo automáticamente la primera pregunta');
+        }, 500); // Pequeño delay para que se cargue todo
         
         console.log('Carga de sesión completada exitosamente');
         
@@ -175,7 +181,6 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     this.isLoading = false;
   }
 }
-
   // CONVERTIR PREGUNTAS (igual que civil-escrito)
   convertBackendQuestions(backendQuestions: any[]): Question[] {
     console.log('Convirtiendo preguntas del backend, cantidad:', backendQuestions?.length || 0);
@@ -394,11 +399,11 @@ getTimerMessage(): string {
     return 'play';
   }
 
-  getAudioStatus(): string {
-    if (this.isPlaying) return 'Reproduciendo pregunta...';
-    if (this.audioCompleted) return 'Audio completado';
-    return 'Escuchar pregunta';
-  }
+getAudioStatus(): string {
+  if (this.isPlaying) return 'Reproduciendo pregunta...';
+  if (this.audioCompleted) return 'Reproducir nuevamente';
+  return 'Escuchando pregunta...'; // Cambiar el texto por defecto
+}
 
 
   // ========================================
@@ -727,39 +732,45 @@ async showDetailedFeedback(
   // ========================================
   // RESETEAR ESTADO PARA NUEVA PREGUNTA
   // ========================================
-  resetQuestionState() {
-    this.isPlaying = false;
-    this.audioCompleted = false;
-    this.audioProgress = '00:02';
-    
-    if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio = null;
-    }
-    
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    
-    if (this.recordingAudio) {
-      this.recordingAudio.pause();
-      this.recordingAudio = null;
-      this.isPlayingRecording = false;
-    }
-    
-    this.audioService.clearRecording();
-    
-    // 🎓 RESETEAR TIMERS DEL INTERROGATORIO
-    this.stopResponseTimer();
-    this.questionReadyTime = 0;
-    this.responseStartTime = 0;
-    this.questionResponseTime = 0;
-    this.elapsedResponseTime = '00:00';
-    
-    console.log('🔄 Estado reseteado para pregunta', this.currentQuestionNumber);
-    
-    this.cdr.detectChanges();
+resetQuestionState() {
+  this.isPlaying = false;
+  this.audioCompleted = false;
+  this.audioProgress = '00:02';
+  
+  if (this.currentAudio) {
+    this.currentAudio.pause();
+    this.currentAudio = null;
   }
+  
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  
+  if (this.recordingAudio) {
+    this.recordingAudio.pause();
+    this.recordingAudio = null;
+    this.isPlayingRecording = false;
+  }
+  
+  this.audioService.clearRecording();
+  
+  // RESETEAR TIMERS DEL INTERROGATORIO
+  this.stopResponseTimer();
+  this.questionReadyTime = 0;
+  this.responseStartTime = 0;
+  this.questionResponseTime = 0;
+  this.elapsedResponseTime = '00:00';
+  
+  console.log('🔄 Estado reseteado para pregunta', this.currentQuestionNumber);
+  
+  this.cdr.detectChanges();
+  
+  // 🆕 REPRODUCIR AUTOMÁTICAMENTE LA SIGUIENTE PREGUNTA
+  setTimeout(() => {
+    this.playAudio();
+    console.log('🔊 Reproduciendo automáticamente pregunta', this.currentQuestionNumber);
+  }, 300); // Pequeño delay
+}
 
 
   // ========================================

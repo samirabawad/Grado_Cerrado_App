@@ -670,3 +670,34 @@
     }
   }
 }
+
+// Indicador de escucha
+.listening-indicator {
+  text-align: center;
+  padding: 30px 20px;
+  margin-bottom: 20px;
+  
+  .pulse-icon {
+    font-size: 3rem;
+    color: #4CAF50;
+    animation: pulse 1.5s infinite;
+  }
+  
+  p {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    color: #666;
+    font-weight: 500;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
