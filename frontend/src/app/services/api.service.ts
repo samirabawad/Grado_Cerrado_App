@@ -176,6 +176,28 @@ getAreaStats(studentId: number): Observable<any> {
         })
       );
   }
+  evaluateOralAnswer(evaluationData: {
+  testId: number;
+  preguntaGeneradaId: number;
+  numeroOrden: number;
+  transcription: string;
+}): Observable<any> {
+  const url = `${this.API_URL}/Speech/evaluate-oral-answer`;
+  
+  console.log('📊 Evaluando respuesta oral:', evaluationData);
+  
+  return this.http.post<any>(url, evaluationData, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Evaluación recibida:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error evaluando respuesta:', error);
+        throw error;
+      })
+    );
+}
 
   // ✅ VERIFICAR ESTADO DE LA BASE DE DATOS
   checkDatabaseStatus(): Observable<any> {
