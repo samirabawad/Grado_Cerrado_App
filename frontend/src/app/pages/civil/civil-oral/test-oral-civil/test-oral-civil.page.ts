@@ -527,10 +527,10 @@ async submitVoiceAnswer() {
       ? Math.round((this.responseStartTime - this.questionReadyTime) / 1000)
       : 0;
     
-    console.log('⏱️ ===== ANÁLISIS DEL INTERROGATORIO =====');
-    console.log(`⏱️ Tiempo TOTAL de respuesta: ${this.questionResponseTime}s`);
-    console.log(`⏱️   • Tiempo pensando: ${thinkingTime}s`);
-    console.log('⏱️ ========================================');
+    console.log('===== ANÁLISIS DEL INTERROGATORIO =====');
+    console.log(`Tiempo TOTAL de respuesta: ${this.questionResponseTime}s`);
+    console.log(`  • Tiempo pensando: ${thinkingTime}s`);
+    console.log('========================================');
   } else {
     this.questionResponseTime = 0;
   }
@@ -544,7 +544,7 @@ async submitVoiceAnswer() {
     });
     await loading.present();
     
-    // 1️⃣ TRANSCRIBIR AUDIO
+    // 1. TRANSCRIBIR AUDIO
     const response = await this.audioService.uploadAudio(
       this.audioBlob,
       question.id,
@@ -553,13 +553,14 @@ async submitVoiceAnswer() {
       this.questionResponseTime
     );
     
-    console.log('✅ Transcripción recibida:', response);
+    console.log('Transcripción recibida:', response);
     
-    // 2️⃣ EVALUAR RESPUESTA
+    // 2. EVALUAR RESPUESTA
     let isCorrect = false;
     let confidence = 0;
     let feedback = '';
     let correctAnswerText = '';
+    let explanation = '';
     
     if (response.success && response.transcription) {
       loading.message = 'Evaluando tu respuesta...';
@@ -572,24 +573,26 @@ async submitVoiceAnswer() {
           transcription: response.transcription
         }).toPromise();
         
-        console.log('📊 Evaluación recibida:', evaluation);
+        console.log('Evaluación recibida:', evaluation);
         
         isCorrect = evaluation.isCorrect;
         confidence = evaluation.confidence;
         feedback = evaluation.feedback;
         correctAnswerText = evaluation.correctAnswer;
+        explanation = evaluation.explanation || '';
         
       } catch (evalError) {
-        console.error('⚠️ Error al evaluar respuesta:', evalError);
+        console.error('Error al evaluar respuesta:', evalError);
         isCorrect = false;
         confidence = 0;
         feedback = 'No se pudo evaluar la respuesta automáticamente.';
+        explanation = '';
       }
     }
     
     await loading.dismiss();
     
-    // 3️⃣ GUARDAR RESPUESTA
+    // 3. GUARDAR RESPUESTA
     this.userAnswers[question.id] = JSON.stringify({
       type: 'voice',
       transcription: response.transcription || 'Texto no disponible',
@@ -601,7 +604,8 @@ async submitVoiceAnswer() {
       confidence: confidence,
       isCorrect: isCorrect,
       feedback: feedback,
-      correctAnswer: correctAnswerText
+      correctAnswer: correctAnswerText,
+      explanation: explanation
     });
     
     this.questionReadyTime = 0;
@@ -617,32 +621,22 @@ async submitVoiceAnswer() {
       this.isPlayingRecording = false;
     }
     
-    // 4️⃣ MOSTRAR RESULTADO
-    const transcription = response.transcription || 'No se pudo transcribir el audio';
+    // 4. MOSTRAR RESULTADO CON RETROALIMENTACIÓN DETALLADA
+    await this.showDetailedFeedback(
+      isCorrect, 
+      response.transcription, 
+      correctAnswerText, 
+      explanation,
+      confidence
+    );
     
-    const alert = await this.alertController.create({
-      header: isCorrect ? '✅ ¡Respuesta Correcta!' : '❌ Respuesta Incorrecta',
-      message: `
-        <div style="text-align: left;">
-          <p><strong>Tu respuesta:</strong><br/>"${transcription}"</p>
-          ${!isCorrect ? `<p><strong>Respuesta correcta:</strong><br/>${correctAnswerText}</p>` : ''}
-          ${feedback ? `<p style="margin-top: 10px;"><em>${feedback}</em></p>` : ''}
-          ${confidence > 0 ? `<p style="font-size: 0.9em; color: #666;">Confianza: ${confidence}%</p>` : ''}
-        </div>
-      `,
-      cssClass: isCorrect ? 'alert-correct' : 'alert-incorrect',
-      buttons: ['Continuar']
-    });
-    await alert.present();
-    
-    await alert.onDidDismiss();
-    
+    // Continuar después de cerrar el alert
     setTimeout(() => {
       this.nextQuestion();
     }, 500);
     
   } catch (error: any) {
-    console.error('❌ Error al enviar respuesta:', error);
+    console.error('Error al enviar respuesta:', error);
     
     this.stopResponseTimer();
     
@@ -660,6 +654,41 @@ async submitVoiceAnswer() {
   }
 }
 
+// NUEVO MÉTODO: Mostrar retroalimentación detallada
+async showDetailedFeedback(
+  isCorrect: boolean,
+  userAnswer: string,
+  correctAnswer: string,
+  explanation: string,
+  confidence: number
+) {
+  const header = isCorrect ? '✅ ¡Correcto!' : '❌ Incorrecto';
+
+  let message = `Tu respuesta:\n"${userAnswer || 'Sin transcripción'}"\n\n`;
+  
+  if (!isCorrect) {
+    message += `Respuesta correcta:\n${correctAnswer}\n\n`;
+  }
+  
+  if (explanation && explanation !== 'No hay explicación disponible.') {
+    message += `Explicación:\n${explanation}`;
+  }
+
+  const alert = await this.alertController.create({
+    header: header,
+    message: message,
+    cssClass: isCorrect ? 'oral-alert-correct' : 'oral-alert-incorrect',
+    buttons: [
+      {
+        text: 'Continuar',
+        role: 'confirm'
+      }
+    ]
+  });
+
+  await alert.present();
+  await alert.onDidDismiss();
+}
   // ========================================
   // NAVEGACIÓN
   // ========================================
