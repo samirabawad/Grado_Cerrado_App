@@ -23,6 +23,7 @@ export class DashboardPage implements OnInit {
   totalCorrectAnswers: number = 0;
   overallSuccessRate: number = 0;
   currentGoal: number = 200;
+  currentSessionGoal: number = 50; // ✅ AGREGADO
 
   chartData: any[] = [];
   areaStats: any[] = [];
@@ -45,7 +46,7 @@ export class DashboardPage implements OnInit {
     this.isLoading = true;
     
     try {
-      const studentId = 4; // ✅ Estudiante con datos
+      const studentId = 4;
       this.userName = 'Estudiante 00000000';
 
       // 📊 CARGAR ESTADÍSTICAS GENERALES
@@ -59,6 +60,7 @@ export class DashboardPage implements OnInit {
           this.overallSuccessRate = Math.round(stats.successRate || 0);
           this.userStreak = stats.streak || 0;
           this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
+          this.currentSessionGoal = this.calculateSessionGoal(this.totalSessions); // ✅ CALCULAR OBJETIVO
           
           console.log('✅ Estadísticas cargadas:', {
             sesiones: this.totalSessions,
@@ -123,7 +125,6 @@ export class DashboardPage implements OnInit {
 
   // ✅ GENERAR BADGES DE SESIONES DINÁMICAMENTE
   getSessionBadges(): number[] {
-    // Mostrar máximo 5 iconos
     const maxBadges = 5;
     return Array(maxBadges).fill(0).map((_, i) => i);
   }
@@ -190,6 +191,24 @@ export class DashboardPage implements OnInit {
 
   getGaugeOffset(): number {
     const maxDash = 110;
+    const progress = Math.min(this.overallSuccessRate / 100, 1);
+    return maxDash * (1 - progress);
+  }
+
+  // ✅ CALCULAR OBJETIVO DE SESIONES (cada 50)
+  calculateSessionGoal(sessions: number): number {
+    if (sessions < 50) return 50;
+    if (sessions < 100) return 100;
+    if (sessions < 150) return 150;
+    if (sessions < 200) return 200;
+    if (sessions < 250) return 250;
+    
+    return Math.ceil(sessions / 50) * 50;
+  }
+
+  // ✅ GAUGE OFFSET PARA GRÁFICO GRANDE
+  getGaugeOffsetLarge(): number {
+    const maxDash = 125.6;
     const progress = Math.min(this.overallSuccessRate / 100, 1);
     return maxDash * (1 - progress);
   }
