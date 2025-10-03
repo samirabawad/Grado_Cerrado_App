@@ -35,12 +35,12 @@ export class CivilOralPage implements OnInit {
     }, 1000);
   }
 
-  // INICIAR PRÁCTICA RÁPIDA - LLAMANDO AL BACKEND
+  // 🎤 MODIFICADO: Ahora llama al endpoint de sesión ORAL
   async startVoicePractice() {
-    console.log('Iniciando práctica rápida - modo voz');
+    console.log('🎤 Iniciando práctica rápida - modo voz ORAL');
     
     const loading = await this.loadingController.create({
-      message: 'Preparando tu test oral...',
+      message: 'Preparando tu test oral con IA...',
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
@@ -65,11 +65,21 @@ export class CivilOralPage implements OnInit {
         numberOfQuestions: 5
       };
       
-      console.log('Enviando datos de sesión:', sessionData);
+      console.log('📤 Enviando datos de sesión ORAL:', sessionData);
       
-      // Llamar al backend para crear sesión
-      const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
-      console.log('Sesión creada exitosamente:', sessionResponse);
+      // 🆕 CAMBIO CLAVE: Usar el método ORAL en lugar del normal
+      const sessionResponse = await this.apiService.startOralStudySession(sessionData).toPromise();
+      console.log('✅ Sesión ORAL creada exitosamente:', sessionResponse);
+      
+      // Verificar que se generaron preguntas de tipo oral
+      if (sessionResponse.questions && sessionResponse.questions.length > 0) {
+        const firstQuestionType = sessionResponse.questions[0].type;
+        console.log('✅ Tipo de primera pregunta:', firstQuestionType);
+        
+        if (firstQuestionType !== 'oral') {
+          console.warn('⚠️ Advertencia: Las preguntas no son de tipo oral');
+        }
+      }
       
       // Guardar la sesión
       this.apiService.setCurrentSession(sessionResponse);
@@ -89,15 +99,15 @@ export class CivilOralPage implements OnInit {
             const currentSession = this.apiService.getCurrentSession();
             const hasQuestions = currentSession?.questions && currentSession.questions.length > 0;
             
-            console.log(`Intento ${attempts}: Preguntas cargadas = ${hasQuestions}`);
+            console.log(`🔍 Intento ${attempts}: Preguntas cargadas = ${hasQuestions}`);
             
             if (hasQuestions) {
               clearInterval(interval);
-              console.log('Preguntas detectadas, cerrando loading');
+              console.log('✅ Preguntas detectadas, cerrando loading');
               resolve();
             } else if (attempts >= maxAttempts) {
               clearInterval(interval);
-              console.log('Timeout esperando preguntas');
+              console.log('⏱️ Timeout esperando preguntas');
               reject(new Error('Timeout cargando preguntas'));
             }
           }, 500);
@@ -107,14 +117,14 @@ export class CivilOralPage implements OnInit {
       await checkQuestionsLoaded();
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      console.log('Test oral completamente cargado');
+      console.log('🎉 Test oral completamente cargado y listo');
       
     } catch (error) {
-      console.error('Error al crear sesión o cargar preguntas:', error);
+      console.error('❌ Error al crear sesión o cargar preguntas:', error);
       alert('Error al cargar el test oral. Verifica tu conexión e inténtalo nuevamente.');
     } finally {
       await loading.dismiss();
-      console.log('Loading cerrado');
+      console.log('✅ Loading cerrado');
     }
   }
 
