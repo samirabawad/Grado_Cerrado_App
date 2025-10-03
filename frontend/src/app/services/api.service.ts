@@ -437,4 +437,48 @@ getWeeklyProgress(studentId: number): Observable<any> {
   return this.http.get(`${this.API_URL}/Dashboard/weekly-progress/${studentId}`);
 }
   
+// 🆕 AGREGAR ESTE MÉTODO AL FINAL DE LA CLASE ApiService (antes del último })
+
+/**
+ * 🎤 Inicia una sesión de estudio ORAL
+ * Usa el endpoint específico que genera preguntas abiertas evaluadas por IA
+ */
+startOralStudySession(sessionData: any): Observable<any> {
+  const url = `${this.API_URL}/Study/start-oral-session`;
+  
+  const requestData = {
+    studentId: sessionData.studentId || 1, // Ahora usa int
+    difficulty: sessionData.difficulty || "intermedio",
+    legalAreas: sessionData.legalAreas || ["Derecho Civil"]
+  };
+  
+  console.log('🎤 Enviando datos para sesión ORAL:', requestData);
+  
+  return this.http.post<any>(url, requestData, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Sesión ORAL iniciada exitosamente:', response);
+        
+        // Verificar que las preguntas sean de tipo oral
+        if (response.questions && response.questions.length > 0) {
+          console.log('📋 Tipo de preguntas recibidas:', response.questions[0].type);
+        }
+        
+        this.setCurrentSession(response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error al iniciar sesión ORAL:', error);
+        throw error;
+      })
+    );
+}
+
+/**
+ * ✍️ Método existente para sesiones ESCRITAS
+ * (Mantener sin cambios para no romper el modo escrito)
+ */
+// startStudySession(sessionData: any): Observable<any> {
+//   ... código existente sin cambios ...
+// }
 }
