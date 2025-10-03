@@ -41,12 +41,10 @@ export class DashboardPage implements OnInit {
     this.loadDashboardData();
   }
 
-  // MÉTODO PRINCIPAL - USA EL ID DEL USUARIO LOGUEADO
   async loadDashboardData() {
     this.isLoading = true;
     
     try {
-      // Obtener usuario actual de localStorage
       const currentUser = this.apiService.getCurrentUser();
       
       if (!currentUser || !currentUser.id) {
@@ -58,9 +56,8 @@ export class DashboardPage implements OnInit {
       const studentId = currentUser.id;
       this.userName = currentUser.name || 'Estudiante';
 
-      console.log('Cargando dashboard para estudiante:', studentId, this.userName);
+      console.log('Cargando dashboard para estudiante:', studentId);
 
-      // CARGAR ESTADÍSTICAS GENERALES
       try {
         const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
         if (statsResponse && statsResponse.success) {
@@ -77,14 +74,14 @@ export class DashboardPage implements OnInit {
         console.error('Error cargando estadísticas:', error);
       }
 
-      // CARGAR ESTADÍSTICAS POR ÁREA
       try {
         const areaResponse = await this.apiService.getAreaStats(studentId).toPromise();
         if (areaResponse && areaResponse.success) {
           this.areaStats = areaResponse.data.map((area: any) => ({
-            name: area.area,
-            questions: area.questions,
-            correct: area.correct,
+            area: area.area,
+            sessions: area.sessions,
+            totalQuestions: area.totalQuestions,
+            correctAnswers: area.correctAnswers,
             successRate: Math.round(area.successRate)
           }));
           
@@ -94,7 +91,6 @@ export class DashboardPage implements OnInit {
         console.error('Error cargando áreas:', error);
       }
 
-      // CARGAR SESIONES RECIENTES
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
         if (sessionsResponse && sessionsResponse.success) {
@@ -112,8 +108,7 @@ export class DashboardPage implements OnInit {
         console.error('Error cargando sesiones:', error);
       }
 
-      // Generar datos del gráfico (por ahora simulados, pero respetan si el usuario es nuevo)
-      this.generateChartData();
+      await this.generateChartData();
 
     } catch (error) {
       console.error('Error general:', error);
@@ -122,13 +117,11 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  // GENERAR BADGES DE SESIONES DINÁMICAMENTE
   getSessionBadges(): number[] {
     const maxBadges = 5;
     return Array(maxBadges).fill(0).map((_, i) => i);
   }
 
-  // NUEVO: Obtener mensaje motivacional basado en sesiones
   getMotivationalMessage(): string {
     if (this.totalSessions === 0) {
       return '¡Es un buen momento para empezar!';
@@ -141,11 +134,10 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  generateChartData() {
-    const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    
-    // Si el usuario es nuevo (sin sesiones), mostrar todo en cero
-    if (this.totalSessions === 0) {
+  async generateChartData() {
+    const currentUser = this.apiService.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
       this.chartData = daysOfWeek.map(day => ({
         date: day,
         civil: 0,
@@ -154,21 +146,23 @@ export class DashboardPage implements OnInit {
       }));
       return;
     }
-    
-    // Si tiene sesiones, generar datos simulados
-    // TODO: Reemplazar con datos reales del backend cuando esté disponible el endpoint
-    this.chartData = daysOfWeek.map(day => {
-      const dailyQuestions = Math.floor(Math.random() * 15) + 5;
-      const civilQuestions = Math.floor(dailyQuestions * 0.6);
-      const procesalQuestions = dailyQuestions - civilQuestions;
-      
-      return {
+
+    try {
+      const response = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
+      if (response && response.success && response.data) {
+        this.chartData = response.data;
+        console.log('Datos del gráfico cargados:', this.chartData);
+      }
+    } catch (error) {
+      console.error('Error cargando gráfico semanal:', error);
+      const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      this.chartData = daysOfWeek.map(day => ({
         date: day,
-        civil: civilQuestions,
-        procesal: procesalQuestions,
-        total: dailyQuestions
-      };
-    });
+        civil: 0,
+        procesal: 0,
+        total: 0
+      }));
+    }
   }
 
   changeTimeFrame(timeFrame: string) {
@@ -204,7 +198,6 @@ export class DashboardPage implements OnInit {
     return maxTotal === 0 ? 20 : maxTotal + 2;
   }
 
-  // MÉTODOS PARA LOS GRÁFICOS
   getBarHeight(value: number, type: 'civil' | 'procesal'): number {
     const maxValue = this.getMaxValue();
     if (maxValue === 0) return 0;

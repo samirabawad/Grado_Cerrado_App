@@ -37,10 +37,9 @@ export class RachaPage implements OnInit {
   totalDays: number = 0;
   nextGoal: number = 0;
 
-  // Calendario
   calendarDays: CalendarDay[] = [];
   currentMonthName: string = '';
-  studiedDates: Set<string> = new Set(); // Formato: 'YYYY-MM-DD'
+  studiedDates: Set<string> = new Set();
 
   achievements: Achievement[] = [
     { id: '1min', title: 'Primer Paso', description: 'Primera sesión completada', daysRequired: 0.0007, icon: 'footsteps', unlocked: false, color: '#10b981' },
@@ -97,11 +96,11 @@ export class RachaPage implements OnInit {
           console.log('Datos de racha cargados:', {
             current: this.currentStreak,
             best: this.bestStreak,
-            total: this.totalDays
+            total: this.totalDays,
+            nextGoal: this.nextGoal
           });
         }
 
-        // Cargar días estudiados
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 100).toPromise();
         if (sessionsResponse && sessionsResponse.success && sessionsResponse.data) {
           sessionsResponse.data.forEach((session: any) => {
@@ -111,7 +110,6 @@ export class RachaPage implements OnInit {
           });
         }
 
-        // Generar calendario
         this.generateCalendar();
 
       } catch (error) {
@@ -130,22 +128,18 @@ export class RachaPage implements OnInit {
     const year = today.getFullYear();
     const month = today.getMonth();
     
-    // Nombre del mes
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     this.currentMonthName = `${monthNames[month]} ${year}`;
 
-    // Primer día del mes
     const firstDay = new Date(year, month, 1);
-    const firstDayOfWeek = firstDay.getDay(); // 0 = Domingo
+    const firstDayOfWeek = firstDay.getDay();
 
-    // Último día del mes
     const lastDay = new Date(year, month + 1, 0);
     const totalDays = lastDay.getDate();
 
     this.calendarDays = [];
 
-    // Días vacíos antes del primer día
     for (let i = 0; i < firstDayOfWeek; i++) {
       this.calendarDays.push({
         day: 0,
@@ -156,7 +150,6 @@ export class RachaPage implements OnInit {
       });
     }
 
-    // Días del mes
     for (let day = 1; day <= totalDays; day++) {
       const date = new Date(year, month, day);
       const dateStr = this.formatDateKey(date);

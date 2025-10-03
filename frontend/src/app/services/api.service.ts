@@ -433,5 +433,8 @@ submitAnswer(answerData: SubmitAnswerRequest): Observable<SubmitAnswerResponse> 
       })
     );
 }
+getWeeklyProgress(studentId: number): Observable<any> {
+  return this.http.get(`${this.API_URL}/Dashboard/weekly-progress/${studentId}`);
+}
   
 }

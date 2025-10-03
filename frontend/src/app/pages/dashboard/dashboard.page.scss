@@ -147,20 +147,17 @@
   margin-bottom: 30px;
 }
 
-// ✅ FILA SUPERIOR - Sesiones y Preguntas lado a lado
 .stats-row-top {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
 
-// ✅ FILA INFERIOR - Precisión (ancho completo)
 .stats-row-bottom {
   display: grid;
   grid-template-columns: 1fr;
 }
 
-// Estilos base para las tarjetas
 .stat-card {
   background: white;
   border-radius: 20px;
@@ -194,7 +191,6 @@
   }
 }
 
-// 🎯 Tarjeta de Sesiones (Sin gráfico)
 .sessions-card {
   .sessions-badges {
     display: flex;
@@ -295,7 +291,6 @@
   }
 }
 
-// 📊 Gráfico de Dona (Preguntas)
 .donut-chart {
   position: relative;
   width: 100px;
@@ -334,11 +329,10 @@
   }
 }
 
-// 🎯 Velocímetro (Precisión) - ESPACIADO REDUCIDO
 .precision-card-full {
   
   .stat-title {
-    margin: 0 0 0px 0; // ✅ REDUCIDO: antes era 15px, ahora 8px
+    margin: 0 0 0px 0;
   }
   
   .gauge-chart-large {
@@ -419,7 +413,7 @@
         transition: all 0.3s ease;
         
         &.active {
-          background: linear-gradient(135deg, #667eea, #764ba2);
+          background: linear-gradient(135deg, #10b981, #059669);
           color: white;
           border-color: transparent;
         }
@@ -450,11 +444,11 @@
         border-radius: 3px;
         
         &.civil {
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          background: linear-gradient(135deg, #10b981, #059669);
         }
         
         &.procesal {
-          background: linear-gradient(135deg, #f59e0b, #d97706);
+          background: linear-gradient(135deg, #34d399, #10b981);
         }
       }
     }
@@ -486,14 +480,22 @@
             width: 16px;
             border-radius: 6px 6px 0 0;
             position: relative;
-            transition: all 0.5s ease;
+            transition: all 0.3s ease;
             
             &.bar-civil {
-              background: linear-gradient(to top, #3b82f6, #60a5fa);
+              background: linear-gradient(180deg, #10b981, #059669);
+              
+              .bar-value {
+                color: white;
+              }
             }
             
             &.bar-procesal {
-              background: linear-gradient(to top, #f59e0b, #fbbf24);
+              background: linear-gradient(180deg, #34d399, #10b981);
+              
+              .bar-value {
+                color: white;
+              }
             }
             
             .bar-value {
@@ -503,7 +505,6 @@
               transform: translateX(-50%);
               font-size: 11px;
               font-weight: 600;
-              color: #64748b;
               white-space: nowrap;
             }
           }
@@ -511,7 +512,7 @@
         
         .bar-label {
           font-size: 12px;
-          color: #94a3b8;
+          color: #64748b;
           font-weight: 500;
         }
       }
@@ -571,23 +572,36 @@
       }
       
       .area-progress {
-        margin-bottom: 15px;
+        margin-top: 12px;
         
         .progress-info {
           display: flex;
           justify-content: space-between;
           margin-bottom: 8px;
-          font-size: 14px;
           
-          .percentage {
-            font-weight: 600;
-            color: #059669;
+          span {
+            font-size: 13px;
+            color: #64748b;
+            
+            &.percentage {
+              font-weight: 700;
+              color: #f97316;
+            }
           }
         }
         
         ion-progress-bar {
           height: 8px;
           border-radius: 4px;
+          
+          &::part(progress) {
+            background: linear-gradient(90deg, #f97316, #ea580c);
+            border-radius: 4px;
+          }
+          
+          &::part(track) {
+            background: #f1f5f9;
+          }
         }
       }
       
@@ -617,11 +631,11 @@
 .recent-sessions-container {
   margin-bottom: 30px;
   
-  .section-header {
+  .sessions-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     
     h2 {
       margin: 0;
@@ -630,13 +644,11 @@
       color: #1e293b;
     }
     
-    .see-all-btn {
-      background: none;
-      border: none;
-      color: #667eea;
+    .view-all {
       font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
+      color: #10b981;
+      font-weight: 600;
+      text-decoration: none;
     }
   }
   
@@ -662,7 +674,6 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       }
       
-      // 📅 Calendario mejorado
       .session-date-box {
         display: flex;
         flex-direction: column;
@@ -670,9 +681,9 @@
         justify-content: center;
         min-width: 70px;
         padding: 12px 10px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #10b981, #059669);
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         
         .calendar-icon {
           color: white;
@@ -752,7 +763,7 @@
   .start-session-btn {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     border: none;
     border-radius: 16px;
@@ -763,12 +774,12 @@
     justify-content: center;
     gap: 10px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
     transition: all 0.3s ease;
     
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
     }
     
     &:active {
@@ -826,7 +837,6 @@
     padding: 25px 15px 100px 15px;
   }
   
-  // ✅ EN MÓVIL: Sesiones y Preguntas también lado a lado (más pequeños)
   .stats-row-top {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
