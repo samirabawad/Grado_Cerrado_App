@@ -30,6 +30,10 @@ export class HomePage implements OnInit {
   ) { }
 
   ngOnInit() {
+  this.loadUserData();
+  }
+
+  ionViewWillEnter() {
     this.loadUserData();
   }
 
