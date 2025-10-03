@@ -7,47 +7,39 @@
         <img src="assets/image/civil/logo_civil.png" alt="Derecho Civil" class="derecho-civil-image-responsive">
       </div>
     </div>
-</div>
+  </div>
 
   <!-- Resto del contenido -->
   <div class="content-area">
     
     <!-- Progreso Civil con estadísticas reales -->
     <div class="progreso-card">
-      <div class="progreso-content">
-        <div class="progreso-icon">
-          <ion-icon name="trophy-outline"></ion-icon>
-        </div>
-        <div class="progreso-info">
-          <h4>Progreso Civil</h4>
-          
-          <ng-container *ngIf="!isLoading && civilStats">
-            <p>{{ civilStats.correctAnswers }}/{{ civilStats.totalQuestions }} preguntas correctas</p>
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="civilStats.successRate"></div>
-            </div>
-            <span class="progress-text">{{ civilStats.successRate }}% completado</span>
-          </ng-container>
-          
-          <ng-container *ngIf="!isLoading && !civilStats">
-            <p>Aún no tienes progreso</p>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 0%"></div>
-            </div>
-            <span class="progress-text">0% completado</span>
-          </ng-container>
-          
-          <ng-container *ngIf="isLoading">
-            <p>Cargando...</p>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 0%"></div>
-            </div>
-            <span class="progress-text">...</span>
-          </ng-container>
-        </div>
-      </div>
-      <div class="mapache-container">
-        <img src="assets/image/mok.png" alt="Mapache" class="mapache-image">
+      <div class="progreso-info-full">
+        <h4>Progreso Civil</h4>
+        
+        <ng-container *ngIf="!isLoading && civilStats">
+          <p>{{ civilStats.correctAnswers }}/{{ civilStats.totalQuestions }} preguntas correctas</p>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="civilStats.successRate"></div>
+          </div>
+          <span class="progress-text">{{ civilStats.successRate }}% completado</span>
+        </ng-container>
+        
+        <ng-container *ngIf="!isLoading && !civilStats">
+          <p>Aún no tienes progreso</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text">0% completado</span>
+        </ng-container>
+        
+        <ng-container *ngIf="isLoading">
+          <p>Cargando...</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text">...</span>
+        </ng-container>
       </div>
     </div>
 
@@ -66,9 +58,25 @@
       <img src="assets/image/botones/reforzar.png" alt="Test" class="practice-image-button" (click)="goToTest()">
     </div>
 
-    <!-- Banner de promoción (reemplaza estadísticas) -->
+    <!-- Carrusel de imágenes del mapache -->
     <div class="banner-section">
-      <img src="assets/image/bannerhome.png" alt="Promoción" class="banner-image">
+      <div class="carousel-container">
+        <img 
+          *ngFor="let image of carouselImages; let i = index"
+          [src]="image" 
+          [alt]="'Mapache ' + (i + 1)"
+          class="carousel-image"
+          [class.active]="currentImageIndex === i">
+        
+        <div class="carousel-indicators">
+          <div 
+            *ngFor="let image of carouselImages; let i = index"
+            class="indicator"
+            [class.active]="currentImageIndex === i"
+            (click)="goToSlide(i)">
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

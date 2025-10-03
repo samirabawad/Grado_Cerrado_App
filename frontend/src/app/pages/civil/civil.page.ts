@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -12,10 +12,19 @@ import { ApiService } from '../../services/api.service';
   standalone: true,
   imports: [IonicModule, CommonModule, BottomNavComponent]
 })
-export class CivilPage implements OnInit {
+export class CivilPage implements OnInit, OnDestroy {
   
   civilStats: any = null;
   isLoading: boolean = true;
+  
+  // Carrusel
+  carouselImages: string[] = [
+    'assets/image/bannerhome.png',
+    'assets/image/banner-2.png',
+    'assets/image/banner-3.png'
+  ];
+  currentImageIndex: number = 0;
+  carouselInterval: any;
   
   constructor(
     private router: Router,
@@ -24,10 +33,20 @@ export class CivilPage implements OnInit {
   
   ngOnInit() {
     this.loadCivilStats();
+    this.startCarousel();
+  }
+
+  ngOnDestroy() {
+    this.stopCarousel();
   }
 
   ionViewWillEnter() {
     this.loadCivilStats();
+    this.startCarousel();
+  }
+
+  ionViewWillLeave() {
+    this.stopCarousel();
   }
 
   async loadCivilStats() {
@@ -51,7 +70,6 @@ export class CivilPage implements OnInit {
       if (areaResponse && areaResponse.success && areaResponse.data) {
         console.log('Todas las áreas recibidas:', areaResponse.data);
         
-        // Buscar exactamente "Derecho Civil"
         const civilArea = areaResponse.data.find((area: any) => 
           area.area === 'Derecho Civil'
         );
@@ -60,11 +78,8 @@ export class CivilPage implements OnInit {
           this.civilStats = civilArea;
           console.log('✅ Estadísticas de Derecho Civil:', this.civilStats);
         } else {
-          console.log('❌ No se encontró "Derecho Civil". Áreas disponibles:', 
-            areaResponse.data.map((a: any) => a.area).join(', '));
+          console.log('❌ No se encontró "Derecho Civil"');
         }
-      } else {
-        console.log('⚠️ Respuesta del API no válida');
       }
       
     } catch (error) {
@@ -72,6 +87,29 @@ export class CivilPage implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  // Funciones del carrusel
+  startCarousel() {
+    this.carouselInterval = setInterval(() => {
+      this.nextSlide();
+    }, 4000); // Cambia cada 4 segundos
+  }
+
+  stopCarousel() {
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+    }
+  }
+
+  nextSlide() {
+    this.currentImageIndex = (this.currentImageIndex + 1) % this.carouselImages.length;
+  }
+
+  goToSlide(index: number) {
+    this.currentImageIndex = index;
+    this.stopCarousel();
+    this.startCarousel();
   }
 
   goToEscrito() {
