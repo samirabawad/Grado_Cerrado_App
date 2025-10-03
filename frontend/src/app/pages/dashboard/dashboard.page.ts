@@ -23,6 +23,7 @@ export class DashboardPage implements OnInit {
   totalCorrectAnswers: number = 0;
   overallSuccessRate: number = 0;
   currentGoal: number = 200;
+  currentSessionGoal: number = 50;
 
   chartData: any[] = [];
   areaStats: any[] = [];
@@ -40,15 +41,26 @@ export class DashboardPage implements OnInit {
     this.loadDashboardData();
   }
 
-  // ✅ MÉTODO PRINCIPAL - USA ESTUDIANTE_ID 4
+  // MÉTODO PRINCIPAL - USA EL ID DEL USUARIO LOGUEADO
   async loadDashboardData() {
     this.isLoading = true;
     
     try {
-      const studentId = 4; // ✅ Estudiante con datos
-      this.userName = 'Estudiante 00000000';
+      // Obtener usuario actual de localStorage
+      const currentUser = this.apiService.getCurrentUser();
+      
+      if (!currentUser || !currentUser.id) {
+        console.error('No hay usuario logueado');
+        this.router.navigate(['/login']);
+        return;
+      }
 
-      // 📊 CARGAR ESTADÍSTICAS GENERALES
+      const studentId = currentUser.id;
+      this.userName = currentUser.name || 'Estudiante';
+
+      console.log('Cargando dashboard para estudiante:', studentId, this.userName);
+
+      // CARGAR ESTADÍSTICAS GENERALES
       try {
         const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
         if (statsResponse && statsResponse.success) {
@@ -58,60 +70,49 @@ export class DashboardPage implements OnInit {
           this.totalCorrectAnswers = stats.correctAnswers || 0;
           this.overallSuccessRate = Math.round(stats.successRate || 0);
           this.userStreak = stats.streak || 0;
-          this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
           
-          console.log('✅ Estadísticas cargadas:', {
-            sesiones: this.totalSessions,
-            preguntas: this.totalQuestions,
-            correctas: this.totalCorrectAnswers,
-            precision: this.overallSuccessRate
-          });
+          console.log('Estadísticas cargadas:', stats);
         }
       } catch (error) {
         console.error('Error cargando estadísticas:', error);
       }
 
-      // 📈 CARGAR ESTADÍSTICAS POR ÁREA
+      // CARGAR ESTADÍSTICAS POR ÁREA
       try {
         const areaResponse = await this.apiService.getAreaStats(studentId).toPromise();
         if (areaResponse && areaResponse.success) {
-          const colors = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6'];
-          
-          this.areaStats = areaResponse.data.map((area: any, index: number) => ({
-            area: area.area,
-            totalQuestions: area.totalQuestions,
-            correctAnswers: area.correctAnswers,
-            successRate: Math.round(area.successRate),
-            color: colors[index % colors.length],
-            sessions: area.sessions
+          this.areaStats = areaResponse.data.map((area: any) => ({
+            name: area.area,
+            questions: area.questions,
+            correct: area.correct,
+            successRate: Math.round(area.successRate)
           }));
           
-          console.log('✅ Áreas cargadas:', this.areaStats);
+          console.log('Áreas cargadas:', this.areaStats);
         }
       } catch (error) {
         console.error('Error cargando áreas:', error);
       }
 
-      // 📅 CARGAR SESIONES RECIENTES
+      // CARGAR SESIONES RECIENTES
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
         if (sessionsResponse && sessionsResponse.success) {
           this.recentSessions = sessionsResponse.data.map((session: any) => ({
             id: session.id,
-            date: this.formatDate(session.date),
-            area: session.area,
-            duration: session.duration,
+            date: new Date(session.date).toLocaleDateString('es-ES'),
             questions: session.questions,
             correct: session.correct,
             successRate: Math.round(session.successRate)
           }));
           
-          console.log('✅ Sesiones cargadas:', this.recentSessions);
+          console.log('Sesiones cargadas:', this.recentSessions);
         }
       } catch (error) {
         console.error('Error cargando sesiones:', error);
       }
 
+      // Generar datos del gráfico (por ahora simulados, pero respetan si el usuario es nuevo)
       this.generateChartData();
 
     } catch (error) {
@@ -121,16 +122,41 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  // ✅ GENERAR BADGES DE SESIONES DINÁMICAMENTE
+  // GENERAR BADGES DE SESIONES DINÁMICAMENTE
   getSessionBadges(): number[] {
-    // Mostrar máximo 5 iconos
     const maxBadges = 5;
     return Array(maxBadges).fill(0).map((_, i) => i);
+  }
+
+  // NUEVO: Obtener mensaje motivacional basado en sesiones
+  getMotivationalMessage(): string {
+    if (this.totalSessions === 0) {
+      return '¡Es un buen momento para empezar!';
+    } else if (this.totalSessions < 10) {
+      return '¡Sigue así!';
+    } else if (this.totalSessions < 50) {
+      return '¡Excelente progreso!';
+    } else {
+      return '¡Eres imparable!';
+    }
   }
 
   generateChartData() {
     const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     
+    // Si el usuario es nuevo (sin sesiones), mostrar todo en cero
+    if (this.totalSessions === 0) {
+      this.chartData = daysOfWeek.map(day => ({
+        date: day,
+        civil: 0,
+        procesal: 0,
+        total: 0
+      }));
+      return;
+    }
+    
+    // Si tiene sesiones, generar datos simulados
+    // TODO: Reemplazar con datos reales del backend cuando esté disponible el endpoint
     this.chartData = daysOfWeek.map(day => {
       const dailyQuestions = Math.floor(Math.random() * 15) + 5;
       const civilQuestions = Math.floor(dailyQuestions * 0.6);
@@ -174,11 +200,14 @@ export class DashboardPage implements OnInit {
 
   getMaxValue(): number {
     if (!this.chartData || this.chartData.length === 0) return 20;
-    return Math.max(...this.chartData.map(d => d.total)) + 2;
+    const maxTotal = Math.max(...this.chartData.map(d => d.total));
+    return maxTotal === 0 ? 20 : maxTotal + 2;
   }
 
+  // MÉTODOS PARA LOS GRÁFICOS
   getBarHeight(value: number, type: 'civil' | 'procesal'): number {
     const maxValue = this.getMaxValue();
+    if (maxValue === 0) return 0;
     return (value / maxValue) * 100;
   }
 
@@ -192,6 +221,22 @@ export class DashboardPage implements OnInit {
     const maxDash = 110;
     const progress = Math.min(this.overallSuccessRate / 100, 1);
     return maxDash * (1 - progress);
+  }
+
+  getGaugeOffsetLarge(): number {
+    const maxDash = 125.6;
+    const progress = Math.min(this.overallSuccessRate / 100, 1);
+    return maxDash * (1 - progress);
+  }
+
+  calculateSessionGoal(sessions: number): number {
+    if (sessions < 50) return 50;
+    if (sessions < 100) return 100;
+    if (sessions < 150) return 150;
+    if (sessions < 200) return 200;
+    if (sessions < 250) return 250;
+    
+    return Math.ceil(sessions / 50) * 50;
   }
 
   calculateProgressiveGoal(questions: number): number {
