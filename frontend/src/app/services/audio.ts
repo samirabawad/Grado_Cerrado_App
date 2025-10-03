@@ -159,63 +159,153 @@ export class AudioService {
   }
 
   async uploadAudio(
-  audioBlob: Blob, 
-  questionId: string, 
-  sessionId: string,
-  numeroOrden: number,
-  tiempoRespuestaSegundos: number 
-): Promise<any> {
-  const formData = new FormData();
-  
-  const fileExtension = audioBlob.type.includes('mp4') ? '.m4a' : 
-                       audioBlob.type.includes('webm') ? '.webm' : '.audio';
-  
-  formData.append('audioFile', audioBlob, `recording_${questionId}${fileExtension}`);
-  
-  // ✅ Convertir a números antes de enviar
-  const testIdNumber = parseInt(sessionId, 10);
-  const preguntaIdNumber = parseInt(questionId, 10);
-  
-  // Validar que sean números válidos
-  if (isNaN(testIdNumber) || isNaN(preguntaIdNumber)) {
-    throw new Error('IDs inválidos: testId y preguntaGeneradaId deben ser numéricos');
-  }
-  
-  formData.append('testId', testIdNumber.toString());
-  formData.append('preguntaGeneradaId', preguntaIdNumber.toString());
-  formData.append('numeroOrden', numeroOrden.toString());
-  
-  // 🆕 ¡ESTA ERA LA LÍNEA QUE FALTABA!
-  formData.append('tiempoRespuestaSegundos', tiempoRespuestaSegundos.toString());
-
-  console.log('📤 Enviando al backend:', {
-    testId: testIdNumber,
-    preguntaGeneradaId: preguntaIdNumber,
-    numeroOrden: numeroOrden,
-    tiempoRespuestaSegundos: tiempoRespuestaSegundos,  // ✅ Ahora se envía
-    audioSize: audioBlob.size
-  });
-
-  try {
-    const response = await this.http.post(
-      'http://localhost:5183/api/Speech/speech-to-text', 
-      formData
-    ).toPromise();
-
-    console.log('✅ Respuesta del backend:', response);
-    return response;
-
-  } catch (error: any) {
-    console.error('❌ Error enviando audio:', error);
-    console.error('Detalles completos:', error.error);
+    audioBlob: Blob, 
+    questionId: string, 
+    sessionId: string,
+    numeroOrden: number,
+    tiempoRespuestaSegundos: number 
+  ): Promise<any> {
     
-    throw {
-      error: true,
-      message: error.error?.message || 'Error al procesar el audio',
-      details: error
-    };
+    console.log('🎤 Preparando audio para enviar:', {
+      originalType: audioBlob.type,
+      originalSize: audioBlob.size
+    });
+
+    // CONVERTIR A WAV antes de enviar
+    let audioToSend = audioBlob;
+    
+    try {
+      // Si no es WAV, convertir
+      if (!audioBlob.type.includes('wav')) {
+        console.log('🔄 Convirtiendo audio a WAV...');
+        audioToSend = await this.convertToWav(audioBlob);
+        console.log('✅ Audio convertido a WAV:', audioToSend.size, 'bytes');
+      }
+    } catch (conversionError) {
+      console.warn('⚠️ No se pudo convertir a WAV, enviando formato original:', conversionError);
+      // Continuar con el audio original si falla la conversión
+    }
+
+    const formData = new FormData();
+    
+    // Siempre usar .wav como extensión si logramos convertir
+    const fileExtension = audioToSend.type.includes('wav') ? '.wav' : '.webm';
+    
+    formData.append('audioFile', audioToSend, `recording_${questionId}${fileExtension}`);
+    
+    const testIdNumber = parseInt(sessionId, 10);
+    const preguntaIdNumber = parseInt(questionId, 10);
+    
+    if (isNaN(testIdNumber) || isNaN(preguntaIdNumber)) {
+      throw new Error('IDs inválidos: testId y preguntaGeneradaId deben ser numéricos');
+    }
+    
+    formData.append('testId', testIdNumber.toString());
+    formData.append('preguntaGeneradaId', preguntaIdNumber.toString());
+    formData.append('numeroOrden', numeroOrden.toString());
+    formData.append('tiempoRespuestaSegundos', tiempoRespuestaSegundos.toString());
+
+    console.log('📤 Enviando al backend:', {
+      testId: testIdNumber,
+      preguntaGeneradaId: preguntaIdNumber,
+      numeroOrden: numeroOrden,
+      tiempoRespuestaSegundos: tiempoRespuestaSegundos,
+      audioSize: audioToSend.size,
+      audioType: audioToSend.type
+    });
+
+    try {
+      const response = await this.http.post(
+        'http://localhost:5183/api/Speech/speech-to-text', 
+        formData
+      ).toPromise();
+
+      console.log('✅ Respuesta del backend:', response);
+      return response;
+
+    } catch (error: any) {
+      console.error('❌ Error enviando audio:', error);
+      console.error('Detalles completos:', error.error);
+      
+      throw {
+        error: true,
+        message: error.error?.message || 'Error al procesar el audio',
+        details: error
+      };
+    }
   }
-}
+
+  // NUEVO MÉTODO: Convertir audio a WAV
+  private async convertToWav(audioBlob: Blob): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const fileReader = new FileReader();
+
+      fileReader.onload = async (e) => {
+        try {
+          const arrayBuffer = e.target?.result as ArrayBuffer;
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          
+          // Convertir a WAV
+          const wavBlob = this.audioBufferToWav(audioBuffer);
+          resolve(wavBlob);
+        } catch (error) {
+          console.error('Error decodificando audio:', error);
+          reject(error);
+        }
+      };
+
+      fileReader.onerror = () => reject(new Error('Error leyendo el archivo'));
+      fileReader.readAsArrayBuffer(audioBlob);
+    });
+  }
+
+  // Convertir AudioBuffer a WAV Blob
+  private audioBufferToWav(audioBuffer: AudioBuffer): Blob {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const format = 1; // PCM
+    const bitDepth = 16;
+
+    const bytesPerSample = bitDepth / 8;
+    const blockAlign = numChannels * bytesPerSample;
+
+    const samples = audioBuffer.getChannelData(0);
+    const dataLength = samples.length * bytesPerSample;
+    const buffer = new ArrayBuffer(44 + dataLength);
+    const view = new DataView(buffer);
+
+    // WAV header
+    this.writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + dataLength, true);
+    this.writeString(view, 8, 'WAVE');
+    this.writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true);
+    this.writeString(view, 36, 'data');
+    view.setUint32(40, dataLength, true);
+
+    // Escribir los samples
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++) {
+      const sample = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      offset += 2;
+    }
+
+    return new Blob([view], { type: 'audio/wav' });
+  }
+
+  private writeString(view: DataView, offset: number, string: string): void {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
 
   playRecording(audioUrl: string): void {
     if (!audioUrl) return;
