@@ -351,4 +351,52 @@ ion-content.results-content {
     letter-spacing: 0.5px;
     height: 50px;
   }
+
+  // ========================================
+// ESTILOS PARA ALERTS PERSONALIZADOS
+// ========================================
+::ng-deep {
+  .oral-alert-incorrect .alert-wrapper,
+  .oral-alert-correct .alert-wrapper {
+    background: white !important;
+    
+    .alert-head {
+      background: transparent;
+      
+      h2 {
+        color: #333 !important;
+        font-weight: 700;
+      }
+    }
+    
+    .alert-message {
+      color: #555 !important;
+      background: white !important;
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+      
+      strong {
+        color: #333 !important;
+      }
+    }
+    
+    .alert-button-group {
+      background: white;
+      
+      button {
+        color: #4CAF50 !important;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  .oral-alert-incorrect .alert-head h2 {
+    color: #F44336 !important;
+  }
+  
+  .oral-alert-correct .alert-head h2 {
+    color: #4CAF50 !important;
+  }
+}
 }
