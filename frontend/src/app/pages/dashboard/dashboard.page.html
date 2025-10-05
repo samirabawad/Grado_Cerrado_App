@@ -1,25 +1,23 @@
 <ion-content class="dashboard-content">
-  <!-- Header FIJO igual que home -->
+  <!-- Header FIJO -->
   <div class="header-section">
     <div class="background-image">
       <img src="assets/image/superior_gris.png" alt="Background" class="superior-gris">
     </div>
 
-  <!-- Saludo del usuario -->
-  <div class="user-greeting">
-    <ion-button fill="clear" (click)="goBack()" class="back-button">
-      <ion-icon name="chevron-back"></ion-icon>
-    </ion-button>
-    
-    <div class="avatar-container">
-      <img src="assets/image/msombra.png" alt="Avatar" class="user-avatar">
-    </div>
+    <div class="user-greeting">
+      <ion-button fill="clear" (click)="goBack()" class="back-button">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+      
+      <div class="avatar-container">
+        <img src="assets/image/msombra.png" alt="Avatar" class="user-avatar">
+      </div>
       <div class="greeting-text">
         <h1 class="greeting-title">¡Hola {{ userName }}!</h1>
         <p class="greeting-subtitle">Tu progreso</p>
       </div>
       
-      <!-- Racha con hojitas -->
       <div class="streak-display">
         <img src="assets/image/menu/hoja.png" alt="Racha" class="streak-icon">
         <span class="streak-count">{{ userStreak }}</span>
@@ -33,145 +31,53 @@
     <p>Cargando estadísticas...</p>
   </div>
 
-  <!-- CONTENIDO que hace scroll - DEBAJO del header fijo -->
+  <!-- CONTENIDO scrollable -->
   <div *ngIf="!isLoading" class="scrollable-content">
 
-    <!-- Estadísticas Generales con Gráficos -->
+    <!-- Estadísticas Generales -->
     <div class="stats-overview">
-      
-      <!-- FILA SUPERIOR: Sesiones y Preguntas lado a lado -->
       <div class="stats-row-top">
-        
-        <!-- Tarjeta 1: Sesiones Completadas con Sistema de Objetivos -->
         <div class="stat-card sessions-card">
           <h4 class="stat-title">Sesiones</h4>
           <div class="sessions-badges">
-            <!-- ✅ Mostrar 5 bolitas, cada una representa 10 tests -->
             <ng-container *ngFor="let milestone of [0, 1, 2, 3, 4]; let i = index">
-              <div class="session-badge" [class.completed]="totalSessions >= (i + 1) * 10" [class.pending]="totalSessions < (i + 1) * 10">
+              <div class="session-badge" 
+                   [class.completed]="totalSessions >= (i + 1) * 10" 
+                   [class.pending]="totalSessions < (i + 1) * 10">
                 <ion-icon *ngIf="totalSessions >= (i + 1) * 10" name="checkmark-circle"></ion-icon>
                 <ion-icon *ngIf="totalSessions < (i + 1) * 10" name="ellipse-outline"></ion-icon>
               </div>
             </ng-container>
           </div>
-          <div class="sessions-count">
-            <span class="count-number">{{ totalSessions }}</span>
-            <span class="count-label">de {{ currentSessionGoal }} completadas</span>
-          </div>
-          <div class="sessions-progress-text">
-            <ion-icon name="trophy"></ion-icon>
-            <span>{{ getMotivationalMessage() }}</span>
-          </div>
+          <p class="sessions-progress">{{ totalSessions }}/50 sesiones</p>
         </div>
 
-        <!-- Tarjeta 2: Preguntas con Meta Progresiva -->
-        <div class="stat-card">
+        <div class="stat-card questions-card">
           <h4 class="stat-title">Preguntas</h4>
-          <div class="donut-chart">
-            <svg viewBox="0 0 100 100" class="donut-svg">
-              <circle 
-                cx="50" 
-                cy="50" 
-                r="35" 
-                fill="none" 
-                stroke="#e5e7eb" 
-                stroke-width="12">
-              </circle>
-              <circle 
-                cx="50" 
-                cy="50" 
-                r="35" 
-                fill="none" 
-                stroke="url(#gradient2)" 
-                stroke-width="12"
-                stroke-dasharray="219.8"
-                stroke-dashoffset="0"
-                transform="rotate(-90 50 50)"
-                class="donut-progress"
-                [style.stroke-dashoffset]="getDonutOffset()">
-              </circle>
-              <defs>
-                <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
-                </linearGradient>
-              </defs>
+          <div class="donut-container">
+            <svg width="100" height="100">
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#e2e8f0" stroke-width="8"></circle>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#10b981" stroke-width="8" 
+                      stroke-dasharray="219.8" 
+                      [attr.stroke-dashoffset]="getDonutOffset()"
+                      stroke-linecap="round"></circle>
             </svg>
-            <div class="donut-center">
-              <span class="donut-value">{{ totalQuestions }}</span>
+            <div class="donut-text">
+              <div class="donut-value">{{ totalQuestions }}</div>
+              <div class="donut-label">/ {{ currentGoal }}</div>
             </div>
           </div>
-          <div class="progress-meta">
-            <span class="meta-text">Meta: {{ currentGoal }}</span>
-            <p class="stat-label">Respondidas</p>
-          </div>
         </div>
-        
       </div>
-
-      <!-- FILA INFERIOR: Precisión (ancho completo) -->
-      <div class="stats-row-bottom">
-        
-        <!-- Tarjeta 3: Velocímetro de Precisión ARREGLADO -->
-        <div class="stat-card precision-card-full">
-          <h4 class="stat-title">Precisión</h4>
-          <div class="gauge-chart-large">
-            <svg viewBox="0 0 120 70" class="gauge-svg">
-              <!-- Fondo del arco -->
-              <path 
-                d="M 20 65 A 40 40 0 0 1 100 65" 
-                fill="none" 
-                stroke="#e5e7eb" 
-                stroke-width="12"
-                stroke-linecap="round">
-              </path>
-              <!-- Arco de progreso -->
-              <path 
-                d="M 20 65 A 40 40 0 0 1 100 65" 
-                fill="none" 
-                stroke="url(#gradient3)" 
-                stroke-width="12"
-                stroke-linecap="round"
-                stroke-dasharray="125.6"
-                [style.stroke-dashoffset]="getGaugeOffsetLarge()"
-                class="gauge-progress">
-              </path>
-              <defs>
-                <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
-                  <stop offset="50%" style="stop-color:#10b981;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div class="gauge-center-large">
-              <span class="gauge-value-large">{{ overallSuccessRate }}%</span>
-            </div>
-          </div>
-          <p class="stat-label">Tasa de éxito</p>
-        </div>
-        
-      </div>
-      
     </div>
 
-    <!-- Gráfico de Progreso Semanal -->
-    <div class="chart-container">
+    <!-- Gráfico Semanal -->
+    <div class="weekly-chart-container">
       <div class="chart-header">
-        <h2>Progreso Semanal</h2>
-        <div class="time-selector">
-          <button 
-            class="time-btn" 
-            [class.active]="selectedTimeFrame === 'week'"
-            (click)="changeTimeFrame('week')">
-            Semana
-          </button>
-          <button 
-            class="time-btn" 
-            [class.active]="selectedTimeFrame === 'month'"
-            (click)="changeTimeFrame('month')">
-            Mes
-          </button>
+        <h2>Actividad Semanal</h2>
+        <div class="time-filters">
+          <button class="time-btn" [class.active]="selectedTimeFrame === 'week'" (click)="changeTimeFrame('week')">Semana</button>
+          <button class="time-btn" [class.active]="selectedTimeFrame === 'month'" (click)="changeTimeFrame('month')">Mes</button>
         </div>
       </div>
 
@@ -190,14 +96,10 @@
         <div class="chart-bars">
           <div *ngFor="let day of chartData" class="bar-group">
             <div class="bar-container">
-              <div 
-                class="bar bar-civil" 
-                [style.height.%]="getBarHeight(day.civil, 'civil')">
+              <div class="bar bar-civil" [style.height.%]="getBarHeight(day.civil, 'civil')">
                 <span class="bar-value">{{ day.civil }}</span>
               </div>
-              <div 
-                class="bar bar-procesal" 
-                [style.height.%]="getBarHeight(day.procesal, 'procesal')">
+              <div class="bar bar-procesal" [style.height.%]="getBarHeight(day.procesal, 'procesal')">
                 <span class="bar-value">{{ day.procesal }}</span>
               </div>
             </div>
@@ -212,10 +114,11 @@
       <h2>Rendimiento por Área</h2>
       
       <div class="area-cards">
-        <div *ngFor="let area of areaStats" class="area-card" (click)="goToAreaDetails(area.area)">
-          <div class="area-header">
+        <div *ngFor="let area of areaStats" class="area-card">
+          
+          <div class="area-header" (click)="toggleAreaExpansion(area.area)">
             <h3>{{ area.area }}</h3>
-            <ion-icon name="chevron-forward"></ion-icon>
+            <ion-icon [name]="isAreaExpanded(area.area) ? 'chevron-down' : 'chevron-forward'" class="expand-icon"></ion-icon>
           </div>
           
           <div class="area-progress">
@@ -223,10 +126,7 @@
               <span>{{ area.correctAnswers }}/{{ area.totalQuestions }} correctas</span>
               <span class="percentage">{{ area.successRate }}%</span>
             </div>
-            <ion-progress-bar 
-              [value]="area.successRate / 100" 
-              [color]="getProgressColor(area.successRate)">
-            </ion-progress-bar>
+            <ion-progress-bar [value]="area.successRate / 100" [color]="getProgressColor(area.successRate)"></ion-progress-bar>
           </div>
           
           <div class="area-details">
@@ -239,6 +139,59 @@
               <span>{{ area.successRate }}% precisión</span>
             </div>
           </div>
+
+          <ng-container *ngIf="isAreaExpanded(area.area)">
+            <div class="subtemas-section" *ngIf="getSubtemasForArea(area.area).length > 0">
+              
+              <div class="alert-weak-subtemas" *ngIf="getWeakSubtemas(area.area).length > 0">
+                <ion-icon name="warning"></ion-icon>
+                <div class="alert-content">
+                  <p class="alert-title">Necesitas reforzar:</p>
+                  <p class="alert-text">
+                    <span *ngFor="let weak of getWeakSubtemas(area.area); let last = last">
+                      {{ weak.subtemaNombre }} ({{ weak.successRate }}%){{ !last ? ', ' : '' }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="subtemas-list">
+                <div class="subtemas-header">
+                  <h4>Subtemas</h4>
+                  <span class="subtemas-count">{{ getSubtemasForArea(area.area).length }}</span>
+                </div>
+
+                <div *ngFor="let subtema of getSubtemasForArea(area.area)" 
+                     class="subtema-item"
+                     [class.low-performance]="subtema.successRate < 60"
+                     [class.medium-performance]="subtema.successRate >= 60 && subtema.successRate < 80"
+                     [class.high-performance]="subtema.successRate >= 80">
+                  
+                  <div class="subtema-info">
+                    <div class="subtema-name">{{ subtema.subtemaNombre }}</div>
+                    <div class="subtema-stats-mini">
+                      <span>{{ subtema.totalQuestions }} preguntas</span>
+                      <span class="separator">•</span>
+                      <span>{{ subtema.correctAnswers }} correctas</span>
+                    </div>
+                  </div>
+
+                  <div class="subtema-percentage" 
+                       [class.danger]="subtema.successRate < 60"
+                       [class.warning]="subtema.successRate >= 60 && subtema.successRate < 80"
+                       [class.success]="subtema.successRate >= 80">
+                    {{ subtema.successRate }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="getSubtemasForArea(area.area).length === 0" class="no-data-message">
+              <ion-icon name="analytics-outline"></ion-icon>
+              <p>Comienza a practicar para ver estadísticas detalladas</p>
+            </div>
+          </ng-container>
+
         </div>
       </div>
     </div>
@@ -252,12 +205,11 @@
 
       <div class="sessions-list">
         <div *ngFor="let session of recentSessions" class="session-card" (click)="goToSession(session.id)">
-          
           <div class="session-date-box">
             <div class="calendar-icon">
               <ion-icon name="calendar-outline"></ion-icon>
             </div>
-            <span class="date-text">{{ session.date }}</span>
+            <span class="date-text">{{ session.date | date: 'dd/MM' }}</span>
           </div>
           
           <div class="session-info">
@@ -279,7 +231,6 @@
       </div>
     </div>
 
-    <!-- Botón de Acción -->
     <div class="action-section">
       <button class="start-session-btn" (click)="startNewSession()">
         <ion-icon name="add-circle"></ion-icon>

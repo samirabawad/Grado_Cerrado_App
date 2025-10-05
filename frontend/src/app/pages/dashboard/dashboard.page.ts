@@ -28,9 +28,11 @@ export class DashboardPage implements OnInit {
   chartData: any[] = [];
   areaStats: any[] = [];
   recentSessions: any[] = [];
+  subtemaStats: any[] = [];
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
+  expandedArea: string | null = null;
 
   constructor(
     private router: Router,
@@ -82,49 +84,81 @@ export class DashboardPage implements OnInit {
             sessions: area.sessions,
             totalQuestions: area.totalQuestions,
             correctAnswers: area.correctAnswers,
-            successRate: Math.round(area.successRate)
+            successRate: Math.round(area.successRate || 0),
+            color: area.color
           }));
           
-          console.log('Áreas cargadas:', this.areaStats);
+          console.log('Estadísticas por área:', this.areaStats);
         }
       } catch (error) {
-        console.error('Error cargando áreas:', error);
+        console.error('Error cargando estadísticas por área:', error);
+      }
+
+      try {
+        const subtemaResponse = await this.apiService.getSubtemaStats(studentId).toPromise();
+        if (subtemaResponse && subtemaResponse.success) {
+          this.subtemaStats = subtemaResponse.data;
+          console.log('Estadísticas por subtema:', this.subtemaStats);
+        }
+      } catch (error) {
+        console.error('Error cargando estadísticas por subtema:', error);
       }
 
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
         if (sessionsResponse && sessionsResponse.success) {
-          this.recentSessions = sessionsResponse.data.map((session: any) => ({
-            id: session.id,
-            date: new Date(session.date).toLocaleDateString('es-ES'),
-            questions: session.questions,
-            correct: session.correct,
-            successRate: Math.round(session.successRate)
-          }));
-          
-          console.log('Sesiones cargadas:', this.recentSessions);
+          this.recentSessions = sessionsResponse.data;
+          console.log('Sesiones recientes:', this.recentSessions);
         }
       } catch (error) {
-        console.error('Error cargando sesiones:', error);
+        console.error('Error cargando sesiones recientes:', error);
       }
 
       await this.generateChartData();
 
+      this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
+      this.currentSessionGoal = this.calculateSessionGoal(this.totalSessions);
+
     } catch (error) {
-      console.error('Error general:', error);
+      console.error('Error general en loadDashboardData:', error);
     } finally {
       this.isLoading = false;
     }
   }
 
-  getSessionBadges(): number[] {
-    const maxBadges = 5;
-    return Array(maxBadges).fill(0).map((_, i) => i);
+  toggleAreaExpansion(areaName: string) {
+    if (this.expandedArea === areaName) {
+      this.expandedArea = null;
+    } else {
+      this.expandedArea = areaName;
+    }
   }
 
-  getMotivationalMessage(): string {
+  isAreaExpanded(areaName: string): boolean {
+    return this.expandedArea === areaName;
+  }
+
+  getSubtemasForArea(areaName: string): any[] {
+    if (!this.subtemaStats || this.subtemaStats.length === 0) {
+      return [];
+    }
+    return this.subtemaStats.filter(s => 
+      s.temaNombre === areaName || 
+      s.temaNombre === areaName.replace('Derecho ', '')
+    );
+  }
+
+  getWeakSubtemas(areaName: string): any[] {
+    const subtemas = this.getSubtemasForArea(areaName);
+    if (!subtemas || subtemas.length === 0) {
+      return [];
+    }
+    return subtemas.filter(s => s.successRate < 60).slice(0, 2);
+  }
+
+  getProgressMessage(): string {
     if (this.totalSessions === 0) {
-      return '¡Es un buen momento para empezar!';
+      return 'Comienza tu primera sesión';
     } else if (this.totalSessions < 10) {
       return '¡Sigue así!';
     } else if (this.totalSessions < 50) {
@@ -206,18 +240,24 @@ export class DashboardPage implements OnInit {
 
   getDonutOffset(): number {
     const circumference = 219.8;
+    if (this.totalQuestions === 0) {
+      return circumference;
+    }
     const progress = Math.min(this.totalQuestions / this.currentGoal, 1);
     return circumference * (1 - progress);
   }
 
   getGaugeOffset(): number {
-    const maxDash = 110;
+    const maxDash = 157;
     const progress = Math.min(this.overallSuccessRate / 100, 1);
     return maxDash * (1 - progress);
   }
 
   getGaugeOffsetLarge(): number {
     const maxDash = 125.6;
+    if (this.overallSuccessRate === 0) {
+      return maxDash;
+    }
     const progress = Math.min(this.overallSuccessRate / 100, 1);
     return maxDash * (1 - progress);
   }

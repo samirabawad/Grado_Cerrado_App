@@ -141,6 +141,24 @@ getAreaStats(studentId: number): Observable<any> {
       })
     );
 }
+
+getSubtemaStats(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/subtema-stats/${studentId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Estadísticas por subtema:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo stats por subtema:', error);
+        throw error;
+      })
+    );
+}
+
+
   // ✅ LOGIN DE USUARIO MEJORADO
   loginUser(loginData: { email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/auth/login`;
