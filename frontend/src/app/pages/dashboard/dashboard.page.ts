@@ -56,8 +56,9 @@ export class DashboardPage implements OnInit {
       }
 
       const studentId = currentUser.id;
-      this.userName = currentUser.name || 'Estudiante';
-
+      const fullName = currentUser.name || 'Estudiante';
+      this.userName = fullName.split(' ')[0]; // Solo el primer nombre
+      
       console.log('Cargando dashboard para estudiante:', studentId);
 
       try {

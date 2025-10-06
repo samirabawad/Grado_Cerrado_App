@@ -38,19 +38,26 @@
     <div class="stats-overview">
       <div class="stats-row-top">
         <div class="stat-card sessions-card">
-          <h4 class="stat-title">Sesiones</h4>
-          <div class="sessions-badges">
-            <ng-container *ngFor="let milestone of [0, 1, 2, 3, 4]; let i = index">
-              <div class="session-badge" 
-                   [class.completed]="totalSessions >= (i + 1) * 10" 
-                   [class.pending]="totalSessions < (i + 1) * 10">
-                <ion-icon *ngIf="totalSessions >= (i + 1) * 10" name="checkmark-circle"></ion-icon>
-                <ion-icon *ngIf="totalSessions < (i + 1) * 10" name="ellipse-outline"></ion-icon>
-              </div>
-            </ng-container>
-          </div>
-          <p class="sessions-progress">{{ totalSessions }}/50 sesiones</p>
+        <h4 class="stat-title">Sesiones</h4>
+        <div class="sessions-badges">
+          <ng-container *ngFor="let milestone of [0, 1, 2, 3, 4]; let i = index">
+            <div class="session-badge" 
+                [class.completed]="totalSessions >= (i + 1) * 10" 
+                [class.pending]="totalSessions < (i + 1) * 10">
+              <ion-icon *ngIf="totalSessions >= (i + 1) * 10" name="checkmark-circle"></ion-icon>
+              <ion-icon *ngIf="totalSessions < (i + 1) * 10" name="ellipse-outline"></ion-icon>
+            </div>
+          </ng-container>
         </div>
+        <p class="sessions-progress">
+          <span class="sessions-current">{{ totalSessions }}</span> de 
+          <span class="sessions-total">50</span>
+        </p>
+        <p class="sessions-message" *ngIf="totalSessions === 0">¡Empieza a aprender!</p>
+        <p class="sessions-message" *ngIf="totalSessions > 0 && totalSessions < 10">¡Sigue así!</p>
+        <p class="sessions-message" *ngIf="totalSessions >= 10 && totalSessions < 30">¡Tú puedes más!</p>
+        <p class="sessions-message" *ngIf="totalSessions >= 30">¡Vas excelente!</p>
+      </div>
 
         <div class="stat-card questions-card">
           <h4 class="stat-title">Preguntas</h4>

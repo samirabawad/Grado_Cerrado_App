@@ -55,8 +55,8 @@ export class ProfilePage implements OnInit {
     const userData = localStorage.getItem('currentUser');
     if (userData) {
       const parsed = JSON.parse(userData);
-      this.user.nombre = parsed.name || 'Usuario';
-      this.user.email = parsed.email || 'usuario@example.com';
+      const fullName = parsed.name || 'Usuario';
+      this.user.nombre = fullName.split(' ')[0]; // Solo primer nombre
     }
   }
 

@@ -25,12 +25,11 @@
 
 .user-greeting {
   position: absolute;
-  top: 50px;
-  left: 0;
-  right: 0;
+  top: 30px;
+  left: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
   gap: 12px;
 
   .back-button {
@@ -60,15 +59,15 @@
     flex: 1;
 
     .greeting-title {
-      color: white;
-      font-size: 18px;
+      color: rgb(0, 0, 0);
+      font-size: 24px;
       font-weight: 600;
       margin: 0;
       line-height: 1.2;
     }
 
     .greeting-subtitle {
-      color: rgba(255,255,255,0.9);
+      color: rgba(0, 0, 0, 0.9);
       font-size: 13px;
       margin: 2px 0 0 0;
     }
@@ -89,7 +88,7 @@
     }
 
     .streak-count {
-      color: white;
+      color: rgb(0, 0, 0);
       font-weight: 700;
       font-size: 14px;
     }
@@ -97,8 +96,8 @@
 }
 
 .scrollable-content {
-  margin-top: 200px;
-  padding: 20px;
+  margin-top: 150px;
+  padding: 0;
   padding-bottom: 100px;
 }
 
@@ -123,6 +122,7 @@
 
 .stats-overview {
   margin-bottom: 30px;
+  padding: 0 20px;
 
   .stats-row-top {
     display: grid;
@@ -139,19 +139,40 @@
     border: 1px solid #f1f5f9;
 
     &.sessions-card {
-      .stat-title {
-        font-size: 14px;
-        color: #64748b;
-        margin: 0 0 15px 0;
-        font-weight: 600;
-      }
-      .sessions-progress {
-        text-align: center;
-        margin: 15px 0 0 0;
-        font-size: 13px;
-        color: #64748b;
-        font-weight: 500;
-      }
+  .stat-title {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+  }
+  .sessions-progress {
+    text-align: center;
+    margin: 15px 0 8px 0;
+    font-size: 15px;
+    color: #000000;
+    font-weight: 600;
+    
+    .sessions-current {
+      font-size: 24px;
+      font-weight: 800;
+      color: #10b981;
+    }
+    
+    .sessions-total {
+      font-size: 16px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+  }
+  
+  .sessions-message {
+    text-align: center;
+    margin: 0;
+    font-size: 12px;
+    color: #10b981;
+    font-weight: 600;
+    font-style: italic;
+  }
 
       .sessions-badges {
         display: flex;
@@ -234,6 +255,7 @@
   background: white;
   border-radius: 16px;
   padding: 20px;
+  margin: 0 20px 30px 20px;
   margin-bottom: 30px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   border: 1px solid #f1f5f9;
@@ -366,7 +388,8 @@
 
 .area-stats-container {
   margin-bottom: 30px;
-  
+  padding: 0 20px;
+
   h2 {
     margin: 0 0 20px 0;
     font-size: 20px;
@@ -653,6 +676,7 @@
 
 .recent-sessions-container {
   margin-bottom: 30px;
+  padding: 0 20px;
 
   .section-header {
     display: flex;
@@ -765,6 +789,7 @@
 
 .action-section {
   margin-bottom: 30px;
+  padding: 0 20px;
 
   .start-session-btn {
     width: 100%;
