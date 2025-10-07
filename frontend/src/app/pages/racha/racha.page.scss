@@ -13,7 +13,9 @@ ion-content.racha-content {
   height: 100%;
 }
 
-// Header EXACTO como Civil
+// ========================================
+// HEADER FIJO - IGUAL QUE CIVIL
+// ========================================
 .custom-header-section {
   position: fixed;
   top: 0;
@@ -51,28 +53,29 @@ ion-content.racha-content {
   }
 }
 
-// Botón EXACTO como Civil
+// Flecha atrás - SOLO FLECHA BLANCA SIN CÍRCULO
 .back-button {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 12px);
   left: 12px;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
   z-index: 1100;
-  --min-width: 42px;
+  --color: #ffffff;
+  --icon-font-size: 28px;
+  --min-width: auto;
   --padding-start: 0;
   --padding-end: 0;
+  background: transparent;
+  box-shadow: none;
 
   ion-icon {
-    font-size: 22px;
-    color: #222;
+    font-size: 28px;
+    color: #ffffff;
   }
 }
 
-// Contenido
+// ========================================
+// CONTENIDO
+// ========================================
 .content-area {
   margin-top: 140px;
   padding: 20px 16px 100px;
@@ -299,7 +302,7 @@ ion-content.racha-content {
   border-radius: 20px;
   padding: 24px 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 
   .calendar-title {
     margin: 0 0 20px 0;
@@ -327,7 +330,7 @@ ion-content.racha-content {
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 4px;
 
     .calendar-day {
       aspect-ratio: 1;
@@ -337,28 +340,24 @@ ion-content.racha-content {
       border-radius: 8px;
       font-size: 14px;
       font-weight: 500;
-      color: #1f2937;
-      background: #f3f4f6;
+      color: #374151;
+      background: #f9fafb;
       transition: all 0.2s ease;
 
       &.empty {
         background: transparent;
+        color: #d1d5db;
       }
 
       &.studied {
-        background: #10b981;
+        background: linear-gradient(135deg, #10b981, #059669);
         color: white;
-        font-weight: 700;
+        font-weight: 600;
       }
 
       &.today {
         border: 2px solid #10b981;
         font-weight: 700;
-      }
-
-      &.studied.today {
-        background: #10b981;
-        border: 2px solid #065f46;
       }
     }
   }
@@ -372,7 +371,7 @@ ion-content.racha-content {
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
 
       .legend-box {
         width: 16px;
@@ -380,7 +379,7 @@ ion-content.racha-content {
         border-radius: 4px;
 
         &.studied {
-          background: #10b981;
+          background: linear-gradient(135deg, #10b981, #059669);
         }
 
         &.today {
@@ -397,9 +396,37 @@ ion-content.racha-content {
   }
 }
 
-// Responsive
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (min-width: 768px) {
+  .custom-header-section .green-background {
+    .racha-container-full {
+      .racha-image-responsive {
+        min-height: 150px;
+        max-height: 250px;
+      }
+    }
+  }
+  
+  .content-area {
+    margin-top: 180px;
+    padding: 24px 32px 100px;
+  }
+}
+
 @media (max-width: 480px) {
+  .custom-header-section .green-background {
+    .racha-container-full {
+      .racha-image-responsive {
+        min-height: 100px;
+        max-height: 160px;
+      }
+    }
+  }
+  
   .content-area {
     margin-top: 120px;
+    padding: 16px 12px 80px;
   }
 }
