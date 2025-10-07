@@ -56,6 +56,26 @@ ion-content.civil-content {
   }
 }
 
+// Flecha atrás - SOLO FLECHA BLANCA SIN CÍRCULO
+.gc-back-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 12px;
+  z-index: 1100;
+  --color: #ffffff;
+  --icon-font-size: 28px;
+  --min-width: auto;
+  --padding-start: 0;
+  --padding-end: 0;
+  background: transparent;
+  box-shadow: none;
+
+  &::part(icon) {
+    font-size: 28px;
+    color: #ffffff;
+  }
+}
+
 // ========================================
 // CONTENIDO PRINCIPAL
 // ========================================
@@ -70,7 +90,7 @@ ion-content.civil-content {
 }
 
 // ========================================
-// BOTÓN PRINCIPAL - ANGOSTO COMO DERECHO CIVIL
+// BOTÓN PRINCIPAL
 // ========================================
 .quick-practice-card {
   background: linear-gradient(135deg, #FF8F00, #F57C00);
@@ -128,7 +148,7 @@ ion-content.civil-content {
 }
 
 // ========================================
-// CARRUSEL DE BANNERS - COMPLETO SIN CORTAR
+// CARRUSEL DE BANNERS
 // ========================================
 .banner-section {
   margin-top: 20px;
@@ -140,35 +160,31 @@ ion-content.civil-content {
   max-width: 580px;
   background: white;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 
   .carousel-container {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 280px;
     background: white;
     border-radius: 20px;
-    padding: 0;
   }
 
   .carousel-image {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
-    object-fit: contain;
-    position: relative;
+    object-fit: cover;
+    object-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
     opacity: 0;
     transition: opacity 0.8s ease-in-out;
-    border-radius: 20px;
 
     &.active {
       opacity: 1;
       z-index: 1;
-    }
-
-    &:not(.active) {
-      position: absolute;
-      top: 0;
-      left: 0;
     }
   }
 
@@ -185,7 +201,7 @@ ion-content.civil-content {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.6);
       transition: all 0.3s ease;
       cursor: pointer;
 
@@ -244,6 +260,10 @@ ion-content.civil-content {
   .quick-practice-card {
     padding: 24px;
   }
+
+  .banner-section .carousel-container {
+    height: 320px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -268,5 +288,9 @@ ion-content.civil-content {
 
   .banner-section {
     max-width: 100%;
+  }
+
+  .banner-section .carousel-container {
+    height: 240px;
   }
 }
