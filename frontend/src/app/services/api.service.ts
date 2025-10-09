@@ -141,6 +141,21 @@ getAreaStats(studentId: number): Observable<any> {
       })
     );
 }
+getAreaStatsWithTemas(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/area-stats-with-temas/${studentId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Estadísticas por área con temas:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo stats por área con temas:', error);
+        throw error;
+      })
+    );
+}
 
 getSubtemaStats(studentId: number): Observable<any> {
   const url = `${this.API_URL}/Dashboard/subtema-stats/${studentId}`;
@@ -158,21 +173,7 @@ getSubtemaStats(studentId: number): Observable<any> {
     );
     
 }
-getTemaStats(studentId: number): Observable<any> {
-  const url = `${this.API_URL}/Dashboard/tema-stats/${studentId}`;
-  
-  return this.http.get<any>(url, this.httpOptions)
-    .pipe(
-      map((response: any) => {
-        console.log('Estadísticas por tema:', response);
-        return response;
-      }),
-      catchError((error: any) => {
-        console.error('Error obteniendo stats por tema:', error);
-        throw error;
-      })
-    );
-}
+
 
 
   // ✅ LOGIN DE USUARIO MEJORADO
@@ -506,7 +507,22 @@ startOralStudySession(sessionData: any): Observable<any> {
         throw error;
       })
     );
+    
 }
+getHierarchicalStats(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/hierarchical-stats/${studentId}`;
+  return this.http.get<any>(url, this.httpOptions).pipe(
+    map((response: any) => {
+      console.log('Estadísticas jerárquicas:', response);
+      return response;
+    }),
+    catchError((error: any) => {
+      console.error('Error obteniendo stats jerárquicas:', error);
+      throw error;
+    })
+  );
+}
+
 
 /**
  * ✍️ Método existente para sesiones ESCRITAS

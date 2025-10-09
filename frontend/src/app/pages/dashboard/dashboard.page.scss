@@ -139,40 +139,41 @@
     border: 1px solid #f1f5f9;
 
     &.sessions-card {
-  .stat-title {
-    font-size: 14px;
-    color: #64748b;
-    margin: 0 0 15px 0;
-    font-weight: 600;
-  }
-  .sessions-progress {
-    text-align: center;
-    margin: 15px 0 8px 0;
-    font-size: 15px;
-    color: #000000;
-    font-weight: 600;
-    
-    .sessions-current {
-      font-size: 24px;
-      font-weight: 800;
-      color: #10b981;
-    }
-    
-    .sessions-total {
-      font-size: 16px;
-      font-weight: 700;
-      color: #94a3b8;
-    }
-  }
-  
-  .sessions-message {
-    text-align: center;
-    margin: 0;
-    font-size: 12px;
-    color: #10b981;
-    font-weight: 600;
-    font-style: italic;
-  }
+      .stat-title {
+        font-size: 14px;
+        color: #64748b;
+        margin: 0 0 15px 0;
+        font-weight: 600;
+      }
+      
+      .sessions-progress {
+        text-align: center;
+        margin: 15px 0 8px 0;
+        font-size: 15px;
+        color: #000000;
+        font-weight: 600;
+        
+        .sessions-current {
+          font-size: 24px;
+          font-weight: 800;
+          color: #10b981;
+        }
+        
+        .sessions-total {
+          font-size: 16px;
+          font-weight: 700;
+          color: #94a3b8;
+        }
+      }
+      
+      .sessions-message {
+        text-align: center;
+        margin: 0;
+        font-size: 12px;
+        color: #10b981;
+        font-weight: 600;
+        font-style: italic;
+      }
 
       .sessions-badges {
         display: flex;
@@ -247,7 +248,6 @@
         }
       }
     }
-
   }
 }
 
@@ -487,6 +487,164 @@
           ion-icon {
             font-size: 16px;
             color: #94a3b8;
+          }
+        }
+      }
+
+      .temas-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #f1f5f9;
+        animation: slideDown 0.3s ease;
+
+        .tema-card {
+          background: #f8fafc;
+          border-radius: 12px;
+          padding: 15px;
+          margin-bottom: 12px;
+          border: 1px solid #e2e8f0;
+
+          .tema-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 10px;
+
+            &:hover {
+              .expand-icon-tema {
+                color: #10b981;
+              }
+            }
+
+            h4 {
+              margin: 0;
+              font-size: 15px;
+              font-weight: 600;
+              color: #1e293b;
+            }
+
+            .expand-icon-tema {
+              color: #94a3b8;
+              font-size: 20px;
+              transition: all 0.3s ease;
+            }
+          }
+
+          .tema-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+
+            .tema-questions {
+              font-size: 13px;
+              color: #64748b;
+            }
+
+            .tema-percentage {
+              font-size: 15px;
+              font-weight: 700;
+              padding: 4px 12px;
+              border-radius: 8px;
+
+              &.danger {
+                background: #fee2e2;
+                color: #dc2626;
+              }
+
+              &.warning {
+                background: #fef3c7;
+                color: #f59e0b;
+              }
+
+              &.success {
+                background: #d1fae5;
+                color: #10b981;
+              }
+            }
+          }
+
+          .subtemas-list {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+
+            .subtema-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 12px 15px;
+              border-radius: 10px;
+              margin-bottom: 8px;
+              background: white;
+              border: 1px solid #e2e8f0;
+              transition: all 0.2s ease;
+
+              &:hover {
+                transform: translateX(3px);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+              }
+
+              &.low-performance {
+                background: #fef2f2;
+                border-color: #fecaca;
+              }
+
+              &.medium-performance {
+                background: #fffbeb;
+                border-color: #fde68a;
+              }
+
+              &.high-performance {
+                background: #f0fdf4;
+                border-color: #bbf7d0;
+              }
+
+              .subtema-info {
+                flex: 1;
+
+                .subtema-name {
+                  font-size: 14px;
+                  font-weight: 600;
+                  color: #1e293b;
+                  margin-bottom: 4px;
+                }
+
+                .subtema-stats-mini {
+                  font-size: 12px;
+                  color: #64748b;
+
+                  .separator {
+                    margin: 0 6px;
+                    color: #cbd5e1;
+                  }
+                }
+              }
+
+              .subtema-percentage {
+                font-size: 16px;
+                font-weight: 700;
+                padding: 6px 12px;
+                border-radius: 8px;
+
+                &.danger {
+                  background: #dc2626;
+                  color: white;
+                }
+
+                &.warning {
+                  background: #f59e0b;
+                  color: white;
+                }
+
+                &.success {
+                  background: #10b981;
+                  color: white;
+                }
+              }
+            }
           }
         }
       }

@@ -28,8 +28,6 @@ export class DashboardPage implements OnInit {
   chartData: any[] = [];
   areaStats: any[] = [];
   recentSessions: any[] = [];
-  subtemaStats: any[] = [];
-  temaStats: any[] = [];
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -80,41 +78,56 @@ export class DashboardPage implements OnInit {
       }
 
       try {
-        const areaResponse = await this.apiService.getAreaStats(studentId).toPromise();
+        const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();        
         if (areaResponse && areaResponse.success) {
-          this.areaStats = areaResponse.data.map((area: any) => ({
-            area: area.area,
-            sessions: area.sessions,
-            totalQuestions: area.totalQuestions,
-            correctAnswers: area.correctAnswers,
-            successRate: Math.round(area.successRate || 0),
-            color: area.color
-          }));
+          console.log('Datos jerárquicos:', areaResponse.data);
           
-          console.log('Estadísticas por área:', this.areaStats);
+          this.areaStats = [];
+          
+          areaResponse.data.forEach((item: any) => {
+            if (item.type === 'general') {
+              this.areaStats.push({
+                area: item.area,
+                sessions: item.sessions,
+                totalQuestions: item.totalQuestions,
+                correctAnswers: item.correctAnswers,
+                successRate: Math.round(item.successRate || 0),
+                isGeneral: true,
+                temas: []
+              });
+            } else if (item.type === 'area') {
+              const totalPreguntas = item.temas.reduce((sum: number, tema: any) => sum + tema.totalPreguntas, 0);
+              const totalCorrectas = item.temas.reduce((sum: number, tema: any) => sum + tema.preguntasCorrectas, 0);
+              
+              this.areaStats.push({
+                area: item.area,
+                sessions: 0,
+                totalQuestions: totalPreguntas,
+                correctAnswers: totalCorrectas,
+                successRate: this.calculateAreaSuccessRate(item.temas),
+                isGeneral: false,
+                temas: item.temas.map((tema: any) => ({
+                  temaId: tema.temaId,
+                  temaNombre: tema.temaNombre,
+                  totalPreguntas: tema.totalPreguntas,
+                  preguntasCorrectas: tema.preguntasCorrectas,
+                  porcentajeAcierto: Math.round(tema.porcentajeAcierto || 0),
+                  subtemas: tema.subtemas.map((subtema: any) => ({
+                    subtemaId: subtema.subtemaId,
+                    subtemaNombre: subtema.subtemaNombre,
+                    totalPreguntas: subtema.totalPreguntas,
+                    preguntasCorrectas: subtema.preguntasCorrectas,
+                    porcentajeAcierto: Math.round(subtema.porcentajeAcierto || 0)
+                  }))
+                }))
+              });
+            }
+          });
+          
+          console.log('Estadísticas procesadas:', this.areaStats);
         }
       } catch (error) {
         console.error('Error cargando estadísticas por área:', error);
-      }
-
-      try {
-        const temaResponse = await this.apiService.getTemaStats(studentId).toPromise();
-        if (temaResponse && temaResponse.success) {
-          this.temaStats = temaResponse.data;
-          console.log('Estadísticas por tema:', this.temaStats);
-        }
-      } catch (error) {
-        console.error('Error cargando estadísticas por tema:', error);
-      }
-
-      try {
-        const subtemaResponse = await this.apiService.getSubtemaStats(studentId).toPromise();
-        if (subtemaResponse && subtemaResponse.success) {
-          this.subtemaStats = subtemaResponse.data;
-          console.log('Estadísticas por subtema:', this.subtemaStats);
-        }
-      } catch (error) {
-        console.error('Error cargando estadísticas por subtema:', error);
       }
 
       try {
@@ -137,6 +150,14 @@ export class DashboardPage implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  calculateAreaSuccessRate(temas: any[]): number {
+    const totalPreguntas = temas.reduce((sum: number, tema: any) => sum + tema.totalPreguntas, 0);
+    const totalCorrectas = temas.reduce((sum: number, tema: any) => sum + tema.preguntasCorrectas, 0);
+    
+    if (totalPreguntas === 0) return 0;
+    return Math.round((totalCorrectas / totalPreguntas) * 100);
   }
 
   toggleAreaExpansion(areaName: string) {
@@ -163,20 +184,14 @@ export class DashboardPage implements OnInit {
     return this.expandedTema === temaNombre;
   }
 
-  getTemasForArea(area: string): any[] {
-    return this.temaStats;
+  getTemasForArea(areaName: string): any[] {
+    const area = this.areaStats.find(a => a.area === areaName && !a.isGeneral);
+    console.log('Buscando temas para área:', areaName, 'Area encontrada:', area);
+    console.log('Temas:', area?.temas);
+    return area && area.temas ? area.temas : [];
   }
-
-  getSubtemasForTema(temaNombre: string): any[] {
-    return this.subtemaStats.filter((subtema: any) => subtema.temaNombre === temaNombre);
-  }
-
-  getWeakSubtemasForTema(temaNombre: string): any[] {
-    const subtemas = this.getSubtemasForTema(temaNombre);
-    if (!subtemas || subtemas.length === 0) {
-      return [];
-    }
-    return subtemas.filter(s => s.porcentajeAcierto < 60).slice(0, 2);
+  getSubtemasForTema(tema: any): any[] {
+    return tema && tema.subtemas ? tema.subtemas : [];
   }
 
   getProgressMessage(): string {
