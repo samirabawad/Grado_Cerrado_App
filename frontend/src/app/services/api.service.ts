@@ -156,6 +156,22 @@ getSubtemaStats(studentId: number): Observable<any> {
         throw error;
       })
     );
+    
+}
+getTemaStats(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/tema-stats/${studentId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Estadísticas por tema:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo stats por tema:', error);
+        throw error;
+      })
+    );
 }
 
 

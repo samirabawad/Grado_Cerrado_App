@@ -29,10 +29,12 @@ export class DashboardPage implements OnInit {
   areaStats: any[] = [];
   recentSessions: any[] = [];
   subtemaStats: any[] = [];
+  temaStats: any[] = [];
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
   expandedArea: string | null = null;
+  expandedTema: string | null = null;
 
   constructor(
     private router: Router,
@@ -57,7 +59,7 @@ export class DashboardPage implements OnInit {
 
       const studentId = currentUser.id;
       const fullName = currentUser.name || 'Estudiante';
-      this.userName = fullName.split(' ')[0]; // Solo el primer nombre
+      this.userName = fullName.split(' ')[0];
       
       console.log('Cargando dashboard para estudiante:', studentId);
 
@@ -93,6 +95,16 @@ export class DashboardPage implements OnInit {
         }
       } catch (error) {
         console.error('Error cargando estadísticas por área:', error);
+      }
+
+      try {
+        const temaResponse = await this.apiService.getTemaStats(studentId).toPromise();
+        if (temaResponse && temaResponse.success) {
+          this.temaStats = temaResponse.data;
+          console.log('Estadísticas por tema:', this.temaStats);
+        }
+      } catch (error) {
+        console.error('Error cargando estadísticas por tema:', error);
       }
 
       try {
@@ -139,22 +151,32 @@ export class DashboardPage implements OnInit {
     return this.expandedArea === areaName;
   }
 
-  getSubtemasForArea(areaName: string): any[] {
-    if (!this.subtemaStats || this.subtemaStats.length === 0) {
-      return [];
+  toggleTemaExpansion(temaNombre: string) {
+    if (this.expandedTema === temaNombre) {
+      this.expandedTema = null;
+    } else {
+      this.expandedTema = temaNombre;
     }
-    return this.subtemaStats.filter(s => 
-      s.temaNombre === areaName || 
-      s.temaNombre === areaName.replace('Derecho ', '')
-    );
   }
 
-  getWeakSubtemas(areaName: string): any[] {
-    const subtemas = this.getSubtemasForArea(areaName);
+  isTemaExpanded(temaNombre: string): boolean {
+    return this.expandedTema === temaNombre;
+  }
+
+  getTemasForArea(area: string): any[] {
+    return this.temaStats;
+  }
+
+  getSubtemasForTema(temaNombre: string): any[] {
+    return this.subtemaStats.filter((subtema: any) => subtema.temaNombre === temaNombre);
+  }
+
+  getWeakSubtemasForTema(temaNombre: string): any[] {
+    const subtemas = this.getSubtemasForTema(temaNombre);
     if (!subtemas || subtemas.length === 0) {
       return [];
     }
-    return subtemas.filter(s => s.successRate < 60).slice(0, 2);
+    return subtemas.filter(s => s.porcentajeAcierto < 60).slice(0, 2);
   }
 
   getProgressMessage(): string {

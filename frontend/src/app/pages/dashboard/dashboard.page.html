@@ -116,7 +116,7 @@
       </div>
     </div>
 
-    <!-- Estadísticas por Área -->
+  <!-- Estadísticas por Área -->
     <div class="area-stats-container">
       <h2>Rendimiento por Área</h2>
       
@@ -148,57 +148,77 @@
           </div>
 
           <ng-container *ngIf="isAreaExpanded(area.area)">
-            <div class="subtemas-section" *ngIf="getSubtemasForArea(area.area).length > 0">
+            <div class="temas-section" *ngIf="getTemasForArea(area.area).length > 0">
               
-              <div class="alert-weak-subtemas" *ngIf="getWeakSubtemas(area.area).length > 0">
-                <ion-icon name="warning"></ion-icon>
-                <div class="alert-content">
-                  <p class="alert-title">Necesitas reforzar:</p>
-                  <p class="alert-text">
-                    <span *ngFor="let weak of getWeakSubtemas(area.area); let last = last">
-                      {{ weak.subtemaNombre }} ({{ weak.successRate }}%){{ !last ? ', ' : '' }}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              <div class="subtemas-list">
-                <div class="subtemas-header">
-                  <h4>Subtemas</h4>
-                  <span class="subtemas-count">{{ getSubtemasForArea(area.area).length }}</span>
-                </div>
-
-                <div *ngFor="let subtema of getSubtemasForArea(area.area)" 
-                     class="subtema-item"
-                     [class.low-performance]="subtema.successRate < 60"
-                     [class.medium-performance]="subtema.successRate >= 60 && subtema.successRate < 80"
-                     [class.high-performance]="subtema.successRate >= 80">
+              <div class="temas-list">
+                <div *ngFor="let tema of getTemasForArea(area.area)" class="tema-card">
                   
-                  <div class="subtema-info">
-                    <div class="subtema-name">{{ subtema.subtemaNombre }}</div>
-                    <div class="subtema-stats-mini">
-                      <span>{{ subtema.totalQuestions }} preguntas</span>
-                      <span class="separator">•</span>
-                      <span>{{ subtema.correctAnswers }} correctas</span>
+                  <div class="tema-header" (click)="toggleTemaExpansion(tema.temaNombre)">
+                    <h4>{{ tema.temaNombre }}</h4>
+                    <ion-icon [name]="isTemaExpanded(tema.temaNombre) ? 'chevron-down' : 'chevron-forward'" class="expand-icon-small"></ion-icon>
+                  </div>
+                  
+                  <div class="tema-progress">
+                    <div class="progress-info">
+                      <span>{{ tema.preguntasCorrectas }}/{{ tema.totalPreguntas }} correctas</span>
+                      <span class="percentage">{{ tema.porcentajeAcierto }}%</span>
                     </div>
+                    <ion-progress-bar [value]="tema.porcentajeAcierto / 100" [color]="getProgressColor(tema.porcentajeAcierto)"></ion-progress-bar>
                   </div>
 
-                  <div class="subtema-percentage" 
-                       [class.danger]="subtema.successRate < 60"
-                       [class.warning]="subtema.successRate >= 60 && subtema.successRate < 80"
-                       [class.success]="subtema.successRate >= 80">
-                    {{ subtema.successRate }}%
-                  </div>
+                  <ng-container *ngIf="isTemaExpanded(tema.temaNombre)">
+                    <div class="subtemas-section" *ngIf="getSubtemasForTema(tema.temaNombre).length > 0">
+                      
+                      <div class="alert-weak-subtemas" *ngIf="getWeakSubtemasForTema(tema.temaNombre).length > 0">
+                        <ion-icon name="warning"></ion-icon>
+                        <div class="alert-content">
+                          <p class="alert-title">Necesitas reforzar:</p>
+                          <p class="alert-text">
+                            <span *ngFor="let weak of getWeakSubtemasForTema(tema.temaNombre); let last = last">
+                              {{ weak.subtemaNombre }} ({{ weak.porcentajeAcierto }}%){{ !last ? ', ' : '' }}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div class="subtemas-list">
+                        <div class="subtemas-header">
+                          <h5>Subtemas</h5>
+                          <span class="subtemas-count">{{ getSubtemasForTema(tema.temaNombre).length }}</span>
+                        </div>
+
+                        <div *ngFor="let subtema of getSubtemasForTema(tema.temaNombre)" 
+                            class="subtema-item"
+                            [class.low-performance]="subtema.porcentajeAcierto < 60"
+                            [class.medium-performance]="subtema.porcentajeAcierto >= 60 && subtema.porcentajeAcierto < 80"
+                            [class.high-performance]="subtema.porcentajeAcierto >= 80">
+                          
+                          <div class="subtema-info">
+                            <div class="subtema-name">{{ subtema.subtemaNombre }}</div>
+                            <div class="subtema-stats-mini">
+                              <span>{{ subtema.totalPreguntas }} preguntas</span>
+                              <span class="separator">•</span>
+                              <span>{{ subtema.preguntasCorrectas }} correctas</span>
+                            </div>
+                          </div>
+
+                          <div class="subtema-performance">
+                            <span class="percentage-badge">{{ subtema.porcentajeAcierto }}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
                 </div>
               </div>
-            </div>
-
-            <div *ngIf="getSubtemasForArea(area.area).length === 0" class="no-data-message">
-              <ion-icon name="analytics-outline"></ion-icon>
-              <p>Comienza a practicar para ver estadísticas detalladas</p>
             </div>
           </ng-container>
+        </div>
 
+        <div class="empty-state" *ngIf="areaStats.length === 0">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+          <p>Aún no tienes estadísticas</p>
+          <p class="empty-subtitle">Completa tu primera sesión para ver tu progreso</p>
         </div>
       </div>
     </div>
