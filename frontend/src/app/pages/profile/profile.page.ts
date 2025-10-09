@@ -1,9 +1,12 @@
+// frontend/src/app/pages/profile/profile.page.ts
+
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
+import { ApiService, StudyFrequencyConfig } from '../../services/api.service';
 
 @Component({
   selector: 'app-profile',
@@ -14,9 +17,11 @@ import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-na
 })
 export class ProfilePage implements OnInit {
 
-  // Datos del usuario desde la base de datos
+  // ============================================
+  // PROPIEDADES EXISTENTES
+  // ============================================
   user = {
-    id: 2,
+    id: 2, // IMPORTANTE: Cambiar al ID real del usuario logueado
     nombre: 'Usuario',
     email: 'usuario@example.com',
     nivel_actual: 'basico',
@@ -26,7 +31,6 @@ export class ProfilePage implements OnInit {
     verificado: false
   };
 
-  // Estadísticas desde metricas_estudiante
   stats = {
     racha_dias_actual: 0,
     racha_dias_maxima: 0,
@@ -36,7 +40,6 @@ export class ProfilePage implements OnInit {
     promedio_aciertos: 0
   };
 
-  // Configuración
   settings = {
     darkMode: false,
     soundEffects: true,
@@ -44,30 +47,49 @@ export class ProfilePage implements OnInit {
     autoSave: true
   };
 
+  // ============================================
+  // PROPIEDADES DE FRECUENCIA DE ESTUDIO
+  // ============================================
+  frecuenciaConfig: StudyFrequencyConfig = {
+    frecuenciaSemanal: 3,
+    objetivoDias: 'flexible',
+    diasPreferidos: [],
+    recordatorioActivo: true,
+    horaRecordatorio: '19:00'
+  };
+
+  cumplimiento: any = null;
+  isSaving: boolean = false;
+  diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
   constructor(
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController,
+    private apiService: ApiService
   ) { }
 
   ngOnInit() {
     this.loadUserData();
     this.loadSettings();
+    this.loadStudyFrequency();
+    this.loadCumplimiento();
   }
 
-  // Cargar datos del usuario (de localStorage por ahora)
+  // ============================================
+  // MÉTODOS EXISTENTES
+  // ============================================
   loadUserData() {
     const userData = localStorage.getItem('currentUser');
     if (userData) {
       const parsed = JSON.parse(userData);
-      this.user.nombre = parsed.name || 'Usuario';
+      this.user.id = parsed.id || 2;
+      const fullName = parsed.name || 'Usuario';
+      this.user.nombre = fullName.split(' ')[0];
       this.user.email = parsed.email || 'usuario@example.com';
     }
-    
-    // TODO: Conectar con API para obtener datos reales
-    // this.apiService.getUserProfile(userId).subscribe(...)
   }
 
-  // Cargar configuración
   loadSettings() {
     const saved = localStorage.getItem('appSettings');
     if (saved) {
@@ -75,7 +97,6 @@ export class ProfilePage implements OnInit {
     }
   }
 
-  // Formatear nivel
   getNivelFormatted(): string {
     const niveles: any = {
       'basico': 'Básico',
@@ -85,7 +106,6 @@ export class ProfilePage implements OnInit {
     return niveles[this.user.nivel_actual] || 'Básico';
   }
 
-  // Formatear fecha de registro
   getFechaRegistroFormatted(): string {
     const fecha = new Date(this.user.fecha_registro);
     return fecha.toLocaleDateString('es-ES', { 
@@ -95,76 +115,35 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  // Editar perfil
   async editProfile() {
     const alert = await this.alertController.create({
       header: 'Editar Perfil',
-      message: 'Función en desarrollo. Próximamente podrás editar tu perfil.',
+      message: 'Función en desarrollo.',
       buttons: ['OK']
     });
     await alert.present();
   }
 
-  // Cambiar foto de perfil
   async changeAvatar() {
     const alert = await this.alertController.create({
       header: 'Cambiar Foto',
-      message: 'Función en desarrollo. Próximamente podrás cambiar tu foto de perfil.',
+      message: 'Función en desarrollo.',
       buttons: ['OK']
     });
     await alert.present();
   }
 
-  // Ver certificados
-  viewCertificates() {
-    console.log('Ver certificados');
-  }
-
-  // Ver logros
-  viewAchievements() {
-    this.router.navigate(['/racha']);
-  }
-
-  // Ver historial
-  viewHistory() {
-    this.router.navigate(['/dashboard']);
-  }
-
-  // Ayuda y soporte
-  async getHelp() {
-    const alert = await this.alertController.create({
-      header: 'Ayuda y Soporte',
-      message: '¿Necesitas ayuda? Contáctanos en soporte@gradocerrado.com',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  // Acerca de
-  async aboutApp() {
-    const alert = await this.alertController.create({
-      header: 'Grado Cerrado',
-      message: 'Versión 1.0.0\n\nTu aplicación de estudio inteligente para preparar tu examen de grado.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  // Cerrar sesión
   async logout() {
     const alert = await this.alertController.create({
       header: 'Cerrar Sesión',
-      message: '¿Estás seguro que deseas cerrar sesión?',
+      message: '¿Estás seguro?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Cerrar Sesión',
+        { text: 'Cancelar', role: 'cancel' },
+        { 
+          text: 'Sí, cerrar sesión', 
           handler: () => {
             localStorage.removeItem('currentUser');
-            this.router.navigate(['/welcome']);
+            this.router.navigate(['/login']);
           }
         }
       ]
@@ -172,13 +151,214 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
-  // Guardar configuración
-  saveSettings() {
-    localStorage.setItem('appSettings', JSON.stringify(this.settings));
+  goBack() {
+    this.router.navigate(['/dashboard']);
   }
 
-  // Volver
-  goBack() {
-    this.router.navigate(['/home']);
+  // ============================================
+  // MÉTODOS DE FRECUENCIA DE ESTUDIO
+  // ============================================
+  
+  loadStudyFrequency() {
+    const studentId = this.user.id;
+    
+    this.apiService.getStudyFrequency(studentId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.frecuenciaConfig = {
+            frecuenciaSemanal: response.data.frecuenciaSemanal || 3,
+            objetivoDias: (response.data.objetivoDias as 'flexible' | 'estricto' | 'personalizado') || 'flexible',
+            diasPreferidos: response.data.diasPreferidos || [],
+            recordatorioActivo: response.data.recordatorioActivo ?? true,
+            horaRecordatorio: response.data.horaRecordatorio || '19:00'
+          };
+          console.log('✅ Configuración cargada:', this.frecuenciaConfig);
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando frecuencia:', error);
+      }
+    });
+  }
+
+  loadCumplimiento() {
+    const studentId = this.user.id;
+    
+    this.apiService.getStudyFrequencyCumplimiento(studentId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.cumplimiento = response.data;
+          console.log('✅ Cumplimiento cargado:', this.cumplimiento);
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando cumplimiento:', error);
+      }
+    });
+  }
+
+  // ============================================
+  // CONTROL DE FRECUENCIA
+  // ============================================
+  
+  increaseFrecuencia() {
+    if (this.frecuenciaConfig.frecuenciaSemanal < 7) {
+      this.frecuenciaConfig.frecuenciaSemanal++;
+    }
+  }
+
+  decreaseFrecuencia() {
+    if (this.frecuenciaConfig.frecuenciaSemanal > 1) {
+      this.frecuenciaConfig.frecuenciaSemanal--;
+      if (this.frecuenciaConfig.diasPreferidos.length > this.frecuenciaConfig.frecuenciaSemanal) {
+        this.frecuenciaConfig.diasPreferidos = this.frecuenciaConfig.diasPreferidos
+          .slice(0, this.frecuenciaConfig.frecuenciaSemanal);
+      }
+    }
+  }
+
+  setFrecuencia(dias: number) {
+    this.frecuenciaConfig.frecuenciaSemanal = dias;
+    if (this.frecuenciaConfig.diasPreferidos.length > dias) {
+      this.frecuenciaConfig.diasPreferidos = this.frecuenciaConfig.diasPreferidos.slice(0, dias);
+    }
+  }
+
+  // ============================================
+  // DÍAS PREFERIDOS
+  // ============================================
+  
+  isDiaSelected(dia: number): boolean {
+    return this.frecuenciaConfig.diasPreferidos.includes(dia);
+  }
+
+  toggleDia(dia: number) {
+    const index = this.frecuenciaConfig.diasPreferidos.indexOf(dia);
+    
+    if (index > -1) {
+      this.frecuenciaConfig.diasPreferidos.splice(index, 1);
+    } else {
+      if (this.frecuenciaConfig.diasPreferidos.length < this.frecuenciaConfig.frecuenciaSemanal) {
+        this.frecuenciaConfig.diasPreferidos.push(dia);
+        this.frecuenciaConfig.diasPreferidos.sort((a, b) => a - b);
+      }
+    }
+  }
+
+  // ============================================
+  // RECORDATORIOS
+  // ============================================
+  
+  onRecordatorioChange() {
+    console.log('Recordatorio:', this.frecuenciaConfig.recordatorioActivo);
+  }
+
+  // ============================================
+  // GUARDAR CONFIGURACIÓN
+  // ============================================
+  
+  async saveFrequency() {
+    this.isSaving = true;
+
+    this.apiService.updateStudyFrequency(this.user.id, this.frecuenciaConfig).subscribe({
+      next: async (response) => {
+        this.isSaving = false;
+        
+        if (response.success) {
+          await this.showToast('✅ Configuración guardada correctamente', 'success');
+          this.loadCumplimiento();
+        } else {
+          await this.showToast('⚠️ No se pudo guardar la configuración', 'warning');
+        }
+      },
+      error: async (error) => {
+        this.isSaving = false;
+        console.error('Error guardando frecuencia:', error);
+        await this.showToast('❌ Error al guardar la configuración', 'danger');
+      }
+    });
+  }
+
+  // ============================================
+  // MENSAJES DE PROGRESO
+  // ============================================
+  
+  getProgressMessage(): string {
+    if (!this.cumplimiento) return '';
+
+    const porcentaje = this.cumplimiento.porcentajeCumplimiento;
+    const faltantes = this.cumplimiento.objetivoSemanal - this.cumplimiento.diasEstudiadosSemana;
+
+    if (porcentaje >= 100) {
+      return '¡Objetivo cumplido! 🎉';
+    } else if (porcentaje >= 75) {
+      return `¡Vas muy bien! Solo ${faltantes} día${faltantes > 1 ? 's' : ''} más`;
+    } else if (porcentaje >= 50) {
+      return `Buen avance. Faltan ${faltantes} día${faltantes > 1 ? 's' : ''}`;
+    } else if (porcentaje > 0) {
+      return `Sigue así. Faltan ${faltantes} día${faltantes > 1 ? 's' : ''}`;
+    } else {
+      return '¡Comienza hoy! 💪';
+    }
+  }
+
+  // ============================================
+  // UTILIDADES
+  // ============================================
+  
+  async showToast(message: string, color: string = 'primary') {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 3000,
+      position: 'top',
+      color: color,
+      cssClass: 'custom-toast'
+    });
+    await toast.present();
+  }
+
+    // ============================================
+  // MÉTODOS FALTANTES
+  // ============================================
+  
+  async viewHistory() {
+    const alert = await this.alertController.create({
+      header: 'Historial',
+      message: 'Función en desarrollo. Próximamente podrás ver tu historial completo.',
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  async viewAchievements() {
+    const alert = await this.alertController.create({
+      header: 'Logros',
+      message: 'Función en desarrollo. Próximamente podrás ver tus logros y medallas.',
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  saveSettings() {
+    localStorage.setItem('appSettings', JSON.stringify(this.settings));
+    console.log('Configuración guardada:', this.settings);
+  }
+
+  async getHelp() {
+    const alert = await this.alertController.create({
+      header: 'Ayuda',
+      message: 'Para soporte, contáctanos en soporte@gradocerrado.com',
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  async aboutApp() {
+    const alert = await this.alertController.create({
+      header: 'Acerca de',
+      message: 'Grado Cerrado v1.0.0\n\nAplicación de estudio para preparación de exámenes.',
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 }

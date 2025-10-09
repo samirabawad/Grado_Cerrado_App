@@ -28,6 +28,36 @@ export interface SubmitAnswerResponse {
   correctAnswer: string;
 }
 
+export interface StudyFrequencyConfig {
+  frecuenciaSemanal: number;
+  objetivoDias: 'flexible' | 'estricto' | 'personalizado';
+  diasPreferidos: number[]; // 0=Domingo, 1=Lunes, ..., 6=Sábado
+  recordatorioActivo: boolean;
+  horaRecordatorio: string; // formato "HH:mm"
+}
+
+export interface StudyFrequencyResponse {
+  success: boolean;
+  data: {
+    estudianteId: number;
+    frecuenciaSemanal: number;
+    objetivoDias: string;
+    diasPreferidos: number[];
+    recordatorioActivo: boolean;
+    horaRecordatorio: string;
+  };
+}
+
+export interface CumplimientoResponse {
+  success: boolean;
+  data: {
+    objetivoSemanal: number;
+    diasEstudiadosSemana: number;
+    porcentajeCumplimiento: number;
+    rachaActual: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -430,6 +460,108 @@ submitAnswer(answerData: SubmitAnswerRequest): Observable<SubmitAnswerResponse> 
         }
         
         throw { ...error, friendlyMessage: errorMessage };
+      })
+    );
+}
+
+// ============================================
+// FRECUENCIA DE ESTUDIO
+// ============================================
+
+/**
+ * Obtener la configuración de frecuencia de estudio del estudiante
+ */
+getStudyFrequency(studentId: number): Observable<StudyFrequencyResponse> {
+  const url = `${this.API_URL}/StudyFrequency/${studentId}`;
+  
+  return this.http.get<StudyFrequencyResponse>(url, this.httpOptions)
+    .pipe(
+      map((response: StudyFrequencyResponse) => {
+        console.log('✅ Frecuencia obtenida:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo frecuencia:', error);
+        
+        let errorMessage = 'Error al obtener frecuencia de estudio';
+        
+        if (error.status === 0) {
+          errorMessage = 'No se puede conectar al servidor';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        // Retornar datos por defecto en caso de error
+        return of({
+          success: true,
+          data: {
+            estudianteId: studentId,
+            frecuenciaSemanal: 3,
+            objetivoDias: 'flexible',
+            diasPreferidos: [],
+            recordatorioActivo: true,
+            horaRecordatorio: '19:00'
+          }
+        } as StudyFrequencyResponse);
+      })
+    );
+}
+
+/**
+ * Actualizar la configuración de frecuencia de estudio
+ */
+updateStudyFrequency(studentId: number, config: StudyFrequencyConfig): Observable<any> {
+  const url = `${this.API_URL}/StudyFrequency/${studentId}`;
+  
+  console.log('📤 Actualizando frecuencia:', config);
+  
+  return this.http.put(url, config, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Frecuencia actualizada:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error actualizando frecuencia:', error);
+        
+        let errorMessage = 'Error al guardar la configuración';
+        
+        if (error.status === 0) {
+          errorMessage = 'No se puede conectar al servidor';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        throw { ...error, friendlyMessage: errorMessage };
+      })
+    );
+}
+
+/**
+ * Obtener el cumplimiento de la frecuencia de estudio
+ */
+getStudyFrequencyCumplimiento(studentId: number): Observable<CumplimientoResponse> {
+  const url = `${this.API_URL}/StudyFrequency/${studentId}/cumplimiento`;
+  
+  return this.http.get<CumplimientoResponse>(url, this.httpOptions)
+    .pipe(
+      map((response: CumplimientoResponse) => {
+        console.log('✅ Cumplimiento obtenido:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo cumplimiento:', error);
+        
+        // Retornar datos por defecto en caso de error
+        return of({
+          success: true,
+          data: {
+            objetivoSemanal: 3,
+            diasEstudiadosSemana: 0,
+            porcentajeCumplimiento: 0,
+            rachaActual: 0
+          }
+        } as CumplimientoResponse);
       })
     );
 }
