@@ -1,248 +1,264 @@
 .dashboard-content {
-  --background: #f5f5f5;
+  --ion-background-color: #f8fafc;
+  --background: #f8fafc;
 }
 
+// ========================================
+// HEADER FIJO - FONDO GRIS SÓLIDO
+// ========================================
 .header-section {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
-}
+  z-index: 1000;
+  background: #d1d5db;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 20px;
 
-.background-image {
-  position: relative;
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-
-  .superior-gris {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.user-greeting {
-  position: absolute;
-  top: 30px;
-  left: 20px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  .back-button {
-    --color: white;
-    --padding-start: 0;
-    --padding-end: 0;
-    margin: 0;
-    font-size: 24px;
-  }
-
-  .avatar-container {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-
-    .user-avatar {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .greeting-text {
-    flex: 1;
-
-    .greeting-title {
-      color: rgb(0, 0, 0);
-      font-size: 24px;
-      font-weight: 600;
-      margin: 0;
-      line-height: 1.2;
-    }
-
-    .greeting-subtitle {
-      color: rgba(0, 0, 0, 0.9);
-      font-size: 13px;
-      margin: 2px 0 0 0;
-    }
-  }
-
-  .streak-display {
+  .user-greeting {
     display: flex;
     align-items: center;
-    gap: 5px;
-    background: rgba(255,255,255,0.2);
-    padding: 6px 10px;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
+    gap: 12px;
 
-    .streak-icon {
-      width: 20px;
-      height: 20px;
+    .back-button {
+      --padding-start: 0;
+      --padding-end: 0;
+      margin: 0;
+      width: 40px;
+      height: 40px;
+
+      ion-icon {
+        font-size: 24px;
+        color: #1e293b;
+      }
     }
 
-    .streak-count {
-      color: rgb(0, 0, 0);
-      font-weight: 700;
-      font-size: 14px;
+    .avatar-container {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .user-avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .greeting-text {
+      flex: 1;
+
+      .greeting-title {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      .greeting-subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: #64748b;
+      }
+    }
+
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      padding: 8px 14px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+      .streak-icon {
+        width: 24px;
+        height: 24px;
+      }
+
+      .streak-count {
+        font-size: 18px;
+        font-weight: 700;
+        color: #10b981;
+      }
     }
   }
 }
 
-.scrollable-content {
-  margin-top: 150px;
-  padding: 0;
-  padding-bottom: 100px;
-}
-
+// ========================================
+// LOADING STATE
+// ========================================
 .loading-container {
-  margin-top: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15px;
-  padding: 40px 20px;
+  height: 60vh;
+  gap: 20px;
 
   ion-spinner {
     --color: #10b981;
+    width: 50px;
+    height: 50px;
   }
 
   p {
-    color: #666;
+    color: #64748b;
     font-size: 16px;
   }
 }
 
-.stats-overview {
-  margin-bottom: 30px;
-  padding: 0 20px;
+// ========================================
+// CONTENIDO SCROLLABLE
+// ========================================
+.scrollable-content {
+  margin-top: 120px;
+  padding: 0 0 100px 0;
+}
 
-  .stats-row-top {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
-  }
+// ========================================
+// TARJETA GENERAL (ARRIBA DE TODO)
+// ========================================
+.general-overview {
+  padding: 0 20px 20px;
 
-  .stat-card {
+  .general-card {
     background: white;
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-bottom: 4px solid #10b981;
 
-    &.sessions-card {
-      .stat-title {
-        font-size: 14px;
-        color: #64748b;
-        margin: 0 0 15px 0;
-        font-weight: 600;
-      }
-      
-      .sessions-progress {
-        text-align: center;
-        margin: 15px 0 8px 0;
-        font-size: 15px;
-        color: #000000;
-        font-weight: 600;
-        
-        .sessions-current {
-          font-size: 24px;
-          font-weight: 800;
-          color: #10b981;
-        }
-        
-        .sessions-total {
-          font-size: 16px;
-          font-weight: 700;
-          color: #94a3b8;
-        }
-      }
-      
-      .sessions-message {
-        text-align: center;
-        margin: 0;
-        font-size: 12px;
-        color: #10b981;
-        font-weight: 600;
-        font-style: italic;
-      }
+    .general-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+      user-select: none;
 
-      .sessions-badges {
+      .general-left {
         display: flex;
-        gap: 8px;
-        justify-content: center;
+        align-items: center;
+        gap: 12px;
 
-        .session-badge {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
+        .general-emoji {
+          font-size: 48px;
+          width: 64px;
+          height: 64px;
           display: flex;
           align-items: center;
           justify-content: center;
-          
-          &.completed {
-            background: linear-gradient(135deg, #10b981, #059669);
-            ion-icon {
-              color: white;
-              font-size: 20px;
-            }
+          border-radius: 50%;
+          background: rgba(0, 0, 0, 0.03);
+        }
+
+        .general-info {
+          h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #111111;
           }
-          
-          &.pending {
-            background: #e2e8f0;
-            ion-icon {
-              color: #cbd5e1;
-              font-size: 20px;
-            }
-          }
+        }
+      }
+
+      .general-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .general-percentage {
+          font-size: 28px;
+          font-weight: 900;
+          color: #111111;
+        }
+
+        .expand-icon {
+          font-size: 24px;
+          color: #111111;
         }
       }
     }
 
-    &.questions-card {
-      position: relative;
+    .general-progress {
+      margin-bottom: 16px;
 
-      .stat-title {
-        font-size: 14px;
-        color: #64748b;
-        margin: 0 0 10px 0;
-        font-weight: 600;
-        text-align: center;
+      .general-bar {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+
+        .general-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #10b981, #34d399);
+          border-radius: 10px;
+          transition: width 0.6s ease;
+        }
       }
+    }
 
-      .donut-container {
-        position: relative;
-        width: 100px;
-        height: 100px;
-        margin: 0 auto;
+    .general-areas-list {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e5e7eb;
 
-        svg {
-          transform: rotate(-90deg);
+      .general-area-item {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #f1f5f9;
+          transform: translateX(4px);
         }
 
-        .donut-text {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          text-align: center;
+        .area-item-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
 
-          .donut-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e293b;
+          .area-item-emoji {
+            font-size: 32px;
           }
 
-          .donut-label {
-            font-size: 11px;
+          .area-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+          }
+        }
+
+        .area-item-right {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .area-item-percentage {
+            font-size: 20px;
+            font-weight: 700;
+
+            &.civil {
+              color: #f97316;
+            }
+
+            &.procesal {
+              color: #3b82f6;
+            }
+          }
+
+          .area-item-arrow {
+            font-size: 20px;
             color: #64748b;
           }
         }
@@ -251,13 +267,107 @@
   }
 }
 
+// ========================================
+// ESTADÍSTICAS GENERALES - SOLO SESIONES
+// ========================================
+.stats-overview {
+  padding: 0 20px 20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
+
+  .stat-title {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
+.sessions-card {
+  width: 100%;
+
+  .sessions-badges {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 16px;
+
+    .session-badge {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+
+      ion-icon {
+        font-size: 28px;
+      }
+
+      &.completed {
+        ion-icon {
+          color: #10b981;
+        }
+      }
+
+      &.pending {
+        ion-icon {
+          color: #e2e8f0;
+        }
+      }
+    }
+  }
+
+  .sessions-progress {
+    text-align: center;
+    margin: 12px 0;
+    font-size: 14px;
+    color: #64748b;
+
+    .sessions-current {
+      font-size: 32px;
+      font-weight: 700;
+      color: #10b981;
+    }
+
+    .sessions-de {
+      font-size: 16px;
+      color: #64748b;
+      margin: 0 4px;
+    }
+
+    .sessions-total {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  .sessions-message {
+    text-align: center;
+    margin: 8px 0 0 0;
+    font-size: 13px;
+    color: #10b981;
+    font-weight: 500;
+  }
+}
+
+// ========================================
+// GRÁFICO SEMANAL - CIVIL NARANJA
+// ========================================
 .weekly-chart-container {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 20px;
-  margin: 0 20px 30px 20px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  margin: 0 20px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #f1f5f9;
 
   .chart-header {
@@ -278,17 +388,23 @@
       gap: 8px;
 
       .time-btn {
-        padding: 6px 12px;
-        border-radius: 8px;
+        padding: 6px 14px;
+        border-radius: 12px;
         border: 1px solid #e2e8f0;
         background: white;
-        font-size: 12px;
         color: #64748b;
+        font-size: 12px;
+        font-weight: 500;
         cursor: pointer;
+        transition: all 0.2s;
 
         &.active {
           background: #10b981;
           color: white;
+          border-color: #10b981;
+        }
+
+        &:hover {
           border-color: #10b981;
         }
       }
@@ -314,7 +430,7 @@
         border-radius: 3px;
 
         &.civil {
-          background: linear-gradient(180deg, #34d399, #10b981);
+          background: linear-gradient(180deg, #fb923c, #f97316);
         }
 
         &.procesal {
@@ -353,7 +469,7 @@
             transition: all 0.3s ease;
 
             &.bar-civil {
-              background: linear-gradient(180deg, #34d399, #10b981);
+              background: linear-gradient(180deg, #fb923c, #f97316);
             }
 
             &.bar-procesal {
@@ -386,8 +502,9 @@
   }
 }
 
-
-
+// ========================================
+// ESTADÍSTICAS POR ÁREA - SOLO CIVIL Y PROCESAL
+// ========================================
 .area-stats-container {
   margin-bottom: 30px;
   padding: 0 20px;
@@ -405,149 +522,25 @@
     gap: 15px;
     
     .area-card-duolingo {
+      background: #ffffff !important;
       border-radius: 20px;
       padding: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       transition: all 0.3s ease;
       border: none;
+      border-bottom: 4px solid transparent;
 
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
       }
 
-      // GENERAL - Verde claro
-      &.is-general {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-
-        .area-header-duo {
-          .area-left-duo {
-            .area-title-info {
-              h3 {
-                color: #065f46;
-                font-size: 22px;
-                font-weight: 800;
-              }
-            }
-          }
-
-          .area-right-duo {
-            .porcentaje-area {
-              color: #065f46 !important;
-              font-weight: 900;
-            }
-          }
-        }
-
-        .progreso-area-duo {
-          .barra-progreso-area {
-            background: rgba(255, 255, 255, 0.4);
-
-            .barra-fill-area {
-              background: rgba(255, 255, 255, 0.9) !important;
-              box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-            }
-          }
-        }
-
-        .mensaje-area {
-          background: rgba(255, 255, 255, 0.5) !important;
-          color: #065f46 !important;
-          border-left: 4px solid white !important;
-          font-weight: 700;
-        }
+      &[data-area="Derecho Civil"] {
+        border-bottom-color: #f97316;
       }
 
-      // DERECHO CIVIL - Naranja claro
-      &.is-area[data-area="Derecho Civil"] {
-        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-
-        .area-header-duo {
-          .area-left-duo {
-            .area-title-info {
-              h3 {
-                color: #7c2d12;
-                font-size: 22px;
-                font-weight: 800;
-              }
-            }
-          }
-
-          .area-right-duo {
-            .porcentaje-area {
-              color: #7c2d12 !important;
-              font-weight: 900;
-            }
-
-            .expand-icon-area {
-              color: #7c2d12;
-            }
-          }
-        }
-
-        .progreso-area-duo {
-          .barra-progreso-area {
-            background: rgba(255, 255, 255, 0.4);
-
-            .barra-fill-area {
-              background: rgba(255, 255, 255, 0.9) !important;
-              box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-            }
-          }
-        }
-
-        .mensaje-area {
-          background: rgba(255, 255, 255, 0.5) !important;
-          color: #7c2d12 !important;
-          border-left: 4px solid white !important;
-          font-weight: 700;
-        }
-      }
-
-      // DERECHO PROCESAL - Azul claro
-      &.is-area[data-area="Derecho Procesal"] {
-        background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
-
-        .area-header-duo {
-          .area-left-duo {
-            .area-title-info {
-              h3 {
-                color: #1e3a8a;
-                font-size: 22px;
-                font-weight: 800;
-              }
-            }
-          }
-
-          .area-right-duo {
-            .porcentaje-area {
-              color: #1e3a8a !important;
-              font-weight: 900;
-            }
-
-            .expand-icon-area {
-              color: #1e3a8a;
-            }
-          }
-        }
-
-        .progreso-area-duo {
-          .barra-progreso-area {
-            background: rgba(255, 255, 255, 0.4);
-
-            .barra-fill-area {
-              background: rgba(255, 255, 255, 0.9) !important;
-              box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-            }
-          }
-        }
-
-        .mensaje-area {
-          background: rgba(255, 255, 255, 0.5) !important;
-          color: #1e3a8a !important;
-          border-left: 4px solid white !important;
-          font-weight: 700;
-        }
+      &[data-area="Derecho Procesal"] {
+        border-bottom-color: #3b82f6;
       }
 
       .area-header-duo {
@@ -573,7 +566,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.03);
             flex-shrink: 0;
           }
 
@@ -585,162 +578,72 @@
               margin: 0;
               font-size: 18px;
               font-weight: 700;
+              color: #111111 !important;
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
               line-height: 1.2;
-
-              @media (max-width: 380px) {
-                font-size: 16px;
-              }
-            }
-
-            .nivel-info {
-              display: flex;
-              align-items: center;
-              gap: 6px;
-              margin-top: 8px;
-              flex-wrap: wrap;
-
-              .nivel-badge-area {
-                padding: 3px 10px;
-                border-radius: 12px;
-                font-size: 11px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                white-space: nowrap;
-                order: 1;
-
-                &.principiante {
-                  background: #fee2e2;
-                  color: #dc2626;
-                }
-
-                &.intermedio {
-                  background: #fef3c7;
-                  color: #f59e0b;
-                }
-
-                &.avanzado {
-                  background: #dbeafe;
-                  color: #3b82f6;
-                }
-
-                &.experto {
-                  background: #d1fae5;
-                  color: #10b981;
-                }
-              }
-
-              .estrellas-area {
-                display: flex;
-                align-items: center;
-                gap: 2px;
-                order: 2;
-
-                ion-icon {
-                  font-size: 14px;
-                  color: rgba(0, 0, 0, 0.3);
-
-                  &.filled {
-                    color: #fbbf24;
-                  }
-                }
-              }
             }
           }
         }
 
         .area-right-duo {
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           gap: 8px;
-          flex-shrink: 0;
 
           .porcentaje-area {
-            font-size: 32px;
-            font-weight: 800;
-            line-height: 1;
-
-            @media (max-width: 380px) {
-              font-size: 28px;
-            }
+            font-size: 28px;
+            font-weight: 900;
+            color: #111111 !important;
           }
 
           .expand-icon-area {
             font-size: 24px;
-            flex-shrink: 0;
-            margin-top: 4px;
+            color: #111111;
           }
         }
       }
 
       .progreso-area-duo {
-        margin-bottom: 14px;
+        margin: 16px 0;
 
         .barra-progreso-area {
-          height: 14px;
-          border-radius: 20px;
+          height: 8px;
+          background: #e5e7eb;
+          border-radius: 10px;
           overflow: hidden;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 
           .barra-fill-area {
             height: 100%;
-            border-radius: 20px;
-            transition: width 0.8s ease;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+
+            &.civil {
+              background: linear-gradient(90deg, #fb923c, #f97316);
+            }
+
+            &.procesal {
+              background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            }
           }
-        }
-      }
-
-      .mensaje-area {
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 13px;
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 12px;
-
-        @media (max-width: 380px) {
-          font-size: 12px;
-          padding: 10px 14px;
         }
       }
 
       .temas-section {
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 2px solid rgba(255, 255, 255, 0.5);
-        animation: slideDown 0.3s ease;
+        border-top: 2px solid #e5e7eb;
 
         .tema-card-duolingo {
-          background: white;
+          background: #f3f4f6;
           border-radius: 16px;
-          padding: 18px;
-          margin-bottom: 14px;
-          border: 2px solid #e2e8f0;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          padding: 16px;
+          margin-bottom: 12px;
           transition: all 0.3s ease;
 
           &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-          }
-
-          // HIGHLIGHT cuando está expandido
-          &.expanded {
-            background: #f1f5f9;
-            border: 2px solid #94a3b8;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-
-            .tema-main {
-              .tema-left {
-                .tema-emoji {
-                  transform: scale(1.1);
-                  animation: pulse 2s ease-in-out infinite;
-                }
-              }
-            }
+            background: #e5e7eb;
           }
 
           .tema-main {
@@ -748,91 +651,22 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
 
             .tema-left {
               display: flex;
               align-items: center;
               gap: 12px;
               flex: 1;
-              min-width: 0;
-
-              .tema-emoji {
-                font-size: 36px;
-                line-height: 1;
-                transition: transform 0.3s ease;
-                flex-shrink: 0;
-
-                @media (max-width: 380px) {
-                  font-size: 32px;
-                }
-              }
 
               .tema-info-compact {
                 flex: 1;
-                min-width: 0;
 
                 .tema-nombre {
-                  margin: 0 0 6px 0;
-                  font-size: 15px;
-                  font-weight: 700;
+                  margin: 0;
+                  font-size: 16px;
+                  font-weight: 600;
                   color: #1e293b;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  display: -webkit-box;
-                  -webkit-line-clamp: 2;
-                  -webkit-box-orient: vertical;
-
-                  @media (max-width: 380px) {
-                    font-size: 14px;
-                  }
-                }
-
-                .estrellas {
-                  display: flex;
-                  align-items: center;
-                  gap: 3px;
-                  flex-wrap: wrap;
-
-                  ion-icon {
-                    font-size: 14px;
-                    color: #cbd5e1;
-
-                    &.filled {
-                      color: #fbbf24;
-                    }
-                  }
-
-                  .nivel-badge {
-                    margin-left: 6px;
-                    padding: 2px 8px;
-                    border-radius: 10px;
-                    font-size: 10px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    white-space: nowrap;
-
-                    &.principiante {
-                      background: #fee2e2;
-                      color: #dc2626;
-                    }
-
-                    &.intermedio {
-                      background: #fef3c7;
-                      color: #f59e0b;
-                    }
-
-                    &.avanzado {
-                      background: #dbeafe;
-                      color: #3b82f6;
-                    }
-
-                    &.experto {
-                      background: #d1fae5;
-                      color: #10b981;
-                    }
-                  }
                 }
               }
             }
@@ -841,144 +675,82 @@
               display: flex;
               align-items: center;
               gap: 8px;
-              flex-shrink: 0;
 
               .porcentaje-grande {
-                font-size: 24px;
-                font-weight: 800;
-                line-height: 1;
+                font-size: 22px;
+                font-weight: 700;
 
-                @media (max-width: 380px) {
-                  font-size: 20px;
+                &[data-parent-area="Derecho Civil"] {
+                  color: #f97316;
                 }
 
-                &.principiante {
-                  color: #dc2626;
-                }
-
-                &.intermedio {
-                  color: #f59e0b;
-                }
-
-                &.avanzado {
+                &[data-parent-area="Derecho Procesal"] {
                   color: #3b82f6;
-                }
-
-                &.experto {
-                  color: #10b981;
                 }
               }
 
               .expand-icon-small {
-                font-size: 18px;
-                color: #94a3b8;
+                font-size: 20px;
+                color: #64748b;
               }
             }
           }
 
           .progreso-visual {
-            margin-bottom: 12px;
-
             .barra-progreso {
-              height: 10px;
-              background: #f1f5f9;
-              border-radius: 20px;
+              height: 6px;
+              background: #e2e8f0;
+              border-radius: 10px;
               overflow: hidden;
               margin-bottom: 8px;
 
               .barra-fill {
                 height: 100%;
-                border-radius: 20px;
+                border-radius: 10px;
                 transition: width 0.6s ease;
 
-                &.principiante {
-                  background: linear-gradient(90deg, #ef4444, #dc2626);
+                &[data-parent-area="Derecho Civil"] {
+                  background: linear-gradient(90deg, #fb923c, #f97316);
                 }
 
-                &.intermedio {
-                  background: linear-gradient(90deg, #fbbf24, #f59e0b);
-                }
-
-                &.avanzado {
+                &[data-parent-area="Derecho Procesal"] {
                   background: linear-gradient(90deg, #60a5fa, #3b82f6);
-                }
-
-                &.experto {
-                  background: linear-gradient(90deg, #34d399, #10b981);
                 }
               }
             }
 
             .stats-mini {
               display: flex;
-              gap: 16px;
+              gap: 12px;
               font-size: 12px;
-              color: #64748b;
-              flex-wrap: wrap;
 
               .stat-item {
                 display: flex;
                 align-items: center;
                 gap: 4px;
+                color: #64748b;
 
                 ion-icon {
                   font-size: 14px;
                 }
 
                 &.correctas {
-                  color: #10b981;
-                  font-weight: 600;
+                  &[data-parent-area="Derecho Civil"] {
+                    color: #f97316;
+                  }
 
-                  ion-icon {
-                    color: #10b981;
+                  &[data-parent-area="Derecho Procesal"] {
+                    color: #3b82f6;
                   }
                 }
               }
             }
           }
 
-          .mensaje-motivacional {
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 12px;
-
-            @media (max-width: 380px) {
-              font-size: 12px;
-              padding: 8px 12px;
-            }
-
-            &.principiante {
-              background: linear-gradient(135deg, #fee2e2, #fecaca);
-              color: #991b1b;
-              border-left: 4px solid #dc2626;
-            }
-
-            &.intermedio {
-              background: linear-gradient(135deg, #fef3c7, #fde68a);
-              color: #92400e;
-              border-left: 4px solid #f59e0b;
-            }
-
-            &.avanzado {
-              background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-              color: #1e40af;
-              border-left: 4px solid #3b82f6;
-            }
-
-            &.experto {
-              background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-              color: #065f46;
-              border-left: 4px solid #10b981;
-            }
-          }
-
           .subtemas-list-duolingo {
             margin-top: 16px;
             padding-top: 16px;
-            border-top: 2px solid #f1f5f9;
+            border-top: 2px solid #d1d5db;
 
             .subtemas-header {
               margin-bottom: 12px;
@@ -986,7 +758,7 @@
               h5 {
                 margin: 0;
                 font-size: 13px;
-                font-weight: 700;
+                font-weight: 600;
                 color: #64748b;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
@@ -996,142 +768,61 @@
             .subtema-item-duolingo {
               background: white;
               border-radius: 12px;
-              padding: 14px;
-              margin-bottom: 10px;
-              border: 2px solid #e2e8f0;
-              transition: all 0.2s ease;
+              padding: 12px;
+              margin-bottom: 8px;
+              border: 1px solid #e5e7eb;
 
-              &:hover {
-                transform: translateX(4px);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-              }
-
-              &.principiante {
-                border-left: 4px solid #dc2626;
-                background: linear-gradient(to right, #fef2f2 0%, #ffffff 100%);
-              }
-
-              &.intermedio {
-                border-left: 4px solid #f59e0b;
-                background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
-              }
-
-              &.avanzado {
-                border-left: 4px solid #3b82f6;
-                background: linear-gradient(to right, #eff6ff 0%, #ffffff 100%);
-              }
-
-              &.experto {
-                border-left: 4px solid #10b981;
-                background: linear-gradient(to right, #f0fdf4 0%, #ffffff 100%);
-              }
-
-              .subtema-content {
+              .subtema-header-compact {
                 display: flex;
+                justify-content: space-between;
                 align-items: center;
-                gap: 10px;
+                margin-bottom: 8px;
 
-                .subtema-icon {
-                  font-size: 28px;
-                  line-height: 1;
-                  flex-shrink: 0;
-
-                  @media (max-width: 380px) {
-                    font-size: 24px;
-                  }
-                }
-
-                .subtema-data {
-                  flex: 1;
-                  min-width: 0;
-
-                  .subtema-nombre {
-                    font-size: 14px;
-                    font-weight: 700;
-                    color: #1e293b;
-                    margin-bottom: 5px;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-
-                    @media (max-width: 380px) {
-                      font-size: 13px;
-                    }
-                  }
-
-                  .subtema-stats-row {
-                    font-size: 11px;
-                    color: #64748b;
-                    margin-bottom: 6px;
-
-                    .separator {
-                      margin: 0 4px;
-                    }
-
-                    .correctas-count {
-                      color: #10b981;
-                      font-weight: 600;
-                    }
-                  }
-
-                  .mini-barra {
-                    height: 5px;
-                    background: #f1f5f9;
-                    border-radius: 10px;
-                    overflow: hidden;
-
-                    .mini-barra-fill {
-                      height: 100%;
-                      border-radius: 10px;
-                      transition: width 0.4s ease;
-
-                      &.principiante {
-                        background: #dc2626;
-                      }
-
-                      &.intermedio {
-                        background: #f59e0b;
-                      }
-
-                      &.avanzado {
-                        background: #3b82f6;
-                      }
-
-                      &.experto {
-                        background: #10b981;
-                      }
-                    }
-                  }
+                .subtema-nombre {
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: #1e293b;
                 }
 
                 .subtema-porcentaje {
-                  font-size: 20px;
-                  font-weight: 800;
-                  line-height: 1;
-                  flex-shrink: 0;
+                  font-size: 16px;
+                  font-weight: 700;
 
-                  @media (max-width: 380px) {
-                    font-size: 18px;
+                  &[data-parent-area="Derecho Civil"] {
+                    color: #f97316;
                   }
 
-                  &.principiante {
-                    color: #dc2626;
-                  }
-
-                  &.intermedio {
-                    color: #f59e0b;
-                  }
-
-                  &.avanzado {
+                  &[data-parent-area="Derecho Procesal"] {
                     color: #3b82f6;
                   }
+                }
+              }
 
-                  &.experto {
-                    color: #10b981;
+              .subtema-barra {
+                height: 4px;
+                background: #e5e7eb;
+                border-radius: 10px;
+                overflow: hidden;
+                margin-bottom: 6px;
+
+                .subtema-fill {
+                  height: 100%;
+                  border-radius: 10px;
+                  transition: width 0.6s ease;
+
+                  &[data-parent-area="Derecho Civil"] {
+                    background: linear-gradient(90deg, #fb923c, #f97316);
+                  }
+
+                  &[data-parent-area="Derecho Procesal"] {
+                    background: linear-gradient(90deg, #60a5fa, #3b82f6);
                   }
                 }
+              }
+
+              .subtema-stats {
+                font-size: 11px;
+                color: #64748b;
               }
             }
           }
@@ -1141,40 +832,18 @@
   }
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    max-height: 3000px;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-
-
-
+// ========================================
+// SESIONES RECIENTES
+// ========================================
 .recent-sessions-container {
-  margin-bottom: 30px;
   padding: 0 20px;
+  margin-bottom: 30px;
 
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 
     h2 {
       margin: 0;
@@ -1200,25 +869,28 @@
 
     .session-card {
       background: white;
-      border-radius: 12px;
-      padding: 15px;
+      border-radius: 16px;
+      padding: 16px;
       display: flex;
       align-items: center;
       gap: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      border: 1px solid #f1f5f9;
       cursor: pointer;
+      transition: all 0.2s;
 
       &:hover {
-        transform: translateX(5px);
+        transform: translateX(4px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
       .session-date-box {
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 8px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        min-width: 50px;
+        min-width: 60px;
 
         .calendar-icon {
           ion-icon {
@@ -1228,8 +900,10 @@
         }
 
         .date-text {
-          font-size: 11px;
+          font-size: 12px;
+          font-weight: 600;
           color: #64748b;
+          margin-top: 4px;
         }
       }
 
@@ -1244,7 +918,7 @@
 
           h4 {
             margin: 0;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: #1e293b;
           }
@@ -1257,11 +931,15 @@
 
         .session-stats {
           display: flex;
-          gap: 15px;
+          gap: 12px;
           font-size: 13px;
-          color: #64748b;
+
+          .questions {
+            color: #64748b;
+          }
 
           .score {
+            color: #10b981;
             font-weight: 600;
 
             &.high-score {
@@ -1272,44 +950,47 @@
       }
 
       .session-arrow {
-        color: #cbd5e1;
         font-size: 20px;
+        color: #cbd5e1;
       }
     }
   }
 }
 
+// ========================================
+// BOTÓN ACCIÓN
+// ========================================
 .action-section {
-  margin-bottom: 30px;
   padding: 0 20px;
+  margin-bottom: 30px;
 
   .start-session-btn {
     width: 100%;
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, #10b981, #34d399);
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 16px;
+    padding: 18px;
     font-size: 16px;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s;
+
+    &:active {
+      transform: scale(0.98);
+    }
 
     ion-icon {
       font-size: 24px;
-    }
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
     }
   }
 }
 
 .bottom-spacer {
-  height: 20px;
+  height: 100px;
 }

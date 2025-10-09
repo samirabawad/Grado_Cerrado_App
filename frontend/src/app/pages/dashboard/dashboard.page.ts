@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -13,6 +13,8 @@ import { ApiService } from '../../services/api.service';
   imports: [IonicModule, CommonModule, BottomNavComponent]
 })
 export class DashboardPage implements OnInit {
+
+  @ViewChild('areaStatsSection', { read: ElementRef }) areaStatsSection!: ElementRef;
 
   userName: string = 'Estudiante';
   userLevel: string = 'Intermedio';
@@ -33,6 +35,7 @@ export class DashboardPage implements OnInit {
   selectedTimeFrame: string = 'week';
   expandedArea: string | null = null;
   expandedTema: string | null = null;
+  isGeneralExpanded: boolean = false;
 
   constructor(
     private router: Router,
@@ -97,7 +100,6 @@ export class DashboardPage implements OnInit {
                 temas: []
               });
             } else if (item.type === 'area') {
-              // Procesar temas con nueva lógica
               const temasConNuevoCalculo = item.temas.map((tema: any) => {
                 const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => ({
                   subtemaId: subtema.subtemaId,
@@ -141,7 +143,6 @@ export class DashboardPage implements OnInit {
             }
           });
 
-          // AGREGAR Derecho Procesal (placeholder sin datos)
           this.areaStats.push({
             area: 'Derecho Procesal',
             sessions: 0,
@@ -153,7 +154,7 @@ export class DashboardPage implements OnInit {
             temas: []
           });
           
-          console.log('Estadísticas procesadas con nueva lógica:', this.areaStats);
+          console.log('Estadísticas procesadas:', this.areaStats);
         }
       } catch (error) {
         console.error('Error cargando estadísticas por área:', error);
@@ -184,7 +185,6 @@ export class DashboardPage implements OnInit {
   calculateAreaSuccessRate(temas: any[]): number {
     if (!temas || temas.length === 0) return 0;
     
-    // El porcentaje del área es el promedio de los porcentajes de sus temas
     const totalPorcentaje = temas.reduce((sum: number, tema: any) => {
       return sum + tema.porcentajeAcierto;
     }, 0);
@@ -192,23 +192,24 @@ export class DashboardPage implements OnInit {
     return Math.round(totalPorcentaje / temas.length);
   }
 
-  // NUEVO: Calcular porcentaje de un tema basado en sus subtemas
   calculateTemaSuccessRate(subtemas: any[]): number {
     if (!subtemas || subtemas.length === 0) return 0;
     
-    // El porcentaje del tema es el promedio de los porcentajes de sus subtemas
     const totalPorcentaje = subtemas.reduce((sum: number, subtema: any) => {
-      return sum + this.calculateSubtemaSuccessRate(subtema.preguntasCorrectas);
+      return sum + subtema.porcentajeAcierto;
     }, 0);
     
     return Math.round(totalPorcentaje / subtemas.length);
   }
 
-  // NUEVO: Calcular porcentaje de un subtema (máximo 100 correctas = 100%)
   calculateSubtemaSuccessRate(correctas: number): number {
     const MAX_CORRECTAS = 100;
     const porcentaje = Math.min((correctas / MAX_CORRECTAS) * 100, 100);
     return Math.round(porcentaje);
+  }
+
+  toggleGeneralExpansion() {
+    this.isGeneralExpanded = !this.isGeneralExpanded;
   }
 
   toggleAreaExpansion(areaName: string) {
@@ -237,139 +238,68 @@ export class DashboardPage implements OnInit {
 
   getTemasForArea(areaName: string): any[] {
     const area = this.areaStats.find(a => a.area === areaName && !a.isGeneral);
-    console.log('Buscando temas para área:', areaName, 'Area encontrada:', area);
-    console.log('Temas:', area?.temas);
     return area && area.temas ? area.temas : [];
   }
+
   getSubtemasForTema(tema: any): any[] {
     return tema && tema.subtemas ? tema.subtemas : [];
   }
 
-  // Obtener nivel de dominio según porcentaje
-  getNivelDominio(porcentaje: number): string {
-    if (porcentaje >= 80) return 'Experto';
-    if (porcentaje >= 60) return 'Avanzado';
-    if (porcentaje >= 40) return 'Intermedio';
-    return 'Principiante';
+  getGeneralArea(): any {
+    return this.areaStats.find(a => a.isGeneral);
   }
 
-  // Obtener número de estrellas (0-3)
-  getEstrellas(porcentaje: number): number {
-    if (porcentaje >= 80) return 3;
-    if (porcentaje >= 60) return 2;
-    if (porcentaje >= 40) return 1;
-    return 0;
+  getNonGeneralAreas(): any[] {
+    return this.areaStats.filter(a => !a.isGeneral);
   }
 
-  // Obtener clase de color según nivel
-  getNivelColor(porcentaje: number): string {
-    if (porcentaje >= 80) return 'experto';
-    if (porcentaje >= 60) return 'avanzado';
-    if (porcentaje >= 40) return 'intermedio';
-    return 'principiante';
-  }
-
-  // Obtener emoji según rendimiento
-  getNivelEmoji(porcentaje: number): string {
-    if (porcentaje >= 80) return '🏆';
-    if (porcentaje >= 60) return '⭐';
-    if (porcentaje >= 40) return '📚';
-    return '🌱';
-  }
-
-  // Mensaje motivacional según rendimiento
-  getMensajeMotivacional(porcentaje: number, totalPreguntas: number): string {
-    if (totalPreguntas === 0) return '¡Comienza a practicar este tema!';
-    if (porcentaje >= 80) return '¡Excelente dominio! Sigue así';
-    if (porcentaje >= 60) return '¡Buen trabajo! Casi lo dominas';
-    if (porcentaje >= 40) return 'Vas por buen camino, sigue practicando';
-    return '⚠️ Necesitas reforzar este tema';
-  }
-
-  // Crear array de estrellas para mostrar
-  getEstrellasArray(porcentaje: number): boolean[] {
-    const estrellas = this.getEstrellas(porcentaje);
-    return [
-      estrellas >= 1,
-      estrellas >= 2,
-      estrellas >= 3
-    ];
-  }
-
-  getProgressMessage(): string {
-    if (this.totalSessions === 0) {
-      return 'Comienza tu primera sesión';
-    } else if (this.totalSessions < 10) {
-      return '¡Sigue así!';
-    } else if (this.totalSessions < 50) {
-      return '¡Excelente progreso!';
-    } else {
-      return '¡Eres imparable!';
+  scrollToArea(areaName: string) {
+    const element = document.getElementById('area-' + areaName);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        this.toggleAreaExpansion(areaName);
+      }, 500);
     }
   }
 
   async generateChartData() {
-    const currentUser = this.apiService.getCurrentUser();
-    if (!currentUser || !currentUser.id) {
-      const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-      this.chartData = daysOfWeek.map(day => ({
-        date: day,
-        civil: 0,
-        procesal: 0,
-        total: 0
-      }));
-      return;
-    }
-
     try {
-      const response = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
-      if (response && response.success && response.data) {
-        this.chartData = response.data;
-        console.log('Datos del gráfico cargados:', this.chartData);
+      const currentUser = this.apiService.getCurrentUser();
+      if (!currentUser || !currentUser.id) return;
+
+      const progressResponse = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
+      if (progressResponse && progressResponse.success) {
+        this.chartData = progressResponse.data;
       }
     } catch (error) {
-      console.error('Error cargando gráfico semanal:', error);
-      const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-      this.chartData = daysOfWeek.map(day => ({
-        date: day,
-        civil: 0,
-        procesal: 0,
-        total: 0
-      }));
+      console.error('Error generando datos del gráfico:', error);
+      this.chartData = [];
     }
   }
 
   changeTimeFrame(timeFrame: string) {
     this.selectedTimeFrame = timeFrame;
-    this.loadDashboardData();
-  }
-
-  goToSession(sessionId: number) {
-    console.log('Navegar a sesión:', sessionId);
-  }
-
-  goToAreaDetails(area: string) {
-    console.log('Ver detalles de:', area);
-  }
-
-  startNewSession() {
-    this.router.navigate(['/home']);
   }
 
   goBack() {
     this.router.navigate(['/home']);
   }
 
-  getProgressColor(percentage: number): string {
-    if (percentage >= 80) return 'success';
-    if (percentage >= 60) return 'warning';
-    return 'danger';
+  goToSession(sessionId: number) {
+    console.log('Navegando a sesión:', sessionId);
+  }
+
+  startNewSession() {
+    this.router.navigate(['/civil']);
   }
 
   getMaxValue(): number {
-    if (!this.chartData || this.chartData.length === 0) return 20;
-    const maxTotal = Math.max(...this.chartData.map(d => d.total));
-    return maxTotal === 0 ? 20 : maxTotal + 2;
+    if (this.chartData.length === 0) return 10;
+    const maxCivil = Math.max(...this.chartData.map(d => d.civil || 0));
+    const maxProcesal = Math.max(...this.chartData.map(d => d.procesal || 0));
+    const maxTotal = Math.max(maxCivil, maxProcesal);
+    return maxTotal === 0 ? 10 : maxTotal + 2;
   }
 
   getBarHeight(value: number, type: 'civil' | 'procesal'): number {
@@ -422,20 +352,5 @@ export class DashboardPage implements OnInit {
     if (questions < 500) return 500;
     
     return Math.ceil(questions / 50) * 50;
-  }
-
-  private formatDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      const day = date.getDate();
-      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
-                     'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      const month = months[date.getMonth()];
-      const year = date.getFullYear();
-      
-      return `${day} ${month} ${year}`;
-    } catch (error) {
-      return dateString;
-    }
   }
 }
