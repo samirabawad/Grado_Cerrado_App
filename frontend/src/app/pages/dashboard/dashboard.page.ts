@@ -93,38 +93,67 @@ export class DashboardPage implements OnInit {
                 correctAnswers: item.correctAnswers,
                 successRate: Math.round(item.successRate || 0),
                 isGeneral: true,
+                colorBarra: 'verde',
                 temas: []
               });
             } else if (item.type === 'area') {
-              const totalPreguntas = item.temas.reduce((sum: number, tema: any) => sum + tema.totalPreguntas, 0);
-              const totalCorrectas = item.temas.reduce((sum: number, tema: any) => sum + tema.preguntasCorrectas, 0);
+              // Procesar temas con nueva lógica
+              const temasConNuevoCalculo = item.temas.map((tema: any) => {
+                const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => ({
+                  subtemaId: subtema.subtemaId,
+                  subtemaNombre: subtema.subtemaNombre,
+                  totalPreguntas: subtema.totalPreguntas,
+                  preguntasCorrectas: subtema.preguntasCorrectas,
+                  porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema.preguntasCorrectas)
+                }));
+
+                const porcentajeTema = this.calculateTemaSuccessRate(subtemasConPorcentaje);
+
+                return {
+                  temaId: tema.temaId,
+                  temaNombre: tema.temaNombre,
+                  totalPreguntas: tema.totalPreguntas,
+                  preguntasCorrectas: tema.preguntasCorrectas,
+                  porcentajeAcierto: porcentajeTema,
+                  subtemas: subtemasConPorcentaje
+                };
+              });
+
+              const totalCorrectas = temasConNuevoCalculo.reduce((sum: number, tema: any) => 
+                sum + tema.preguntasCorrectas, 0);
+              const totalPreguntas = temasConNuevoCalculo.reduce((sum: number, tema: any) => 
+                sum + tema.totalPreguntas, 0);
+              const porcentajeArea = temasConNuevoCalculo.length > 0 
+                ? Math.round(temasConNuevoCalculo.reduce((sum: number, tema: any) => 
+                    sum + tema.porcentajeAcierto, 0) / temasConNuevoCalculo.length)
+                : 0;
               
               this.areaStats.push({
                 area: item.area,
                 sessions: 0,
                 totalQuestions: totalPreguntas,
                 correctAnswers: totalCorrectas,
-                successRate: this.calculateAreaSuccessRate(item.temas),
+                successRate: porcentajeArea,
                 isGeneral: false,
-                temas: item.temas.map((tema: any) => ({
-                  temaId: tema.temaId,
-                  temaNombre: tema.temaNombre,
-                  totalPreguntas: tema.totalPreguntas,
-                  preguntasCorrectas: tema.preguntasCorrectas,
-                  porcentajeAcierto: Math.round(tema.porcentajeAcierto || 0),
-                  subtemas: tema.subtemas.map((subtema: any) => ({
-                    subtemaId: subtema.subtemaId,
-                    subtemaNombre: subtema.subtemaNombre,
-                    totalPreguntas: subtema.totalPreguntas,
-                    preguntasCorrectas: subtema.preguntasCorrectas,
-                    porcentajeAcierto: Math.round(subtema.porcentajeAcierto || 0)
-                  }))
-                }))
+                colorBarra: 'naranja',
+                temas: temasConNuevoCalculo
               });
             }
           });
+
+          // AGREGAR Derecho Procesal (placeholder sin datos)
+          this.areaStats.push({
+            area: 'Derecho Procesal',
+            sessions: 0,
+            totalQuestions: 0,
+            correctAnswers: 0,
+            successRate: 0,
+            isGeneral: false,
+            colorBarra: 'azul',
+            temas: []
+          });
           
-          console.log('Estadísticas procesadas:', this.areaStats);
+          console.log('Estadísticas procesadas con nueva lógica:', this.areaStats);
         }
       } catch (error) {
         console.error('Error cargando estadísticas por área:', error);
@@ -153,11 +182,33 @@ export class DashboardPage implements OnInit {
   }
 
   calculateAreaSuccessRate(temas: any[]): number {
-    const totalPreguntas = temas.reduce((sum: number, tema: any) => sum + tema.totalPreguntas, 0);
-    const totalCorrectas = temas.reduce((sum: number, tema: any) => sum + tema.preguntasCorrectas, 0);
+    if (!temas || temas.length === 0) return 0;
     
-    if (totalPreguntas === 0) return 0;
-    return Math.round((totalCorrectas / totalPreguntas) * 100);
+    // El porcentaje del área es el promedio de los porcentajes de sus temas
+    const totalPorcentaje = temas.reduce((sum: number, tema: any) => {
+      return sum + tema.porcentajeAcierto;
+    }, 0);
+    
+    return Math.round(totalPorcentaje / temas.length);
+  }
+
+  // NUEVO: Calcular porcentaje de un tema basado en sus subtemas
+  calculateTemaSuccessRate(subtemas: any[]): number {
+    if (!subtemas || subtemas.length === 0) return 0;
+    
+    // El porcentaje del tema es el promedio de los porcentajes de sus subtemas
+    const totalPorcentaje = subtemas.reduce((sum: number, subtema: any) => {
+      return sum + this.calculateSubtemaSuccessRate(subtema.preguntasCorrectas);
+    }, 0);
+    
+    return Math.round(totalPorcentaje / subtemas.length);
+  }
+
+  // NUEVO: Calcular porcentaje de un subtema (máximo 100 correctas = 100%)
+  calculateSubtemaSuccessRate(correctas: number): number {
+    const MAX_CORRECTAS = 100;
+    const porcentaje = Math.min((correctas / MAX_CORRECTAS) * 100, 100);
+    return Math.round(porcentaje);
   }
 
   toggleAreaExpansion(areaName: string) {
@@ -192,6 +243,57 @@ export class DashboardPage implements OnInit {
   }
   getSubtemasForTema(tema: any): any[] {
     return tema && tema.subtemas ? tema.subtemas : [];
+  }
+
+  // Obtener nivel de dominio según porcentaje
+  getNivelDominio(porcentaje: number): string {
+    if (porcentaje >= 80) return 'Experto';
+    if (porcentaje >= 60) return 'Avanzado';
+    if (porcentaje >= 40) return 'Intermedio';
+    return 'Principiante';
+  }
+
+  // Obtener número de estrellas (0-3)
+  getEstrellas(porcentaje: number): number {
+    if (porcentaje >= 80) return 3;
+    if (porcentaje >= 60) return 2;
+    if (porcentaje >= 40) return 1;
+    return 0;
+  }
+
+  // Obtener clase de color según nivel
+  getNivelColor(porcentaje: number): string {
+    if (porcentaje >= 80) return 'experto';
+    if (porcentaje >= 60) return 'avanzado';
+    if (porcentaje >= 40) return 'intermedio';
+    return 'principiante';
+  }
+
+  // Obtener emoji según rendimiento
+  getNivelEmoji(porcentaje: number): string {
+    if (porcentaje >= 80) return '🏆';
+    if (porcentaje >= 60) return '⭐';
+    if (porcentaje >= 40) return '📚';
+    return '🌱';
+  }
+
+  // Mensaje motivacional según rendimiento
+  getMensajeMotivacional(porcentaje: number, totalPreguntas: number): string {
+    if (totalPreguntas === 0) return '¡Comienza a practicar este tema!';
+    if (porcentaje >= 80) return '¡Excelente dominio! Sigue así';
+    if (porcentaje >= 60) return '¡Buen trabajo! Casi lo dominas';
+    if (porcentaje >= 40) return 'Vas por buen camino, sigue practicando';
+    return '⚠️ Necesitas reforzar este tema';
+  }
+
+  // Crear array de estrellas para mostrar
+  getEstrellasArray(porcentaje: number): boolean[] {
+    const estrellas = this.getEstrellas(porcentaje);
+    return [
+      estrellas >= 1,
+      estrellas >= 2,
+      estrellas >= 3
+    ];
   }
 
   getProgressMessage(): string {
