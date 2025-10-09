@@ -523,7 +523,43 @@ getHierarchicalStats(studentId: number): Observable<any> {
   );
 }
 
+// ========================================
+  // WEAKNESS (DEBILIDADES)
+  // ========================================
 
+  getTopTemasDebiles(studentId: number): Observable<any> {
+    const url = `${this.API_URL}/Weakness/top-debiles/${studentId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Top temas débiles:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo temas débiles:', error);
+          throw error;
+        })
+      );
+  }
+
+  getResumenDebilidades(studentId: number): Observable<any> {
+    const url = `${this.API_URL}/Weakness/resumen/${studentId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Resumen debilidades:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo resumen:', error);
+          throw error;
+        })
+      );
+  }
+
+  
 /**
  * ✍️ Método existente para sesiones ESCRITAS
  * (Mantener sin cambios para no romper el modo escrito)

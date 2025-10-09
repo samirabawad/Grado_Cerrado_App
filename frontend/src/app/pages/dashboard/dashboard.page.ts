@@ -30,6 +30,9 @@ export class DashboardPage implements OnInit {
   chartData: any[] = [];
   areaStats: any[] = [];
   recentSessions: any[] = [];
+  // 🆕 DEBILIDADES
+  topTemasDebiles: any[] = [];
+  resumenDebilidades: any = null;
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -170,6 +173,27 @@ export class DashboardPage implements OnInit {
         console.error('Error cargando sesiones recientes:', error);
       }
 
+      // 🆕 CARGAR DEBILIDADES
+      try {
+        const debilesResponse = await this.apiService.getTopTemasDebiles(studentId).toPromise();
+        if (debilesResponse && debilesResponse.success) {
+          this.topTemasDebiles = debilesResponse.data || [];
+          console.log('Top temas débiles:', this.topTemasDebiles);
+        }
+      } catch (error) {
+        console.error('Error cargando temas débiles:', error);
+      }
+
+      try {
+        const resumenResponse = await this.apiService.getResumenDebilidades(studentId).toPromise();
+        if (resumenResponse && resumenResponse.success) {
+          this.resumenDebilidades = resumenResponse.data;
+          console.log('Resumen debilidades:', this.resumenDebilidades);
+        }
+      } catch (error) {
+        console.error('Error cargando resumen debilidades:', error);
+      }
+
       await this.generateChartData();
 
       this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
@@ -292,6 +316,10 @@ export class DashboardPage implements OnInit {
 
   startNewSession() {
     this.router.navigate(['/civil']);
+  }
+
+  navigateToHome() {
+    this.router.navigate(['/home']);
   }
 
   getMaxValue(): number {

@@ -143,6 +143,42 @@
       </div>
     </div>
 
+    <!-- 🆕 TEMAS A REFORZAR -->
+    <div class="weakness-section" *ngIf="topTemasDebiles && topTemasDebiles.length > 0">
+      <div class="weakness-header">
+        <h2>Temas a Reforzar</h2>
+      </div>
+
+      <div class="weakness-cards">
+        <div class="weakness-card" *ngFor="let tema of topTemasDebiles">
+          <div class="weakness-content">
+            <div class="weakness-title-row">
+              <h3 class="weakness-tema">{{ tema.nombreTema }}</h3>
+              <span class="weakness-badge" [class.critico]="tema.porcentajeAcierto < 40">
+                {{ tema.porcentajeAcierto }}%
+              </span>
+            </div>
+            
+            <div class="weakness-stats">
+              <div class="weakness-stat">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>{{ tema.diasSinPracticar || 0 }} días sin practicar</span>
+              </div>
+              <div class="weakness-stat" *ngIf="tema.racha > 0">
+                <ion-icon name="flame-outline"></ion-icon>
+                <span>Racha: {{ tema.racha }}</span>
+              </div>
+            </div>
+
+            <button class="practice-button" (click)="navigateToHome()">
+              <ion-icon name="play"></ion-icon>
+              <span>Practicar ahora</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Estadísticas por Área - SOLO CIVIL Y PROCESAL -->
     <div class="area-stats-container" #areaStatsSection>
       <h2>Rendimiento por Área</h2>
