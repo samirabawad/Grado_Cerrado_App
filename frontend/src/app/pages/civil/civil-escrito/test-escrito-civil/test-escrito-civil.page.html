@@ -66,9 +66,9 @@
       </div>
     </div>
 
+
     <!-- Explicación de la respuesta (mostrar después de responder) -->
-    <div class="explanation-container" *ngIf="hasAnsweredCurrentQuestion() && getCurrentQuestion()?.explanation">
-      <div class="explanation-header">
+    <div class="explanation-container" *ngIf="hasAnsweredCurrentQuestion()">      <div class="explanation-header">
         <ion-icon name="bulb" color="warning"></ion-icon>
         <span>Explicación</span>
       </div>
