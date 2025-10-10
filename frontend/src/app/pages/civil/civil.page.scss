@@ -1,4 +1,35 @@
 // ========================================
+// HEADER ESTILO DASHBOARD
+// ========================================
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #FF6F00;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .back-icon {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-right: 12px;
+  }
+
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+// ========================================
 // CONFIGURACIÓN BÁSICA
 // ========================================
 .civil-content {
@@ -11,130 +42,26 @@
   min-height: 100vh;
 }
 
-/* Asegurar que ion-content sea scrollable */
 ion-content.civil-content {
   --overflow: auto;
   height: 100%;
 }
 
 // ========================================
-// HEADER FIJO CON IMAGEN RESPONSIVA
-// ========================================
-.custom-header-section {
-  position: fixed;  
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;   
-  background: transparent;
-  
-  .orange-background {
-    background: transparent;
-    padding: 0;
-    border-radius: 0;
-    position: relative;
-    overflow: hidden;
-    width: 100vw;
-
-    .derecho-civil-container-full {
-      display: block;
-      width: 100%;
-      height: auto;
-      position: relative;
-      z-index: 3;
-
-      .derecho-civil-image-responsive {
-        display: block;
-        width: 100vw;
-        height: auto;
-        min-height: 120px;
-        max-height: 200px;
-        object-fit: cover;
-        object-position: center;
-        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
-      }
-    }
-  }
-}
-
-// ========================================
 // CONTENIDO PRINCIPAL
 // ========================================
 .content-area {
-  margin-top: 140px;
+  margin-top: 60px;
   padding: 20px 16px 100px 16px;
   position: relative;
   z-index: 2;
-  background: transparent; 
+  background: transparent;
   border-radius: 30px 30px 0 0;
   min-height: calc(100vh - 100px);
 }
 
 // ========================================
-// CARD DE TEST DE NIVELACIÓN
-// ========================================
-.test-nivelacion-card {
-  background: white;
-  border-radius: 20px;
-  padding: 0;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-
-  .test-content {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: rgba(74, 144, 226, 0.05);
-    }
-
-    .test-icon {
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #4a90e2, #357abd);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 15px;
-      flex-shrink: 0;
-
-      ion-icon {
-        color: white;
-        font-size: 24px;
-      }
-    }
-
-    .test-info {
-      flex: 1;
-
-      h3 {
-        margin: 0 0 5px 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-      }
-
-      p {
-        margin: 0;
-        font-size: 14px;
-        color: #666;
-      }
-    }
-
-    .test-arrow {
-      color: #4a90e2;
-      font-size: 20px;
-    }
-  }
-}
-
-// ========================================
-// CARD DE PROGRESO - SIMPLIFICADA
+// CARD DE PROGRESO
 // ========================================
 .progreso-card {
   background: white;
@@ -186,7 +113,7 @@ ion-content.civil-content {
 }
 
 // ========================================
-// BOTONES DE MATERIAL (MÁS PEQUEÑOS Y CENTRADOS)
+// BOTONES DE MATERIAL
 // ========================================
 .material-buttons {
   display: flex;
@@ -201,9 +128,6 @@ ion-content.civil-content {
     cursor: pointer;
     transition: all 0.3s ease;
     border-radius: 18px;
-    padding: 0;
-    background: transparent;
-    box-shadow: none;
 
     &:hover {
       transform: translateY(-2px);
@@ -217,72 +141,35 @@ ion-content.civil-content {
 }
 
 // ========================================
-// BOTONES DE DERECHO (ESTILO COMO HOME)
+// BOTONES DE PRÁCTICA
 // ========================================
-.derecho-buttons {
+.practice-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin: 20px 0;
 
-  .derecho-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0);
-    transition: all 0.3s ease;
+  .practice-image-button {
+    width: 100%;
+    height: auto;
     cursor: pointer;
-    min-height: 120px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    transition: all 0.3s ease;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
     }
 
-    .derecho-icon {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 12px;
-      font-size: 48px;
-    }
-
-    .derecho-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-      margin: 0;
-      line-height: 1.2;
-    }
-
-    // Estilo específico para Derecho Civil (naranja)
-    &.civil {
-      background: linear-gradient(135deg, #FF6F00, #E65100);
-      color: white;
-      
-      .derecho-title {
-        color: white;
-      }
-    }
-
-    // Estilo específico para Derecho Procesal (azul)
-    &.procesal {
-      background: linear-gradient(135deg, #2196F3, #1976D2);
-      color: white;
-      
-      .derecho-title {
-        color: white;
-      }
+    &:active {
+      transform: translateY(0);
     }
   }
 }
 
 // ========================================
-// CARRUSEL DE IMÁGENES
+// CARRUSEL DE BANNERS
 // ========================================
 .banner-section {
   margin-top: 30px;
@@ -340,70 +227,30 @@ ion-content.civil-content {
   }
 }
 
-// Responsive
-@media (min-width: 768px) {
-  .banner-section {
-    height: 250px;
-  }
-}
-
 // ========================================
-// RESPONSIVE DESIGN
+// RESPONSIVE
 // ========================================
 @media (min-width: 768px) {
-  .custom-header-section .orange-background {
-    .derecho-civil-container-full {
-      .derecho-civil-image-responsive {
-        min-height: 150px;
-        max-height: 250px;
-      }
-    }
-  }
-  
   .content-area {
-    margin-top: 180px;
     padding: 24px 32px 100px 32px;
   }
-  
+
   .material-buttons {
     gap: 20px;
   }
-  
-  .derecho-buttons {
+
+  .practice-buttons {
     gap: 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .custom-header-section .orange-background {
-    .derecho-civil-container-full {
-      .derecho-civil-image-responsive {
-        min-height: 100px;
-        max-height: 160px;
-      }
-    }
-  }
-  
   .content-area {
-    margin-top: 120px;
     padding: 16px 12px 80px 12px;
   }
-  
-  .derecho-buttons {
+
+  .practice-buttons {
     gap: 12px;
-    
-    .derecho-card {
-      padding: 16px;
-      min-height: 100px;
-      
-      .derecho-icon {
-        font-size: 40px;
-        margin-bottom: 8px;
-      }
-      
-      .derecho-title {
-        font-size: 13px;
-      }
-    }
   }
 }
+

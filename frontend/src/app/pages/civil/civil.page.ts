@@ -135,4 +135,7 @@ export class CivilPage implements OnInit, OnDestroy {
   goToDestacados() {
     console.log('Ir a Destacados');
   }
+  goBack() {
+  this.router.navigate(['/dashboard']);
+}
 }
