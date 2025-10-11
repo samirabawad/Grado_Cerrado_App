@@ -320,5 +320,48 @@ export class ProfilePage implements OnInit {
     });
     await toast.present();
   }
-  
+  // ============================================
+// MÉTODOS DE NAVEGACIÓN Y ACCIONES
+// ============================================
+
+async viewHistory() {
+  const alert = await this.alertController.create({
+    header: 'Historial',
+    message: 'Función en desarrollo.',
+    buttons: ['OK']
+  });
+  await alert.present();
+}
+
+async viewAchievements() {
+  const alert = await this.alertController.create({
+    header: 'Logros',
+    message: 'Función en desarrollo.',
+    buttons: ['OK']
+  });
+  await alert.present();
+}
+
+saveSettings() {
+  localStorage.setItem('appSettings', JSON.stringify(this.settings));
+  this.showToast('⚙️ Configuración guardada', 'success');
+}
+
+async getHelp() {
+  const alert = await this.alertController.create({
+    header: 'Ayuda y Soporte',
+    message: 'Para obtener ayuda, contacta con soporte@ejemplo.com',
+    buttons: ['OK']
+  });
+  await alert.present();
+}
+
+async aboutApp() {
+  const alert = await this.alertController.create({
+    header: 'Acerca de',
+    message: 'Aplicación de Estudio\nVersión 1.0.0\n\n© 2025 Todos los derechos reservados.',
+    buttons: ['OK']
+  });
+  await alert.present();
+}
 }
