@@ -171,6 +171,41 @@ getAreaStats(studentId: number): Observable<any> {
       })
     );
 }
+getAreaStatsWithTemas(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/area-stats-with-temas/${studentId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Estadísticas por área con temas:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo stats por área con temas:', error);
+        throw error;
+      })
+    );
+}
+
+getSubtemaStats(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/subtema-stats/${studentId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('Estadísticas por subtema:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('Error obteniendo stats por subtema:', error);
+        throw error;
+      })
+    );
+    
+}
+
+
+
   // ✅ LOGIN DE USUARIO MEJORADO
   loginUser(loginData: { email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/auth/login`;
@@ -463,6 +498,105 @@ submitAnswer(answerData: SubmitAnswerRequest): Observable<SubmitAnswerResponse> 
       })
     );
 }
+getWeeklyProgress(studentId: number): Observable<any> {
+  return this.http.get(`${this.API_URL}/Dashboard/weekly-progress/${studentId}`);
+}
+  
+// 🆕 AGREGAR ESTE MÉTODO AL FINAL DE LA CLASE ApiService (antes del último })
+
+/**
+ * 🎤 Inicia una sesión de estudio ORAL
+ * Usa el endpoint específico que genera preguntas abiertas evaluadas por IA
+ */
+startOralStudySession(sessionData: any): Observable<any> {
+  const url = `${this.API_URL}/Study/start-oral-session`;
+  
+  const requestData = {
+    studentId: sessionData.studentId || 1, // Ahora usa int
+    difficulty: sessionData.difficulty || "intermedio",
+    legalAreas: sessionData.legalAreas || ["Derecho Civil"]
+  };
+  
+  console.log('🎤 Enviando datos para sesión ORAL:', requestData);
+  
+  return this.http.post<any>(url, requestData, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Sesión ORAL iniciada exitosamente:', response);
+        
+        // Verificar que las preguntas sean de tipo oral
+        if (response.questions && response.questions.length > 0) {
+          console.log('📋 Tipo de preguntas recibidas:', response.questions[0].type);
+        }
+        
+        this.setCurrentSession(response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error al iniciar sesión ORAL:', error);
+        throw error;
+      })
+    );
+    
+}
+getHierarchicalStats(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/hierarchical-stats/${studentId}`;
+  return this.http.get<any>(url, this.httpOptions).pipe(
+    map((response: any) => {
+      console.log('Estadísticas jerárquicas:', response);
+      return response;
+    }),
+    catchError((error: any) => {
+      console.error('Error obteniendo stats jerárquicas:', error);
+      throw error;
+    })
+  );
+}
+
+// ========================================
+  // WEAKNESS (DEBILIDADES)
+  // ========================================
+
+  getTopTemasDebiles(studentId: number): Observable<any> {
+    const url = `${this.API_URL}/Weakness/top-debiles/${studentId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Top temas débiles:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo temas débiles:', error);
+          throw error;
+        })
+      );
+  }
+
+  getResumenDebilidades(studentId: number): Observable<any> {
+    const url = `${this.API_URL}/Weakness/resumen/${studentId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Resumen debilidades:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo resumen:', error);
+          throw error;
+        })
+      );
+  }
+
+  
+/**
+ * ✍️ Método existente para sesiones ESCRITAS
+ * (Mantener sin cambios para no romper el modo escrito)
+ */
+// startStudySession(sessionData: any): Observable<any> {
+//   ... código existente sin cambios ...
+// }
 
 // ============================================
 // FRECUENCIA DE ESTUDIO

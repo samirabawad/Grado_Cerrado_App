@@ -136,14 +136,18 @@ export class ProfilePage implements OnInit {
   async logout() {
     const alert = await this.alertController.create({
       header: 'Cerrar Sesión',
-      message: '¿Estás seguro?',
+      message: '¿Estás seguro de que quieres cerrar sesión?',
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        { 
-          text: 'Sí, cerrar sesión', 
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Cerrar Sesión',
+          role: 'destructive',
           handler: () => {
             localStorage.removeItem('currentUser');
-            this.router.navigate(['/login']);
+            this.router.navigate(['/welcome2']);
           }
         }
       ]
@@ -316,49 +320,5 @@ export class ProfilePage implements OnInit {
     });
     await toast.present();
   }
-
-    // ============================================
-  // MÉTODOS FALTANTES
-  // ============================================
   
-  async viewHistory() {
-    const alert = await this.alertController.create({
-      header: 'Historial',
-      message: 'Función en desarrollo. Próximamente podrás ver tu historial completo.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  async viewAchievements() {
-    const alert = await this.alertController.create({
-      header: 'Logros',
-      message: 'Función en desarrollo. Próximamente podrás ver tus logros y medallas.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  saveSettings() {
-    localStorage.setItem('appSettings', JSON.stringify(this.settings));
-    console.log('Configuración guardada:', this.settings);
-  }
-
-  async getHelp() {
-    const alert = await this.alertController.create({
-      header: 'Ayuda',
-      message: 'Para soporte, contáctanos en soporte@gradocerrado.com',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  async aboutApp() {
-    const alert = await this.alertController.create({
-      header: 'Acerca de',
-      message: 'Grado Cerrado v1.0.0\n\nAplicación de estudio para preparación de exámenes.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
 }

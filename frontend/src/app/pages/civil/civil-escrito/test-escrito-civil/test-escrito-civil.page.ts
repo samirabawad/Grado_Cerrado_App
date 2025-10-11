@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { ApiService } from '../../../../services/api.service';
@@ -63,14 +63,15 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   questionStartTime: Date = new Date();
 
   constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private apiService: ApiService,
-    private alertController: AlertController,
-    private loadingController: LoadingController // ✅ AGREGAR
-  ) { 
-    console.log('TestEscritoCivilPage constructor inicializado');
-  }
+  private router: Router,
+  private route: ActivatedRoute,
+  private apiService: ApiService,
+  private alertController: AlertController,
+  private loadingController: LoadingController,
+  private cdr: ChangeDetectorRef
+) { 
+  console.log('TestEscritoCivilPage constructor inicializado');
+}
 
   ngOnInit() {
     console.log('TestEscritoCivilPage ngOnInit iniciado');
@@ -344,20 +345,22 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   nextQuestion() {
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++;
-      this.currentQuestionNumber++;
-      this.selectedAnswer = '';
-      
-      // ✅ REINICIAR TIEMPO DE LA PREGUNTA
-      this.questionStartTime = new Date();
-      
-      this.apiService.updateCurrentQuestionIndex(this.currentQuestionIndex);
-      console.log('➡️ Avanzando a pregunta:', this.currentQuestionNumber);
-    } else {
-      this.completeTest();
-    }
+  if (this.currentQuestionIndex < this.questions.length - 1) {
+    this.currentQuestionIndex++;
+    this.currentQuestionNumber++;
+    this.selectedAnswer = '';
+    
+    this.questionStartTime = new Date();
+    
+    this.apiService.updateCurrentQuestionIndex(this.currentQuestionIndex);
+    console.log('➡️ Avanzando a pregunta:', this.currentQuestionNumber);
+    
+    // Forzar detección de cambios
+    this.cdr.detectChanges();
+  } else {
+    this.completeTest();
   }
+}
 
   async completeTest() {
     if (this.timer) {
