@@ -827,31 +827,96 @@
   }
 
   .reminder-time {
+  margin-top: 16px;
+  
+  label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 500;
+    color: var(--ion-color-dark);
+    font-size: 14px;
+  }
+  
+  .time-selector-container {
+    position: relative;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .time-selector {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 12px 16px;
     gap: 8px;
-
-    label {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--ion-color-medium);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    
+    &:focus-within {
+      background: #fff;
+      border-color: var(--ion-color-primary);
+      box-shadow: 0 0 0 4px rgba(var(--ion-color-primary-rgb), 0.1);
     }
-
-    .time-input {
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--ion-color-dark);
+  }
+  
+  .time-select {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    text-align: center;
+    outline: none;
+    cursor: pointer;
+    padding: 4px;
+    
+    &.hora {
+      max-width: 50px;
+    }
+    
+    &.minuto {
+      max-width: 50px;
+    }
+    
+    // Ocultar la flecha por defecto en algunos navegadores
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    // Agregar flecha custom
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    background-size: 16px;
+    padding-right: 24px;
+    
+    &:focus {
+      color: var(--ion-color-primary);
+    }
+    
+    option {
       background: white;
-      transition: border-color 0.3s ease;
-
-      &:focus {
-        outline: none;
-        border-color: var(--ion-color-primary);
-      }
+      color: var(--ion-color-dark);
+      padding: 8px;
     }
+  }
+  }
+  
+  .separator {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ion-color-medium);
+    user-select: none;
+  }
+  
+  .time-icon {
+    font-size: 24px;
+    color: var(--ion-color-medium);
+    flex-shrink: 0;
   }
 }
 

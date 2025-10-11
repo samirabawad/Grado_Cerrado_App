@@ -191,13 +191,21 @@
         </ion-toggle>
       </div>
 
-      <div class="reminder-time" *ngIf="frecuenciaConfig.recordatorioActivo">
-        <label>Hora preferida</label>
-        <input 
-          type="time" 
-          [(ngModel)]="frecuenciaConfig.horaRecordatorio"
-          class="time-input">
+    <div class="reminder-time" *ngIf="frecuenciaConfig.recordatorioActivo">
+      <label>Hora preferida</label>
+      <div class="time-selector-container">
+        <div class="time-selector">
+          <select [(ngModel)]="horaSeleccionada" (change)="onHoraMinutoChange()" class="time-select hora">
+            <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
+          </select>
+          <span class="separator">:</span>
+          <select [(ngModel)]="minutoSeleccionado" (change)="onHoraMinutoChange()" class="time-select minuto">
+            <option *ngFor="let m of minutos" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+        <ion-icon name="time-outline" class="time-icon"></ion-icon>
       </div>
+    </div>
     </div>
 
     <!-- Botón guardar -->
