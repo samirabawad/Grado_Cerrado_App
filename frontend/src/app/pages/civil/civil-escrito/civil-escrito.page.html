@@ -1,8 +1,7 @@
 <ion-content class="civil-content">
   <!-- Header estilo dashboard -->
   <div class="dashboard-header">
-    <ion-icon name="chevron-back" class="back-icon" routerLink="/civil"></ion-icon>
-    <h1 class="header-title">Derecho Civil Escrito</h1>
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>    <h1 class="header-title">Derecho Civil Escrito</h1>
   </div>
 
   <!-- Contenido principal -->
@@ -12,10 +11,8 @@
     <div class="selection-card">
       <label class="selection-label">Cantidad de preguntas</label>
       <select class="custom-select" [(ngModel)]="selectedQuantity">
-        <option [value]="3">3 preguntas</option>
         <option [value]="5">5 preguntas</option>
         <option [value]="10">10 preguntas</option>
-        <option [value]="11">11 preguntas</option>
         <option [value]="15">15 preguntas</option>
       </select>
     </div>

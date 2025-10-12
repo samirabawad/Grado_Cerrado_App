@@ -246,6 +246,10 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
     return '';
   }
 
+  goBack() {
+    this.router.navigate(['/civil']);
+  }
+
   canStartTest(): boolean {
     // Siempre se puede iniciar el test si hay una cantidad seleccionada
     return this.selectedQuantity > 0;
