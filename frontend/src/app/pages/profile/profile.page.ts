@@ -72,6 +72,13 @@ export class ProfilePage implements OnInit, AfterViewInit {
   horas: string[] = Array.from({length: 24}, (_, i) => i.toString().padStart(2, '0'));
   minutos: string[] = ['00', '15', '30', '45'];
 
+  // ============================================
+  // ✅ NUEVAS PROPIEDADES DE MODO ADAPTATIVO
+  // ============================================
+  adaptiveConfig = {
+    enabled: false
+  };
+
   constructor(
     private router: Router,
     private alertController: AlertController,
@@ -84,7 +91,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Forzar el valor del input después de que la vista se inicialice
     this.updateTimeInput();
   }
 
@@ -96,7 +102,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     try {
-      // 1. Obtener usuario del localStorage
       const currentUser = this.apiService.getCurrentUser();
       
       if (!currentUser || !currentUser.id) {
@@ -107,7 +112,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
       const studentId = currentUser.id;
       
-      // 2. Cargar información básica del usuario
       this.user.id = studentId;
       this.user.nombre = currentUser.name?.split(' ')[0] || 'Usuario';
       this.user.nombreCompleto = currentUser.name || 'Usuario';
@@ -115,17 +119,12 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
       console.log('👤 Usuario cargado:', this.user);
 
-      // 3. Cargar estadísticas desde el dashboard
       await this.loadDashboardStats(studentId);
-
-      // 4. Cargar configuración de frecuencia
-      this.loadStudyFrequency();
-
-      // 5. Cargar cumplimiento
       this.loadCumplimiento();
-
-      // 6. Cargar configuración local
       this.loadSettings();
+      
+      // ✅ NUEVO: Cargar modo adaptativo
+      this.loadAdaptiveConfig();
 
     } catch (error) {
       console.error('Error cargando datos del usuario:', error);
@@ -146,16 +145,12 @@ export class ProfilePage implements OnInit, AfterViewInit {
       if (statsResponse && statsResponse.success) {
         const data = statsResponse.data;
         
-        // Mapear las estadísticas
         this.stats.total_tests = data.totalTests || 0;
         this.stats.total_preguntas = data.totalQuestions || 0;
         this.stats.promedio_aciertos = Math.round(data.successRate || 0);
         this.stats.racha_dias_actual = data.streak || 0;
-        
-        // La racha máxima y días estudiados vendrían de metricas_estudiante
-        // Por ahora usamos valores calculados
         this.stats.racha_dias_maxima = Math.max(this.stats.racha_dias_actual, this.stats.racha_dias_maxima);
-        this.stats.total_dias_estudiados = this.stats.racha_dias_actual; // Aproximación
+        this.stats.total_dias_estudiados = this.stats.racha_dias_actual;
 
         console.log('📊 Estadísticas cargadas:', this.stats);
       }
@@ -165,57 +160,147 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   // ============================================
+  // ✅ MÉTODOS DE MODO ADAPTATIVO
+  // ============================================
+  
+  loadAdaptiveConfig() {
+    const studentId = this.user.id;
+    
+    if (!studentId || studentId === 0) {
+      console.log('⚠️ No hay studentId válido para cargar config adaptativa');
+      return;
+    }
+
+    // ✅ Cargar desde la base de datos
+    this.apiService.getAdaptiveModeConfig(studentId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.adaptiveConfig.enabled = response.data.adaptiveModeEnabled || false;
+          console.log('✅ Modo adaptativo cargado desde BD:', this.adaptiveConfig);
+          
+          // También guardar en localStorage como backup
+          localStorage.setItem(
+            `adaptive_mode_${this.user.id}`, 
+            JSON.stringify(this.adaptiveConfig)
+          );
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error cargando modo adaptativo:', error);
+        
+        // Fallback: intentar cargar desde localStorage
+        const saved = localStorage.getItem(`adaptive_mode_${this.user.id}`);
+        if (saved) {
+          try {
+            this.adaptiveConfig = JSON.parse(saved);
+            console.log('ℹ️ Modo adaptativo cargado desde localStorage:', this.adaptiveConfig);
+          } catch (e) {
+            this.adaptiveConfig = { enabled: false };
+          }
+        }
+      }
+    });
+  }
+
+  async onAdaptiveModeChange() {
+    console.log('🎯 Modo adaptativo:', this.adaptiveConfig.enabled ? 'ACTIVADO' : 'DESACTIVADO');
+    
+    // ✅ GUARDAR AUTOMÁTICAMENTE al cambiar el toggle
+    await this.saveAdaptiveConfig();
+  }
+
+  async saveAdaptiveConfig() {
+    this.isSaving = true;
+
+    try {
+      // ✅ Guardar en la base de datos
+      const response = await this.apiService.updateAdaptiveModeConfig(
+        this.user.id, 
+        this.adaptiveConfig.enabled
+      ).toPromise();
+
+      if (response && response.success) {
+        console.log('💾 Modo adaptativo guardado en BD:', response);
+        
+        // También guardar en localStorage como backup
+        localStorage.setItem(
+          `adaptive_mode_${this.user.id}`, 
+          JSON.stringify(this.adaptiveConfig)
+        );
+
+        await this.showToast(
+          this.adaptiveConfig.enabled 
+            ? '✅ Modo Adaptativo activado correctamente'
+            : '✅ Modo Adaptativo desactivado',
+          'success'
+        );
+      } else {
+        throw new Error('No se pudo guardar la configuración');
+      }
+
+    } catch (error: any) {
+      console.error('Error guardando adaptive config:', error);
+      
+      // Revertir el cambio en caso de error
+      this.adaptiveConfig.enabled = !this.adaptiveConfig.enabled;
+      
+      await this.showToast(
+        error.friendlyMessage || '❌ Error al guardar la configuración', 
+        'danger'
+      );
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  // ============================================
   // MÉTODOS DE FRECUENCIA DE ESTUDIO
   // ============================================
   
   loadStudyFrequency() {
-  const studentId = this.user.id;
-  
-  this.apiService.getStudyFrequency(studentId).subscribe({
-    next: (response) => {
-      console.log('📥 RESPUESTA FRECUENCIA:', response);
-      
-      if (response.success && response.data) {
-        console.log('⏰ HORA DE BD:', response.data.horaRecordatorio);
+    const studentId = this.user.id;
+    
+    this.apiService.getStudyFrequency(studentId).subscribe({
+      next: (response) => {
+        console.log('📥 RESPUESTA FRECUENCIA:', response);
         
-        // Extraer solo HH:mm (sin segundos)
-        let horaFormateada = '19:00';
-        
-        if (response.data.horaRecordatorio) {
-          const horaStr = response.data.horaRecordatorio.toString();
-          const partes = horaStr.split(':');
-          if (partes.length >= 2) {
-            const horas = partes[0].padStart(2, '0');
-            const minutos = partes[1].padStart(2, '0');
-            horaFormateada = `${horas}:${minutos}`;
-            
-            // Separar para los selectores
-            this.horaSeleccionada = horas;
-            this.minutoSeleccionado = minutos;
+        if (response.success && response.data) {
+          console.log('⏰ HORA DE BD:', response.data.horaRecordatorio);
+          
+          let horaFormateada = '19:00';
+          
+          if (response.data.horaRecordatorio) {
+            const horaStr = response.data.horaRecordatorio.toString();
+            const partes = horaStr.split(':');
+            if (partes.length >= 2) {
+              const horas = partes[0].padStart(2, '0');
+              const minutos = partes[1].padStart(2, '0');
+              horaFormateada = `${horas}:${minutos}`;
+              
+              this.horaSeleccionada = horas;
+              this.minutoSeleccionado = minutos;
+            }
           }
+          
+          console.log('⏰ HORA FORMATEADA:', horaFormateada);
+          
+          this.frecuenciaConfig = {
+            frecuenciaSemanal: response.data.frecuenciaSemanal || 3,
+            objetivoDias: (response.data.objetivoDias as 'flexible' | 'estricto' | 'personalizado') || 'flexible',
+            diasPreferidos: response.data.diasPreferidos || [],
+            recordatorioActivo: response.data.recordatorioActivo ?? true,
+            horaRecordatorio: horaFormateada
+          };
+          
+          console.log('✅ Config frecuencia - Hora:', this.frecuenciaConfig.horaRecordatorio);
         }
-        
-        console.log('⏰ HORA FORMATEADA:', horaFormateada);
-        
-        this.frecuenciaConfig = {
-          frecuenciaSemanal: response.data.frecuenciaSemanal || 3,
-          objetivoDias: (response.data.objetivoDias as 'flexible' | 'estricto' | 'personalizado') || 'flexible',
-          diasPreferidos: response.data.diasPreferidos || [],
-          recordatorioActivo: response.data.recordatorioActivo ?? true,
-          horaRecordatorio: horaFormateada
-        };
-        
-        console.log('✅ Config frecuencia - Hora:', this.frecuenciaConfig.horaRecordatorio);
-        console.log('🕐 Selectores - Hora:', this.horaSeleccionada, 'Minuto:', this.minutoSeleccionado);
+      },
+      error: (error) => {
+        console.error('❌ Error cargando frecuencia:', error);
       }
-    },
-    error: (error) => {
-      console.error('❌ Error cargando frecuencia:', error);
-    }
-  });
-}
+    });
+  }
 
-  // Método para actualizar el input de tiempo
   updateTimeInput() {
     setTimeout(() => {
       if (this.timeInput && this.timeInput.nativeElement) {
@@ -306,9 +391,9 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   onHoraMinutoChange() {
-  this.frecuenciaConfig.horaRecordatorio = `${this.horaSeleccionada}:${this.minutoSeleccionado}`;
-  console.log('🕐 Hora actualizada:', this.frecuenciaConfig.horaRecordatorio);
-}
+    this.frecuenciaConfig.horaRecordatorio = `${this.horaSeleccionada}:${this.minutoSeleccionado}`;
+    console.log('🕐 Hora actualizada:', this.frecuenciaConfig.horaRecordatorio);
+  }
 
   onTimeChange(event: any) {
     const newTime = event.target.value;
@@ -323,7 +408,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
   async saveFrequency() {
     this.isSaving = true;
 
-    // Asegurar formato correcto antes de guardar (solo HH:mm)
     const configToSave = {
       ...this.frecuenciaConfig,
       horaRecordatorio: this.frecuenciaConfig.horaRecordatorio.substring(0, 5)

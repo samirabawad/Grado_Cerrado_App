@@ -82,6 +82,68 @@
         </div>
       </div>
     </div>
+
+<!-- ============================================ -->
+<!-- SECCIÓN MODO ADAPTATIVO (VERSIÓN SIMPLE) -->
+<!-- ============================================ -->
+
+<ion-card class="settings-card">
+  <ion-card-header>
+    <div class="card-header-with-icon">
+      <ion-icon name="analytics-outline" color="primary"></ion-icon>
+      <ion-card-title>Modo Adaptativo</ion-card-title>
+    </div>
+    <ion-card-subtitle>
+      Sistema inteligente de aprendizaje personalizado
+    </ion-card-subtitle>
+  </ion-card-header>
+
+  <ion-card-content>
+    <!-- Toggle Modo Adaptativo -->
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-label">
+          <ion-icon name="trending-up-outline" color="success"></ion-icon>
+          <span>Activar Modo Adaptativo</span>
+        </div>
+        <div class="setting-description">
+          El sistema analizará tu desempeño y priorizará preguntas de temas donde necesitas refuerzo
+        </div>
+      </div>
+      <ion-toggle 
+        [(ngModel)]="adaptiveConfig.enabled" 
+        (ionChange)="onAdaptiveModeChange()"
+        color="success">
+      </ion-toggle>
+    </div>
+
+    <!-- Información cuando está activo -->
+    <div *ngIf="adaptiveConfig.enabled" class="adaptive-info">
+      <ion-note color="success">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <div>
+          <strong>Modo Adaptativo Activo</strong>
+          <p>
+            Tus próximas sesiones de estudio incluirán más preguntas de los temas 
+            donde has tenido dificultades, ayudándote a mejorar de forma más eficiente.
+          </p>
+        </div>
+      </ion-note>
+    </div>
+
+    <!-- Información cuando está desactivado -->
+    <div *ngIf="!adaptiveConfig.enabled" class="adaptive-info-disabled">
+      <ion-note color="medium">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <div>
+          Activa el modo adaptativo para recibir preguntas personalizadas basadas en tu rendimiento.
+        </div>
+      </ion-note>
+    </div>
+  </ion-card-content>
+</ion-card>
+
+
 <!-- ============================================ -->
 <!-- FRECUENCIA DE ESTUDIO -->
 <!-- ============================================ -->
