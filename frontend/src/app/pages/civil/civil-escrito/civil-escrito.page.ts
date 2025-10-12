@@ -114,59 +114,41 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
   toggleTema(tema: any) {
     if (tema.cantidadPreguntas === 0) return;
     
-    // Si ya está expandido, seleccionarlo y cerrarlo
     if (this.expandedTema === tema.id) {
-      this.selectedTemaId = tema.id;
+      this.expandedTema = null;
+      this.scopeType = 'all';
+      this.selectedTemaId = null;
       this.selectedSubtemaId = null;
-      this.scopeType = 'tema';
-      this.expandedTema = null; // Cerrar acordeón
     } else {
-      // Expandir y seleccionar
       this.expandedTema = tema.id;
+      this.scopeType = 'tema';
       this.selectedTemaId = tema.id;
       this.selectedSubtemaId = null;
-      this.scopeType = 'tema';
     }
   }
 
-  selectSubtema(tema: any, subtema: any) {
-    if (subtema.cantidadPreguntas < this.selectedQuantity) return;
+  selectSubtema(subtema: any, tema: any) {
+    if (subtema.cantidadPreguntas === 0) return;
     
+    this.scopeType = 'subtema';
     this.selectedTemaId = tema.id;
     this.selectedSubtemaId = subtema.id;
-    this.scopeType = 'subtema';
-    this.expandedTema = null; // Cerrar acordeón después de seleccionar
   }
 
-  getSummaryText(): string {
-    if (this.scopeType === 'all') {
-      return `Test de ${this.selectedQuantity} preguntas de todo Derecho Civil`;
-    } else if (this.scopeType === 'tema' && this.selectedTemaId) {
-      const tema = this.temas.find(t => t.id === this.selectedTemaId);
-      return `Test de ${this.selectedQuantity} preguntas de ${tema?.nombre}`;
-    } else if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
-      const tema = this.temas.find(t => t.id === this.selectedTemaId);
-      const subtema = tema?.subtemas?.find((s: any) => s.id === this.selectedSubtemaId);
-      return `Test de ${this.selectedQuantity} preguntas de ${subtema?.nombre}`;
-    }
-    return '';
+  isSubtemaSelected(subtema: any): boolean {
+    return this.scopeType === 'subtema' && this.selectedSubtemaId === subtema.id;
   }
 
-  canStartTest(): boolean {
-    if (this.scopeType === 'all') return true;
-    if (this.scopeType === 'tema') return this.selectedTemaId !== null;
-    if (this.scopeType === 'subtema') return this.selectedSubtemaId !== null;
-    return false;
+  isTemaExpanded(tema: any): boolean {
+    return this.expandedTema === tema.id;
   }
 
-  async startQuickPractice() {
-    if (!this.canStartTest()) return;
-
-    console.log('🎯 Iniciando test con configuración:');
-    console.log('  - Alcance:', this.scopeType);
-    console.log('  - Cantidad:', this.selectedQuantity);
-    console.log('  - Tema ID:', this.selectedTemaId);
-    console.log('  - Subtema ID:', this.selectedSubtemaId);
+  async startTest() {
+    console.log('🚀 Iniciando test escrito con:');
+    console.log('  Cantidad:', this.selectedQuantity);
+    console.log('  Tipo:', this.scopeType);
+    console.log('  Tema ID:', this.selectedTemaId);
+    console.log('  Subtema ID:', this.selectedSubtemaId);
     
     const loading = await this.loadingController.create({
       message: 'Preparando tu test...',
@@ -186,7 +168,6 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
         return;
       }
 
-      // Construir request con filtros
       const sessionData: any = {
         studentId: currentUser.id,
         difficulty: "intermedio",
@@ -194,7 +175,6 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
         numberOfQuestions: this.selectedQuantity
       };
 
-      // Agregar filtros de tema/subtema según la selección
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
         sessionData.SubtemaId = this.selectedSubtemaId;
         console.log('  ✅ Filtrando por SUBTEMA:', this.selectedSubtemaId);
@@ -227,7 +207,6 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
     }
   }
 
-  // Funciones del carrusel
   startCarousel() {
     this.carouselInterval = setInterval(() => {
       this.nextSlide();
@@ -248,5 +227,32 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
     this.currentImageIndex = index;
     this.stopCarousel();
     this.startCarousel();
+  }
+
+  getSummaryText(): string {
+    if (this.scopeType === 'all') {
+      return 'Practicarás con TODO el contenido de Derecho Civil';
+    } else if (this.scopeType === 'tema' && this.selectedTemaId) {
+      const tema = this.temas.find(t => t.id === this.selectedTemaId);
+      return tema ? `Practicarás: ${tema.nombre}` : '';
+    } else if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
+      for (const tema of this.temas) {
+        const subtema = tema.subtemas?.find((s: any) => s.id === this.selectedSubtemaId);
+        if (subtema) {
+          return `Practicarás: ${subtema.nombre}`;
+        }
+      }
+    }
+    return '';
+  }
+
+  canStartTest(): boolean {
+    // Siempre se puede iniciar el test si hay una cantidad seleccionada
+    return this.selectedQuantity > 0;
+  }
+
+  startQuickPractice(): void {
+    // Alias para startTest()
+    this.startTest();
   }
 }

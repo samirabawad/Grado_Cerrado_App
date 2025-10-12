@@ -1,24 +1,7 @@
 <ion-content class="dashboard-content">
-  <!-- Header FIJO - FONDO GRIS SÓLIDO -->
-  <div class="header-section">
-    <div class="user-greeting">
-      <ion-button fill="clear" (click)="goBack()" class="back-button">
-        <ion-icon name="chevron-back"></ion-icon>
-      </ion-button>
-      
-      <div class="avatar-container">
-        <img src="assets/image/msombra.png" alt="Avatar" class="user-avatar">
-      </div>
-      <div class="greeting-text">
-        <h1 class="greeting-title">¡Hola {{ userName }}!</h1>
-        <p class="greeting-subtitle">Tu progreso</p>
-      </div>
-      
-      <div class="streak-display">
-        <img src="assets/image/menu/hoja.png" alt="Racha" class="streak-icon">
-        <span class="streak-count">{{ userStreak }}</span>
-      </div>
-    </div>
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Progreso</h1>
   </div>
 
   <!-- Loading State -->

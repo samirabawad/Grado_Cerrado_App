@@ -56,173 +56,158 @@ ion-content.civil-content {
   position: relative;
   z-index: 2;
   background: transparent;
-  border-radius: 30px 30px 0 0;
   min-height: calc(100vh - 100px);
 }
 
 // ========================================
-// CARD DE PROGRESO
+// PROGRESO CIVIL - ESTILO DASHBOARD
 // ========================================
-.progreso-card {
+.progreso-card-dashboard {
   background: white;
-  border-radius: 16px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 4px solid #f97316;
 
-  .progreso-info-full {
-    width: 100%;
+  &:active {
+    transform: scale(0.98);
+  }
 
-    h4 {
-      color: #333;
-      font-size: 18px;
-      font-weight: 700;
-      margin: 0 0 8px 0;
-    }
+  .progreso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 
-    p {
-      color: #666;
-      font-size: 15px;
-      margin: 0 0 12px 0;
-      font-weight: 500;
-    }
+    .progreso-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
 
-    .progress-bar {
-      width: 100%;
-      height: 12px;
-      background: #f0f0f0;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 8px;
+      .progreso-emoji {
+        font-size: 48px;
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.03);
+      }
 
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #FF9800, #FF5722);
-        border-radius: 10px;
-        transition: width 0.5s ease;
-        box-shadow: 0 2px 6px rgba(255, 87, 34, 0.3);
+      .progreso-info {
+        h3 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 700;
+          color: #111111;
+        }
       }
     }
 
-    .progress-text {
-      color: #888;
-      font-size: 13px;
-      font-weight: 500;
+    .progreso-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .progreso-percentage {
+        font-size: 28px;
+        font-weight: 900;
+        color: #f97316;
+      }
+
+      .arrow-icon {
+        font-size: 24px;
+        color: #111111;
+      }
+    }
+  }
+
+  .progreso-progress {
+    .progreso-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+
+      .progreso-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.6s ease;
+
+        &.civil {
+          background: linear-gradient(90deg, #fb923c, #f97316);
+        }
+      }
     }
   }
 }
 
 // ========================================
-// BOTONES DE MATERIAL
+// TÍTULO DE SECCIÓN
 // ========================================
-.material-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin: 12px 0;
-  padding: 0 40px;
+.section-title-container {
+  margin-bottom: 20px;
 
-  .material-image-button {
-    width: 140px;
-    height: auto;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 18px;
-
-    &:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
+  .section-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
   }
 }
 
 // ========================================
-// BOTONES DE PRÁCTICA
+// GRID 2x2 - 4 BOTONES NARANJAS
 // ========================================
-.practice-buttons {
+.study-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin: 20px 0;
+  margin-bottom: 32px;
 
-  .practice-image-button {
-    width: 100%;
-    height: auto;
+  .study-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    }
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
 
     &:active {
-      transform: translateY(0);
+      transform: scale(0.96);
+      border-color: #FF6F00;
     }
-  }
-}
 
-// ========================================
-// CARRUSEL DE BANNERS
-// ========================================
-.banner-section {
-  margin-top: 30px;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  position: relative;
-  height: 200px;
+    .study-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #FF6F00, #FF8F00);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
 
-  .carousel-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-
-  .carousel-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: opacity 0.8s ease-in-out;
-
-    &.active {
-      opacity: 1;
-      z-index: 1;
-    }
-  }
-
-  .carousel-indicators {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
-    z-index: 2;
-
-    .indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      transition: all 0.3s ease;
-      cursor: pointer;
-
-      &.active {
-        background: white;
-        width: 24px;
-        border-radius: 4px;
+      ion-icon {
+        font-size: 32px;
+        color: white;
       }
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
     }
   }
 }
@@ -232,25 +217,35 @@ ion-content.civil-content {
 // ========================================
 @media (min-width: 768px) {
   .content-area {
-    padding: 24px 32px 100px 32px;
+    padding: 24px 32px 100px;
   }
 
-  .material-buttons {
-    gap: 20px;
-  }
-
-  .practice-buttons {
+  .study-grid {
+    max-width: 600px;
+    margin: 0 auto 32px;
     gap: 20px;
   }
 }
 
-@media (max-width: 480px) {
-  .content-area {
-    padding: 16px 12px 80px 12px;
-  }
-
-  .practice-buttons {
+@media (max-width: 360px) {
+  .study-grid {
     gap: 12px;
+
+    .study-card {
+      padding: 24px 16px;
+
+      .study-icon {
+        width: 56px;
+        height: 56px;
+
+        ion-icon {
+          font-size: 28px;
+        }
+      }
+
+      h3 {
+        font-size: 14px;
+      }
+    }
   }
 }
-

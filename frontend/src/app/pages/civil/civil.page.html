@@ -8,77 +8,67 @@
   <!-- Resto del contenido -->
   <div class="content-area">
 
-    
-    <!-- Progreso Civil con estadísticas reales -->
-    <div class="progreso-card">
-      <div class="progreso-info-full">
-        <h4>Progreso Civil</h4>
-        
-        <ng-container *ngIf="!isLoading && civilStats">
-          <p>{{ civilStats.correctAnswers }}/{{ civilStats.totalQuestions }} preguntas correctas</p>
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="civilStats.successRate"></div>
+    <!-- Progreso Civil - ESTILO DASHBOARD -->
+    <div class="progreso-card-dashboard" (click)="goToDashboard()">
+      <div class="progreso-header">
+        <div class="progreso-left">
+          <div class="progreso-emoji">📜</div>
+          <div class="progreso-info">
+            <h3>Derecho Civil</h3>
           </div>
-          <span class="progress-text">{{ civilStats.successRate }}% completado</span>
-        </ng-container>
-        
-        <ng-container *ngIf="!isLoading && !civilStats">
-          <p>Aún no tienes progreso</p>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: 0%"></div>
-          </div>
-          <span class="progress-text">0% completado</span>
-        </ng-container>
-        
-        <ng-container *ngIf="isLoading">
-          <p>Cargando...</p>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: 0%"></div>
-          </div>
-          <span class="progress-text">...</span>
-        </ng-container>
+        </div>
+        <div class="progreso-right">
+          <div class="progreso-percentage">{{ civilStats?.successRate || 0 }}%</div>
+          <ion-icon name="chevron-forward" class="arrow-icon"></ion-icon>
+        </div>
       </div>
-    </div>
 
-    <!-- Botones de Material -->
-    <div class="material-buttons">
-      <img src="assets/image/botones/Material_Estudio.png" alt="Material de Estudio" class="material-image-button" (click)="goToMaterialEstudio()">
-      <img src="assets/image/botones/Plan_Estudio.png" alt="Plan de Estudio" class="material-image-button" (click)="goToPlanEstudio()">
-    </div>
-
-    <!-- Botones de Práctica -->
-    <div class="practice-buttons">
-      <img src="assets/image/botones/escrito.png" alt="Escrito" class="practice-image-button" (click)="goToEscrito()">
-      
-      <img src="assets/image/botones/concersacion.png" alt="Conversación" class="practice-image-button" (click)="goToConversacion()">
-      
-      <img src="assets/image/botones/reforzar.png" alt="Test" class="practice-image-button" (click)="goToTest()">
-    </div>
-
-    <!-- Carrusel de imágenes del mapache -->
-    <div class="banner-section">
-      <div class="carousel-container">
-        <img 
-          *ngFor="let image of carouselImages; let i = index"
-          [src]="image" 
-          [alt]="'Mapache ' + (i + 1)"
-          class="carousel-image"
-          [class.active]="currentImageIndex === i">
-        
-        <div class="carousel-indicators">
-          <div 
-            *ngFor="let image of carouselImages; let i = index"
-            class="indicator"
-            [class.active]="currentImageIndex === i"
-            (click)="goToSlide(i)">
-          </div>
+      <div class="progreso-progress">
+        <div class="progreso-bar">
+          <div class="progreso-fill civil" [style.width.%]="civilStats?.successRate || 0"></div>
         </div>
       </div>
     </div>
 
+    <!-- Título único -->
+    <div class="section-title-container">
+      <h2 class="section-title">¿Cómo quieres estudiar?</h2>
+    </div>
+
+    <!-- Grid 2x2 - 4 BOTONES -->
+    <div class="study-grid">
+      <!-- Fila 1 -->
+      <div class="study-card" (click)="goToEscrito()">
+        <div class="study-icon">
+          <ion-icon name="create"></ion-icon>
+        </div>
+        <h3>Escrito</h3>
+      </div>
+      
+      <div class="study-card" (click)="goToConversacion()">
+        <div class="study-icon">
+          <ion-icon name="mic"></ion-icon>
+        </div>
+        <h3>Conversación</h3>
+      </div>
+      
+      <!-- Fila 2 -->
+      <div class="study-card">
+        <div class="study-icon">
+          <ion-icon name="fitness"></ion-icon>
+        </div>
+        <h3>Reforzar</h3>
+      </div>
+      
+      <div class="study-card" (click)="goToMaterialEstudio()">
+        <div class="study-icon">
+          <ion-icon name="folder-open"></ion-icon>
+        </div>
+        <h3>Material</h3>
+      </div>
+    </div>
   </div>
 
-  <!-- Bottom Navigation Component -->
+  <!-- Bottom Navigation -->
   <app-bottom-nav></app-bottom-nav>
-
 </ion-content>

@@ -14,62 +14,33 @@ ion-content.racha-content {
 }
 
 // ========================================
-// HEADER FIJO - IGUAL QUE CIVIL
+// HEADER ESTILO DASHBOARD
 // ========================================
-.custom-header-section {
+.dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  height: 60px;
+  background: #10b981;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
   z-index: 1000;
-  background: transparent;
-  
-  .green-background {
-    background: transparent;
-    padding: 0;
-    border-radius: 0;
-    position: relative;
-    overflow: hidden;
-    width: 100vw;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-    .racha-container-full {
-      display: block;
-      width: 100%;
-      height: auto;
-      position: relative;
-      z-index: 3;
-
-      .racha-image-responsive {
-        display: block;
-        width: 100vw;
-        height: auto;
-        min-height: 120px;
-        max-height: 200px;
-        object-fit: cover;
-        object-position: center;
-        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
-      }
-    }
+  .back-icon {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-right: 12px;
   }
-}
 
-// Flecha atrás - SOLO FLECHA BLANCA SIN CÍRCULO
-.back-button {
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
-  left: 12px;
-  z-index: 1100;
-  --color: #ffffff;
-  --icon-font-size: 28px;
-  --min-width: auto;
-  --padding-start: 0;
-  --padding-end: 0;
-  background: transparent;
-  box-shadow: none;
-
-  ion-icon {
-    font-size: 28px;
-    color: #ffffff;
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
   }
 }
 
@@ -77,7 +48,7 @@ ion-content.racha-content {
 // CONTENIDO
 // ========================================
 .content-area {
-  margin-top: 140px;
+  margin-top: 60px;
   padding: 20px 16px 100px;
   background: transparent;
   border-radius: 30px 30px 0 0;
@@ -90,6 +61,7 @@ ion-content.racha-content {
   justify-content: center;
   align-items: center;
   padding: 100px 20px;
+  margin-top: 60px;
 }
 
 // Tarjeta principal de racha
@@ -396,37 +368,17 @@ ion-content.racha-content {
   }
 }
 
-// ========================================
 // RESPONSIVE
-// ========================================
 @media (min-width: 768px) {
-  .custom-header-section .green-background {
-    .racha-container-full {
-      .racha-image-responsive {
-        min-height: 150px;
-        max-height: 250px;
-      }
-    }
-  }
-  
   .content-area {
-    margin-top: 180px;
+    margin-top: 60px;
     padding: 24px 32px 100px;
   }
 }
 
 @media (max-width: 480px) {
-  .custom-header-section .green-background {
-    .racha-container-full {
-      .racha-image-responsive {
-        min-height: 100px;
-        max-height: 160px;
-      }
-    }
-  }
-  
   .content-area {
-    margin-top: 120px;
+    margin-top: 60px;
     padding: 16px 12px 80px;
   }
 }

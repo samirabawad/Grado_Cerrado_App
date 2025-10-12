@@ -1,17 +1,19 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { IonicModule, LoadingController } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
+import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-civil-oral',
   templateUrl: './civil-oral.page.html',
   styleUrls: ['./civil-oral.page.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [IonicModule, CommonModule, BottomNavComponent]
 })
 export class CivilOralPage implements OnInit, OnDestroy {
 
-  // Carrusel de banners
   carouselImages: string[] = [
     'assets/image/banner-9.png',
     'assets/image/banner-10.png',
@@ -42,7 +44,6 @@ export class CivilOralPage implements OnInit, OnDestroy {
     this.stopCarousel();
   }
 
-  // Funciones del carrusel
   startCarousel() {
     this.carouselInterval = setInterval(() => {
       this.nextSlide();

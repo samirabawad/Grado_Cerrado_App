@@ -1,13 +1,16 @@
+// INICIO DEL ARCHIVO - Copiar desde aquí
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../services/api.service';
 
 interface Question {
   id: string;
   text: string;
   questionText: string;
-  type: string;
+  type: string | number;  // ✅ CORREGIDO: Acepta string o number
   category: string;
   legalArea: string;
   difficulty: number;
@@ -26,11 +29,27 @@ interface BackendSession {
   totalQuestions: number;
 }
 
+// ✅ AGREGADO: Interface para los resultados
+interface TestResults {
+  correctAnswers: number;
+  incorrectAnswers: number;
+  totalAnswered: number;
+  totalQuestions: number;
+  percentage: number;
+  grade: string;
+  level: string;
+  incorrectQuestions: any[];
+  timeUsed?: number;           // ✅ AGREGADO
+  timeUsedFormatted?: string;  // ✅ AGREGADO
+  sessionId?: string;          // ✅ AGREGADO
+}
+
 @Component({
   selector: 'app-test-escrito-civil',
   templateUrl: './test-escrito-civil.page.html',
   styleUrls: ['./test-escrito-civil.page.scss'],
-  standalone: false
+  standalone: true,
+  imports: [IonicModule, CommonModule, FormsModule]
 })
 export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
@@ -63,7 +82,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
     private apiService: ApiService,
     private alertController: AlertController,
     private loadingController: LoadingController,
@@ -86,43 +104,51 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   async loadSessionFromBackend() {
     try {
       console.log('Iniciando carga de sesión...');
-      this.isLoading = true;
+      
+      const session = this.apiService.getCurrentSession();
+      
+      if (!session || !session.questions || session.questions.length === 0) {
+        console.error('❌ No hay sesión activa o no tiene preguntas');
+        this.loadingError = true;
+        this.isLoading = false;
+        return;
+      }
+
+      console.log('✅ Sesión encontrada:', session);
+      
+      this.currentSession = session as BackendSession;
+      this.testId = session.testId || session.session?.id || 0;
+      this.sessionId = session.session?.id?.toString() || '';
+      
+      console.log('📝 Test ID:', this.testId);
+      console.log('📝 Session ID:', this.sessionId);
       
       setTimeout(() => {
-        this.currentSession = this.apiService.getCurrentSession();
-        console.log('Sesión obtenida del ApiService:', this.currentSession);
-        
-        if (!this.currentSession) {
-          console.error('No hay sesión activa');
-          this.loadingError = true;
-          this.isLoading = false;
-          return;
-        }
-
         try {
-          this.testId = this.currentSession?.testId || 0;
-          this.sessionId = this.currentSession?.session?.sessionId || this.currentSession?.session?.id || 'sin-id';
-          this.totalQuestions = this.currentSession?.totalQuestions || 10;
-          this.currentQuestionIndex = this.currentSession?.currentQuestionIndex || 0;
-          this.currentQuestionNumber = this.currentQuestionIndex + 1;
-          
-          const backendQuestions = this.currentSession?.questions || [];
-          this.questions = this.convertBackendQuestions(backendQuestions);
-          
-          console.log(`✅ Test ID: ${this.testId}`);
-          console.log(`✅ Preguntas cargadas: ${this.questions.length}`);
+          this.questions = this.convertBackendQuestions(session.questions);
           
           if (this.questions.length === 0) {
-            console.error('No se cargaron preguntas');
+            console.error('❌ No se pudieron convertir las preguntas');
             this.loadingError = true;
             this.isLoading = false;
             return;
           }
+
+          this.totalQuestions = this.questions.length;
+          this.currentQuestionNumber = 1;
+          this.currentQuestionIndex = 0;
           
-          this.questionStartTime = new Date();
-          this.startTimer();
+          console.log(`✅ ${this.totalQuestions} preguntas cargadas correctamente`);
+          console.log('📋 Primera pregunta:', this.questions[0]);
+          
           this.isLoading = false;
-          console.log('Carga de sesión completada exitosamente');
+          this.cdr.detectChanges();
+          
+          this.startTimer();
+          
+          setTimeout(() => {
+            this.logQuestionDebug();
+          }, 500);
           
         } catch (conversionError) {
           console.error('Error en conversión de preguntas:', conversionError);
@@ -139,27 +165,22 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   convertBackendQuestions(backendQuestions: any[]): Question[] {
-    console.log('Convirtiendo preguntas del backend, cantidad:', backendQuestions?.length || 0);
-    
     if (!Array.isArray(backendQuestions)) {
       console.error('backendQuestions no es un array:', backendQuestions);
       return [];
     }
     
     return backendQuestions.map((q: any, index: number) => {
-      console.log(`Procesando pregunta ${index + 1}:`, q);
-      
       const convertedQuestion: Question = {
-        id: String(q.id) || `temp-${index}`,
+        id: q.id || `temp-${index}`,
         text: q.questionText || q.text || q.enunciado || 'Texto no disponible',
         questionText: q.questionText || q.text || q.enunciado || 'Texto no disponible',
-        type: q.type || 'seleccion_multiple',
-        category: q.category || q.tema || q.legalArea || 'Sin categoría',
-        legalArea: q.legalArea || q.tema || q.category || 'General',
+        type: q.type || 1,
+        category: q.category || q.legalArea || 'Sin categoría',
+        legalArea: q.legalArea || q.category || 'General',
         difficulty: q.difficulty || 3,
         correctAnswer: q.correctAnswer || 'A',
-        explanation: q.explanation || 'Explicación no disponible',
-        options: q.options || []
+        explanation: q.explanation || 'Explicación no disponible'
       };
 
       try {
@@ -176,188 +197,135 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     });
   }
 
-  getCurrentQuestion(): Question | null {
-    if (this.currentQuestionIndex >= 0 && this.currentQuestionIndex < this.questions.length) {
-      return this.questions[this.currentQuestionIndex];
-    }
-    return null;
-  }
-
-  // ✅ NUEVO: Detectar si es V/F
-  isMultipleChoiceQuestion(): boolean {
-    const question = this.getCurrentQuestion();
-    if (!question) return true;
-    
-    // Detectar por tipo explícito
-    if (question.type === 'verdadero_falso' || question.type === 'boolean') {
-      return false;
-    }
-    
-    // Es selección múltiple si tiene tipo explícito o tiene opciones
-    if (question.type === 'seleccion_multiple') {
-      return true;
-    }
-    
-    // Fallback: si tiene opciones, es selección múltiple
-    return !!(question.options && question.options.length > 0);
-  }
-
-  isTrueFalseQuestion(): boolean {
-    return !this.isMultipleChoiceQuestion();
-  }
-
-  // ✅ ACTUALIZADO: Incluye soporte V/F
-  getCurrentQuestionOptions(): { id: string; text: string; letter?: string }[] {
-    const question = this.getCurrentQuestion();
-    if (!question) return [];
-
-    // ✅ Si es V/F, retornar opciones booleanas
-    if (this.isTrueFalseQuestion()) {
-      return [
-        { id: 'true', text: 'Verdadero', letter: 'V' },
-        { id: 'false', text: 'Falso', letter: 'F' }
-      ];
-    }
-
-    const q: any = question;
-
-    if (Array.isArray(q.options) && q.options.length > 0) {
-      return q.options.map((opt: any, idx: number) => ({
-        id: String(opt?.id ?? String.fromCharCode(65 + idx)),
-        text: typeof opt === 'string' ? opt : (opt?.text ?? opt?.content ?? `Opción ${idx + 1}`),
-        letter: String.fromCharCode(65 + idx),
-      }));
-    }
-
-    const individualOptions: { id: string; text: string; letter: string }[] = [];
-    if (q.optionA) individualOptions.push({ id: 'A', text: q.optionA, letter: 'A' });
-    if (q.optionB) individualOptions.push({ id: 'B', text: q.optionB, letter: 'B' });
-    if (q.optionC) individualOptions.push({ id: 'C', text: q.optionC, letter: 'C' });
-    if (q.optionD) individualOptions.push({ id: 'D', text: q.optionD, letter: 'D' });
-    if (individualOptions.length > 0) return individualOptions;
-
-    const possibleArrayProps = ['choices', 'answers', 'alternativas'];
-    for (const prop of possibleArrayProps) {
-      if (Array.isArray(q[prop]) && q[prop].length > 0) {
-        return q[prop].map((opt: any, idx: number) => ({
-          id: String(opt?.id ?? String.fromCharCode(65 + idx)),
-          text: typeof opt === 'string' ? opt : (opt?.text ?? opt?.content ?? `Opción ${idx + 1}`),
-          letter: String.fromCharCode(65 + idx),
-        }));
-      }
-    }
-
-    // Si no hay opciones, probablemente es V/F
-    return [
-      { id: 'true', text: 'Verdadero', letter: 'V' },
-      { id: 'false', text: 'Falso', letter: 'F' }
-    ];
+  logQuestionDebug() {
+    const q = this.getCurrentQuestion();
+    console.log('=== DEBUG PREGUNTA ACTUAL ===');
+    console.log('Pregunta:', q);
+    console.log('Tipo:', q?.type);
+    console.log('Es V/F:', this.isTrueFalseQuestion());
+    console.log('Opciones:', this.getCurrentQuestionOptions());
+    console.log('=============================');
   }
 
   startTimer() {
-    if (this.testConfig.timeLimit > 0) {
-      this.timeRemaining = this.testConfig.timeLimit * 60;
-      this.timer = setInterval(() => {
-        this.timeRemaining--;
-        if (this.timeRemaining <= 0) {
-          this.completeTest();
-        }
-      }, 1000);
-    }
-  }
-
-  async selectAnswer(optionId: string) {
-    if (!this.canSelectOption()) {
-      console.log('⚠️ Ya se respondió esta pregunta');
-      return;
-    }
-
-    console.log(`👆 Usuario seleccionó: ${optionId}`);
-
-    this.selectedAnswer = optionId;
+    this.timeRemaining = this.testConfig.timeLimit * 60;
     
-    const currentQuestion = this.getCurrentQuestion();
-    if (!currentQuestion) {
-      console.error('❌ No hay pregunta actual');
-      return;
-    }
-
-    currentQuestion.userAnswer = optionId;
-
-    const isCorrect = this.isCorrectAnswer(optionId);
-    console.log(`${isCorrect ? '✅' : '❌'} Respuesta ${isCorrect ? 'CORRECTA' : 'INCORRECTA'}`);
-
-    const timeSpent = Math.floor((new Date().getTime() - this.questionStartTime.getTime()) / 1000);
-    console.log(`⏱️ Tiempo: ${timeSpent} segundos`);
-
-    await this.submitAnswerToBackend(currentQuestion, optionId, isCorrect, timeSpent);
+    this.timer = setInterval(() => {
+      if (this.timeRemaining > 0) {
+        this.timeRemaining--;
+      } else {
+        this.finishTest();
+      }
+    }, 1000);
   }
 
-  async submitAnswerToBackend(question: Question, userAnswer: string, isCorrect: boolean, timeSpent: number) {
-    if (this.testId === 0) {
-      console.error('❌ No hay testId válido');
-      return;
+  getFormattedTime(): string {
+    const minutes = Math.floor(this.timeRemaining / 60);
+    const seconds = this.timeRemaining % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  getCurrentQuestion(): Question | null {
+    return this.questions[this.currentQuestionIndex] || null;
+  }
+
+  getCurrentQuestionOptions(): string[] {
+    const question = this.getCurrentQuestion();
+    
+    if (!question) {
+      return [];
     }
 
-    console.log('📤 Enviando respuesta al backend...');
+    if (this.isTrueFalseQuestion()) {
+      return ['Verdadero', 'Falso'];
+    }
 
-    const loading = await this.loadingController.create({
-      message: 'Guardando...',
-      spinner: 'crescent',
-      duration: 5000
+    const options: string[] = [];
+    ['optionA', 'optionB', 'optionC', 'optionD', 'optionE'].forEach(key => {
+      if (question[key]) {
+        options.push(question[key]);
+      }
     });
 
-    await loading.present();
+    return options.length > 0 ? options : [];
+  }
 
-    try {
-      const timeSpanString = this.formatTimeSpan(timeSpent);
+  isTrueFalseQuestion(): boolean {
+    const question = this.getCurrentQuestion();
+    return question?.type === 2 || question?.type === '2';
+  }
 
-      const submitData = {
-        testId: this.testId,
-        preguntaId: parseInt(question.id),
-        userAnswer: userAnswer,
-        correctAnswer: question.correctAnswer,
-        explanation: question.explanation || '',
-        timeSpent: timeSpanString, 
-        numeroOrden: this.currentQuestionNumber,
-        isCorrect: isCorrect
-      };
-
-      console.log('📦 Datos a enviar:', submitData);
-
-      const response = await this.apiService.submitAnswer(submitData).toPromise();
-
-      console.log('📥 Respuesta del backend:', response);
-
-      if (response && response.success) {
-        console.log(`✅ Respuesta guardada. ID: ${response.respuestaId}`);
-      } else {
-        console.warn('⚠️ Backend retornó success=false');
-      }
-
-    } catch (error: any) {
-      console.error('❌ Error enviando respuesta:', error);
-      
-      const alert = await this.alertController.create({
-        header: 'Advertencia',
-        message: 'Hubo un problema al guardar la respuesta en el servidor.',
-        buttons: ['OK']
-      });
-      await alert.present();
-
-    } finally {
-      await loading.dismiss();
+  selectAnswer(optionId: string) {
+    if (this.hasAnsweredCurrentQuestion()) {
+      console.log('Ya respondiste esta pregunta');
+      return;
     }
+    
+    const question = this.getCurrentQuestion();
+    if (!question) return;
+
+    let normalizedAnswer = optionId;
+    
+    if (this.isTrueFalseQuestion()) {
+      normalizedAnswer = optionId === 'Verdadero' ? 'V' : 'F';
+    } else {
+      normalizedAnswer = optionId.toUpperCase();
+      if (!['A', 'B', 'C', 'D', 'E'].includes(normalizedAnswer)) {
+        const options = this.getCurrentQuestionOptions();
+        const optionIndex = options.indexOf(optionId);
+        if (optionIndex !== -1) {
+          normalizedAnswer = String.fromCharCode(65 + optionIndex);
+        }
+      }
+    }
+    
+    console.log(`✅ Respuesta seleccionada: ${normalizedAnswer} (original: ${optionId})`);
+    question.userAnswer = normalizedAnswer;
+    
+    this.sendAnswerToBackend(question, normalizedAnswer);
+    
+    this.cdr.detectChanges();
   }
 
-  private formatTimeSpan(seconds: number): string {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `PT${hours}H${minutes}M${secs}S`;
+  async sendAnswerToBackend(question: Question, answer: string) {
+  try {
+    const questionEndTime = new Date();
+    const responseTime = Math.floor((questionEndTime.getTime() - this.questionStartTime.getTime()) / 1000);
+    
+    // ✅ Convertir tiempo a formato TimeSpan (PT0H0M10S)
+    const hours = Math.floor(responseTime / 3600);
+    const minutes = Math.floor((responseTime % 3600) / 60);
+    const seconds = responseTime % 60;
+    const timeSpanString = `PT${hours}H${minutes}M${seconds}S`;
+    
+    // ✅ Estructura exacta que espera el backend
+    const answerData = {
+      testId: this.testId,
+      preguntaId: parseInt(question.id),  // ✅ Convertir a number
+      userAnswer: answer,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation || '',
+      timeSpent: timeSpanString,  // ✅ Formato TimeSpan
+      numeroOrden: this.currentQuestionNumber,
+      isCorrect: this.compareAnswers(answer, question.correctAnswer)
+    };
+    
+    console.log('📤 Enviando respuesta al backend:', answerData);
+    
+    await this.apiService.submitAnswer(answerData).toPromise();
+    console.log('✅ Respuesta enviada correctamente');
+    
+  } catch (error) {
+    console.error('❌ Error enviando respuesta:', error);
   }
+}
 
   nextQuestion() {
+    if (!this.hasAnsweredCurrentQuestion()) {
+      this.showAnswerRequiredAlert();
+      return;
+    }
+
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
       this.currentQuestionNumber++;
@@ -365,30 +333,65 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
       
       this.questionStartTime = new Date();
       
-      this.apiService.updateCurrentQuestionIndex(this.currentQuestionIndex);
-      console.log('➡️ Avanzando a pregunta:', this.currentQuestionNumber);
-      
-      this.cdr.detectChanges();
+      console.log(`➡️ Avanzando a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
+      this.logQuestionDebug();
     } else {
-      this.completeTest();
+      this.finishTest();
     }
   }
 
-  async completeTest() {
+  previousQuestion() {
+    if (this.currentQuestionIndex > 0) {
+      this.currentQuestionIndex--;
+      this.currentQuestionNumber--;
+      this.selectedAnswer = '';
+      
+      console.log(`⬅️ Retrocediendo a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
+      this.logQuestionDebug();
+    }
+  }
+
+  hasAnsweredCurrentQuestion(): boolean {
+    const question = this.getCurrentQuestion();
+    return !!question?.userAnswer;
+  }
+
+  async showAnswerRequiredAlert() {
+    const alert = await this.alertController.create({
+      header: 'Respuesta requerida',
+      message: 'Debes seleccionar una respuesta antes de continuar.',
+      buttons: ['OK']
+    });
+    
+    await alert.present();
+  }
+
+  compareAnswers(userAnswer: string, correctAnswer: string): boolean {
+    const normalize = (ans: string) => ans?.toString().trim().toUpperCase() || '';
+    return normalize(userAnswer) === normalize(correctAnswer);
+  }
+
+  async finishTest() {
+    console.log('🏁 Finalizando test...');
+    
     if (this.timer) {
       clearInterval(this.timer);
     }
-    
-    this.isTestCompleted = true;
-    console.log('🏁 Test completado');
-    
+
+    const timeUsed = (this.testConfig.timeLimit * 60) - this.timeRemaining;
     const results = this.calculateResults();
+    
+    // ✅ CORREGIDO: Asignación correcta de propiedades
+    results.timeUsed = timeUsed;
+    results.timeUsedFormatted = this.formatTime(timeUsed);
+    results.sessionId = this.sessionId;
+    
     console.log('📊 Resultados calculados:', results);
     
     this.saveResultsAndNavigateToSummary(results);
   }
 
-  saveResultsAndNavigateToSummary(results: any) {
+  saveResultsAndNavigateToSummary(results: TestResults) {  // ✅ CORREGIDO: Tipo específico
     const sessionResults = {
       date: new Date().toISOString(),
       percentage: results.percentage,
@@ -421,7 +424,7 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     this.router.navigate(['/civil/civil-escrito/resumen-test-civil']);
   }
 
-  calculateResults() {
+  calculateResults(): TestResults {  // ✅ CORREGIDO: Retorna tipo específico
     let correctAnswers = 0;
     let totalAnswered = 0;
     const incorrectQuestions: any[] = [];
@@ -430,7 +433,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
       if (question.userAnswer) {
         totalAnswered++;
         
-        // ✅ Comparación mejorada para V/F
         const isCorrect = this.compareAnswers(question.userAnswer, question.correctAnswer);
         
         if (isCorrect) {
@@ -448,138 +450,44 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     });
     
     const percentage = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
-    const timeUsed = this.testConfig.timeLimit * 60 - this.timeRemaining;
+    const incorrectAnswers = totalAnswered - correctAnswers;
     
     return {
       correctAnswers,
-      incorrectAnswers: totalAnswered - correctAnswers,
-      totalQuestions: this.totalQuestions,
+      incorrectAnswers,
       totalAnswered,
+      totalQuestions: this.questions.length,
       percentage,
-      timeUsed,
-      timeUsedFormatted: this.formatTime(timeUsed),
       grade: this.getGradeFromPercentage(percentage),
       level: this.getLevelFromPercentage(percentage),
-      incorrectQuestions,
-      sessionId: this.sessionId
+      incorrectQuestions
     };
   }
 
-  // ✅ NUEVO: Comparar respuestas (maneja V/F y múltiple)
-  private compareAnswers(userAnswer: string, correctAnswer: string): boolean {
-    const userLower = String(userAnswer).trim().toLowerCase();
-    const correctLower = String(correctAnswer).trim().toLowerCase();
-    return userLower === correctLower;
-  }
-
-  updateGeneralStats(results: any) {
-    const currentStats = JSON.parse(localStorage.getItem('civil_escrito_stats') || '{}');
-    
-    const updatedStats = {
-      totalTests: (currentStats.totalTests || 0) + 1,
-      totalQuestions: (currentStats.totalQuestions || 0) + results.totalAnswered,
-      totalCorrect: (currentStats.totalCorrect || 0) + results.correctAnswers,
-      averagePercentage: 0,
-      bestScore: Math.max(currentStats.bestScore || 0, results.percentage),
-      currentLevel: results.level,
-      lastUpdated: new Date().toISOString()
+  updateGeneralStats(results: TestResults) {  // ✅ CORREGIDO: Tipo específico
+    const stats = {
+      lastTestDate: new Date().toISOString(),
+      lastTestScore: results.percentage,
+      totalTests: (parseInt(localStorage.getItem('totalTests') || '0')) + 1,
+      totalQuestions: (parseInt(localStorage.getItem('totalQuestions') || '0')) + results.totalQuestions,
+      totalCorrect: (parseInt(localStorage.getItem('totalCorrect') || '0')) + results.correctAnswers
     };
     
-    updatedStats.averagePercentage = updatedStats.totalQuestions > 0 
-      ? Math.round((updatedStats.totalCorrect / updatedStats.totalQuestions) * 100)
-      : 0;
+    localStorage.setItem('totalTests', stats.totalTests.toString());
+    localStorage.setItem('totalQuestions', stats.totalQuestions.toString());
+    localStorage.setItem('totalCorrect', stats.totalCorrect.toString());
+    localStorage.setItem('lastTestDate', stats.lastTestDate);
+    localStorage.setItem('lastTestScore', stats.lastTestScore.toString());
     
-    localStorage.setItem('civil_escrito_stats', JSON.stringify(updatedStats));
+    console.log('📈 Estadísticas actualizadas:', stats);
   }
 
-  // ESTADO
-
-  hasSelectedAnswer(): boolean {
-    return this.selectedAnswer !== '';
-  }
-
-  hasAnsweredCurrentQuestion(): boolean {
-    const currentQuestion = this.getCurrentQuestion();
-    return currentQuestion ? !!currentQuestion.userAnswer : false;
-  }
-
-  isOptionSelected(optionId: string): boolean {
-    const currentQuestion = this.getCurrentQuestion();
-    return currentQuestion ? currentQuestion.userAnswer === optionId : false;
-  }
-
-  canSelectOption(): boolean {
-    return !this.hasAnsweredCurrentQuestion();
-  }
-
-  getProgress(): number {
-    return this.totalQuestions > 0 ? (this.currentQuestionIndex / this.totalQuestions) * 100 : 0;
-  }
-
-  getCategoryColor(): string {
-    return '#FF6F00';
-  }
-
-  getCurrentQuestionCategory(): string {
+  getAnswerButtonClass(optionId: string): string {
     const question = this.getCurrentQuestion();
-    return question?.category || question?.legalArea || 'Sin categoría';
-  }
-
-  getCurrentQuestionText(): string {
-    const question = this.getCurrentQuestion();
-    return question?.text || question?.questionText || 'Pregunta no disponible';
-  }
-
-  // ✅ NUEVO: Etiqueta de tipo de pregunta
-  getQuestionTypeLabel(): string {
-    if (this.isTrueFalseQuestion()) {
-      return 'Verdadero o Falso';
-    }
-    return 'Selección Múltiple';
-  }
-
-  // ✅ NUEVO: Clase CSS según tipo
-  getQuestionTypeClass(): string {
-    if (this.isTrueFalseQuestion()) {
-      return 'true-false-question';
-    }
-    return 'multiple-choice-question';
-  }
-
-  // VALIDACIÓN
-
-  // ✅ ACTUALIZADO: Maneja V/F
-  isCorrectAnswer(optionId: string): boolean {
-    const currentQuestion = this.getCurrentQuestion();
-    if (!currentQuestion) return false;
+    if (!question) return 'default';
     
-    // ✅ Si es V/F, comparar como booleanos
-    if (this.isTrueFalseQuestion()) {
-      const userBool = optionId.toLowerCase() === 'true';
-      const correctBool = String(currentQuestion.correctAnswer).toLowerCase() === 'true';
-      return userBool === correctBool;
-    }
-    
-    // Verificar en options del backend si existe
-    if (currentQuestion.options && Array.isArray(currentQuestion.options)) {
-      const option = currentQuestion.options.find((opt: any) => String(opt.id) === String(optionId));
-      if (option && typeof option.isCorrect === 'boolean') {
-        return option.isCorrect;
-      }
-    }
-    
-    return String(currentQuestion.correctAnswer).trim().toLowerCase() === String(optionId).trim().toLowerCase();
-  }
-
-  isIncorrectAnswer(optionId: string): boolean {
-    return this.hasAnsweredCurrentQuestion() && 
-           this.isOptionSelected(optionId) && 
-           !this.isCorrectAnswer(optionId);
-  }
-
-  getOptionState(optionId: string): string {
-    if (!this.hasAnsweredCurrentQuestion()) {
-      return this.isOptionSelected(optionId) ? 'selected' : 'default';
+    if (question.userAnswer === optionId) {
+      return 'selected';
     }
     
     if (this.isCorrectAnswer(optionId)) {
@@ -591,6 +499,20 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
     
     return 'default';
+  }
+
+  isCorrectAnswer(optionId: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !this.hasAnsweredCurrentQuestion()) return false;
+    
+    return this.compareAnswers(optionId, question.correctAnswer);
+  }
+
+  isIncorrectAnswer(optionId: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !this.hasAnsweredCurrentQuestion()) return false;
+    
+    return question.userAnswer === optionId && !this.compareAnswers(optionId, question.correctAnswer);
   }
 
   shouldShowOptionIcon(optionId: string): boolean {
@@ -621,8 +543,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return '';
   }
 
-  // CONTROL
-
   exitTest() {
     console.log('Saliendo del test...');
     this.apiService.clearCurrentSession();
@@ -642,8 +562,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadSessionFromBackend();
   }
-
-  // AUXILIARES
 
   getGradeFromPercentage(percentage: number): string {
     if (percentage >= 90) return 'Excelente';
@@ -677,5 +595,61 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     console.log('Opciones:', this.getCurrentQuestionOptions());
     console.log('TestId:', this.testId);
     console.log('=============');
+  }
+
+
+  getProgress(): number {
+    if (this.totalQuestions === 0) return 0;
+    return (this.currentQuestionNumber / this.totalQuestions) * 100;
+  }
+
+  getCategoryColor(): string {
+    return '#FF6F00'; // Color naranja para Civil
+  }
+
+  getCurrentQuestionCategory(): string {
+    const question = this.getCurrentQuestion();
+    return question?.category || question?.legalArea || 'General';
+  }
+
+  getCurrentQuestionText(): string {
+    const question = this.getCurrentQuestion();
+    return question?.questionText || question?.text || 'Pregunta no disponible';
+  }
+
+  isOptionSelected(optionText: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question) return false;
+    return question.userAnswer === optionText;
+  }
+
+  getOptionState(optionText: string): 'correct' | 'incorrect' | 'default' {
+    if (!this.hasAnsweredCurrentQuestion()) return 'default';
+    
+    const question = this.getCurrentQuestion();
+    if (!question) return 'default';
+    
+    const isCorrect = this.compareAnswers(optionText, question.correctAnswer);
+    const isSelected = question.userAnswer === optionText;
+    
+    if (isCorrect) return 'correct';
+    if (isSelected && !isCorrect) return 'incorrect';
+    
+    return 'default';
+  }
+
+  canSelectOption(): boolean {
+    return !this.hasAnsweredCurrentQuestion();
+  }
+
+  hasSelectedAnswer(): boolean {
+    return this.hasAnsweredCurrentQuestion();
+  }
+
+  getOptionLetter(index: number): string {
+    if (this.isTrueFalseQuestion()) {
+      return index === 0 ? 'V' : 'F';
+    }
+    return String.fromCharCode(65 + index); // A, B, C, D, E
   }
 }

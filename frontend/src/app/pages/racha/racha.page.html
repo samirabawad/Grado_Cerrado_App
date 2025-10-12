@@ -1,15 +1,9 @@
 <ion-content class="racha-content">
-  <div class="custom-header-section">
-    <div class="green-background">
-      <div class="racha-container-full">
-        <img src="assets/image/racha.png" alt="Derecho Civil" class="racha-image-responsive">
-      </div>
-    </div>
+  <!-- Header estilo dashboard -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">La Racha</h1>
   </div>
-
-  <ion-button fill="clear" class="back-button" (click)="goBack()">
-    <ion-icon name="chevron-back"></ion-icon>
-  </ion-button>
 
   <div *ngIf="isLoading" class="loading-container">
     <ion-spinner name="circular"></ion-spinner>
@@ -71,45 +65,8 @@
       </div>
     </div>
 
-    <!-- Próxima meta -->
-    <div class="next-goal-card">
-      <h3>Próxima meta: {{ nextGoal }} días</h3>
-      <div class="goal-progress-bar">
-        <div class="goal-progress-fill" [style.width.%]="getProgressToNextGoal()"></div>
-      </div>
-      <p class="goal-text">{{ getDaysToNextGoal() }} días más para completar tu meta</p>
-    </div>
-
-    <!-- Logros -->
-    <div class="achievements-section">
-      <h2 class="section-title">
-        Logros ({{ getUnlockedCount() }}/{{ getTotalCount() }})
-      </h2>
-      
-      <div class="achievements-grid">
-        <div 
-          *ngFor="let achievement of achievements" 
-          class="achievement-card"
-          [class.unlocked]="achievement.unlocked"
-          [class.locked]="!achievement.unlocked">
-          
-          <div class="achievement-icon" [style.background-color]="achievement.color">
-            <ion-icon [name]="achievement.icon"></ion-icon>
-          </div>
-          
-          <div class="achievement-info">
-            <h4 class="achievement-title">{{ achievement.title }}</h4>
-            <p class="achievement-desc">{{ achievement.description }}</p>
-            <span class="achievement-days" *ngIf="!achievement.unlocked">
-              {{ achievement.daysRequired >= 1 ? achievement.daysRequired + ' días' : 'Próximamente' }}
-            </span>
-            <span class="achievement-unlocked" *ngIf="achievement.unlocked">
-              ✓ Desbloqueado
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Resto del contenido... -->
   </div>
+
   <app-bottom-nav></app-bottom-nav>
 </ion-content>

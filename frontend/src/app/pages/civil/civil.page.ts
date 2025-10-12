@@ -17,7 +17,6 @@ export class CivilPage implements OnInit, OnDestroy {
   civilStats: any = null;
   isLoading: boolean = true;
   
-  // Carrusel
   carouselImages: string[] = [
     'assets/image/bannerhome.png',
     'assets/image/banner-2.png',
@@ -89,11 +88,10 @@ export class CivilPage implements OnInit, OnDestroy {
     }
   }
 
-  // Funciones del carrusel
   startCarousel() {
     this.carouselInterval = setInterval(() => {
       this.nextSlide();
-    }, 4000); // Cambia cada 4 segundos
+    }, 4000);
   }
 
   stopCarousel() {
@@ -120,22 +118,15 @@ export class CivilPage implements OnInit, OnDestroy {
     this.router.navigate(['/civil/civil-oral']);
   }
 
-  goToTest() {
-    console.log('Ir a Test');
-  }
-
   goToMaterialEstudio() {
     this.router.navigate(['/civil/material-estudio-civil']);
   }
 
-  goToPlanEstudio() {
-    this.router.navigate(['/civil/plan-estudio-civil']);
+  goBack() {
+    this.router.navigate(['/dashboard']);
   }
 
-  goToDestacados() {
-    console.log('Ir a Destacados');
+  goToDashboard() {
+    this.router.navigate(['/dashboard']);
   }
-  goBack() {
-  this.router.navigate(['/dashboard']);
-}
 }
