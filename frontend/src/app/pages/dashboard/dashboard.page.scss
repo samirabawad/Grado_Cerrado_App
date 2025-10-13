@@ -58,18 +58,18 @@
 }
 
 // ========================================
-// CONTENIDO SCROLLABLE
+// CONTENIDO SCROLLABLE - IGUAL QUE HOME
 // ========================================
 .scrollable-content {
   margin-top: 80px;
-  padding: 0 0 100px 0;
+  padding: 0 16px 100px 16px;
 }
 
 // ========================================
 // TARJETA GENERAL (ARRIBA DE TODO)
 // ========================================
 .general-overview {
-  padding: 0 20px 20px;
+  padding: 0 0 20px 0;
 
   .general-card {
     background: white;
@@ -217,7 +217,7 @@
 // ESTADÍSTICAS GENERALES - SOLO SESIONES
 // ========================================
 .stats-overview {
-  padding: 0 20px 20px;
+  padding: 0 0 20px 0;
 }
 
 .stat-card {
@@ -306,13 +306,13 @@
 }
 
 // ========================================
-// GRÁFICO SEMANAL - CIVIL NARANJA
+// GRÁFICO SEMANAL
 // ========================================
 .weekly-chart-container {
   background: white;
   border-radius: 20px;
   padding: 20px;
-  margin: 0 20px 20px;
+  margin: 0 0 20px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #f1f5f9;
 
@@ -449,11 +449,11 @@
 }
 
 // ========================================
-// ESTADÍSTICAS POR ÁREA - SOLO CIVIL Y PROCESAL
+// ESTADÍSTICAS POR ÁREA
 // ========================================
 .area-stats-container {
   margin-bottom: 30px;
-  padding: 0 20px;
+  padding: 0 0 0 0;
 
   h2 {
     margin: 0 0 20px 0;
@@ -782,7 +782,7 @@
 // SESIONES RECIENTES
 // ========================================
 .recent-sessions-container {
-  padding: 0 20px;
+  padding: 0 0 0 0;
   margin-bottom: 30px;
 
   .section-header {
@@ -907,7 +907,7 @@
 // BOTÓN ACCIÓN
 // ========================================
 .action-section {
-  padding: 0 20px;
+  padding: 0 0 0 0;
   margin-bottom: 30px;
 
   .start-session-btn {
@@ -937,10 +937,12 @@
   }
 }
 
-// 🆕 ESTILOS DE DEBILIDADES
+// ========================================
+// ESTILOS DE DEBILIDADES
+// ========================================
 .weakness-section {
   margin-bottom: 30px;
-  padding: 0 20px;
+  padding: 0 0 0 0;
 
   .weakness-header {
     margin-bottom: 15px;
