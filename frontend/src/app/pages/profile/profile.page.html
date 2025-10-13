@@ -1,28 +1,8 @@
 <ion-content class="profile-content">
   
-  <div class="header-section">
-    <div class="background-image">
-      <img src="assets/image/superior_gris.png" alt="Background" class="superior-gris">
-    </div>
-    
-    <ion-button fill="clear" (click)="goBack()" class="back-button">
-      <ion-icon name="chevron-back"></ion-icon>
-    </ion-button>
-    
-    <div class="profile-header">
-      <div class="avatar-container" (click)="changeAvatar()">
-        <img [src]="user.avatar" alt="Avatar" class="avatar-image">
-        <div class="avatar-edit-badge">
-          <ion-icon name="camera"></ion-icon>
-        </div>
-      </div>
-      <h1>{{ user.nombre }}</h1>
-      <p class="user-email">{{ user.email }}</p>
-      <button class="edit-profile-btn" (click)="editProfile()">
-        <ion-icon name="create"></ion-icon>
-        Editar Perfil
-      </button>
-    </div>
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Mi Perfil</h1>
   </div>
 
   <div class="scrollable-content">

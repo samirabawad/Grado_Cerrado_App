@@ -105,6 +105,15 @@ const routes: Routes = [
   },
 
   // ========================================
+  // CIVIL - REFORZAR  ⬅️ NUEVA RUTA
+  // ========================================
+  {
+    path: 'civil/civil-reforzar',
+    loadComponent: () => import('./pages/civil/civil-reforzar/civil-reforzar.page').then(m => m.CivilReforzarPage)
+  },
+
+
+  // ========================================
   // CIVIL - ORAL
   // ========================================
   {

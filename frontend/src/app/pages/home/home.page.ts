@@ -30,7 +30,7 @@ export class HomePage implements OnInit {
   ) { }
 
   ngOnInit() {
-  this.loadUserData();
+    this.loadUserData();
   }
 
   ionViewWillEnter() {
@@ -77,6 +77,11 @@ export class HomePage implements OnInit {
     }
   }
 
+  getFirstName(): string {
+    if (!this.userName) return 'Estudiante';
+    return this.userName.split(' ')[0];
+  }
+
   getProgressMessage(): string {
     if (this.totalSessions === 0) {
       return '¡Comienza tu primera sesión!';
@@ -88,21 +93,20 @@ export class HomePage implements OnInit {
   }
 
   getProgressSubtitle(): string {
-  const sessions = this.totalSessions ?? 0;
-  const streak = this.userStreak ?? 0;
+    const sessions = this.totalSessions ?? 0;
+    const streak = this.userStreak ?? 0;
 
-  if (sessions <= 0) {
-    return 'Aún no registras progreso. ¡Empieza tu primera sesión!';
+    if (sessions <= 0) {
+      return 'Aún no registras progreso. ¡Empieza tu primera sesión!';
+    }
+    if (streak <= 0) {
+      return 'Retoma tu racha hoy.';
+    }
+    if (streak === 1) {
+      return '¡Llevas 1 día seguido!';
+    }
+    return `¡Llevas ${streak} días seguidos!`;
   }
-  if (streak <= 0) {
-    return 'Retoma tu racha hoy.';
-  }
-  if (streak === 1) {
-    return '¡Llevas 1 día seguido!';
-  }
-  return `¡Llevas ${streak} días seguidos!`;
-}
-
 
   getProgressPercentage(): number {
     if (this.totalQuestions === 0) return 0;

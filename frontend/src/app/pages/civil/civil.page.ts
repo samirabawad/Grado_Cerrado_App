@@ -122,6 +122,10 @@ export class CivilPage implements OnInit, OnDestroy {
     this.router.navigate(['/civil/material-estudio-civil']);
   }
 
+  goToReforzar() {
+    this.router.navigate(['/civil/civil-reforzar']);
+  }
+
   goBack() {
     this.router.navigate(['/dashboard']);
   }

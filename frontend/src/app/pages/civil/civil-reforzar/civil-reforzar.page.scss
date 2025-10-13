@@ -1,0 +1,578 @@
+// ========================================
+// HEADER ESTILO DASHBOARD
+// ========================================
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #FF6F00;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .back-icon {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-right: 12px;
+  }
+
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
+.civil-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+ion-content.civil-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
+.content-area {
+  margin-top: 60px;
+  padding: 20px 16px 100px 16px;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  min-height: calc(100vh - 100px);
+}
+
+// ========================================
+// SECTION CARDS
+// ========================================
+.section-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #FF6F00;
+}
+
+// ========================================
+// SECTION COLLAPSIBLE
+// ========================================
+.section-card.collapsible {
+  padding: 0;
+
+  .collapsible-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: #fafafa;
+    }
+
+    .section-title {
+      margin: 0;
+    }
+
+    .expand-icon {
+      font-size: 24px;
+      color: #FF6F00;
+      transition: transform 0.3s ease;
+    }
+  }
+
+  .collapsible-content {
+    padding: 0 20px 20px 20px;
+    animation: slideDown 0.3s ease;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+// ========================================
+// TEMAS A REFORZAR
+// ========================================
+.weak-topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weak-topic-card {
+  background: #FFF3E0;
+  border-left: 4px solid #FF6F00;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.15);
+  }
+}
+
+.topic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.topic-info {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .topic-area {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+  }
+}
+
+.topic-stats {
+  .topic-percentage {
+    font-size: 24px;
+    font-weight: 800;
+    color: #FF6F00;
+
+    &.critical {
+      color: #f44336;
+    }
+
+    &.weak {
+      color: #FF9800;
+    }
+  }
+}
+
+.topic-progress-bar {
+  height: 8px;
+  background: #FFE0B2;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+
+  .topic-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF6F00, #F57C00);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+}
+
+.topic-meta {
+  display: flex;
+  gap: 16px;
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #666;
+
+    ion-icon {
+      font-size: 16px;
+      color: #FF6F00;
+    }
+  }
+}
+
+// ========================================
+// SESIONES RECIENTES
+// ========================================
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #f0f0f0;
+    transform: translateX(4px);
+  }
+}
+
+.session-icon {
+  width: 44px;
+  height: 44px;
+  background: #FFF3E0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 24px;
+    color: #FF6F00;
+  }
+}
+
+.session-info {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .session-date {
+    margin: 0;
+    font-size: 12px;
+    color: #999;
+  }
+}
+
+.session-stats {
+  text-align: right;
+
+  .session-score {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 2px;
+
+    &.good {
+      color: #4CAF50;
+    }
+
+    &.medium {
+      color: #FF9800;
+    }
+
+    &.low {
+      color: #f44336;
+    }
+  }
+
+  .session-questions {
+    margin: 0;
+    font-size: 12px;
+    color: #999;
+  }
+}
+
+.session-arrow {
+  font-size: 20px;
+  color: #ccc;
+  flex-shrink: 0;
+}
+
+// ========================================
+// CARDS DE SELECCIÓN
+// ========================================
+.selection-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .selection-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 10px;
+  }
+}
+
+// ========================================
+// SELECT SUTIL
+// ========================================
+.custom-select {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #FF6F00;
+    background: white;
+  }
+}
+
+// ========================================
+// OPCIONES DE ALCANCE
+// ========================================
+.scope-options {
+  display: flex;
+  gap: 10px;
+
+  .scope-option {
+    flex: 1;
+    background: #f9f9f9;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    ion-icon {
+      font-size: 24px;
+      color: #666;
+    }
+
+    span {
+      font-size: 13px;
+      font-weight: 500;
+      color: #666;
+      text-align: center;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &.active {
+      background: #FFF3E0;
+      border-color: #FF6F00;
+
+      ion-icon {
+        color: #FF6F00;
+      }
+
+      span {
+        color: #FF6F00;
+      }
+    }
+  }
+}
+
+// ========================================
+// ACORDEÓN DE TEMAS
+// ========================================
+.accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .accordion-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    &.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .accordion-header {
+      background: #f9f9f9;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #f0f0f0;
+      }
+
+      &.active {
+        background: #FFF3E0;
+      }
+
+      .tema-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .tema-nombre {
+          font-size: 15px;
+          font-weight: 600;
+          color: #333;
+        }
+
+        .tema-count {
+          font-size: 12px;
+          color: #999;
+        }
+      }
+
+      .tema-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .check-icon {
+          font-size: 20px;
+          color: #4CAF50;
+        }
+
+        .chevron-icon {
+          font-size: 20px;
+          color: #666;
+        }
+      }
+    }
+
+    .accordion-content {
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      padding: 8px;
+
+      .subtema-item {
+        padding: 12px 16px;
+        margin: 4px 0;
+        background: #fafafa;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover:not(.disabled) {
+          background: #f0f0f0;
+          transform: translateX(4px);
+        }
+
+        &.active {
+          background: #FFF3E0;
+          border: 1px solid #FF6F00;
+        }
+
+        &.disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        .subtema-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+
+          .subtema-nombre {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+          }
+
+          .subtema-count {
+            font-size: 11px;
+            color: #999;
+          }
+        }
+
+        .check-icon {
+          font-size: 18px;
+          color: #4CAF50;
+        }
+      }
+    }
+  }
+}
+
+
+// ========================================
+// BOTÓN EMPEZAR TEST
+// ========================================
+.start-button-container {
+  margin-bottom: 20px;
+
+  .start-button {
+    --background: #FF6F00;
+    --background-activated: #F57C00;
+    --color: white;
+    --border-radius: 12px;
+    height: 50px;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(255, 111, 0, 0.3);
+
+    ion-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+
+
+// ========================================
+// EMPTY STATE
+// ========================================
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+
+  ion-icon {
+    font-size: 64px;
+    color: #ddd;
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 15px;
+  }
+}
