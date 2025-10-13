@@ -1,5 +1,10 @@
+.civil-content {
+  --ion-background-color: #f8fafc;
+  --background: #f8fafc;
+}
+
 // ========================================
-// HEADER ESTILO DASHBOARD
+// HEADER FIJO
 // ========================================
 .dashboard-header {
   position: fixed;
@@ -30,280 +35,47 @@
 }
 
 // ========================================
-// CONFIGURACIÓN BÁSICA
-// ========================================
-.civil-content {
-  --background: transparent;
-  background-image: url('/assets/image/fondo_blanco_app.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
-  min-height: 100vh;
-}
-
-ion-content.civil-content {
-  --overflow: auto;
-  height: 100%;
-}
-
-// ========================================
-// CONTENIDO PRINCIPAL
+// CONTENIDO
 // ========================================
 .content-area {
-  margin-top: 60px;
+  margin-top: 80px;
   padding: 20px 16px 100px 16px;
-  position: relative;
-  z-index: 2;
-  background: transparent;
-  min-height: calc(100vh - 100px);
 }
 
 // ========================================
-// CARDS DE SELECCIÓN
+// TARJETA DE SELECCIÓN
 // ========================================
 .selection-card {
   background: white;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   .selection-label {
     display: block;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
-    color: #666;
-    margin-bottom: 10px;
+    color: #1e293b;
+    margin-bottom: 12px;
   }
-}
 
-// ========================================
-// SELECT SUTIL
-// ========================================
-.custom-select {
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #333;
-  background: #f9f9f9;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #FF6F00;
+  .custom-select {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
     background: white;
-  }
-}
-
-// ========================================
-// OPCIONES DE ALCANCE
-// ========================================
-.scope-options {
-  display: flex;
-  gap: 10px;
-
-  .scope-option {
-    flex: 1;
-    background: #f9f9f9;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
+    color: #1e293b;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 
-    ion-icon {
-      font-size: 24px;
-      color: #666;
-    }
-
-    span {
-      font-size: 13px;
-      font-weight: 500;
-      color: #666;
-      text-align: center;
-    }
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    &.active {
-      background: #FFF3E0;
+    &:focus {
+      outline: none;
       border-color: #FF6F00;
-
-      ion-icon {
-        color: #FF6F00;
-      }
-
-      span {
-        color: #FF6F00;
-      }
+      box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
     }
-  }
-}
-
-// ========================================
-// ACORDEÓN DE TEMAS
-// ========================================
-.accordion-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  .accordion-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-
-    &.disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    .accordion-header {
-      background: #f9f9f9;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background: #f0f0f0;
-      }
-
-      &.active {
-        background: #FFF3E0;
-      }
-
-      .tema-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        .tema-nombre {
-          font-size: 15px;
-          font-weight: 600;
-          color: #333;
-        }
-
-        .tema-count {
-          font-size: 12px;
-          color: #999;
-        }
-      }
-
-      .tema-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        .check-icon {
-          font-size: 20px;
-          color: #4CAF50;
-        }
-
-        .chevron-icon {
-          font-size: 20px;
-          color: #666;
-        }
-      }
-    }
-
-    .accordion-content {
-      background: white;
-      border-top: 1px solid #e0e0e0;
-      padding: 8px;
-
-      .subtema-item {
-        padding: 12px 16px;
-        margin: 4px 0;
-        background: #fafafa;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        transition: all 0.3s ease;
-
-        &:hover:not(.disabled) {
-          background: #f0f0f0;
-          transform: translateX(4px);
-        }
-
-        &.active {
-          background: #FFF3E0;
-          border: 1px solid #FF6F00;
-        }
-
-        &.disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-
-        .subtema-info {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-
-          .subtema-nombre {
-            font-size: 14px;
-            font-weight: 500;
-            color: #333;
-          }
-
-          .subtema-count {
-            font-size: 11px;
-            color: #999;
-          }
-        }
-
-        .check-icon {
-          font-size: 18px;
-          color: #4CAF50;
-        }
-      }
-    }
-  }
-}
-
-// ========================================
-// RESUMEN
-// ========================================
-.summary-card {
-  background: #E3F2FD;
-  border-left: 4px solid #2196F3;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  ion-icon {
-    font-size: 24px;
-    color: #2196F3;
-    flex-shrink: 0;
-  }
-
-  span {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1976D2;
   }
 }
 
@@ -316,75 +88,36 @@ ion-content.civil-content {
   .start-test-btn {
     --background: #FF6F00;
     --background-activated: #E65100;
-    --border-radius: 10px;
-    height: 50px;
+    --border-radius: 12px;
+    height: 56px;
     font-size: 16px;
     font-weight: 600;
     text-transform: none;
-
-    &:disabled {
-      opacity: 0.5;
-    }
+    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
   }
 }
 
 // ========================================
-// CARRUSEL DE BANNERS
+// CUSTOM LOADING
 // ========================================
-.banner-section {
-  margin-top: 20px;
-  border-radius: 16px;
-  position: relative;
-  width: 100%;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+:global(.custom-loading) {
+  --backdrop-opacity: 0.6;
+  --background: rgba(255, 255, 255, 0.95);
+  --color: #FF6F00;
+  border-radius: 15px;
 
-  .carousel-container {
-    position: relative;
-    width: 100%;
-    height: 200px;
-  }
-
-  .carousel-image {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: opacity 0.8s ease-in-out;
-
-    &.active {
-      opacity: 1;
-      z-index: 1;
+  .loading-wrapper {
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    
+    .loading-content {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #FF6F00;
     }
-  }
-
-  .carousel-indicators {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    z-index: 2;
-
-    .indicator {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.6);
-      transition: all 0.3s ease;
-      cursor: pointer;
-
-      &.active {
-        background: white;
-        width: 20px;
-        border-radius: 3px;
-      }
+    
+    .loading-spinner {
+      --color: #FF6F00;
     }
   }
 }
@@ -393,7 +126,7 @@ ion-content.civil-content {
 // RESPONSIVE
 // ========================================
 @media (max-width: 480px) {
-  .scope-options {
-    flex-direction: column;
+  .content-area {
+    padding: 20px 12px 100px 12px;
   }
 }

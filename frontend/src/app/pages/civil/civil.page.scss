@@ -1,5 +1,10 @@
+.civil-content {
+  --ion-background-color: #f8fafc;
+  --background: #f8fafc;
+}
+
 // ========================================
-// HEADER ESTILO DASHBOARD
+// HEADER FIJO - IGUAL QUE DASHBOARD
 // ========================================
 .dashboard-header {
   position: fixed;
@@ -7,7 +12,7 @@
   left: 0;
   right: 0;
   height: 60px;
-  background: #FF6F00;
+  background: #d1d5db;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -16,13 +21,13 @@
 
   .back-icon {
     font-size: 24px;
-    color: white;
+    color: rgb(0, 0, 0);
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: white;
+    color: rgb(0, 0, 0);
     font-size: 18px;
     font-weight: 600;
     margin: 0;
@@ -30,47 +35,25 @@
 }
 
 // ========================================
-// CONFIGURACIÓN BÁSICA
-// ========================================
-.civil-content {
-  --background: transparent;
-  background-image: url('/assets/image/fondo_blanco_app.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
-  min-height: 100vh;
-}
-
-ion-content.civil-content {
-  --overflow: auto;
-  height: 100%;
-}
-
-// ========================================
-// CONTENIDO PRINCIPAL
+// CONTENIDO SCROLLABLE
 // ========================================
 .content-area {
-  margin-top: 60px;
-  padding: 20px 16px 100px 16px;
-  position: relative;
-  z-index: 2;
-  background: transparent;
-  min-height: calc(100vh - 100px);
+  margin-top: 80px;
+  padding: 0 16px 100px 16px;
 }
 
 // ========================================
-// PROGRESO CIVIL - ESTILO DASHBOARD
+// TARJETA DE PROGRESO - ESTILO DASHBOARD
 // ========================================
 .progreso-card-dashboard {
   background: white;
   border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-bottom: 4px solid #FF6F00;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 4px solid #f97316;
 
   &:active {
     transform: scale(0.98);
@@ -86,7 +69,6 @@ ion-content.civil-content {
       display: flex;
       align-items: center;
       gap: 12px;
-      flex: 1;
 
       .progreso-emoji {
         font-size: 48px;
@@ -117,7 +99,7 @@ ion-content.civil-content {
       .progreso-percentage {
         font-size: 28px;
         font-weight: 900;
-        color: #f97316;
+        color: #111111;
       }
 
       .arrow-icon {
@@ -155,15 +137,15 @@ ion-content.civil-content {
 
   .section-title {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
-    color: #1f2937;
+    color: #1e293b;
     text-align: center;
   }
 }
 
 // ========================================
-// GRID 2x2 - 4 BOTONES NARANJAS
+// GRID 2x2 - 4 BOTONES CON EMOJIS
 // ========================================
 .study-grid {
   display: grid;
@@ -186,21 +168,13 @@ ion-content.civil-content {
       border-color: #FF6F00;
     }
 
-    .study-icon {
-      width: 64px;
-      height: 64px;
+    .study-emoji {
+      font-size: 64px;
       margin: 0 auto 16px;
-      background: linear-gradient(135deg, #FF6F00, #FF8F00);
-      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
-
-      ion-icon {
-        font-size: 32px;
-        color: white;
-      }
+      height: 80px;
     }
 
     h3 {
@@ -234,13 +208,9 @@ ion-content.civil-content {
     .study-card {
       padding: 24px 16px;
 
-      .study-icon {
-        width: 56px;
-        height: 56px;
-
-        ion-icon {
-          font-size: 28px;
-        }
+      .study-emoji {
+        font-size: 56px;
+        height: 70px;
       }
 
       h3 {

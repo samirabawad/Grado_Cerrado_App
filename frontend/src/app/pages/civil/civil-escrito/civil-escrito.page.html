@@ -1,7 +1,8 @@
 <ion-content class="civil-content">
   <!-- Header estilo dashboard -->
   <div class="dashboard-header">
-    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>    <h1 class="header-title">Derecho Civil Escrito</h1>
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Derecho Civil Escrito</h1>
   </div>
 
   <!-- Contenido principal -->
@@ -17,118 +18,14 @@
       </select>
     </div>
 
-    <!-- Selector de alcance -->
-    <div class="selection-card">
-      <label class="selection-label">Alcance del test</label>
-      <div class="scope-options">
-        <div 
-          class="scope-option"
-          [class.active]="scopeType === 'all'"
-          (click)="selectScope('all')">
-          <ion-icon name="globe-outline"></ion-icon>
-          <span>Todo Derecho Civil</span>
-        </div>
-        <div 
-          class="scope-option"
-          [class.active]="scopeType === 'tema' || scopeType === 'subtema'"
-          (click)="selectScope('tema')">
-          <ion-icon name="list-outline"></ion-icon>
-          <span>Seleccionar tema/subtema</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Selector de temas con acordeón (solo si eligió tema/subtema) -->
-    <div class="selection-card" *ngIf="scopeType === 'tema' || scopeType === 'subtema'">
-      <label class="selection-label">Temas de Derecho Civil</label>
-      
-      <div class="accordion-list">
-        <div 
-          *ngFor="let tema of temas" 
-          class="accordion-item"
-          [class.disabled]="tema.cantidadPreguntas === 0">
-          
-          <!-- Header del tema -->
-          <div 
-            class="accordion-header"
-            [class.active]="expandedTema === tema.id || selectedTemaId === tema.id"
-            (click)="toggleTema(tema)">
-            <div class="tema-info">
-              <span class="tema-nombre">{{ tema.nombre }}</span>
-              <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
-            </div>
-            <div class="tema-actions">
-              <ion-icon 
-                *ngIf="selectedTemaId === tema.id && !selectedSubtemaId"
-                name="checkmark-circle" 
-                class="check-icon">
-              </ion-icon>
-              <ion-icon 
-                [name]="expandedTema === tema.id ? 'chevron-up' : 'chevron-down'"
-                class="chevron-icon">
-              </ion-icon>
-            </div>
-          </div>
-
-          <!-- Subtemas (acordeón) -->
-          <div class="accordion-content" *ngIf="expandedTema === tema.id && tema.subtemas && tema.subtemas.length > 0">
-            <div 
-              *ngFor="let subtema of tema.subtemas"
-              class="subtema-item"
-              [class.disabled]="subtema.cantidadPreguntas < selectedQuantity"
-              [class.active]="selectedSubtemaId === subtema.id"
-              (click)="selectSubtema(tema, subtema)">
-              <div class="subtema-info">
-                <span class="subtema-nombre">{{ subtema.nombre }}</span>
-                <span class="subtema-count">{{ subtema.cantidadPreguntas }} preguntas</span>
-              </div>
-              <ion-icon 
-                *ngIf="selectedSubtemaId === subtema.id"
-                name="checkmark-circle" 
-                class="check-icon">
-              </ion-icon>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Resumen de selección -->
-    <div class="summary-card" *ngIf="getSummaryText()">
-      <ion-icon name="information-circle-outline"></ion-icon>
-      <span>{{ getSummaryText() }}</span>
-    </div>
-
     <!-- Botón de inicio -->
     <div class="start-button-container">
       <ion-button 
         expand="block" 
         class="start-test-btn"
-        [disabled]="!canStartTest()"
         (click)="startQuickPractice()">
         Empezar Test
       </ion-button>
-    </div>
-
-    <!-- Carrusel de banners -->
-    <div class="banner-section">
-      <div class="carousel-container">
-        <img 
-          *ngFor="let image of carouselImages; let i = index"
-          [src]="image" 
-          [alt]="'Banner ' + (i + 1)"
-          class="carousel-image"
-          [class.active]="currentImageIndex === i">
-        
-        <div class="carousel-indicators">
-          <div 
-            *ngFor="let image of carouselImages; let i = index"
-            class="indicator"
-            [class.active]="currentImageIndex === i"
-            (click)="goToSlide(i)">
-          </div>
-        </div>
-      </div>
     </div>
 
   </div>

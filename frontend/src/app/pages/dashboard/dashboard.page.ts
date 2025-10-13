@@ -29,10 +29,6 @@ export class DashboardPage implements OnInit {
 
   chartData: any[] = [];
   areaStats: any[] = [];
-  recentSessions: any[] = [];
-  // 🆕 DEBILIDADES
-  topTemasDebiles: any[] = [];
-  resumenDebilidades: any = null;
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -90,27 +86,18 @@ export class DashboardPage implements OnInit {
           
           this.areaStats = [];
           
+          // PRIMERO procesamos las áreas (Civil y Procesal)
+          const areasNoGenerales: any[] = [];
+          
           areaResponse.data.forEach((item: any) => {
-            if (item.type === 'general') {
-              this.areaStats.push({
-                area: item.area,
-                sessions: item.sessions,
-                totalQuestions: item.totalQuestions,
-                correctAnswers: item.correctAnswers,
-                successRate: Math.round(item.successRate || 0),
-                isGeneral: true,
-                colorBarra: 'verde',
-                temas: []
-              });
-            } else if (item.type === 'area') {
+            if (item.type === 'area') {
               const temasConNuevoCalculo = item.temas.map((tema: any) => {
                 const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => ({
                   subtemaId: subtema.subtemaId,
                   subtemaNombre: subtema.subtemaNombre,
                   totalPreguntas: subtema.totalPreguntas,
                   preguntasCorrectas: subtema.preguntasCorrectas,
-                  porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema.preguntasCorrectas)
-                }));
+                  porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema)                }));
 
                 const porcentajeTema = this.calculateTemaSuccessRate(subtemasConPorcentaje);
 
@@ -133,65 +120,60 @@ export class DashboardPage implements OnInit {
                     sum + tema.porcentajeAcierto, 0) / temasConNuevoCalculo.length)
                 : 0;
               
-              this.areaStats.push({
+              areasNoGenerales.push({
                 area: item.area,
                 sessions: 0,
                 totalQuestions: totalPreguntas,
                 correctAnswers: totalCorrectas,
                 successRate: porcentajeArea,
                 isGeneral: false,
-                colorBarra: 'naranja',
+                colorBarra: item.area === 'Derecho Civil' ? 'naranja' : 'azul',
                 temas: temasConNuevoCalculo
               });
             }
           });
 
+          // Agregar Derecho Procesal si no existe
+          if (!areasNoGenerales.find(a => a.area === 'Derecho Procesal')) {
+            areasNoGenerales.push({
+              area: 'Derecho Procesal',
+              sessions: 0,
+              totalQuestions: 0,
+              correctAnswers: 0,
+              successRate: 0,
+              isGeneral: false,
+              colorBarra: 'azul',
+              temas: []
+            });
+          }
+
+          // AHORA calculamos el "General" como promedio de Civil y Procesal
+          const civilArea = areasNoGenerales.find(a => a.area === 'Derecho Civil');
+          const procesalArea = areasNoGenerales.find(a => a.area === 'Derecho Procesal');
+          
+          const promedioGeneral = civilArea && procesalArea 
+            ? Math.round((civilArea.successRate + procesalArea.successRate) / 2)
+            : 0;
+
+          // Agregar el área General CON EL PROMEDIO CALCULADO
           this.areaStats.push({
-            area: 'Derecho Procesal',
+            area: 'General',
             sessions: 0,
             totalQuestions: 0,
             correctAnswers: 0,
-            successRate: 0,
-            isGeneral: false,
-            colorBarra: 'azul',
+            successRate: promedioGeneral,
+            isGeneral: true,
+            colorBarra: 'verde',
             temas: []
           });
+
+          // Agregar las áreas no generales
+          this.areaStats = [...this.areaStats, ...areasNoGenerales];
           
           console.log('Estadísticas procesadas:', this.areaStats);
         }
       } catch (error) {
         console.error('Error cargando estadísticas por área:', error);
-      }
-
-      try {
-        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
-        if (sessionsResponse && sessionsResponse.success) {
-          this.recentSessions = sessionsResponse.data;
-          console.log('Sesiones recientes:', this.recentSessions);
-        }
-      } catch (error) {
-        console.error('Error cargando sesiones recientes:', error);
-      }
-
-      // 🆕 CARGAR DEBILIDADES
-      try {
-        const debilesResponse = await this.apiService.getTopTemasDebiles(studentId).toPromise();
-        if (debilesResponse && debilesResponse.success) {
-          this.topTemasDebiles = debilesResponse.data || [];
-          console.log('Top temas débiles:', this.topTemasDebiles);
-        }
-      } catch (error) {
-        console.error('Error cargando temas débiles:', error);
-      }
-
-      try {
-        const resumenResponse = await this.apiService.getResumenDebilidades(studentId).toPromise();
-        if (resumenResponse && resumenResponse.success) {
-          this.resumenDebilidades = resumenResponse.data;
-          console.log('Resumen debilidades:', this.resumenDebilidades);
-        }
-      } catch (error) {
-        console.error('Error cargando resumen debilidades:', error);
       }
 
       await this.generateChartData();
@@ -226,10 +208,13 @@ export class DashboardPage implements OnInit {
     return Math.round(totalPorcentaje / subtemas.length);
   }
 
-  calculateSubtemaSuccessRate(correctas: number): number {
-    const MAX_CORRECTAS = 100;
-    const porcentaje = Math.min((correctas / MAX_CORRECTAS) * 100, 100);
-    return Math.round(porcentaje);
+  calculateSubtemaSuccessRate(subtema: any): number {
+    if (subtema.porcentajeAcierto !== undefined) {
+      return Math.round(subtema.porcentajeAcierto);
+    }
+    
+    if (subtema.totalPreguntas === 0) return 0;
+    return Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100);
   }
 
   toggleGeneralExpansion() {
