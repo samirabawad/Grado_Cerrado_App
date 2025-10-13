@@ -278,20 +278,94 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // ✅ NUEVO: POP-UP DE EXPLICACIÓN
-  async showExplanationAlert(explanation: string) {
-    const alert = await this.alertController.create({
-      header: '💡 Explicación',
-      message: explanation,
-      cssClass: 'explanation-alert',
-      buttons: [
-        {
-          text: 'Entendido',
-          role: 'confirm',
-          cssClass: 'alert-button-confirm'
+async showExplanationAlert(explanation: string) {
+  const alert = await this.alertController.create({
+    header: '💡 Explicación',
+    message: explanation,
+    cssClass: 'explanation-alert',
+    backdropDismiss: false,
+    buttons: [
+      {
+        text: 'Entendido',
+        cssClass: 'alert-button-confirm',
+        role: 'confirm'
+      }
+    ]
+  });
+
+  await alert.present();
+
+  // ✅ Aplicar estilos después de que el alert se presente
+  setTimeout(() => {
+    const alertElement = document.querySelector('ion-alert.explanation-alert');
+    if (alertElement) {
+      const wrapper = alertElement.shadowRoot?.querySelector('.alert-wrapper') as HTMLElement;
+      const head = alertElement.shadowRoot?.querySelector('.alert-head') as HTMLElement;
+      const message = alertElement.shadowRoot?.querySelector('.alert-message') as HTMLElement;
+      const buttonGroup = alertElement.shadowRoot?.querySelector('.alert-button-group') as HTMLElement;
+      const buttons = alertElement.shadowRoot?.querySelectorAll('.alert-button');
+
+      if (wrapper) {
+        wrapper.style.background = 'linear-gradient(135deg, rgba(255, 111, 0, 0.95) 0%, rgba(251, 146, 60, 0.95) 100%)';
+        wrapper.style.backdropFilter = 'blur(10px)';
+        wrapper.style.borderRadius = '20px';
+        wrapper.style.boxShadow = '0 8px 32px rgba(255, 111, 0, 0.5)';
+        wrapper.style.border = '2px solid rgba(255, 255, 255, 0.2)';
+        wrapper.style.maxWidth = '90%';
+      }
+
+      if (head) {
+        head.style.padding = '24px 20px 16px 20px';
+        head.style.textAlign = 'center';
+        head.style.borderBottom = '1px solid rgba(255, 255, 255, 0.2)';
+        const h2 = head.querySelector('h2');
+        if (h2) {
+          h2.style.color = 'white';
+          h2.style.fontSize = '22px';
+          h2.style.fontWeight = '700';
+          h2.style.margin = '0';
+          h2.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
         }
-      ]
-    });
+      }
+
+      if (message) {
+        message.style.padding = '20px';
+        message.style.color = 'white';
+        message.style.fontSize = '16px';
+        message.style.lineHeight = '1.7';
+        message.style.textAlign = 'left';
+        message.style.maxHeight = '50vh';
+        message.style.overflowY = 'auto';
+        message.style.textShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
+      }
+
+      if (buttonGroup) {
+        buttonGroup.style.padding = '16px 20px 20px 20px';
+        buttonGroup.style.borderTop = '1px solid rgba(255, 255, 255, 0.2)';
+      }
+
+      buttons?.forEach((button) => {
+        const btn = button as HTMLElement;
+        btn.style.background = 'white';
+        btn.style.color = '#FF6F00';
+        btn.style.borderRadius = '12px';
+        btn.style.fontWeight = '700';
+        btn.style.fontSize = '16px';
+        btn.style.padding = '14px 24px';
+        btn.style.margin = '0';
+        btn.style.height = 'auto';
+        btn.style.textTransform = 'none';
+        btn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+
+        const inner = btn.querySelector('.alert-button-inner') as HTMLElement;
+        if (inner) {
+          inner.style.color = '#FF6F00';
+          inner.style.fontWeight = '700';
+        }
+      });
+    }
+  }, 100);
+
 
     await alert.present();
   }
@@ -328,24 +402,24 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
-    const normalizedUser = userAnswer.trim().toUpperCase();
-    const normalizedCorrect = correctAnswer.trim().toUpperCase();
-    
-    if (normalizedUser === normalizedCorrect) return true;
-    
-    // V/F comparisons
-    if ((normalizedUser === 'V' || normalizedUser === 'VERDADERO' || normalizedUser === 'TRUE') &&
-        (normalizedCorrect === 'V' || normalizedCorrect === 'VERDADERO' || normalizedCorrect === 'TRUE')) {
-      return true;
-    }
-    
-    if ((normalizedUser === 'F' || normalizedUser === 'FALSO' || normalizedUser === 'FALSE') &&
-        (normalizedCorrect === 'F' || normalizedCorrect === 'FALSO' || normalizedCorrect === 'FALSE')) {
-      return true;
-    }
-    
-    return false;
+  const normalizedUser = userAnswer.trim().toUpperCase();
+  const normalizedCorrect = correctAnswer.trim().toUpperCase();
+  
+  if (normalizedUser === normalizedCorrect) return true;
+  
+  // V/F comparisons
+  if ((normalizedUser === 'V' || normalizedUser === 'VERDADERO' || normalizedUser === 'TRUE') &&
+      (normalizedCorrect === 'V' || normalizedCorrect === 'VERDADERO' || normalizedCorrect === 'TRUE')) {
+    return true;
   }
+  
+  if ((normalizedUser === 'F' || normalizedUser === 'FALSO' || normalizedUser === 'FALSE') &&
+      (normalizedCorrect === 'F' || normalizedCorrect === 'FALSO' || normalizedCorrect === 'FALSE')) {
+    return true;
+  }
+  
+  return false;
+}
 
   async nextQuestion() {
     if (!this.hasAnsweredCurrentQuestion()) {
@@ -381,13 +455,14 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   async showAnswerRequiredAlert() {
-    const alert = await this.alertController.create({
-      header: 'Respuesta requerida',
-      message: 'Debes seleccionar una respuesta antes de continuar.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
+  const alert = await this.alertController.create({
+    header: 'Respuesta requerida',
+    message: 'Debes seleccionar una respuesta antes de continuar.',
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+}
 
   isOptionSelected(optionText: string): boolean {
     const question = this.getCurrentQuestion();
@@ -411,28 +486,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return false;
   }
 
-  getOptionState(optionText: string): 'correct' | 'incorrect' | 'default' {
-    if (!this.hasAnsweredCurrentQuestion()) return 'default';
-    
-    const question = this.getCurrentQuestion();
-    if (!question) return 'default';
-    
-    const options = this.getCurrentQuestionOptions();
-    const optionIndex = options.indexOf(optionText);
-    
-    if (optionIndex === -1) return 'default';
-    
-    const optionLetter = String.fromCharCode(65 + optionIndex);
-    
-    const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
-    const isSelected = question.userAnswer === optionLetter;
-    
-    if (isCorrect) return 'correct';
-    if (isSelected && !isCorrect) return 'incorrect';
-    
-    return 'default';
-  }
-
   canSelectOption(): boolean {
     return !this.hasAnsweredCurrentQuestion();
   }
@@ -448,7 +501,70 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return this.hasAnsweredCurrentQuestion();
   }
 
-  getOptionIcon(option: string): string {
+  getOptionState(optionText: string): 'correct' | 'incorrect' | 'default' {
+  if (!this.hasAnsweredCurrentQuestion()) return 'default';
+  
+  const question = this.getCurrentQuestion();
+  if (!question) return 'default';
+
+  console.log('🔍 DEBUG getOptionState:', {
+    optionText,
+    questionType: question.type,
+    correctAnswer: question.correctAnswer,
+    userAnswer: question.userAnswer
+  });
+
+  // ✅ PARA VERDADERO/FALSO
+  if (this.isTrueFalseQuestion()) {
+    // Normalizar respuesta correcta
+    const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
+    const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
+                               correctAnswerNorm === 'v' || 
+                               correctAnswerNorm === 'verdadero';
+    
+    const optionIsVerdadero = optionText === 'Verdadero';
+    const optionIsFalso = optionText === 'Falso';
+    
+    // Si esta opción es la correcta, marcarla en verde
+    if ((optionIsVerdadero && isVerdaderoCorrect) || (optionIsFalso && !isVerdaderoCorrect)) {
+      return 'correct';
+    }
+    
+    // Si el usuario seleccionó esta opción y es incorrecta
+    if (question.userAnswer === 'V' && optionIsVerdadero && !isVerdaderoCorrect) {
+      return 'incorrect';
+    }
+    if (question.userAnswer === 'F' && optionIsFalso && isVerdaderoCorrect) {
+      return 'incorrect';
+    }
+    
+    return 'default';
+  }
+
+  // ✅ PARA SELECCIÓN MÚLTIPLE
+  const options = this.getCurrentQuestionOptions();
+  const optionIndex = options.indexOf(optionText);
+  
+  if (optionIndex === -1) return 'default';
+  
+  const optionLetter = String.fromCharCode(65 + optionIndex);
+  
+  const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
+  const isSelected = question.userAnswer === optionLetter;
+  
+  console.log('🔍 Opción múltiple:', {
+    optionLetter,
+    isCorrect,
+    isSelected
+  });
+  
+  if (isCorrect) return 'correct';
+  if (isSelected && !isCorrect) return 'incorrect';
+  
+  return 'default';
+}
+
+getOptionIcon(option: string): string {
     const state = this.getOptionState(option);
     if (state === 'correct') return 'checkmark-circle';
     if (state === 'incorrect') return 'close-circle';
@@ -463,74 +579,110 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   async finishTest() {
-    if (!this.hasAnsweredCurrentQuestion()) {
-      await this.showAnswerRequiredAlert();
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Guardando resultados...',
-      spinner: 'crescent'
-    });
-    await loading.present();
-
-    try {
-      const results = this.calculateResults();
-      localStorage.setItem('current_test_results', JSON.stringify(results));
-      
-      await loading.dismiss();
-      
-      this.apiService.clearCurrentSession();
-      await this.router.navigate(['/civil/civil-escrito/resumen-test-civil']);
-      
-    } catch (error) {
-      console.error('Error finalizando test:', error);
-      await loading.dismiss();
-    }
+  if (!this.hasAnsweredCurrentQuestion()) {
+    await this.showAnswerRequiredAlert();
+    return;
   }
+
+  const loading = await this.loadingController.create({
+    message: 'Guardando resultados...',
+    spinner: 'crescent',
+    cssClass: 'custom-loading'
+  });
+  
+  await loading.present();
+
+  try {
+    // Calcular resultados
+    const results = this.calculateResults();
+    
+    console.log('📊 Resultados calculados:', results);
+    
+    // Guardar en localStorage para la página de resumen
+    localStorage.setItem('current_test_results', JSON.stringify(results));
+    
+    await loading.dismiss();
+    
+    // Limpiar sesión actual
+    this.apiService.clearCurrentSession();
+    
+    // Navegar a resumen
+    console.log('🎯 Navegando a resumen...');
+    await this.router.navigate(['/civil/civil-escrito/resumen-test-civil']);
+    
+  } catch (error) {
+    console.error('❌ Error finalizando test:', error);
+    await loading.dismiss();
+    
+    const alert = await this.alertController.create({
+      header: 'Error',
+      message: 'Hubo un problema al guardar los resultados. ¿Deseas intentar de nuevo?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Reintentar',
+          handler: () => {
+            this.finishTest();
+          }
+        }
+      ]
+    });
+    
+    await alert.present();
+  }
+}
 
   calculateResults(): TestResults {
-    let correctAnswers = 0;
-    let incorrectAnswers = 0;
-    const incorrectQuestions: any[] = [];
+  let correctAnswers = 0;
+  let incorrectAnswers = 0;
+  const incorrectQuestions: any[] = [];
 
-    this.questions.forEach((question, index) => {
-      const isCorrect = this.compareAnswers(
-        question.userAnswer || '',
-        question.correctAnswer
-      );
+  this.questions.forEach((question, index) => {
+    const isCorrect = this.compareAnswers(
+      question.userAnswer || '',
+      question.correctAnswer
+    );
 
-      if (isCorrect) {
-        correctAnswers++;
-      } else {
-        incorrectAnswers++;
-        incorrectQuestions.push({
-          questionNumber: index + 1,
-          questionText: question.questionText,
-          userAnswer: question.userAnswer,
-          correctAnswer: question.correctAnswer,
-          explanation: question.explanation
-        });
-      }
-    });
+    if (isCorrect) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++;
+      incorrectQuestions.push({
+        questionNumber: index + 1,
+        questionText: question.questionText,
+        userAnswer: question.userAnswer,
+        correctAnswer: question.correctAnswer,
+        explanation: question.explanation
+      });
+    }
+  });
 
-    const totalAnswered = correctAnswers + incorrectAnswers;
-    const percentage = totalAnswered > 0 
-      ? Math.round((correctAnswers / totalAnswered) * 100) 
-      : 0;
+  const totalAnswered = correctAnswers + incorrectAnswers;
+  const percentage = totalAnswered > 0 
+    ? Math.round((correctAnswers / totalAnswered) * 100) 
+    : 0;
 
-    return {
-      correctAnswers,
-      incorrectAnswers,
-      totalAnswered,
-      totalQuestions: this.totalQuestions,
-      percentage,
-      grade: this.getGradeFromPercentage(percentage),
-      level: this.getLevelFromPercentage(percentage),
-      incorrectQuestions,
-      sessionId: this.sessionId
-    };
-  }
+  console.log('📊 Resultados finales:', {
+    correctAnswers,
+    incorrectAnswers,
+    percentage
+  });
+
+  return {
+    correctAnswers,
+    incorrectAnswers,
+    totalAnswered,
+    totalQuestions: this.totalQuestions,
+    percentage,
+    grade: this.getGradeFromPercentage(percentage),
+    level: this.getLevelFromPercentage(percentage),
+    incorrectQuestions,
+    sessionId: this.sessionId
+  };
+}
 
   getGradeFromPercentage(percentage: number): string {
     if (percentage >= 90) return 'Excelente';

@@ -333,6 +333,66 @@ ion-content.test-content {
 }
 
 // ========================================
+// ✅ ESTILO DEL POP-UP DE EXPLICACIÓN
+// ========================================
+:global(.explanation-alert) {
+  --background: rgba(255, 111, 0, 0.95);
+  --backdrop-opacity: 0.5;
+  
+  .alert-wrapper {
+    background: rgba(255, 111, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(255, 111, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .alert-head {
+    padding: 20px 20px 16px 20px;
+    
+    h2 {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+    }
+  }
+
+  .alert-message {
+    padding: 0 20px 20px 20px;
+    color: white;
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: left;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .alert-button-group {
+    padding: 0 20px 20px 20px;
+    
+    button {
+      background: white;
+      color: #FF6F00;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 14px 24px;
+      margin: 0;
+      width: 100%;
+      text-transform: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+
+      &:active {
+        transform: scale(0.96);
+        background: rgba(255, 255, 255, 0.9);
+      }
+    }
+  }
+}
+
+// ========================================
 // RESPONSIVE
 // ========================================
 @media (max-width: 480px) {
