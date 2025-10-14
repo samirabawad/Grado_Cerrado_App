@@ -699,23 +699,61 @@
 }
 
 // ============================================
-// DÍAS PREFERIDOS
+// DÍAS PREFERIDOS CON INDICADOR DE MODO
 // ============================================
 
 .preferred-days {
-  margin: 25px 0;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
 
+.preferred-days-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  
   h4 {
+    margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #1e293b;
-    margin: 0 0 8px;
+    color: #1f2937;
   }
+}
 
-  .preferred-days-subtitle {
+.mode-chip {
+  font-size: 11px;
+  font-weight: 600;
+  height: 24px;
+  
+  ion-icon {
+    font-size: 14px;
+    margin-right: 4px;
+  }
+}
+
+.mode-description {
+  margin: 12px 0 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-left: 3px solid #3b82f6;
+  border-radius: 8px;
+  
+  p {
+    margin: 0;
     font-size: 13px;
-    color: #64748b;
-    margin: 0 0 15px;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    
+    ion-icon {
+      font-size: 16px;
+      color: #3b82f6;
+      flex-shrink: 0;
+    }
   }
 }
 
@@ -723,55 +761,92 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
+  margin-bottom: 12px;
+}
 
-  .day-btn {
-    aspect-ratio: 1;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    background: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 8px 4px;
-
-    .day-letter {
-      font-size: 18px;
-      font-weight: 700;
-      color: #64748b;
-    }
-
+.day-btn {
+  aspect-ratio: 1;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 4px;
+  
+  .day-letter {
+    font-size: 16px;
+    font-weight: 700;
+    color: #6b7280;
+  }
+  
+  .day-name {
+    font-size: 9px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  
+  &.selected {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    
+    .day-letter,
     .day-name {
-      font-size: 9px;
-      color: #64748b;
-      font-weight: 500;
+      color: white;
     }
-
-    &:hover:not(:disabled) {
-      border-color: #10b981;
-      transform: translateY(-2px);
-    }
-
-    &.selected {
-      border-color: #10b981;
-      background: #10b981;
-
-      .day-letter,
-      .day-name {
-        color: white;
-      }
-    }
-
-    &:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &:hover:not(.selected) {
+    border-color: #cbd5e1;
+    background: #f8fafc;
   }
 }
 
+.days-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 8px;
+  margin-top: 12px;
+  
+  ion-icon {
+    font-size: 18px;
+    color: #f59e0b;
+    flex-shrink: 0;
+  }
+  
+  span {
+    font-size: 12px;
+    color: #92400e;
+    font-weight: 500;
+  }
+}
+
+// Ajustes responsive
+@media (max-width: 375px) {
+  .day-btn {
+    .day-letter {
+      font-size: 14px;
+    }
+    
+    .day-name {
+      font-size: 8px;
+    }
+  }
+}
 // ============================================
 // RECORDATORIOS
 // ============================================
@@ -900,7 +975,7 @@
 }
 
 // ============================================
-// BOTÓN GUARDAR
+// BOTÓN GUARDAR CON ESTADOS
 // ============================================
 
 .save-frequency-btn {
@@ -909,7 +984,6 @@
   margin-top: 20px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -919,33 +993,104 @@
   gap: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+  position: relative;
+  overflow: hidden;
 
   ion-icon {
     font-size: 20px;
   }
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  
+  ion-spinner {
+    width: 20px;
+    height: 20px;
   }
 
-  &:active:not(:disabled) {
-    transform: translateY(0);
+  // Estado por defecto (sin cambios)
+  background: #e5e7eb;
+  color: #9ca3af;
+  box-shadow: none;
+  cursor: not-allowed;
+
+  // ✅ Estado con cambios pendientes
+  &.has-changes {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    cursor: pointer;
+    animation: pulse 2s infinite;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
   }
 
+  // Estado deshabilitado
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    transform: none !important;
+  }
+
+  // Estado guardando
+  &:disabled ion-spinner {
+    --color: white;
   }
 }
 
-.save-button {
-  margin-top: 20px;
-  --border-radius: 8px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0.3px;
+// Animación de pulso para cambios pendientes
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.6);
+  }
+}
+
+// ============================================
+// INDICADOR DE CAMBIOS PENDIENTES
+// ============================================
+
+.changes-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+  
+  ion-icon {
+    font-size: 18px;
+    color: #f59e0b;
+    flex-shrink: 0;
+  }
+  
+  span {
+    font-size: 13px;
+    color: #92400e;
+    font-weight: 600;
+  }
+  
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // ============================================

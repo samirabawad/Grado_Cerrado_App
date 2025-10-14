@@ -202,23 +202,54 @@
       </p>
     </div>
 
-    <!-- Días preferidos (opcional) -->
-    <div class="preferred-days">
-      <h4>Días preferidos (opcional)</h4>
-      <p class="preferred-days-subtitle">Selecciona los días que prefieres estudiar</p>
-      
-      <div class="days-grid">
-        <button 
-          *ngFor="let dia of diasSemana; let i = index"
-          class="day-btn"
-          [class.selected]="isDiaSelected(i)"
-          (click)="toggleDia(i)"
-          [disabled]="!isDiaSelected(i) && frecuenciaConfig.diasPreferidos.length >= frecuenciaConfig.frecuenciaSemanal">
-          <span class="day-letter">{{ dia.substr(0, 1) }}</span>
-          <span class="day-name">{{ dia }}</span>
-        </button>
-      </div>
-    </div>
+<!-- Días preferidos (opcional) -->
+<div class="preferred-days">
+  <div class="preferred-days-header">
+    <h4>Días preferidos (opcional)</h4>
+    
+    <!-- ✅ NUEVO: Indicador de modo -->
+    <ion-chip 
+      [color]="frecuenciaConfig.objetivoDias === 'estricto' ? 'warning' : 'success'"
+      class="mode-chip">
+      <ion-icon 
+        [name]="frecuenciaConfig.objetivoDias === 'estricto' ? 'calendar' : 'infinite'">
+      </ion-icon>
+      <ion-label>
+        {{ frecuenciaConfig.objetivoDias === 'estricto' ? 'Estricto' : 'Flexible' }}
+      </ion-label>
+    </ion-chip>
+  </div>
+  
+  <!-- ✅ NUEVO: Descripción dinámica del modo -->
+  <div class="mode-description">
+    <p *ngIf="frecuenciaConfig.objetivoDias === 'flexible'">
+      <ion-icon name="infinite-outline"></ion-icon>
+      Cualquier día de la semana cuenta para tu racha.
+    </p>
+    <p *ngIf="frecuenciaConfig.objetivoDias === 'estricto'">
+      <ion-icon name="calendar-outline"></ion-icon>
+      Solo los días seleccionados ({{ frecuenciaConfig.diasPreferidos.length }}) cuentan para tu racha.
+    </p>
+  </div>
+  
+  <div class="days-grid">
+    <button 
+      *ngFor="let dia of diasSemana; let i = index"
+      class="day-btn"
+      [class.selected]="isDiaSelected(i)"
+      (click)="toggleDia(i)">
+      <!-- ✅ QUITADA la restricción [disabled] -->
+      <span class="day-letter">{{ dia.substr(0, 1) }}</span>
+      <span class="day-name">{{ dia }}</span>
+    </button>
+  </div>
+  
+  <!-- ✅ NUEVO: Mensaje informativo -->
+  <div class="days-hint" *ngIf="frecuenciaConfig.diasPreferidos.length === 0">
+    <ion-icon name="bulb-outline"></ion-icon>
+    <span>Sin días seleccionados = Modo Flexible (cualquier día vale)</span>
+  </div>
+</div>
 
     <!-- Recordatorios -->
     <div class="reminder-config">
@@ -250,11 +281,37 @@
     </div>
     </div>
 
-    <!-- Botón guardar -->
-    <button class="save-frequency-btn" (click)="saveFrequency()" [disabled]="isSaving">
-      <ion-icon name="save-outline"></ion-icon>
-      {{ isSaving ? 'Guardando...' : 'Guardar Configuración' }}
+    <!-- Botón Guardar con estados -->
+    <button 
+      class="save-frequency-btn"
+      [class.has-changes]="hasUnsavedChanges"
+      [disabled]="isSaving || !hasUnsavedChanges"
+      (click)="saveFrequency()">
+      
+      <!-- Estado: Guardando -->
+      <ng-container *ngIf="isSaving">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Guardando...</span>
+      </ng-container>
+      
+      <!-- Estado: Cambios pendientes -->
+      <ng-container *ngIf="!isSaving && hasUnsavedChanges">
+        <ion-icon name="save-outline"></ion-icon>
+        <span>Guardar Cambios</span>
+      </ng-container>
+      
+      <!-- Estado: Sin cambios -->
+      <ng-container *ngIf="!isSaving && !hasUnsavedChanges">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <span>Todo Guardado</span>
+      </ng-container>
     </button>
+
+    <!-- ✅ NUEVO: Indicador de cambios pendientes -->
+    <div class="changes-indicator" *ngIf="hasUnsavedChanges">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <span>Tienes cambios sin guardar</span>
+    </div>
 
   </div>
 </div>
