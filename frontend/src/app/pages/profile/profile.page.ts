@@ -122,6 +122,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
       await this.loadDashboardStats(studentId);
       this.loadCumplimiento();
       this.loadSettings();
+      this.loadStudyFrequency();
       
       // ✅ NUEVO: Cargar modo adaptativo
       this.loadAdaptiveConfig();
