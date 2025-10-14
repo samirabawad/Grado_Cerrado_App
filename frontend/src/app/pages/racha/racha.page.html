@@ -11,26 +11,28 @@
 
   <div *ngIf="!isLoading" class="content-area">
 
-    <!-- Tarjeta principal de racha -->
+    <!-- Tarjeta principal de racha CON LLAMA -->
     <div class="streak-main-card">
-      <div class="streak-mascot">
-        <img src="assets/image/menu/hoja.png" alt="Racha">
+      <div class="streak-display">
+        <div class="streak-icon">
+          <ion-icon name="flame" class="flame-icon"></ion-icon>
+        </div>
+        <div class="streak-number">{{ currentStreak }}</div>
       </div>
-      
-      <div class="streak-number">{{ currentStreak }}</div>
       <div class="streak-label">días de racha</div>
       
-      <div class="streak-message">
+      <div class="streak-message-large">
         <span *ngIf="currentStreak === 0">¡Comienza tu racha hoy!</span>
         <span *ngIf="currentStreak > 0 && currentStreak < 5">¡Vas muy bien!</span>
         <span *ngIf="currentStreak >= 5 && currentStreak < 10">¡Increíble constancia!</span>
-        <span *ngIf="currentStreak >= 10">¡Eres imparable!</span>
+        <span *ngIf="currentStreak >= 10 && currentStreak < 30">¡Eres imparable!</span>
+        <span *ngIf="currentStreak >= 30">¡Leyenda viviente!</span>
       </div>
     </div>
 
     <!-- CALENDARIO MENSUAL -->
     <div class="calendar-card">
-      <h3 class="calendar-title">{{ currentMonthName }}</h3>
+      <h3 class="calendar-title">{{ currentMonthName }} 2025</h3>
       
       <div class="calendar-weekdays">
         <div class="weekday">D</div>
@@ -65,7 +67,58 @@
       </div>
     </div>
 
-    <!-- Resto del contenido... -->
+    <!-- LOGROS EN CUADRÍCULA -->
+    <div class="achievements-section">
+      <h3 class="section-title">🏆 Logros de Racha</h3>
+      <div class="achievements-grid">
+        <div 
+          *ngFor="let achievement of achievements"
+          class="achievement-card"
+          [class.unlocked]="achievement.unlocked"
+          [class.locked]="!achievement.unlocked">
+          
+          <div class="achievement-icon" [style.background]="achievement.unlocked ? achievement.color : '#e5e7eb'">
+            <ion-icon [name]="achievement.icon"></ion-icon>
+          </div>
+          
+          <div class="achievement-info">
+            <div class="achievement-title">{{ achievement.title }}</div>
+            <div class="achievement-days">{{ achievement.daysRequired }} días</div>
+          </div>
+          
+          <div class="achievement-status">
+            <ion-icon 
+              *ngIf="achievement.unlocked" 
+              name="checkmark-circle" 
+              class="unlocked-check"></ion-icon>
+            <ion-icon 
+              *ngIf="!achievement.unlocked" 
+              name="lock-closed" 
+              class="locked-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="stats-quick">
+      <div class="stat-item">
+        <ion-icon name="trophy"></ion-icon>
+        <div class="stat-value">{{ bestStreak }}</div>
+        <div class="stat-label">Mejor racha</div>
+      </div>
+      <div class="stat-item">
+        <ion-icon name="calendar"></ion-icon>
+        <div class="stat-value">{{ totalDays }}</div>
+        <div class="stat-label">Días totales</div>
+      </div>
+      <div class="stat-item">
+        <ion-icon name="flag"></ion-icon>
+        <div class="stat-value">{{ nextGoal }}</div>
+        <div class="stat-label">Próxima meta</div>
+      </div>
+    </div>
+
   </div>
 
   <app-bottom-nav></app-bottom-nav>
