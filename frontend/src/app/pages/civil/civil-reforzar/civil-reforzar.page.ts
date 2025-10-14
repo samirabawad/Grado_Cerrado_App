@@ -26,6 +26,7 @@ export class CivilReforzarPage implements OnInit {
   selectedTemaId: number | null = null;
   selectedSubtemaId: number | null = null;
   expandedTema: number | null = null;
+  showThemeSelector: boolean = false;
   
   // Estado
   isLoading: boolean = true;
@@ -34,7 +35,7 @@ export class CivilReforzarPage implements OnInit {
   constructor(
     private router: Router,
     private loadingController: LoadingController,
-    private toastController: ToastController, // ✅ Agregado
+    private toastController: ToastController,
     private apiService: ApiService
   ) { }
 
@@ -120,28 +121,24 @@ export class CivilReforzarPage implements OnInit {
     ];
   }
 
-  // ✅ NUEVO: Seleccionar tema débil
   selectWeakTopic(topic: any) {
     console.log('📖 Tema débil seleccionado:', topic);
     
-    // Configurar el alcance como tema específico
     this.scopeType = 'tema';
     this.selectedTemaId = topic.temaId;
     this.selectedSubtemaId = null;
+    this.showThemeSelector = true;
     
-    // Scroll suave hacia el selector de preguntas
     setTimeout(() => {
-      const quantitySection = document.querySelector('.quantity-section');
-      if (quantitySection) {
-        quantitySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const testSection = document.querySelector('.test-section');
+      if (testSection) {
+        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 100);
     
-    // Mostrar feedback visual
     this.showToast(`Tema seleccionado: ${topic.nombre}`, 'primary');
   }
 
-  // ✅ NUEVO: Formatear fechas
   formatDate(dateString: string): string {
     if (!dateString) return '';
     
@@ -162,7 +159,6 @@ export class CivilReforzarPage implements OnInit {
     }
   }
 
-  // ✅ NUEVO: Mostrar toast
   async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastController.create({
       message: message,
@@ -178,29 +174,43 @@ export class CivilReforzarPage implements OnInit {
     this.sessionsExpanded = !this.sessionsExpanded;
   }
 
-  toggleTema(tema: any) {
-    if (tema.cantidadPreguntas === 0) return;
+  toggleThemeSelector() {
+    this.showThemeSelector = !this.showThemeSelector;
     
-    if (this.expandedTema === tema.id) {
-      this.expandedTema = null;
+    if (this.showThemeSelector) {
+      this.scopeType = 'tema';
     } else {
-      this.expandedTema = tema.id;
+      this.scopeType = 'all';
+      this.selectedTemaId = null;
+      this.selectedSubtemaId = null;
+      this.expandedTema = null;
     }
   }
 
   selectScope(type: 'all' | 'tema') {
     this.scopeType = type;
-    this.selectedTemaId = null;
-    this.selectedSubtemaId = null;
-    this.expandedTema = null;
+    
+    if (type === 'all') {
+      this.showThemeSelector = false;
+      this.selectedTemaId = null;
+      this.selectedSubtemaId = null;
+      this.expandedTema = null;
+    }
   }
 
-  selectTema(tema: any) {
+  toggleTema(tema: any) {
     if (tema.cantidadPreguntas === 0) return;
     
-    this.scopeType = 'tema';
-    this.selectedTemaId = tema.id;
-    this.selectedSubtemaId = null;
+    // Si ya está expandido, lo contraemos
+    if (this.expandedTema === tema.id) {
+      this.expandedTema = null;
+    } else {
+      // Expandimos y seleccionamos el tema
+      this.expandedTema = tema.id;
+      this.selectedTemaId = tema.id;
+      this.selectedSubtemaId = null;
+      this.scopeType = 'tema';
+    }
   }
 
   selectSubtema(subtema: any) {
@@ -208,6 +218,12 @@ export class CivilReforzarPage implements OnInit {
     
     this.scopeType = 'subtema';
     this.selectedSubtemaId = subtema.id;
+    
+    console.log('✅ Subtema seleccionado:', {
+      subtemaId: subtema.id,
+      nombre: subtema.nombre,
+      scopeType: this.scopeType
+    });
   }
 
   async startTest() {
@@ -236,26 +252,35 @@ export class CivilReforzarPage implements OnInit {
         numberOfQuestions: this.selectedQuantity
       };
 
+      // ✅ CRITICAL: Aplicar filtros según la selección
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
         sessionData.SubtemaId = this.selectedSubtemaId;
+        console.log('🎯 Iniciando test de SUBTEMA:', this.selectedSubtemaId);
       } else if (this.scopeType === 'tema' && this.selectedTemaId) {
         sessionData.TemaId = this.selectedTemaId;
+        console.log('🎯 Iniciando test de TEMA:', this.selectedTemaId);
+      } else {
+        console.log('🎯 Iniciando test de TODO Derecho Civil');
       }
+
+      console.log('📤 Datos de sesión enviados:', sessionData);
       
       const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
       
       if (sessionResponse && sessionResponse.success) {
         this.apiService.setCurrentSession(sessionResponse);
+        console.log('✅ Sesión iniciada correctamente');
         await this.router.navigate(['/civil/civil-escrito/test-escrito-civil']);
         await loading.dismiss();
       } else {
         await loading.dismiss();
+        console.error('❌ Error en respuesta:', sessionResponse);
         alert('No se pudo iniciar el test. Intenta nuevamente.');
       }
       
     } catch (error) {
       await loading.dismiss();
-      console.error('Error al iniciar test:', error);
+      console.error('❌ Error al iniciar test:', error);
       alert('Hubo un error al iniciar el test. Intenta nuevamente.');
     }
   }
@@ -265,7 +290,7 @@ export class CivilReforzarPage implements OnInit {
   }
 
   viewSession(session: any) {
-  console.log('📊 Ver detalle de sesión:', session);
-  this.router.navigate(['/detalle-test', session.id]);
-}
+    console.log('📊 Ver detalle de sesión:', session);
+    this.router.navigate(['/detalle-test', session.id]);
+  }
 }

@@ -178,15 +178,15 @@ export class ApiService {
   // SESIONES DE ESTUDIO
   // ========================================
 
-  /**
-   * ✅ ACTUALIZADO: Iniciar sesión ESCRITA con soporte de modo adaptativo
-   */
   startStudySession(config: {
     studentId: number;
     difficulty: string;
     legalAreas: string[];
     questionCount?: number;
+    numberOfQuestions?: number;
     adaptiveMode?: boolean;
+    TemaId?: number;
+    SubtemaId?: number;
   }): Observable<any> {
     const url = `${this.API_URL}/Study/start-session`;
     
@@ -212,13 +212,24 @@ export class ApiService {
     
     console.log('🎯 Modo adaptativo:', adaptiveEnabled);
     
-    const requestBody = {
+    const requestBody: any = {
       studentId: config.studentId,
       difficulty: config.difficulty || "basico",
       legalAreas: config.legalAreas || [],
-      questionCount: config.questionCount || 5,
-      adaptiveMode: adaptiveEnabled // ✅ INCLUIR modo adaptativo
+      questionCount: config.numberOfQuestions || config.questionCount || 5,
+      adaptiveMode: adaptiveEnabled
     };
+
+  
+    if (config.TemaId) {
+      requestBody.TemaId = config.TemaId;
+      console.log('📚 Filtro de Tema aplicado:', config.TemaId);
+    }
+
+    if (config.SubtemaId) {
+      requestBody.SubtemaId = config.SubtemaId;
+      console.log('📖 Filtro de Subtema aplicado:', config.SubtemaId);
+    }
     
     console.log('📚 Iniciando sesión ESCRITA:', requestBody);
     

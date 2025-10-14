@@ -78,6 +78,28 @@ ion-content.civil-content {
 }
 
 // ========================================
+// SECCIÓN TEST DE REFUERZO
+// ========================================
+.test-section {
+  margin-top: 24px;
+}
+
+.test-section-title {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #FF6F00;
+  display: flex;
+  align-items: center;
+
+  ion-icon {
+    color: #FF6F00;
+    font-size: 24px;
+    margin-right: 8px;
+  }
+}
+
+// ========================================
 // NUEVO DISEÑO - TEMAS A REFORZAR
 // ========================================
 .weak-topics-list-new {
@@ -109,7 +131,6 @@ ion-content.civil-content {
   }
 }
 
-// Indicador de prioridad 
 .priority-indicator {
   width: 5px;
   flex-shrink: 0;
@@ -127,7 +148,6 @@ ion-content.civil-content {
   }
 }
 
-// Contenido del card
 .topic-content-new {
   flex: 1;
   display: flex;
@@ -165,7 +185,6 @@ ion-content.civil-content {
   flex-shrink: 0;
 }
 
-// Badge con porcentaje
 .error-badge {
   padding: 6px 12px;
   border-radius: 8px;
@@ -392,11 +411,17 @@ ion-content.civil-content {
   }
 }
 
+.theme-accordion {
+  animation: slideDown 0.3s ease;
+  margin-top: 12px;
+}
+
 // ========================================
 // SELECT SUTIL
 // ========================================
 .custom-select {
   width: 100%;
+  padding: 12px;
   padding: 12px 16px;
   font-size: 15px;
   font-weight: 500;
@@ -604,13 +629,17 @@ ion-content.civil-content {
 }
 
 .start-button {
-  --background: linear-gradient(135deg, #FF6F00, #FF8F00);
-  --background-activated: linear-gradient(135deg, #F57C00, #FF6F00);
+  --background: #FF6F00;
+  --background-activated: #E65100;
   --border-radius: 12px;
-  --box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
-  height: 54px;
-  font-weight: 600;
+  --color: white;
+  height: 56px;
   font-size: 16px;
+  font-weight: 600;
   text-transform: none;
-  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+
+  ion-icon {
+    margin-right: 8px;
+  }
 }
