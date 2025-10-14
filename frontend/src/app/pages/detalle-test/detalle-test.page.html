@@ -1,0 +1,101 @@
+<ion-content class="detalle-content">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Repaso del Test</h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando detalle...</p>
+  </div>
+
+  <!-- Contenido -->
+  <div *ngIf="!isLoading && testInfo" class="content-area">
+    
+    <!-- Info del test -->
+    <div class="test-header-card">
+      <div class="header-info">
+        <h2>{{ testInfo?.area }}</h2>
+        <p>{{ testInfo?.date | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-badge correct">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <span>{{ stats?.correctAnswers }}/{{ stats?.totalQuestions }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de preguntas expandidas -->
+    <div class="questions-list">
+      <h3 class="questions-title">Preguntas del Test</h3>
+      
+      <div *ngFor="let question of questions; let i = index" 
+           class="question-expanded"
+           [class.question-correct]="question.isCorrect"
+           [class.question-incorrect]="!question.isCorrect">
+        
+        <!-- Número y estado -->
+        <div class="question-status">
+          <ion-icon [name]="question.isCorrect ? 'checkmark-circle' : 'close-circle'"
+                    [class.icon-correct]="question.isCorrect"
+                    [class.icon-incorrect]="!question.isCorrect">
+          </ion-icon>
+          <span class="question-num">Pregunta {{ question.questionNumber }}</span>
+        </div>
+
+        <!-- Tema/Subtema -->
+        <div class="question-tags">
+          <span class="tag-tema">{{ question.tema }}</span>
+          <span class="tag-subtema">{{ question.subtema }}</span>
+        </div>
+
+        <!-- Enunciado -->
+        <div class="question-enunciado">
+          {{ question.questionText }}
+        </div>
+
+        <!-- Alternativas -->
+        <div class="alternatives-list">
+          <div *ngFor="let answer of question.answers" 
+              class="alternative-item"
+              [class.alt-selected]="answer.letter === question.selectedAnswer"
+              [class.alt-correct]="answer.isCorrect">
+            
+            <div class="alt-icon">
+              <ion-icon *ngIf="answer.isCorrect" name="checkmark-circle"></ion-icon>
+              <ion-icon *ngIf="!answer.isCorrect && answer.letter === question.selectedAnswer" name="close-circle"></ion-icon>
+              <ion-icon *ngIf="!answer.isCorrect && answer.letter !== question.selectedAnswer" name="ellipse-outline"></ion-icon>
+            </div>
+            
+            <div class="alt-text">{{ answer.text }}</div>
+          </div>
+        </div>
+
+
+        <!-- Explicación (placeholder por ahora) -->
+        <div class="question-explanation" *ngIf="question.isCorrect">
+          <ion-icon name="bulb"></ion-icon>
+          <p>¡Respuesta correcta!</p>
+        </div>
+        <div class="question-explanation incorrect" *ngIf="!question.isCorrect">
+          <ion-icon name="information-circle"></ion-icon>
+          <p>Revisa este tema para mejorar tu comprensión.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="!isLoading && !testInfo" class="error-container">
+    <ion-icon name="alert-circle"></ion-icon>
+    <h3>No se pudo cargar el test</h3>
+    <p>Intenta nuevamente más tarde</p>
+    <ion-button (click)="goBack()">Volver</ion-button>
+  </div>
+
+</ion-content>

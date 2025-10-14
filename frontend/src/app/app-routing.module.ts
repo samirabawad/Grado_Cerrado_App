@@ -140,6 +140,10 @@ const routes: Routes = [
     path: 'civil/plan-estudio-civil',
     loadComponent: () => import('./pages/civil/plan-estudio-civil/plan-estudio-civil.page').then(m => m.PlanEstudioCivilPage)
   },
+  {
+    path: 'detalle-test/:testId',
+    loadComponent: () => import('./pages/detalle-test/detalle-test.page').then(m => m.DetalleTestPage)
+  },
 
   // ========================================
   // FALLBACK

@@ -12,7 +12,7 @@
   left: 0;
   right: 0;
   height: 60px;
-  background: #d1d5db;
+  background: #FF6F00;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -21,13 +21,13 @@
 
   .back-icon {
     font-size: 24px;
-    color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
     font-size: 18px;
     font-weight: 600;
     margin: 0;

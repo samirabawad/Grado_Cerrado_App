@@ -500,6 +500,23 @@ export class ApiService {
       );
   }
 
+  getTestDetail(testId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/test-detail/${testId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Detalle del test obtenido:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo detalle del test:', error);
+        throw error;
+      })
+    );
+}
+
+
   getAreaStats(studentId: number): Observable<any> {
     const url = `${this.API_URL}/Dashboard/area-stats/${studentId}`;
     

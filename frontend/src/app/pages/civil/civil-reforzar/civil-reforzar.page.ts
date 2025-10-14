@@ -265,7 +265,7 @@ export class CivilReforzarPage implements OnInit {
   }
 
   viewSession(session: any) {
-    console.log('Ver sesión:', session);
-    // TODO: Navegar a detalle de sesión
-  }
+  console.log('📊 Ver detalle de sesión:', session);
+  this.router.navigate(['/detalle-test', session.id]);
+}
 }
