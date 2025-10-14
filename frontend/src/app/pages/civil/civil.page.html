@@ -9,17 +9,16 @@
   <div class="content-area">
 
     <!-- Progreso Civil - ESTILO DASHBOARD -->
-    <div class="progreso-card-dashboard" (click)="goToDashboard()">
+    <div class="progreso-card-dashboard">
       <div class="progreso-header">
         <div class="progreso-left">
           <div class="progreso-emoji">📜</div>
           <div class="progreso-info">
-            <h3>Derecho Civil</h3>
+            <h3>Tu avance en Civil</h3>
           </div>
         </div>
         <div class="progreso-right">
           <div class="progreso-percentage">{{ civilStats?.successRate || 0 }}%</div>
-          <ion-icon name="chevron-forward" class="arrow-icon"></ion-icon>
         </div>
       </div>
 
