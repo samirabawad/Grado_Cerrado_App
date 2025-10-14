@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, LoadingController } from '@ionic/angular';
+import { IonicModule, LoadingController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
@@ -34,6 +34,7 @@ export class CivilReforzarPage implements OnInit {
   constructor(
     private router: Router,
     private loadingController: LoadingController,
+    private toastController: ToastController, // ✅ Agregado
     private apiService: ApiService
   ) { }
 
@@ -117,6 +118,60 @@ export class CivilReforzarPage implements OnInit {
         ]
       },
     ];
+  }
+
+  // ✅ NUEVO: Seleccionar tema débil
+  selectWeakTopic(topic: any) {
+    console.log('📖 Tema débil seleccionado:', topic);
+    
+    // Configurar el alcance como tema específico
+    this.scopeType = 'tema';
+    this.selectedTemaId = topic.temaId;
+    this.selectedSubtemaId = null;
+    
+    // Scroll suave hacia el selector de preguntas
+    setTimeout(() => {
+      const quantitySection = document.querySelector('.quantity-section');
+      if (quantitySection) {
+        quantitySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+    
+    // Mostrar feedback visual
+    this.showToast(`Tema seleccionado: ${topic.nombre}`, 'primary');
+  }
+
+  // ✅ NUEVO: Formatear fechas
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return 'Hoy';
+      if (diffDays === 1) return 'Ayer';
+      if (diffDays < 7) return `Hace ${diffDays} días`;
+      if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+      
+      return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    } catch (error) {
+      return '';
+    }
+  }
+
+  // ✅ NUEVO: Mostrar toast
+  async showToast(message: string, color: string = 'primary') {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000,
+      position: 'bottom',
+      color: color,
+      cssClass: 'custom-toast'
+    });
+    await toast.present();
   }
 
   toggleSessions() {

@@ -8,49 +8,73 @@
   <!-- Contenido principal -->
   <div class="content-area">
 
-    <!-- Temas a Reforzar - PRIMERO -->
-    <div class="section-card" *ngIf="!isLoading">
-      <h2 class="section-title">Temas a Reforzar</h2>
+    <!-- Temas a Reforzar -->
+<div class="section">
+  <h2 class="section-title">
+    <ion-icon name="trending-down" style="color: #ff6b35; margin-right: 8px;"></ion-icon>
+    Temas a Reforzar
+  </h2>
+
+  <!-- Skeleton Loading -->
+  <div *ngIf="isLoading" class="loading-skeleton">
+    <ion-skeleton-text animated style="width: 100%; height: 80px; border-radius: 12px; margin-bottom: 12px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 80px; border-radius: 12px; margin-bottom: 12px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 80px; border-radius: 12px;"></ion-skeleton-text>
+  </div>
+
+  <!-- Lista de temas débiles -->
+  <div *ngIf="!isLoading && weakTopics.length > 0" class="weak-topics-list">
+    <div *ngFor="let topic of weakTopics" class="weak-topic-card" (click)="selectWeakTopic(topic)">
+      <!-- Barra de progreso del tema -->
+      <div class="topic-header">
+        <div class="topic-info">
+          <h3 class="topic-name">{{ topic.nombre }}</h3>
+          <p class="topic-stats">
+            <ion-icon name="close-circle" style="color: #ff6b35;"></ion-icon>
+            {{ topic.totalErrores }} errores de {{ topic.totalIntentos }} intentos
+          </p>
+        </div>
+        <div class="topic-percentage">
+          <span class="error-rate">{{ topic.tasaError }}%</span>
+          <span class="error-label">error</span>
+        </div>
+      </div>
       
-      <div class="weak-topics-list" *ngIf="weakTopics.length > 0">
-        <div class="weak-topic-card" *ngFor="let topic of weakTopics">
-          <div class="topic-header">
-            <div class="topic-info">
-              <h3>{{ topic.tema }}</h3>
-              <p class="topic-area">{{ topic.area }}</p>
-            </div>
-            <div class="topic-stats">
-              <div class="topic-percentage" 
-                   [class.critical]="topic.tasaAcierto < 40" 
-                   [class.weak]="topic.tasaAcierto >= 40 && topic.tasaAcierto < 60">
-                {{ topic.tasaAcierto }}%
-              </div>
-            </div>
-          </div>
-          
-          <div class="topic-progress-bar">
-            <div class="topic-progress-fill" [style.width.%]="topic.tasaAcierto"></div>
-          </div>
-          
-          <div class="topic-meta">
-            <span class="meta-item">
-              <ion-icon name="help-circle-outline"></ion-icon>
-              {{ topic.intentos }} intentos
-            </span>
-            <span class="meta-item" *ngIf="topic.diasSinPracticar > 0">
-              <ion-icon name="time-outline"></ion-icon>
-              {{ topic.diasSinPracticar }} días sin practicar
-            </span>
+      <!-- Barra visual de tasa de error -->
+      <div class="progress-bar-container">
+        <div class="progress-bar">
+          <div 
+            class="progress-fill error" 
+            [style.width.%]="topic.tasaError"
+            [class.high-error]="topic.tasaError >= 70"
+            [class.medium-error]="topic.tasaError >= 40 && topic.tasaError < 70"
+            [class.low-error]="topic.tasaError < 40">
           </div>
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="weakTopics.length === 0">
-        <ion-icon name="trophy-outline"></ion-icon>
-        <p>¡No tienes temas débiles! Sigue practicando.</p>
+      <!-- Info adicional -->
+      <div class="topic-footer">
+        <span class="topic-detail">
+          <ion-icon name="checkmark-circle" style="color: #10b981;"></ion-icon>
+          {{ topic.totalAciertos }} correctas
+        </span>
+        <span class="topic-detail" *ngIf="topic.ultimaPractica">
+          <ion-icon name="time-outline"></ion-icon>
+          {{ formatDate(topic.ultimaPractica) }}
+        </span>
       </div>
     </div>
+  </div>
 
+  <!-- Mensaje cuando no hay temas débiles -->
+  <div *ngIf="!isLoading && weakTopics.length === 0" class="no-weak-topics">
+    <ion-icon name="trophy" style="font-size: 48px; color: #fbbf24;"></ion-icon>
+    <h3>¡Excelente trabajo!</h3>
+    <p>No tienes temas que necesiten refuerzo en este momento.</p>
+    <p class="subtitle">Sigue practicando para mantener tu rendimiento.</p>
+  </div>
+</div>
     <!-- Sesiones Recientes - DESPLEGABLE -->
     <div class="section-card collapsible" *ngIf="!isLoading && recentSessions.length > 0">
       <div class="collapsible-header" (click)="toggleSessions()">

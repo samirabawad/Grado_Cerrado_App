@@ -123,25 +123,34 @@ ion-content.civil-content {
   }
 }
 
-// ========================================
-// TEMAS A REFORZAR
-// ========================================
+// ============================================
+// TEMAS DÉBILES
+// ============================================
+
 .weak-topics-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-bottom: 24px;
 }
 
 .weak-topic-card {
-  background: #FFF3E0;
-  border-left: 4px solid #FF6F00;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+  border: 2px solid #fee2e2;
+  border-radius: 16px;
   padding: 16px;
+  cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(239, 68, 68, 0.15);
+  }
 
   &:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.15);
+    border-color: #fecaca;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
   }
 }
 
@@ -154,68 +163,138 @@ ion-content.civil-content {
 
 .topic-info {
   flex: 1;
+}
 
-  h3 {
-    margin: 0 0 4px 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #333;
-  }
-
-  .topic-area {
-    margin: 0;
-    font-size: 13px;
-    color: #666;
-  }
+.topic-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
 }
 
 .topic-stats {
-  .topic-percentage {
-    font-size: 24px;
-    font-weight: 800;
-    color: #FF6F00;
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
-    &.critical {
-      color: #f44336;
-    }
-
-    &.weak {
-      color: #FF9800;
-    }
+  ion-icon {
+    font-size: 14px;
   }
 }
 
-.topic-progress-bar {
+.topic-percentage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 60px;
+}
+
+.error-rate {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ef4444;
+  line-height: 1;
+}
+
+.error-label {
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Barra de progreso
+.progress-bar-container {
+  margin: 12px 0;
+}
+
+.progress-bar {
+  width: 100%;
   height: 8px;
-  background: #FFE0B2;
+  background: #f3f4f6;
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 12px;
+}
 
-  .topic-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #FF6F00, #F57C00);
-    border-radius: 4px;
-    transition: width 0.5s ease;
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+  
+  &.high-error {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+  }
+  
+  &.medium-error {
+    background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+  }
+  
+  &.low-error {
+    background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
   }
 }
 
-.topic-meta {
+.topic-footer {
   display: flex;
-  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
 
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #666;
+.topic-detail {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
-    ion-icon {
-      font-size: 16px;
-      color: #FF6F00;
-    }
+  ion-icon {
+    font-size: 14px;
   }
+}
+
+// Estado vacío
+.no-weak-topics {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fff 100%);
+  border-radius: 16px;
+  border: 2px dashed #fbbf24;
+
+  ion-icon {
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+}
+
+// Loading skeleton
+.loading-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 // ========================================
