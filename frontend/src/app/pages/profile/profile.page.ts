@@ -75,6 +75,11 @@ export class ProfilePage implements OnInit, AfterViewInit {
   // ============================================
   // ✅ NUEVAS PROPIEDADES DE MODO ADAPTATIVO
   // ============================================
+
+  hasUnsavedChanges: boolean = false;
+  originalConfig: StudyFrequencyConfig | null = null;
+
+
   adaptiveConfig = {
     enabled: false
   };
@@ -258,49 +263,78 @@ export class ProfilePage implements OnInit, AfterViewInit {
   // MÉTODOS DE FRECUENCIA DE ESTUDIO
   // ============================================
   
-  loadStudyFrequency() {
-    const studentId = this.user.id;
-    
-    this.apiService.getStudyFrequency(studentId).subscribe({
-      next: (response) => {
-        console.log('📥 RESPUESTA FRECUENCIA:', response);
+loadStudyFrequency() {
+  const studentId = this.user.id;
+  
+  this.apiService.getStudyFrequency(studentId).subscribe({
+    next: (response) => {
+      console.log('📥 RESPUESTA FRECUENCIA:', response);
+      
+      if (response.success && response.data) {
+        console.log('⏰ HORA DE BD:', response.data.horaRecordatorio);
         
-        if (response.success && response.data) {
-          console.log('⏰ HORA DE BD:', response.data.horaRecordatorio);
-          
-          let horaFormateada = '19:00';
-          
-          if (response.data.horaRecordatorio) {
-            const horaStr = response.data.horaRecordatorio.toString();
-            const partes = horaStr.split(':');
-            if (partes.length >= 2) {
-              const horas = partes[0].padStart(2, '0');
-              const minutos = partes[1].padStart(2, '0');
-              horaFormateada = `${horas}:${minutos}`;
-              
-              this.horaSeleccionada = horas;
-              this.minutoSeleccionado = minutos;
-            }
+        let horaFormateada = '19:00';
+        
+        if (response.data.horaRecordatorio) {
+          const horaStr = response.data.horaRecordatorio.toString();
+          const partes = horaStr.split(':');
+          if (partes.length >= 2) {
+            const horas = partes[0].padStart(2, '0');
+            const minutos = partes[1].padStart(2, '0');
+            horaFormateada = `${horas}:${minutos}`;
+            
+            this.horaSeleccionada = horas;
+            this.minutoSeleccionado = minutos;
           }
-          
-          console.log('⏰ HORA FORMATEADA:', horaFormateada);
-          
-          this.frecuenciaConfig = {
-            frecuenciaSemanal: response.data.frecuenciaSemanal || 3,
-            objetivoDias: (response.data.objetivoDias as 'flexible' | 'estricto' | 'personalizado') || 'flexible',
-            diasPreferidos: response.data.diasPreferidos || [],
-            recordatorioActivo: response.data.recordatorioActivo ?? true,
-            horaRecordatorio: horaFormateada
-          };
-          
-          console.log('✅ Config frecuencia - Hora:', this.frecuenciaConfig.horaRecordatorio);
         }
-      },
-      error: (error) => {
-        console.error('❌ Error cargando frecuencia:', error);
+        
+        this.frecuenciaConfig = {
+          frecuenciaSemanal: response.data.frecuenciaSemanal || 3,
+          objetivoDias: (response.data.objetivoDias as 'flexible' | 'estricto' | 'personalizado') || 'flexible',
+          diasPreferidos: response.data.diasPreferidos || [],
+          recordatorioActivo: response.data.recordatorioActivo ?? true,
+          horaRecordatorio: horaFormateada
+        };
+        
+        this.updateObjetivoMode();
+        
+        // ✅ NUEVO: Guardar configuración original
+        this.originalConfig = JSON.parse(JSON.stringify(this.frecuenciaConfig));
+        this.hasUnsavedChanges = false;
+        
+        console.log('✅ Config frecuencia completa:', this.frecuenciaConfig);
       }
-    });
+    },
+    error: (error) => {
+      console.error('❌ Error cargando frecuencia:', error);
+    }
+  });
+}
+
+// ============================================
+// ✅ NUEVO: Detectar cambios en configuración
+// ============================================
+checkForChanges() {
+  if (!this.originalConfig) {
+    this.hasUnsavedChanges = false;
+    return;
   }
+
+  // Comparar configuraciones
+  const hasChanged = 
+    this.frecuenciaConfig.frecuenciaSemanal !== this.originalConfig.frecuenciaSemanal ||
+    this.frecuenciaConfig.objetivoDias !== this.originalConfig.objetivoDias ||
+    this.frecuenciaConfig.recordatorioActivo !== this.originalConfig.recordatorioActivo ||
+    this.frecuenciaConfig.horaRecordatorio !== this.originalConfig.horaRecordatorio ||
+    JSON.stringify(this.frecuenciaConfig.diasPreferidos.sort()) !== 
+    JSON.stringify(this.originalConfig.diasPreferidos.sort());
+
+  this.hasUnsavedChanges = hasChanged;
+  
+  if (hasChanged) {
+    console.log('⚠️ Hay cambios sin guardar');
+  }
+}
 
   updateTimeInput() {
     setTimeout(() => {
@@ -342,6 +376,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   increaseFrecuencia() {
     if (this.frecuenciaConfig.frecuenciaSemanal < 7) {
       this.frecuenciaConfig.frecuenciaSemanal++;
+      this.checkForChanges();
     }
   }
 
@@ -352,6 +387,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
         this.frecuenciaConfig.diasPreferidos = this.frecuenciaConfig.diasPreferidos
           .slice(0, this.frecuenciaConfig.frecuenciaSemanal);
       }
+      this.checkForChanges();
     }
   }
 
@@ -360,6 +396,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     if (this.frecuenciaConfig.diasPreferidos.length > dias) {
       this.frecuenciaConfig.diasPreferidos = this.frecuenciaConfig.diasPreferidos.slice(0, dias);
     }
+    this.checkForChanges();
   }
 
   // ============================================
@@ -374,66 +411,91 @@ export class ProfilePage implements OnInit, AfterViewInit {
     const index = this.frecuenciaConfig.diasPreferidos.indexOf(dia);
     
     if (index > -1) {
+      // Remover día
       this.frecuenciaConfig.diasPreferidos.splice(index, 1);
     } else {
-      if (this.frecuenciaConfig.diasPreferidos.length < this.frecuenciaConfig.frecuenciaSemanal) {
-        this.frecuenciaConfig.diasPreferidos.push(dia);
-        this.frecuenciaConfig.diasPreferidos.sort((a, b) => a - b);
-      }
+      // Agregar día (sin límite de cantidad)
+      this.frecuenciaConfig.diasPreferidos.push(dia);
+      this.frecuenciaConfig.diasPreferidos.sort((a, b) => a - b);
     }
+    
+    // ✅ NUEVO: Actualizar automáticamente el modo
+    this.updateObjetivoMode();
+    this.checkForChanges();
   }
 
+  // ============================================
+  // ✅ NUEVO: Actualizar modo automáticamente
+  // ============================================
+  updateObjetivoMode() {
+    if (this.frecuenciaConfig.diasPreferidos.length > 0) {
+      // Si hay días seleccionados → Modo estricto
+      this.frecuenciaConfig.objetivoDias = 'estricto';
+      console.log('🎯 Modo cambiado a ESTRICTO (días seleccionados:', this.frecuenciaConfig.diasPreferidos, ')');
+    } else {
+      // Si no hay días seleccionados → Modo flexible
+      this.frecuenciaConfig.objetivoDias = 'flexible';
+      console.log('🎯 Modo cambiado a FLEXIBLE (sin días específicos)');
+    }
+  }
   // ============================================
   // RECORDATORIOS
   // ============================================
   
   onRecordatorioChange() {
     console.log('Recordatorio:', this.frecuenciaConfig.recordatorioActivo);
+    this.checkForChanges();
   }
 
   onHoraMinutoChange() {
     this.frecuenciaConfig.horaRecordatorio = `${this.horaSeleccionada}:${this.minutoSeleccionado}`;
     console.log('🕐 Hora actualizada:', this.frecuenciaConfig.horaRecordatorio);
+    this.checkForChanges();
   }
 
   onTimeChange(event: any) {
     const newTime = event.target.value;
     console.log('🕐 Hora cambiada a:', newTime);
     this.frecuenciaConfig.horaRecordatorio = newTime;
+    this.checkForChanges(); 
   }
 
   // ============================================
   // GUARDAR CONFIGURACIÓN
   // ============================================
   
-  async saveFrequency() {
-    this.isSaving = true;
+async saveFrequency() {
+  this.isSaving = true;
 
-    const configToSave = {
-      ...this.frecuenciaConfig,
-      horaRecordatorio: this.frecuenciaConfig.horaRecordatorio.substring(0, 5)
-    };
+  const configToSave = {
+    ...this.frecuenciaConfig,
+    horaRecordatorio: this.frecuenciaConfig.horaRecordatorio.substring(0, 5)
+  };
 
-    console.log('💾 Guardando config:', configToSave);
+  console.log('💾 Guardando config:', configToSave);
 
-    this.apiService.updateStudyFrequency(this.user.id, configToSave).subscribe({
-      next: async (response) => {
-        this.isSaving = false;
+  this.apiService.updateStudyFrequency(this.user.id, configToSave).subscribe({
+    next: async (response) => {
+      this.isSaving = false;
+      
+      if (response.success) {
+        // ✅ NUEVO: Actualizar configuración original y resetear cambios
+        this.originalConfig = JSON.parse(JSON.stringify(this.frecuenciaConfig));
+        this.hasUnsavedChanges = false;
         
-        if (response.success) {
-          await this.showToast('✅ Configuración guardada correctamente', 'success');
-          this.loadCumplimiento();
-        } else {
-          await this.showToast('⚠️ No se pudo guardar la configuración', 'warning');
-        }
-      },
-      error: async (error) => {
-        this.isSaving = false;
-        console.error('Error guardando frecuencia:', error);
-        await this.showToast('❌ Error al guardar la configuración', 'danger');
+        await this.showToast('✅ Configuración guardada correctamente', 'success');
+        this.loadCumplimiento();
+      } else {
+        await this.showToast('⚠️ No se pudo guardar la configuración', 'warning');
       }
-    });
-  }
+    },
+    error: async (error) => {
+      this.isSaving = false;
+      console.error('Error guardando frecuencia:', error);
+      await this.showToast('❌ Error al guardar la configuración', 'danger');
+    }
+  });
+}
 
   // ============================================
   // INFORMACIÓN DEL USUARIO
