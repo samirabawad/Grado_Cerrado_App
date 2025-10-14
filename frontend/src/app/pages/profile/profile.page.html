@@ -37,28 +37,39 @@
       
       <div *ngIf="isSectionExpanded('personalInfo')">
         <div class="info-card">
-          <div class="info-item">
+          <!-- NOMBRE EDITABLE -->
+          <div class="info-item editable" (click)="editName()">
             <ion-icon name="person"></ion-icon>
             <div class="info-text">
               <span class="info-label">Nombre Completo</span>
               <span class="info-value">{{ user.nombre }}</span>
             </div>
+            <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
           
-          <div class="info-item">
+          <!-- EMAIL EDITABLE -->
+          <div class="info-item editable" (click)="editEmail()">
             <ion-icon name="mail"></ion-icon>
             <div class="info-text">
               <span class="info-label">Email</span>
               <span class="info-value">{{ user.email }}</span>
             </div>
+            <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
           
+          <!-- MIEMBRO DESDE (NO EDITABLE) -->
           <div class="info-item">
             <ion-icon name="checkmark-circle"></ion-icon>
             <div class="info-text">
               <span class="info-label">Miembro desde</span>
               <span class="info-value">{{ getFechaRegistroFormatted() }}</span>
             </div>
+          </div>
+
+          <!-- MENSAJE DE ÚLTIMA ACTUALIZACIÓN -->
+          <div class="last-update-info" *ngIf="user.last_profile_update">
+            <ion-icon name="information-circle"></ion-icon>
+            <span>Última actualización: {{ getLastUpdateFormatted() }}</span>
           </div>
         </div>
       </div>
@@ -316,47 +327,41 @@
         <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
       </h2>
 
-      <div *ngIf="isSectionExpanded('configuration')">
-        <div class="settings-card">
-          <div class="setting-item">
-            <div class="setting-info">
-              <ion-icon name="moon"></ion-icon>
-              <span>Modo oscuro</span>
-            </div>
-            <ion-toggle [(ngModel)]="settings.darkMode" (ionChange)="saveSettings()" color="success"></ion-toggle>
-          </div>
-          <div class="setting-item">
-            <div class="setting-info">
-              <ion-icon name="volume-high"></ion-icon>
-              <span>Efectos de sonido</span>
-            </div>
-            <ion-toggle [(ngModel)]="settings.soundEffects" (ionChange)="saveSettings()" color="success"></ion-toggle>
-          </div>
-          <div class="setting-item">
-            <div class="setting-info">
-              <ion-icon name="phone-portrait"></ion-icon>
-              <span>Vibración</span>
-            </div>
-            <ion-toggle [(ngModel)]="settings.vibration" (ionChange)="saveSettings()" color="success"></ion-toggle>
-          </div>
-        </div>
-
-        <div class="help-buttons">
-          <button class="help-btn" (click)="getHelp()">
-            <ion-icon name="help-circle-outline"></ion-icon>
-            Ayuda y Soporte
-          </button>
-          <button class="help-btn" (click)="aboutApp()">
-            <ion-icon name="information-circle-outline"></ion-icon>
-            Acerca de Grado Cerrado
-          </button>
-        </div>
-
-        <button class="logout-btn" (click)="logout()">
-          <ion-icon name="log-out"></ion-icon>
-          Cerrar Sesión
-        </button>
+      <div *ngIf="isSectionExpanded('personalInfo')">
+  <div class="info-card">
+    <div class="info-item editable" (click)="editName()">
+      <ion-icon name="person"></ion-icon>
+      <div class="info-text">
+        <span class="info-label">Nombre Completo</span>
+        <span class="info-value">{{ user.nombre }}</span>
       </div>
+      <ion-icon name="create" class="edit-icon"></ion-icon>
+    </div>
+    
+    <div class="info-item editable" (click)="editEmail()">
+      <ion-icon name="mail"></ion-icon>
+      <div class="info-text">
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ user.email }}</span>
+      </div>
+      <ion-icon name="create" class="edit-icon"></ion-icon>
+    </div>
+    
+    <div class="info-item">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      <div class="info-text">
+        <span class="info-label">Miembro desde</span>
+        <span class="info-value">{{ getFechaRegistroFormatted() }}</span>
+      </div>
+    </div>
+
+    <!-- Mensaje de última actualización -->
+    <div class="last-update-info" *ngIf="user.last_profile_update">
+      <ion-icon name="information-circle"></ion-icon>
+      <span>Última actualización: {{ getLastUpdateFormatted() }}</span>
+    </div>
+  </div>
+</div>
     </div>
 
   </div>

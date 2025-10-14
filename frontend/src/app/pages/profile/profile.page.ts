@@ -31,7 +31,8 @@ export class ProfilePage implements OnInit, AfterViewInit {
     fecha_registro: new Date(),
     avatar: 'assets/image/msombra.png',
     activo: true,
-    verificado: false
+    verificado: false,
+    last_profile_update: null as string | null 
   };
 
   stats = {
@@ -671,6 +672,183 @@ async saveFrequency() {
 
   isSectionExpanded(section: string): boolean {
     return this.expandedSections[section];
+  }
+
+  // ============================================
+  // EDITAR NOMBRE Y EMAIL
+  // ============================================
+
+  canEditProfile(): boolean {
+    if (!this.user.last_profile_update) return true;
+    
+    const lastUpdate = new Date(this.user.last_profile_update);
+    const now = new Date();
+    const daysSinceUpdate = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return daysSinceUpdate >= 30;
+  }
+
+  getDaysUntilCanEdit(): number {
+    if (!this.user.last_profile_update) return 0;
+    
+    const lastUpdate = new Date(this.user.last_profile_update);
+    const now = new Date();
+    const daysSinceUpdate = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return Math.max(0, 30 - daysSinceUpdate);
+  }
+
+  getLastUpdateFormatted(): string {
+    if (!this.user.last_profile_update) return 'Nunca';
+    
+    const lastUpdate = new Date(this.user.last_profile_update);
+    return lastUpdate.toLocaleDateString('es-ES', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  }
+
+  async editName() {
+    if (!this.canEditProfile()) {
+      const daysLeft = this.getDaysUntilCanEdit();
+      await this.showToast(
+        `Podrás cambiar tu nombre en ${daysLeft} día${daysLeft > 1 ? 's' : ''}`,
+        'warning'
+      );
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Cambiar Nombre',
+      message: 'Solo puedes cambiar tu nombre cada 30 días.',
+      inputs: [
+        {
+          name: 'newName',
+          type: 'text',
+          placeholder: 'Nuevo nombre',
+          value: this.user.nombre
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            if (data.newName && data.newName.trim().length > 0) {
+              this.updateName(data.newName.trim());
+              return true;  // ✅ AGREGADO
+            } else {
+              this.showToast('El nombre no puede estar vacío', 'danger');
+              return false;
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async editEmail() {
+    if (!this.canEditProfile()) {
+      const daysLeft = this.getDaysUntilCanEdit();
+      await this.showToast(
+        `Podrás cambiar tu email en ${daysLeft} día${daysLeft > 1 ? 's' : ''}`,
+        'warning'
+      );
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Cambiar Email',
+      message: 'Solo puedes cambiar tu email cada 30 días.',
+      inputs: [
+        {
+          name: 'newEmail',
+          type: 'email',
+          placeholder: 'Nuevo email',
+          value: this.user.email
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            if (this.isValidEmail(data.newEmail)) {
+              this.updateEmail(data.newEmail.trim());
+              return true; 
+            } else {
+              this.showToast('Email inválido', 'danger');
+              return false;
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+async updateName(newName: string): Promise<void> {
+    try {
+      const response = await this.apiService.updateUserProfile(this.user.id, {
+        name: newName
+      }).toPromise();
+
+      if (response && response.success) {
+        this.user.nombre = newName;
+        this.user.nombreCompleto = newName;
+        this.user.last_profile_update = new Date().toISOString();
+        
+        const currentUser = this.apiService.getCurrentUser();
+        if (currentUser) {
+          currentUser.name = newName;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+
+        await this.showToast('✅ Nombre actualizado correctamente', 'success');
+      }
+    } catch (error) {
+      console.error('Error actualizando nombre:', error);
+      await this.showToast('❌ Error al actualizar el nombre', 'danger');
+    }
+  }
+
+  async updateEmail(newEmail: string): Promise<void> {
+    try {
+      const response = await this.apiService.updateUserProfile(this.user.id, {
+        email: newEmail
+      }).toPromise();
+
+      if (response && response.success) {
+        this.user.email = newEmail;
+        this.user.last_profile_update = new Date().toISOString();
+        
+        const currentUser = this.apiService.getCurrentUser();
+        if (currentUser) {
+          currentUser.email = newEmail;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+
+        await this.showToast('✅ Email actualizado correctamente', 'success');
+      }
+    } catch (error) {
+      console.error('Error actualizando email:', error);
+      await this.showToast('❌ Error al actualizar el email', 'danger');
+    }
   }
 
 }

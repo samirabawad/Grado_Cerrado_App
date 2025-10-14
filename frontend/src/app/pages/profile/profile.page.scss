@@ -1204,4 +1204,96 @@
       }
     }
   }
+
+  // ============================================
+// INFO ITEMS EDITABLES
+// ============================================
+.info-item {
+  &.editable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:hover {
+      background: #f9fafb;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    .edit-icon {
+      font-size: 20px;
+      color: #10b981;
+      margin-left: 8px;
+    }
+  }
+}
+
+.last-update-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  margin-top: 12px;
+
+  ion-icon {
+    font-size: 18px;
+    color: #10b981;
+  }
+
+  span {
+    font-size: 12px;
+    color: #065f46;
+    font-weight: 500;
+  }
+}
+
+// ============================================
+// INFO ITEMS EDITABLES
+// ============================================
+.info-item {
+  &.editable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:hover {
+      background: #f9fafb;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    .edit-icon {
+      font-size: 20px;
+      color: #10b981;
+      margin-left: 8px;
+    }
+  }
+}
+
+.last-update-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  margin-top: 12px;
+
+  ion-icon {
+    font-size: 18px;
+    color: #10b981;
+  }
+
+  span {
+    font-size: 12px;
+    color: #065f46;
+    font-weight: 500;
+  }
+}
 }

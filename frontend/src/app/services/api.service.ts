@@ -155,6 +155,33 @@ export class ApiService {
       );
   }
 
+  updateUserProfile(userId: number, updates: { name?: string, email?: string }): Observable<any> {
+    const url = `${this.API_URL}/auth/update-profile/${userId}`;
+    
+    console.log('Actualizando perfil:', updates);
+    
+    return this.http.put<any>(url, updates, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Perfil actualizado:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error actualizando perfil:', error);
+          
+          let errorMessage = 'Error al actualizar el perfil';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
   logout(): void {
     localStorage.removeItem('currentUser');
     this.clearCurrentSession();
