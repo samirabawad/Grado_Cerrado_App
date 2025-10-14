@@ -84,6 +84,15 @@ export class ProfilePage implements OnInit, AfterViewInit {
     enabled: false
   };
 
+   // Control de acordeones
+    expandedSections: { [key: string]: boolean } = {
+    personalInfo: false,
+    adaptiveMode: false,
+    studyFrequency: false,
+    progress: false,
+    configuration: false
+  };
+
   constructor(
     private router: Router,
     private alertController: AlertController,
@@ -140,6 +149,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     }
   }
 
+  
   // ============================================
   // CARGAR ESTADÍSTICAS DEL DASHBOARD
   // ============================================
@@ -502,12 +512,16 @@ async saveFrequency() {
   // ============================================
 
   getNivelFormatted(): string {
-    const niveles: any = {
+    const nivel = this.user.nivel_actual?.toLowerCase() || 'basico';
+    
+    const niveles: { [key: string]: string } = {
       'basico': 'Básico',
       'intermedio': 'Intermedio',
-      'avanzado': 'Avanzado'
+      'avanzado': 'Avanzado',
+      'experto': 'Experto'
     };
-    return niveles[this.user.nivel_actual] || 'Básico';
+    
+    return niveles[nivel] || 'Básico';
   }
 
   getFechaRegistroFormatted(): string {
@@ -645,4 +659,18 @@ async saveFrequency() {
     });
     await alert.present();
   }
+
+  ionViewWillEnter() {
+    console.log('🔄 Profile: Recargando datos al entrar a la página');
+    this.loadAllUserData();
+  }
+  
+ toggleSection(section: string) {
+    this.expandedSections[section] = !this.expandedSections[section];
+  }
+
+  isSectionExpanded(section: string): boolean {
+    return this.expandedSections[section];
+  }
+
 }
