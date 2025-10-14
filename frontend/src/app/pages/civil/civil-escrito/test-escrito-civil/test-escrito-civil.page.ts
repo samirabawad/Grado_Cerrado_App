@@ -39,6 +39,7 @@ interface TestResults {
   grade: string;
   level: string;
   incorrectQuestions: any[];
+  allQuestions?: any[]; 
   timeUsed?: number;
   timeUsedFormatted?: string;
   sessionId?: string;
@@ -636,53 +637,62 @@ getOptionIcon(option: string): string {
 }
 
   calculateResults(): TestResults {
-  let correctAnswers = 0;
-  let incorrectAnswers = 0;
-  const incorrectQuestions: any[] = [];
+    let correctAnswers = 0;
+    let incorrectAnswers = 0;
+    const incorrectQuestions: any[] = [];
+    const allQuestions: any[] = []; // ✅ NUEVO: Guardamos TODAS las preguntas
 
-  this.questions.forEach((question, index) => {
-    const isCorrect = this.compareAnswers(
-      question.userAnswer || '',
-      question.correctAnswer
-    );
+    this.questions.forEach((question, index) => {
+      const isCorrect = this.compareAnswers(
+        question.userAnswer || '',
+        question.correctAnswer
+      );
 
-    if (isCorrect) {
-      correctAnswers++;
-    } else {
-      incorrectAnswers++;
-      incorrectQuestions.push({
+      // ✅ Guardar información completa de TODAS las preguntas
+      const questionData = {
         questionNumber: index + 1,
-        questionText: question.questionText,
-        userAnswer: question.userAnswer,
+        questionText: question.questionText || question.text,
+        userAnswer: question.userAnswer || '',
         correctAnswer: question.correctAnswer,
-        explanation: question.explanation
-      });
-    }
-  });
+        explanation: question.explanation || '',
+        isCorrect: isCorrect
+      };
 
-  const totalAnswered = correctAnswers + incorrectAnswers;
-  const percentage = totalAnswered > 0 
-    ? Math.round((correctAnswers / totalAnswered) * 100) 
-    : 0;
+      allQuestions.push(questionData);
 
-  console.log('📊 Resultados finales:', {
-    correctAnswers,
-    incorrectAnswers,
-    percentage
-  });
+      if (isCorrect) {
+        correctAnswers++;
+      } else {
+        incorrectAnswers++;
+        incorrectQuestions.push(questionData);
+      }
+    });
 
-  return {
-    correctAnswers,
-    incorrectAnswers,
-    totalAnswered,
-    totalQuestions: this.totalQuestions,
-    percentage,
-    grade: this.getGradeFromPercentage(percentage),
-    level: this.getLevelFromPercentage(percentage),
-    incorrectQuestions,
-    sessionId: this.sessionId
-  };
-}
+    const totalAnswered = correctAnswers + incorrectAnswers;
+    const percentage = totalAnswered > 0 
+      ? Math.round((correctAnswers / totalAnswered) * 100) 
+      : 0;
+
+    console.log('📊 Resultados finales:', {
+      correctAnswers,
+      incorrectAnswers,
+      percentage,
+      allQuestions: allQuestions.length
+    });
+
+    return {
+      correctAnswers,
+      incorrectAnswers,
+      totalAnswered,
+      totalQuestions: this.totalQuestions,
+      percentage,
+      grade: this.getGradeFromPercentage(percentage),
+      level: this.getLevelFromPercentage(percentage),
+      incorrectQuestions,
+      allQuestions, 
+      sessionId: this.sessionId
+    };
+  }
 
   getGradeFromPercentage(percentage: number): string {
     if (percentage >= 90) return 'Excelente';

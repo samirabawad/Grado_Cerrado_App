@@ -15,7 +15,7 @@ import { ApiService } from '../../../services/api.service';
 })
 export class CivilEscritoPage implements OnInit, OnDestroy {
   
-  selectedQuantity: number = 5;
+  selectedQuantity: number = 1; // Valor por defecto cambiado a 1
 
   constructor(
     private router: Router, 
@@ -35,7 +35,7 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
 
   async startQuickPractice() {
     const loading = await this.loadingController.create({
-      message: 'Preparando tu test...',
+      message: this.selectedQuantity === 1 ? 'Preparando tu pregunta...' : 'Preparando tu test...',
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
