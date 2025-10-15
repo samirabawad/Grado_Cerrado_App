@@ -121,7 +121,7 @@ export class ApiService {
   }
 
   loginUser(loginData: { email: string, password: string }): Observable<any> {
-    const url = `${this.API_URL}/auth/login`;
+    const url = `${this.API_URL}/Auth/login`;  // ✅ CORRECTO: 'Auth' con mayúscula
     
     console.log('Enviando login a:', url, { email: loginData.email });
     

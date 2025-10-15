@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://192.168.1.109:5183/api'  // URL correcta del backend .NET
+  apiUrl: 'http://10.0.2.2:5183/api'  // URL correcta del backend .NET
 };
