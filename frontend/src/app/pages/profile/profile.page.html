@@ -37,7 +37,6 @@
       
       <div *ngIf="isSectionExpanded('personalInfo')">
         <div class="info-card">
-          <!-- NOMBRE EDITABLE -->
           <div class="info-item editable" (click)="editName()">
             <ion-icon name="person"></ion-icon>
             <div class="info-text">
@@ -47,7 +46,6 @@
             <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
           
-          <!-- EMAIL EDITABLE -->
           <div class="info-item editable" (click)="editEmail()">
             <ion-icon name="mail"></ion-icon>
             <div class="info-text">
@@ -57,7 +55,6 @@
             <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
           
-          <!-- MIEMBRO DESDE (NO EDITABLE) -->
           <div class="info-item">
             <ion-icon name="checkmark-circle"></ion-icon>
             <div class="info-text">
@@ -66,7 +63,6 @@
             </div>
           </div>
 
-          <!-- MENSAJE DE ÚLTIMA ACTUALIZACIÓN -->
           <div class="last-update-info" *ngIf="user.last_profile_update">
             <ion-icon name="information-circle"></ion-icon>
             <span>Última actualización: {{ getLastUpdateFormatted() }}</span>
@@ -88,10 +84,6 @@
       <div *ngIf="isSectionExpanded('adaptiveMode')">
         <ion-card class="settings-card">
           <ion-card-header>
-            <div class="card-header-with-icon">
-              <ion-icon name="analytics-outline" color="primary"></ion-icon>
-              <ion-card-title>Modo Adaptativo</ion-card-title>
-            </div>
             <ion-card-subtitle>Sistema inteligente de aprendizaje personalizado</ion-card-subtitle>
           </ion-card-header>
 
@@ -136,149 +128,155 @@
 
     <!-- FRECUENCIA DE ESTUDIO -->
     <div class="section">
-      <h2 class="section-title" (click)="toggleSection('studyFrequency')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+      <h2 class="section-title" (click)="toggleSection('frequency')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
         <span style="display: flex; align-items: center; gap: 12px;">
           <ion-icon name="calendar" style="font-size: 24px;"></ion-icon>
           Frecuencia de Estudio
         </span>
-        <ion-icon [name]="isSectionExpanded('studyFrequency') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+        <ion-icon [name]="isSectionExpanded('frequency') ? 'chevron-up' : 'chevron-down'"></ion-icon>
       </h2>
 
-      <div *ngIf="isSectionExpanded('studyFrequency')">
-        <div class="frequency-header">
-          <ion-icon name="calendar-outline" class="frequency-icon"></ion-icon>
-          <div class="frequency-info">
-            <h3>Mi Objetivo Semanal</h3>
-            <p class="frequency-subtitle">¿Cuántos días a la semana quieres estudiar?</p>
-          </div>
-        </div>
+      <div *ngIf="isSectionExpanded('frequency')">
+        <ion-card class="settings-card">
+          <ion-card-header>
+            <ion-card-subtitle>Configura tus objetivos de estudio semanales</ion-card-subtitle>
+          </ion-card-header>
 
-        <div class="frequency-selector">
-          <div class="days-counter">
-            <button class="counter-btn" (click)="decreaseFrecuencia()" [disabled]="frecuenciaConfig.frecuenciaSemanal <= 1">
-              <ion-icon name="remove-circle"></ion-icon>
-            </button>
-            <div class="counter-display">
-              <div class="counter-number">{{ frecuenciaConfig.frecuenciaSemanal }}</div>
-              <div class="counter-label">días / semana</div>
-            </div>
-            <button class="counter-btn" (click)="increaseFrecuencia()" [disabled]="frecuenciaConfig.frecuenciaSemanal >= 7">
-              <ion-icon name="add-circle"></ion-icon>
-            </button>
-          </div>
-
-          <div class="frequency-presets">
-            <button class="preset-btn" [class.active]="frecuenciaConfig.frecuenciaSemanal === 2" (click)="setFrecuencia(2)">
-              2 días (Básico)
-            </button>
-            <button class="preset-btn" [class.active]="frecuenciaConfig.frecuenciaSemanal === 3" (click)="setFrecuencia(3)">
-              3 días (Regular)
-            </button>
-            <button class="preset-btn" [class.active]="frecuenciaConfig.frecuenciaSemanal === 5" (click)="setFrecuencia(5)">
-              5 días (Intensivo)
-            </button>
-            <button class="preset-btn" [class.active]="frecuenciaConfig.frecuenciaSemanal === 7" (click)="setFrecuencia(7)">
-              Diario
-            </button>
-          </div>
-        </div>
-
-        <div class="weekly-progress" *ngIf="cumplimiento">
-          <div class="progress-header">
-            <span class="progress-label">Esta semana</span>
-            <span class="progress-value">{{ cumplimiento.diasEstudiadosSemana }}/{{ cumplimiento.objetivoSemanal }} días</span>
-          </div>
-          <div class="progress-bar-container">
-            <div class="progress-bar-fill" [style.width.%]="cumplimiento.porcentajeCumplimiento"></div>
-          </div>
-          <p class="progress-message" [class.success]="cumplimiento.porcentajeCumplimiento >= 100">
-            <ion-icon [name]="cumplimiento.porcentajeCumplimiento >= 100 ? 'checkmark-circle' : 'time'"></ion-icon>
-            {{ getProgressMessage() }}
-          </p>
-        </div>
-
-        <div class="preferred-days">
-          <div class="preferred-days-header">
-            <h4>Días preferidos (opcional)</h4>
-            <ion-chip class="mode-chip" [color]="frecuenciaConfig.objetivoDias === 'flexible' ? 'primary' : 'warning'">
-              <ion-icon [name]="frecuenciaConfig.objetivoDias === 'flexible' ? 'options' : 'calendar'"></ion-icon>
-              <ion-label>{{ frecuenciaConfig.objetivoDias === 'flexible' ? 'Flexible' : 'Estricto' }}</ion-label>
-            </ion-chip>
-          </div>
-
-          <div class="mode-description">
-            <p *ngIf="frecuenciaConfig.objetivoDias === 'flexible'">
-              <ion-icon name="information-circle"></ion-icon>
-              Cualquier día que estudies sumará a tu racha. Los días seleccionados son solo una preferencia.
-            </p>
-            <p *ngIf="frecuenciaConfig.objetivoDias === 'estricto'">
-              <ion-icon name="alert-circle"></ion-icon>
-              Solo los días seleccionados ({{ frecuenciaConfig.diasPreferidos.length }}) cuentan para tu racha.
-            </p>
-          </div>
-
-          <div class="days-grid">
-            <button 
-              *ngFor="let dia of [0,1,2,3,4,5,6]; let i = index"
-              class="day-btn"
-              [class.selected]="isDiaSelected(dia)"
-              (click)="toggleDia(dia)">
-              <div class="day-letter">{{ diasSemana[i].charAt(0) }}</div>
-              <div class="day-name">{{ diasSemana[i] }}</div>
-            </button>
-          </div>
-
-          <div class="days-hint" *ngIf="frecuenciaConfig.diasPreferidos.length === 0">
-            <ion-icon name="bulb"></ion-icon>
-            <span>Selecciona los días en que prefieres estudiar</span>
-          </div>
-        </div>
-
-        <div class="reminder-config">
-          <div class="reminder-toggle">
-            <div class="reminder-info">
-              <ion-icon name="notifications-outline"></ion-icon>
-              <span>Recordatorios de estudio</span>
-            </div>
-            <ion-toggle 
-              [(ngModel)]="frecuenciaConfig.recordatorioActivo"
-              (ionChange)="onRecordatorioChange()"
-              color="success">
-            </ion-toggle>
-          </div>
-
-          <div class="reminder-time" *ngIf="frecuenciaConfig.recordatorioActivo">
-            <label>Hora preferida</label>
-            <div class="time-selector-container">
-              <div class="time-selector">
-                <select [(ngModel)]="horaSeleccionada" (change)="onHoraMinutoChange()" class="time-select hora">
-                  <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
-                </select>
-                <span class="separator">:</span>
-                <select [(ngModel)]="minutoSeleccionado" (change)="onHoraMinutoChange()" class="time-select minuto">
-                  <option *ngFor="let m of minutos" [value]="m">{{ m }}</option>
-                </select>
+          <ion-card-content>
+            
+            <!-- Mi Objetivo Semanal (desplegable) -->
+            <div class="frequency-subsection">
+              <div class="subsection-header" (click)="toggleSection('weeklyGoal')">
+                <div class="subsection-title">
+                  <ion-icon name="trophy-outline"></ion-icon>
+                  <span>Mi Objetivo Semanal</span>
+                </div>
+                <ion-icon [name]="isSectionExpanded('weeklyGoal') ? 'chevron-up' : 'chevron-down'"></ion-icon>
               </div>
-              <ion-icon name="time" class="time-icon"></ion-icon>
+
+              <div *ngIf="isSectionExpanded('weeklyGoal')" class="subsection-content">
+                <p class="subsection-description">¿Cuántos días a la semana quieres estudiar?</p>
+                
+                <div class="days-counter">
+                  <button class="counter-btn" (click)="decreaseFrequency()" [disabled]="frecuenciaConfig.frecuenciaSemanal <= 1">
+                    <ion-icon name="remove"></ion-icon>
+                  </button>
+                  
+                  <div class="counter-display">
+                    <span class="counter-number">{{ frecuenciaConfig.frecuenciaSemanal }}</span>
+                    <span class="counter-label">días / semana</span>
+                  </div>
+                  
+                  <button class="counter-btn" (click)="increaseFrequency()" [disabled]="frecuenciaConfig.frecuenciaSemanal >= 7">
+                    <ion-icon name="add"></ion-icon>
+                  </button>
+                </div>
+
+                <div class="frequency-presets">
+                  <button 
+                    class="preset-btn" 
+                    [class.active]="frecuenciaConfig.frecuenciaSemanal === 2"
+                    (click)="setFrequency(2)">
+                    2 días (Básico)
+                  </button>
+                  <button 
+                    class="preset-btn" 
+                    [class.active]="frecuenciaConfig.frecuenciaSemanal === 3"
+                    (click)="setFrequency(3)">
+                    3 días (Regular)
+                  </button>
+                  <button 
+                    class="preset-btn" 
+                    [class.active]="frecuenciaConfig.frecuenciaSemanal === 5"
+                    (click)="setFrequency(5)">
+                    5 días (Intensivo)
+                  </button>
+                  <button 
+                    class="preset-btn" 
+                    [class.active]="frecuenciaConfig.frecuenciaSemanal === 7"
+                    (click)="setFrequency(7)">
+                    Diario
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div class="changes-indicator" *ngIf="hasUnsavedChanges">
-          <ion-icon name="warning"></ion-icon>
-          <span>Tienes cambios sin guardar</span>
-        </div>
+            <!-- Días Preferidos (desplegable) -->
+            <div class="frequency-subsection">
+              <div class="subsection-header" (click)="toggleSection('preferredDays')">
+                <div class="subsection-title">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>Días preferidos (opcional)</span>
+                </div>
+                <ion-icon [name]="isSectionExpanded('preferredDays') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+              </div>
 
-        <button 
-          class="save-frequency-btn" 
-          [class.has-changes]="hasUnsavedChanges"
-          (click)="saveFrequency()"
-          [disabled]="isSaving || !hasUnsavedChanges">
-          <ion-icon name="checkmark-circle" *ngIf="!isSaving && hasUnsavedChanges"></ion-icon>
-          <ion-icon name="checkmark-done" *ngIf="!isSaving && !hasUnsavedChanges"></ion-icon>
-          <ion-spinner name="circular" *ngIf="isSaving"></ion-spinner>
-          {{ isSaving ? 'Guardando...' : hasUnsavedChanges ? 'Guardar Cambios' : 'Todo Guardado' }}
-        </button>
+              <div *ngIf="isSectionExpanded('preferredDays')" class="subsection-content">
+                <p class="subsection-description">Selecciona los días que prefieres estudiar</p>
+                
+                <div class="info-note">
+                  <ion-icon name="information-circle"></ion-icon>
+                  <span>Solo los días seleccionados ({{ frecuenciaConfig.diasPreferidos.length }}) cuentan para tu racha.</span>
+                </div>
+
+                <div class="days-selector">
+                  <button 
+                    *ngFor="let dia of diasSemana; let i = index"
+                    class="day-btn"
+                    [class.selected]="isDaySelected(i)"
+                    (click)="toggleDay(i)">
+                    <span class="day-letter">{{ dia.charAt(0) }}</span>
+                    <span class="day-name">{{ dia }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recordatorios (desplegable) -->
+            <div class="frequency-subsection">
+              <div class="subsection-header" (click)="toggleSection('reminders')">
+                <div class="subsection-title">
+                  <ion-icon name="notifications-outline"></ion-icon>
+                  <span>Recordatorios de estudio</span>
+                </div>
+                <ion-toggle 
+                  [(ngModel)]="frecuenciaConfig.recordatorioActivo"
+                  (ionChange)="onFrequencyChange()"
+                  color="success"
+                  (click)="$event.stopPropagation()">
+                </ion-toggle>
+              </div>
+
+              <div *ngIf="frecuenciaConfig.recordatorioActivo && isSectionExpanded('reminders')" class="subsection-content">
+                <p class="subsection-description">Configura la hora de tus recordatorios</p>
+                
+                <div class="time-picker-container">
+                  <h4 class="time-label">Hora preferida</h4>
+                  <div class="time-picker">
+                    <select [(ngModel)]="horaSeleccionada" (change)="updateTimeFromPicker()" class="time-select">
+                      <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
+                    </select>
+                    <span class="time-separator">:</span>
+                    <select [(ngModel)]="minutoSeleccionado" (change)="updateTimeFromPicker()" class="time-select">
+                      <option *ngFor="let m of minutos" [value]="m">{{ m }}</option>
+                    </select>
+                    <ion-icon name="time" class="time-icon"></ion-icon>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón guardar -->
+            <button 
+              class="save-button"
+              [disabled]="isSaving || !hasUnsavedChanges"
+              (click)="saveFrequencyConfig()">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              {{ isSaving ? 'Guardando...' : hasUnsavedChanges ? 'Guardar Cambios' : 'Todo Guardado' }}
+            </button>
+
+          </ion-card-content>
+        </ion-card>
       </div>
     </div>
 
@@ -327,41 +325,15 @@
         <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
       </h2>
 
-      <div *ngIf="isSectionExpanded('personalInfo')">
-  <div class="info-card">
-    <div class="info-item editable" (click)="editName()">
-      <ion-icon name="person"></ion-icon>
-      <div class="info-text">
-        <span class="info-label">Nombre Completo</span>
-        <span class="info-value">{{ user.nombre }}</span>
+      <div *ngIf="isSectionExpanded('configuration')" class="settings-list">
+        <div class="setting-item action" (click)="saveSettings()">
+          <div class="setting-info">
+            <ion-icon name="save"></ion-icon>
+            <span>Guardar Configuración</span>
+          </div>
+          <ion-icon name="chevron-forward"></ion-icon>
+        </div>
       </div>
-      <ion-icon name="create" class="edit-icon"></ion-icon>
-    </div>
-    
-    <div class="info-item editable" (click)="editEmail()">
-      <ion-icon name="mail"></ion-icon>
-      <div class="info-text">
-        <span class="info-label">Email</span>
-        <span class="info-value">{{ user.email }}</span>
-      </div>
-      <ion-icon name="create" class="edit-icon"></ion-icon>
-    </div>
-    
-    <div class="info-item">
-      <ion-icon name="checkmark-circle"></ion-icon>
-      <div class="info-text">
-        <span class="info-label">Miembro desde</span>
-        <span class="info-value">{{ getFechaRegistroFormatted() }}</span>
-      </div>
-    </div>
-
-    <!-- Mensaje de última actualización -->
-    <div class="last-update-info" *ngIf="user.last_profile_update">
-      <ion-icon name="information-circle"></ion-icon>
-      <span>Última actualización: {{ getLastUpdateFormatted() }}</span>
-    </div>
-  </div>
-</div>
     </div>
 
   </div>

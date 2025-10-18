@@ -49,7 +49,7 @@
 }
 
 // ========================================
-// ESTADÍSTICAS RÁPIDAS
+// ESTADÍSTICAS RÁPIDAS (SIN DEGRADÉ)
 // ========================================
 .quick-stats {
   display: grid;
@@ -58,7 +58,8 @@
   margin-bottom: 30px;
   
   .stat-box {
-    background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+    background: white;
+    border: 2px solid #e5e7eb;
     border-radius: 16px;
     padding: 20px 12px;
     text-align: center;
@@ -67,10 +68,7 @@
     .stat-icon {
       font-size: 28px;
       margin-bottom: 8px;
-      
-      &.streak { color: #10b981; }
-      &.trophy { color: #10b981; }
-      &.time { color: #64748b; }
+      color: #10b981;
     }
     
     h3 {
@@ -126,46 +124,8 @@
 
     &:hover {
       background: #f9fafb;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
-  }
-
-  // Contenido del acordeón
-  > div:not(.section-title) {
-    margin-top: 16px;
-    animation: slideDown 0.3s ease;
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  }
-
-  // Variantes de color para cada sección
-  &:nth-child(1) .section-title {
-    border-left-color: #10b981; 
-  }
-
-  &:nth-child(2) .section-title {
-    border-left-color: #10b981; 
-  }
-
-  &:nth-child(3) .section-title {
-    border-left-color: #10b981; 
-  }
-
-  &:nth-child(4) .section-title {
-    border-left-color: #10b981; 
-  }
-
-  &:nth-child(5) .section-title {
-    border-left-color: #10b981; 
   }
 }
 
@@ -178,114 +138,83 @@
   padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #f1f5f9;
-  
-  .info-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 14px;
-    border-bottom: 1px solid #f1f5f9;
-    
-    &:last-child {
-      border-bottom: none;
-    }
-    
-    ion-icon {
-      font-size: 22px;
-      color: #10b981;
-      flex-shrink: 0;
-    }
-    
-    .info-text {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      
-      .info-label {
-        font-size: 12px;
-        color: #94a3b8;
-        font-weight: 500;
-      }
-      
-      .info-value {
-        font-size: 14px;
-        color: #1e293b;
-        font-weight: 600;
-      }
-    }
-  }
+  margin-top: 12px;
 }
 
-// ========================================
-// TARJETAS DE ACCIÓN
-// ========================================
-.action-cards {
+.info-item {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
   
-  .action-card {
-    background: white;
-    border-radius: 16px;
-    padding: 18px;
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  > ion-icon:first-child {
+    font-size: 24px;
+    color: #10b981;
+    flex-shrink: 0;
+  }
+  
+  .info-text {
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border: 1px solid #f1f5f9;
+    flex-direction: column;
+    gap: 4px;
+    
+    .info-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    
+    .info-value {
+      font-size: 15px;
+      color: #1e293b;
+      font-weight: 600;
+    }
+  }
+  
+  .edit-icon {
+    font-size: 20px;
+    color: #94a3b8;
+  }
+  
+  &.editable {
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.2s;
     
     &:hover {
-      transform: translateX(5px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .action-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      ion-icon {
-        font-size: 24px;
-        color: white;
-      }
-      
-      &.dashboard { background: linear-gradient(135deg, #10b981, #059669); }
-      &.achievements { background: linear-gradient(135deg, #10b981, #059669); }
-      &.certificates { background: linear-gradient(135deg, #f59e0b, #d97706); }
-    }
-    
-    .action-text {
-      flex: 1;
-      
-      h3 {
-        margin: 0 0 4px 0;
-        font-size: 15px;
-        font-weight: 600;
-        color: #1e293b;
-      }
-      
-      p {
-        margin: 0;
-        font-size: 12px;
-        color: #64748b;
-      }
-    }
-    
-    .action-arrow {
-      color: #cbd5e1;
-      font-size: 20px;
+      background: #f8fafc;
     }
   }
 }
 
+.last-update-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  margin: 8px;
+  
+  ion-icon {
+    font-size: 18px;
+    color: #3b82f6;
+  }
+  
+  span {
+    font-size: 12px;
+    color: #1e40af;
+    font-weight: 500;
+  }
+}
+
 // ========================================
-// CONFIGURACIÓN
+// SETTINGS CARD (USADO EN MODO ADAPTATIVO Y FRECUENCIA)
 // ========================================
 .settings-card {
   background: white;
@@ -295,20 +224,6 @@
   border: 1px solid #f1f5f9;
   margin: 16px 0;
   
-  .card-header-with-icon {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    ion-icon {
-      font-size: 28px;
-    }
-  }
-
-  ion-card-subtitle {
-    margin-top: 4px;
-    font-size: 13px;
-  }
   
   .setting-item {
     display: flex;
@@ -373,7 +288,7 @@
 .adaptive-info {
   margin-top: 20px;
   padding: 16px;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  background: #f0fdf4;
   border-radius: 8px;
   border-left: 4px solid #10b981;
 
@@ -426,73 +341,423 @@
 }
 
 // ========================================
-// BOTONES DE AYUDA
+// FRECUENCIA DE ESTUDIO - SUBSECCIONES
 // ========================================
-.help-buttons {
+
+.frequency-subsection {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 12px 0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.subsection-header {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  
-  .help-btn {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 16px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 8px;
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  .subsection-title {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+
+    ion-icon {
+      font-size: 20px;
+      color: #10b981;
+    }
+  }
+
+  > ion-icon {
+    font-size: 20px;
+    color: #94a3b8;
+  }
+}
+
+.subsection-content {
+  padding: 16px 12px;
+}
+
+.subsection-description {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+// ========================================
+// CONTADOR DE DÍAS (SIN DEGRADÉ)
+// ========================================
+
+.days-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background: #10b981;
+  border: 3px solid #059669;
+  border-radius: 16px;
+  margin-bottom: 16px;
+
+  .counter-btn {
+    background: white;
+    border: 2px solid #059669;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    
+
     ion-icon {
-      font-size: 22px;
+      font-size: 32px;
+      color: #10b981;
     }
-    
+
+    &:hover:not(:disabled) {
+      background: #f0fdf4;
+      transform: scale(1.1);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  .counter-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+
+    .counter-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      line-height: 1;
+    }
+
+    .counter-label {
+      font-size: 14px;
+      color: white;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+  }
+}
+
+// ========================================
+// OPCIONES PREDEFINIDAS
+// ========================================
+
+.frequency-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+
+  .preset-btn {
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
     &:hover {
       border-color: #10b981;
       color: #10b981;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    &.active {
+      border-color: #10b981;
+      background: #10b981;
+      color: white;
+      font-weight: 600;
+    }
+  }
+}
+
+
+// ========================================
+// SELECTOR DE DÍAS
+// ========================================
+
+.days-selector {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+
+  .day-btn {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    .day-letter {
+      font-size: 16px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .day-name {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    &:hover {
+      border-color: #10b981;
+      transform: translateY(-2px);
+    }
+
+    &.selected {
+      border-color: #10b981;
+      background: #10b981;
+      
+      .day-letter,
+      .day-name {
+        color: white;
+      }
     }
   }
 }
 
 // ========================================
-// BOTÓN CERRAR SESIÓN
+// NOTA INFORMATIVA
 // ========================================
-.logout-btn {
-  width: 100%;
-  background: white;
-  border: 2px solid #ef4444;
-  border-radius: 16px;
+
+.info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #dbeafe;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 20px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  span {
+    font-size: 13px;
+    color: #1e40af;
+    line-height: 1.5;
+  }
+}
+
+// ========================================
+// SELECTOR DE HORA
+// ========================================
+
+.time-picker-container {
+  margin-top: 16px;
   padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+
+  .time-label {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .time-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+
+    .time-select {
+      padding: 10px 16px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: #10b981;
+      }
+    }
+
+    .time-separator {
+      font-size: 24px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .time-icon {
+      font-size: 24px;
+      color: #10b981;
+      margin-left: 8px;
+    }
+  }
+}
+
+// ========================================
+// BOTÓN GUARDAR
+// ========================================
+
+.save-button {
+  width: 100%;
+  padding: 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #ef4444;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+  margin-top: 24px;
+
   ion-icon {
     font-size: 20px;
   }
-  
-  &:hover {
-    background: #ef4444;
-    color: white;
+
+  &:hover:not(:disabled) {
+    background: #059669;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   }
+
+  &:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+}
+
+// ========================================
+// PROGRESO Y LOGROS
+// ========================================
+
+.action-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  
+  .action-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+    .action-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      ion-icon {
+        font-size: 24px;
+        color: white;
+      }
+      
+      &.dashboard { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+      &.achievements { background: linear-gradient(135deg, #10b981, #059669); }
+    }
+    
+    .action-text {
+      flex: 1;
+      
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+      }
+    }
+    
+    .action-arrow {
+      color: #cbd5e1;
+      font-size: 20px;
+    }
+  }
+}
+
+// ========================================
+// CONFIGURACIÓN
+// ========================================
+
+.settings-list {
+  margin-top: 12px;
 }
 
 .setting-item.action {
   cursor: pointer;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
   
   &:hover {
     background: #f8fafc;
@@ -527,773 +792,4 @@
       }
     }
   }
-}
-
-// ============================================
-// FRECUENCIA DE ESTUDIO
-// ============================================
-
-.frequency-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-
-  .frequency-icon {
-    font-size: 32px;
-    color: #10b981;
-  }
-
-  .frequency-info {
-    flex: 1;
-
-    h3 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    .frequency-subtitle {
-      margin: 5px 0 0;
-      font-size: 13px;
-      color: #64748b;
-    }
-  }
-}
-
-// ============================================
-// SELECTOR DE DÍAS
-// ============================================
-
-.frequency-selector {
-  margin: 25px 0;
-}
-
-.days-counter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-
-  .counter-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    ion-icon {
-      font-size: 32px;
-      color: white;
-    }
-
-    &:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.1);
-    }
-
-    &:active:not(:disabled) {
-      transform: scale(0.95);
-    }
-
-    &:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-  }
-
-  .counter-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 120px;
-
-    .counter-number {
-      font-size: 48px;
-      font-weight: 700;
-      color: white;
-      line-height: 1;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .counter-label {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.9);
-      margin-top: 5px;
-      font-weight: 500;
-    }
-  }
-}
-
-// ============================================
-// OPCIONES PREDEFINIDAS
-// ============================================
-
-.frequency-presets {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin: 20px 0;
-
-  .preset-btn {
-    padding: 12px 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    background: white;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-      border-color: #10b981;
-      color: #10b981;
-      transform: translateY(-2px);
-    }
-
-    &.active {
-      border-color: #10b981;
-      background: #10b981;
-      color: white;
-      font-weight: 600;
-    }
-  }
-}
-
-// ============================================
-// PROGRESO SEMANAL
-// ============================================
-
-.weekly-progress {
-  margin: 25px 0;
-  padding: 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 12px;
-
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-
-    .progress-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    .progress-value {
-      font-size: 16px;
-      font-weight: 700;
-      color: #10b981;
-    }
-  }
-
-  .progress-bar-container {
-    height: 12px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-    margin-bottom: 12px;
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-      border-radius: 10px;
-      transition: width 0.5s ease;
-      position: relative;
-
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          rgba(255, 255, 255, 0.3) 50%,
-          transparent 100%
-        );
-        animation: shimmer 2s infinite;
-      }
-    }
-  }
-
-  .progress-message {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
-
-    ion-icon {
-      font-size: 18px;
-    }
-
-    &.success {
-      color: #10b981;
-      font-weight: 600;
-
-      ion-icon {
-        color: #10b981;
-      }
-    }
-  }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-// ============================================
-// DÍAS PREFERIDOS CON INDICADOR DE MODO
-// ============================================
-
-.preferred-days {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.preferred-days-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  
-  h4 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #1f2937;
-  }
-}
-
-.mode-chip {
-  font-size: 11px;
-  font-weight: 600;
-  height: 24px;
-  
-  ion-icon {
-    font-size: 14px;
-    margin-right: 4px;
-  }
-}
-
-.mode-description {
-  margin: 12px 0 16px;
-  padding: 12px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-left: 3px solid #3b82f6;
-  border-radius: 8px;
-  
-  p {
-    margin: 0;
-    font-size: 13px;
-    color: #1e40af;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    
-    ion-icon {
-      font-size: 16px;
-      color: #3b82f6;
-      flex-shrink: 0;
-    }
-  }
-}
-
-.days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.day-btn {
-  aspect-ratio: 1;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 8px 4px;
-  
-  .day-letter {
-    font-size: 16px;
-    font-weight: 700;
-    color: #6b7280;
-  }
-  
-  .day-name {
-    font-size: 9px;
-    font-weight: 600;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-  
-  &.selected {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border-color: #2563eb;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    
-    .day-letter,
-    .day-name {
-      color: white;
-    }
-  }
-  
-  &:active {
-    transform: scale(0.95);
-  }
-  
-  &:hover:not(.selected) {
-    border-color: #cbd5e1;
-    background: #f8fafc;
-  }
-}
-
-.days-hint {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: #fef3c7;
-  border-radius: 8px;
-  margin-top: 12px;
-  
-  ion-icon {
-    font-size: 18px;
-    color: #f59e0b;
-    flex-shrink: 0;
-  }
-  
-  span {
-    font-size: 12px;
-    color: #92400e;
-    font-weight: 500;
-  }
-}
-
-// Ajustes responsive
-@media (max-width: 375px) {
-  .day-btn {
-    .day-letter {
-      font-size: 14px;
-    }
-    
-    .day-name {
-      font-size: 8px;
-    }
-  }
-}
-// ============================================
-// RECORDATORIOS
-// ============================================
-
-.reminder-config {
-  margin: 25px 0;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-
-  .reminder-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-
-    .reminder-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      ion-icon {
-        font-size: 24px;
-        color: #10b981;
-      }
-
-      span {
-        font-size: 15px;
-        font-weight: 500;
-        color: #1e293b;
-      }
-    }
-  }
-
-  .reminder-time {
-  margin-top: 16px;
-  
-  label {
-    display: block;
-    margin-bottom: 12px;
-    font-weight: 500;
-    color: #1e293b;
-    font-size: 14px;
-  }
-  
-  .time-selector-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .time-selector {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    background: #f5f5f5;
-    border-radius: 12px;
-    padding: 12px 16px;
-    gap: 8px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    
-    &:focus-within {
-      background: #fff;
-      border-color: #10b981;
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-    }
-  }
-  
-  .time-select {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1e293b;
-    text-align: center;
-    outline: none;
-    cursor: pointer;
-    padding: 4px;
-    
-    &.hora {
-      max-width: 50px;
-    }
-    
-    &.minuto {
-      max-width: 50px;
-    }
-    
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 4px center;
-    background-size: 16px;
-    padding-right: 24px;
-    
-    &:focus {
-      color: #10b981;
-    }
-    
-    option {
-      background: white;
-      color: #1e293b;
-      padding: 8px;
-    }
-  }
-  }
-  
-  .separator {
-    font-size: 24px;
-    font-weight: 700;
-    color: #64748b;
-    user-select: none;
-  }
-  
-  .time-icon {
-    font-size: 24px;
-    color: #64748b;
-    flex-shrink: 0;
-  }
-}
-
-// ============================================
-// BOTÓN GUARDAR CON ESTADOS
-// ============================================
-
-.save-frequency-btn {
-  width: 100%;
-  padding: 16px;
-  margin-top: 20px;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  ion-icon {
-    font-size: 20px;
-  }
-  
-  ion-spinner {
-    width: 20px;
-    height: 20px;
-  }
-
-  // Estado por defecto (sin cambios)
-  background: #e5e7eb;
-  color: #9ca3af;
-  box-shadow: none;
-  cursor: not-allowed;
-
-  // ✅ Estado con cambios pendientes
-  &.has-changes {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-    cursor: pointer;
-    animation: pulse 2s infinite;
-
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  }
-
-  // Estado deshabilitado
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-
-  // Estado guardando
-  &:disabled ion-spinner {
-    --color: white;
-  }
-}
-
-// Animación de pulso para cambios pendientes
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-  }
-  50% {
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.6);
-  }
-}
-
-// ============================================
-// INDICADOR DE CAMBIOS PENDIENTES
-// ============================================
-
-.changes-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  margin-top: 12px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-radius: 8px;
-  border-left: 4px solid #f59e0b;
-  
-  ion-icon {
-    font-size: 18px;
-    color: #f59e0b;
-    flex-shrink: 0;
-  }
-  
-  span {
-    font-size: 13px;
-    color: #92400e;
-    font-weight: 600;
-  }
-  
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ============================================
-// TOAST PERSONALIZADO
-// ============================================
-
-.custom-toast {
-  --border-radius: 12px;
-  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  font-weight: 500;
-}
-
-// ============================================
-// RESPONSIVE
-// ============================================
-
-@media (max-width: 400px) {
-  .days-counter {
-    .counter-display {
-      min-width: 100px;
-
-      .counter-number {
-        font-size: 40px;
-      }
-    }
-
-    .counter-btn {
-      width: 40px;
-      height: 40px;
-
-      ion-icon {
-        font-size: 28px;
-      }
-    }
-  }
-
-  .days-grid {
-    gap: 6px;
-
-    .day-btn {
-      .day-letter {
-        font-size: 16px;
-      }
-
-      .day-name {
-        font-size: 8px;
-      }
-    }
-  }
-
-  // ============================================
-// INFO ITEMS EDITABLES
-// ============================================
-.info-item {
-  &.editable {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-
-    &:hover {
-      background: #f9fafb;
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
-
-    .edit-icon {
-      font-size: 20px;
-      color: #10b981;
-      margin-left: 8px;
-    }
-  }
-}
-
-.last-update-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  background: #f0fdf4;
-  border-radius: 8px;
-  margin-top: 12px;
-
-  ion-icon {
-    font-size: 18px;
-    color: #10b981;
-  }
-
-  span {
-    font-size: 12px;
-    color: #065f46;
-    font-weight: 500;
-  }
-}
-
-// ============================================
-// INFO ITEMS EDITABLES
-// ============================================
-.info-item {
-  &.editable {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-
-    &:hover {
-      background: #f9fafb;
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
-
-    .edit-icon {
-      font-size: 20px;
-      color: #10b981;
-      margin-left: 8px;
-    }
-  }
-}
-
-.last-update-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  background: #f0fdf4;
-  border-radius: 8px;
-  margin-top: 12px;
-
-  ion-icon {
-    font-size: 18px;
-    color: #10b981;
-  }
-
-  span {
-    font-size: 12px;
-    color: #065f46;
-    font-weight: 500;
-  }
-}
 }
