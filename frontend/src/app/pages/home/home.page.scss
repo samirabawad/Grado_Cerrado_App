@@ -23,15 +23,15 @@
   background: #d1d5db;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 24px;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   .header-title {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: rgb(0, 0, 0);
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
   }
 }
 
@@ -39,108 +39,103 @@
 // CONTENIDO SCROLLABLE
 // ========================================
 .scrollable-content {
-  margin-top: 80px;
+  margin-top: 60px;
   padding: 0 0 100px 0;
   background: #f8f9fa;
   min-height: calc(100vh - 60px);
 }
 
 // ========================================
-// PROGRESO GENERAL
+// 🔥 TARJETA DE RACHA PRINCIPAL
 // ========================================
-.progress-section {
+.streak-main-section {
   padding: 0 20px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
-.progress-card {
+.streak-main-card {
   background: white;
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  padding: 24px 20px;
-}
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-bottom: 4px solid #10b981;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 
-.progress-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-
-  .progress-icon {
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, #fef3c7, #fde68a);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-
-    .progress-icon-svg {
-      font-size: 32px;
-      color: #f59e0b;
-    }
+  &:active {
+    transform: scale(0.98);
   }
 
-  .progress-info {
-    flex: 1;
+  .streak-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 
-    .progress-title {
-      margin: 0 0 4px 0;
-      font-size: 18px;
-      font-weight: 700;
+    .streak-title {
+      margin: 0;
+      font-size: 28px; 
+      font-weight: 800;
       color: #1f2937;
     }
 
-    .progress-subtitle {
+    .streak-icon-number {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .flame-icon-green {
+        font-size: 64px; 
+        color: #10b981;
+      }
+
+      .streak-number {
+        font-size: 64px;
+        font-weight: 900;
+        color: #1f2937;
+        line-height: 1;
+      }
+    }
+  }
+
+}
+
+// ========================================
+// 📊 ESTADÍSTICAS RÁPIDAS
+// ========================================
+.quick-stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 24px;
+
+  .stat-box {
+    background: white;
+    border-radius: 16px;
+    padding: 16px 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    .stat-icon {
+      font-size: 28px;
+      color: #10b981;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
       margin: 0;
-      font-size: 13px;
+      font-size: 24px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .stat-label {
+      margin: 4px 0 0 0;
+      font-size: 11px;
       color: #6b7280;
+      font-weight: 600;
     }
-  }
-}
-
-.progress-bar-container {
-  margin-bottom: 12px;
-
-  .progress-bar {
-    height: 12px;
-    background: #e5e7eb;
-    border-radius: 999px;
-    overflow: hidden;
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #10b981, #059669);
-      border-radius: 999px;
-      transition: width 0.5s ease;
-    }
-  }
-}
-
-.progress-text {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.streak-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-  border-radius: 20px;
-
-  .streak-icon-small {
-    width: 24px;
-    height: 24px;
-  }
-
-  span {
-    font-size: 14px;
-    font-weight: 600;
-    color: #065f46;
   }
 }
 
@@ -215,7 +210,7 @@
 // ========================================
 .banner-section {
   padding: 0 20px;
-  margin-bottom: 24px;
+  margin-bottom: 0px;
 
   .banner-image {
     width: 100%;

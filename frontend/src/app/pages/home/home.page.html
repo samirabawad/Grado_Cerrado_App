@@ -2,39 +2,44 @@
   <div class="home-container">
 
     <div class="dashboard-header">
-      <h1 class="header-title">Inicio</h1>
+      <h1 class="header-title">Hola, {{ getFirstName() }}</h1>
     </div>
 
     <div class="scrollable-content">
       
-      <!-- Progreso General -->
-      <div class="progress-section">
-        <div class="progress-card">
-          <div class="progress-header">
-            <div class="progress-icon">
-              <ion-icon name="flame" class="progress-icon-svg"></ion-icon>
-            </div>
-            <div class="progress-info">
-              <h3 class="progress-title">Tu Progreso</h3>
-              <p class="progress-subtitle">{{ getProgressSubtitle() }}</p>
-            </div>
-          </div>
-
-          <div class="progress-bar-container" *ngIf="totalSessions > 0">
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
-            </div>
-          </div>
-
-          <!-- Mostrar racha si existe -->
-          <div class="streak-badge" *ngIf="userStreak > 0">
-            <img src="assets/image/menu/hoja.png" alt="Racha" class="streak-icon-small">
-            <span>{{ userStreak }} {{ userStreak === 1 ? 'día' : 'días' }}</span>
+    <!-- 🔥 TARJETA DE RACHA GRANDE -->
+    <div class="streak-main-section">
+      <div class="streak-main-card" (click)="goToRacha()">
+        <div class="streak-header">
+          <h3 class="streak-title">Tu Racha</h3>
+          <div class="streak-icon-number">
+            <ion-icon name="flame" class="flame-icon-green"></ion-icon>
+            <span class="streak-number">{{ userStreak }}</span>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Continúa Avanzando -->
+      <!-- 📊 ESTADÍSTICAS RÁPIDAS -->
+      <div class="quick-stats-section">
+        <div class="stat-box">
+          <ion-icon name="bar-chart" class="stat-icon"></ion-icon>
+          <h3 class="stat-value">{{ totalSessions }}</h3>
+          <p class="stat-label">sesiones</p>
+        </div>
+        <div class="stat-box">
+          <ion-icon name="help-circle" class="stat-icon"></ion-icon>
+          <h3 class="stat-value">{{ totalQuestions }}</h3>
+          <p class="stat-label">preguntas</p>
+        </div>
+        <div class="stat-box">
+          <ion-icon name="trophy" class="stat-icon"></ion-icon>
+          <h3 class="stat-value">{{ overallSuccessRate }}%</h3>
+          <p class="stat-label">aciertos</p>
+        </div>
+      </div>
+
+      <!-- Elige qué quieres aprender hoy -->
       <div class="continue-section">
         <h2 class="section-title">Elige qué quieres aprender hoy</h2>
         <div class="area-cards">
