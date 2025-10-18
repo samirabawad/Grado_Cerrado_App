@@ -599,6 +599,17 @@ getOptionIcon(option: string): string {
     
     console.log('📊 Resultados calculados:', results);
     
+    // ✅ GUARDAR EN EL BACKEND
+    const currentSession = this.apiService.getCurrentSession();
+    if (currentSession && currentSession.testId) {
+      try {
+        const response = await this.apiService.finishTest(currentSession.testId).toPromise();
+        console.log('✅ Test guardado en BD:', response);
+      } catch (error) {
+        console.error('❌ Error guardando test en BD:', error);
+      }
+    }
+    
     // Guardar en localStorage para la página de resumen
     localStorage.setItem('current_test_results', JSON.stringify(results));
     
@@ -632,6 +643,7 @@ getOptionIcon(option: string): string {
       ]
     });
     
+    await loading.dismiss();
     await alert.present();
   }
 }

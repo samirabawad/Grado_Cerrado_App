@@ -305,43 +305,6 @@ ion-content.racha-content {
 }
 
 // ========================================
-// ESTADÍSTICAS RÁPIDAS
-// ========================================
-.stats-quick {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-
-  .stat-item {
-    background: white;
-    border-radius: 16px;
-    padding: 16px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-
-    ion-icon {
-      font-size: 32px;
-      color: #10b981;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 800;
-      color: #1f2937;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      color: #6b7280;
-      font-weight: 600;
-    }
-  }
-}
-
-// ========================================
 // RESPONSIVE
 // ========================================
 @media (max-width: 374px) {

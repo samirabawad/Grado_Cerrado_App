@@ -413,6 +413,22 @@ export class ApiService {
       );
   }
 
+    finishTest(testId: number): Observable<any> {
+    const url = `${this.API_URL}/Study/finish-test/${testId}`;
+    
+    return this.http.put<any>(url, {}, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('✅ Test finalizado:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('❌ Error finalizando test:', error);
+          throw error;
+        })
+      );
+  }
+
   // ========================================
   // MODO ADAPTATIVO
   // ========================================
