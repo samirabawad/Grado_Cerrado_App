@@ -135,8 +135,11 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
           
           this.isLoading = false;
           this.cdr.detectChanges();
-          
+
           this.questionStartTime = new Date();
+
+          this.skipInvalidQuestions();
+
           
         } catch (conversionError) {
           console.error('Error en conversión de preguntas:', conversionError);
@@ -193,44 +196,51 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   getCurrentQuestionOptions(): string[] {
-    const question = this.getCurrentQuestion();
-    
-    if (!question) {
-      console.warn('⚠️ No hay pregunta actual');
-      return [];
-    }
-
-    // ✅ Verdadero/Falso
-    if (this.isTrueFalseQuestion()) {
-      return ['Verdadero', 'Falso'];
-    }
-
-    // ✅ Selección múltiple
-    if (Array.isArray(question.options) && question.options.length > 0) {
-      const firstOption = question.options[0];
-      
-      if (typeof firstOption === 'object') {
-        // Probar con minúscula primero (formato del backend)
-        if ('text' in firstOption && firstOption.text) {
-          const optionsArray = question.options.map((opt: any) => opt.text);
-          return optionsArray;
-        }
-        // Probar con mayúscula
-        if ('Text' in firstOption && firstOption.Text) {
-          const optionsArray = question.options.map((opt: any) => opt.Text);
-          return optionsArray;
-        }
-      }
-      
-      // Si ya son strings directamente
-      if (typeof firstOption === 'string') {
-        return question.options;
-      }
-    }
-
-    console.error('❌ No se encontraron opciones válidas');
+  const question = this.getCurrentQuestion();
+  
+  if (!question) {
+    console.warn('⚠️ No hay pregunta actual');
     return [];
   }
+
+  // ✅ Verdadero/Falso
+  if (this.isTrueFalseQuestion()) {
+    return ['Verdadero', 'Falso'];
+  }
+
+  // ✅ Selección múltiple
+  if (Array.isArray(question.options) && question.options.length > 0) {
+    const firstOption = question.options[0];
+    
+    if (typeof firstOption === 'object') {
+      // Probar con minúscula primero (formato del backend)
+      if ('text' in firstOption && firstOption.text) {
+        const optionsArray = question.options.map((opt: any) => opt.text);
+        return optionsArray;
+      }
+      // Probar con mayúscula
+      if ('Text' in firstOption && firstOption.Text) {
+        const optionsArray = question.options.map((opt: any) => opt.Text);
+        return optionsArray;
+      }
+    }
+    
+    // Si ya son strings directamente
+    if (typeof firstOption === 'string') {
+      return question.options;
+    }
+  }
+
+  // ✅ SI NO TIENE OPCIONES VÁLIDAS, SALTAR ESTA PREGUNTA
+  console.error('❌ Pregunta sin opciones válidas, saltando...', question);
+  
+  // Marcar como respondida automáticamente para poder avanzar
+  if (!question.userAnswer) {
+    question.userAnswer = 'SKIP';
+  }
+  
+  return [];
+}
 
   isTrueFalseQuestion(): boolean {
     const question = this.getCurrentQuestion();
@@ -740,4 +750,28 @@ getOptionIcon(option: string): string {
     this.isLoading = true;
     this.loadSessionFromBackend();
   }
+  skipInvalidQuestions() {
+  // Verificar si la pregunta actual tiene opciones válidas
+  const options = this.getCurrentQuestionOptions();
+  
+  if (options.length === 0) {
+    console.log('⏭️ Saltando pregunta sin opciones automáticamente...');
+    
+    // Marcar como respondida para poder avanzar
+    const question = this.getCurrentQuestion();
+    if (question && !question.userAnswer) {
+      question.userAnswer = 'SKIP';
+    }
+    
+    // Avanzar a la siguiente pregunta automáticamente
+    setTimeout(() => {
+      if (this.currentQuestionIndex < this.questions.length - 1) {
+        this.nextQuestion();
+      } else {
+        // Si es la última pregunta, finalizar el test
+        this.finishTest();
+      }
+    }, 100);
+  }
+}
 }
