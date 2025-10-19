@@ -757,6 +757,59 @@ export class ApiService {
   }
 
   // ========================================
+// NOTIFICACIONES
+// ========================================
+
+getNotifications(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}`;
+  
+  console.log('📬 Obteniendo notificaciones para estudiante:', studentId);
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificaciones recibidas:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo notificaciones:', error);
+        return of({ success: true, data: [], total: 0, noLeidas: 0 });
+      })
+    );
+}
+
+markNotificationAsRead(notificationId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${notificationId}/leer`;
+  
+  return this.http.put<any>(url, {}, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificación marcada como leída');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error marcando notificación:', error);
+        throw error;
+      })
+    );
+}
+
+getUnreadNotificationsCount(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}/contador`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo contador:', error);
+        return of({ success: true, noLeidas: 0 });
+      })
+    );
+}
+
+  // ========================================
   // UTILIDADES Y DEBUG
   // ========================================
 

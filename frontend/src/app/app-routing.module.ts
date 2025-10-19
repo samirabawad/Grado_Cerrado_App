@@ -61,10 +61,30 @@ const routes: Routes = [
   },
 
   // ========================================
+// HOME Y DASHBOARD
+// ========================================
+{
+  path: 'home',
+  loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage)
+},
+{
+  path: 'dashboard',
+  loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
+},
+{
+  path: 'racha',
+  loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
+},
+{
+  path: 'profile',
+  loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
+},
+
+  // ========================================
   // NOTIFICACIONES
   // ========================================
 
-  {
+ {
     path: 'notifications',
     loadComponent: () => import('./pages/notifications/notifications.page').then(m => m.NotificationsPage)
   },
