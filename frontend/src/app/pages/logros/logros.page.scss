@@ -1,0 +1,205 @@
+.logros-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+ion-content.logros-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// HEADER
+// ========================================
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #10b981;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .back-icon {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-right: 12px;
+  }
+
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+// ========================================
+// CONTENIDO
+// ========================================
+.content-area {
+  margin-top: 80px;
+  padding: 20px 16px 100px;
+  background: transparent;
+  min-height: calc(100vh - 100px);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 20px;
+  margin-top: 60px;
+}
+
+// ========================================
+// SECCIONES DESPLEGABLES
+// ========================================
+.section {
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+
+  .section-title {
+    padding: 20px;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    background: white;
+    border-bottom: 1px solid #f3f4f6;
+    user-select: none;
+
+    ion-icon {
+      transition: transform 0.3s;
+    }
+  }
+
+  .section-description {
+    padding: 12px 20px 20px;
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+  }
+}
+
+// ========================================
+// GRID DE LOGROS
+// ========================================
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .achievement-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.3s;
+    position: relative;
+    border: 2px solid transparent;
+
+    &.locked {
+      opacity: 0.6;
+      filter: grayscale(1);
+    }
+
+    &.unlocked {
+      opacity: 1;
+      filter: grayscale(0);
+      border-color: #10b981;
+      
+      &:active {
+        transform: scale(0.97);
+      }
+    }
+
+    .achievement-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+
+      ion-icon {
+        font-size: 36px;
+        color: white;
+      }
+    }
+
+    .achievement-info {
+      margin-bottom: 8px;
+
+      .achievement-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+      }
+
+      .achievement-description {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    .achievement-status {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+
+      .unlocked-check {
+        font-size: 24px;
+        color: #10b981;
+      }
+
+      .locked-icon {
+        font-size: 20px;
+        color: #9ca3af;
+      }
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 374px) {
+  .achievements-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .streak-summary-card {
+    flex-direction: column;
+    text-align: center;
+
+    .streak-info {
+      text-align: center;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .achievements-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

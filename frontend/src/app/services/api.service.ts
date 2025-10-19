@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-
+import { environment } from 'src/environments/environment';
 // ========================================
 // INTERFACES 
 // ========================================
@@ -61,7 +60,7 @@ export interface CumplimientoResponse {
   providedIn: 'root'
 })
 export class ApiService {
-  private API_URL = 'http://localhost:5183/api';
+  private API_URL = environment.apiUrl;
   private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
   
   // ✅ NUEVO: BehaviorSubject para manejar la sesión actual
@@ -84,7 +83,7 @@ export class ApiService {
   // ========================================
 
   registerUser(userData: { name: string, email: string, password: string }): Observable<any> {
-    const url = `${this.API_URL}/auth/register`;
+    const url = `${this.API_URL}/Auth/register`;
     
     if (!userData.name || !userData.email || !userData.password) {
       console.error('Datos incompletos para registro:', userData);
@@ -122,7 +121,7 @@ export class ApiService {
   }
 
   loginUser(loginData: { email: string, password: string }): Observable<any> {
-    const url = `${this.API_URL}/auth/login`;
+    const url = `${this.API_URL}/Auth/login`;  // ✅ CORRECTO: 'Auth' con mayúscula
     
     console.log('Enviando login a:', url, { email: loginData.email });
     
@@ -756,6 +755,59 @@ export class ApiService {
         })
       );
   }
+
+  // ========================================
+// NOTIFICACIONES
+// ========================================
+
+getNotifications(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}`;
+  
+  console.log('📬 Obteniendo notificaciones para estudiante:', studentId);
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificaciones recibidas:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo notificaciones:', error);
+        return of({ success: true, data: [], total: 0, noLeidas: 0 });
+      })
+    );
+}
+
+markNotificationAsRead(notificationId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${notificationId}/leer`;
+  
+  return this.http.put<any>(url, {}, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificación marcada como leída');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error marcando notificación:', error);
+        throw error;
+      })
+    );
+}
+
+getUnreadNotificationsCount(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}/contador`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo contador:', error);
+        return of({ success: true, noLeidas: 0 });
+      })
+    );
+}
 
   // ========================================
   // UTILIDADES Y DEBUG

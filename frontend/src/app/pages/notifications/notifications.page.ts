@@ -4,6 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-notifications',
@@ -16,119 +17,244 @@ export class NotificationsPage implements OnInit {
 
   notifications: any[] = [];
   unreadCount: number = 0;
+  isLoading: boolean = true;
 
-  constructor(private router: Router) { }
+  // Secciones expandibles
+  expandedSections: { [key: string]: boolean } = {
+    lastNotifications: true,
+    notificationTypes: false,
+    reminders: false,
+    channels: false,
+    advanced: false
+  };
+
+  // Configuración de notificaciones
+  notificationSettings = {
+    masterSwitch: true,
+    streakNotifications: true,
+    achievementNotifications: true,
+    studyReminders: true,
+    tipsNotifications: true,
+    goalNotifications: true,
+    weeklyReport: true,
+    motivationalMessages: true,
+    dailyReminder: true,
+    dailyReminderTime: '20:00',
+    pushNotifications: true,
+    soundEnabled: true,
+    vibrationEnabled: true,
+    doNotDisturbEnabled: false,
+    doNotDisturbStart: '22:00',
+    doNotDisturbEnd: '08:00'
+  };
+
+  constructor(
+    private router: Router,
+    private apiService: ApiService
+  ) { }
 
   ngOnInit() {
     this.loadNotifications();
+    this.loadSettings();
   }
 
-  // Cargar notificaciones
-  loadNotifications() {
-    this.notifications = [
-      {
-        id: 1,
-        type: 'streak',
-        icon: 'flame',
-        iconColor: '#f59e0b',
-        title: '¡Racha de 12 días!',
-        message: 'Estás en una racha increíble. ¡No la pierdas!',
-        time: 'Hace 2 horas',
-        read: false,
-        action: '/racha'
-      },
-      {
-        id: 2,
-        type: 'achievement',
-        icon: 'trophy',
-        iconColor: '#10b981',
-        title: 'Logro desbloqueado',
-        message: 'Has completado 10 sesiones de estudio',
-        time: 'Hace 5 horas',
-        read: false,
-        action: '/racha'
-      },
-      {
-        id: 3,
-        type: 'reminder',
-        icon: 'alarm',
-        iconColor: '#3b82f6',
-        title: 'Hora de estudiar',
-        message: 'Tu sesión diaria de Derecho Civil te espera',
-        time: 'Hace 1 día',
-        read: true,
-        action: '/civil'
-      },
-      {
-        id: 4,
-        type: 'goal',
-        icon: 'checkmark-circle',
-        iconColor: '#8b5cf6',
-        title: 'Meta alcanzada',
-        message: 'Has respondido 200 preguntas este mes',
-        time: 'Hace 2 días',
-        read: true,
-        action: '/dashboard'
-      },
-      {
-        id: 5,
-        type: 'tip',
-        icon: 'bulb',
-        iconColor: '#f59e0b',
-        title: 'Consejo del día',
-        message: 'Estudiar en sesiones de 25 minutos mejora la retención',
-        time: 'Hace 3 días',
-        read: true,
-        action: null
+  ionViewWillEnter() {
+    this.loadNotifications();
+  }
+
+  // ========================================
+  // CARGAR NOTIFICACIONES DESDE BACKEND
+  // ========================================
+  async loadNotifications() {
+    this.isLoading = true;
+
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+      
+      if (!currentUser || !currentUser.id) {
+        console.warn('No hay usuario logueado');
+        this.notifications = [];
+        this.isLoading = false;
+        return;
       }
-    ];
-    
-    this.unreadCount = this.notifications.filter(n => !n.read).length;
+
+      const studentId = currentUser.id;
+      console.log('📬 Cargando notificaciones para estudiante:', studentId);
+
+      const response = await this.apiService.getNotifications(studentId).toPromise();
+      
+      if (response && response.success) {
+        // Mapear notificaciones del backend al formato del frontend
+        this.notifications = response.data.map((notif: any) => ({
+          id: notif.id,
+          type: this.getNotificationType(notif.titulo),
+          icon: this.getNotificationIcon(notif.titulo),
+          iconColor: this.getNotificationColor(notif.titulo),
+          title: notif.titulo,
+          message: notif.mensaje,
+          time: this.formatNotificationTime(notif.fecha),
+          read: notif.leido
+        }));
+
+        this.unreadCount = response.noLeidas || 0;
+        
+        console.log('✅ Notificaciones cargadas:', this.notifications.length);
+        console.log('📊 No leídas:', this.unreadCount);
+      }
+
+    } catch (error) {
+      console.error('❌ Error cargando notificaciones:', error);
+      this.notifications = [];
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  // Marcar notificación como leída
-  markAsRead(notification: any) {
-    if (!notification.read) {
+  // ========================================
+  // HELPERS PARA MAPEAR NOTIFICACIONES
+  // ========================================
+  
+  getNotificationType(titulo: string): string {
+    if (titulo.toLowerCase().includes('racha')) return 'streak';
+    if (titulo.toLowerCase().includes('logro') || titulo.toLowerCase().includes('meta')) return 'achievement';
+    if (titulo.toLowerCase().includes('estudiar') || titulo.toLowerCase().includes('sesión')) return 'reminder';
+    if (titulo.toLowerCase().includes('consejo')) return 'tip';
+    return 'general';
+  }
+
+  getNotificationIcon(titulo: string): string {
+    if (titulo.toLowerCase().includes('racha')) return 'flame';
+    if (titulo.toLowerCase().includes('logro') || titulo.toLowerCase().includes('meta')) return 'trophy';
+    if (titulo.toLowerCase().includes('estudiar') || titulo.toLowerCase().includes('sesión')) return 'alarm';
+    if (titulo.toLowerCase().includes('consejo')) return 'bulb';
+    return 'notifications';
+  }
+
+  getNotificationColor(titulo: string): string {
+    if (titulo.toLowerCase().includes('racha')) return '#f59e0b';
+    if (titulo.toLowerCase().includes('logro') || titulo.toLowerCase().includes('meta')) return '#10b981';
+    if (titulo.toLowerCase().includes('estudiar') || titulo.toLowerCase().includes('sesión')) return '#3b82f6';
+    if (titulo.toLowerCase().includes('consejo')) return '#8b5cf6';
+    return '#64748b';
+  }
+
+  formatNotificationTime(fecha: string): string {
+    const date = new Date(fecha);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `Hace ${diffMins} min`;
+    if (diffHours < 24) return `Hace ${diffHours} horas`;
+    if (diffDays === 1) return 'Hace 1 día';
+    if (diffDays < 7) return `Hace ${diffDays} días`;
+    
+    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  }
+
+  // ========================================
+  // ACCIONES DE NOTIFICACIONES
+  // ========================================
+  
+  async markAsRead(notification: any) {
+    if (notification.read) return;
+
+    try {
+      await this.apiService.markNotificationAsRead(notification.id).toPromise();
       notification.read = true;
-      this.unreadCount--;
+      this.unreadCount = Math.max(0, this.unreadCount - 1);
+      console.log('✅ Notificación marcada como leída');
+    } catch (error) {
+      console.error('❌ Error marcando notificación:', error);
+    }
+  }
+
+  async markAllAsRead() {
+    const unreadNotifications = this.notifications.filter(n => !n.read);
+    
+    for (const notif of unreadNotifications) {
+      try {
+        await this.apiService.markNotificationAsRead(notif.id).toPromise();
+        notif.read = true;
+      } catch (error) {
+        console.error('❌ Error marcando notificación:', error);
+      }
     }
     
-    if (notification.action) {
-      this.router.navigate([notification.action]);
-    }
-  }
-
-  // Marcar todas como leídas
-  markAllAsRead() {
-    this.notifications.forEach(n => n.read = true);
     this.unreadCount = 0;
+    console.log('✅ Todas las notificaciones marcadas como leídas');
   }
 
-  // Eliminar notificación
-  deleteNotification(notification: any, event: Event) {
+  deleteNotification(notification: any, event: any) {
     event.stopPropagation();
+    
     const index = this.notifications.indexOf(notification);
     if (index > -1) {
       this.notifications.splice(index, 1);
+      
       if (!notification.read) {
-        this.unreadCount--;
+        this.unreadCount = Math.max(0, this.unreadCount - 1);
       }
     }
   }
 
-  // Limpiar todas
   clearAll() {
     this.notifications = [];
     this.unreadCount = 0;
   }
 
-  // Volver a home
-  goBack() {
-    this.router.navigate(['/home']);
+  // ========================================
+  // SECCIONES EXPANDIBLES
+  // ========================================
+  toggleSection(section: string) {
+    this.expandedSections[section] = !this.expandedSections[section];
   }
 
-  // Ir a configuración
-  goToSettings() {
-    this.router.navigate(['/settings']);
+  isSectionExpanded(section: string): boolean {
+    return this.expandedSections[section];
+  }
+
+  // ========================================
+  // CONFIGURACIÓN
+  // ========================================
+  
+  loadSettings() {
+    const saved = localStorage.getItem('notificationSettings');
+    if (saved) {
+      this.notificationSettings = JSON.parse(saved);
+    }
+  }
+
+  saveSettings() {
+    localStorage.setItem('notificationSettings', JSON.stringify(this.notificationSettings));
+    console.log('⚙️ Configuración guardada:', this.notificationSettings);
+  }
+
+  onSettingChange() {
+    this.saveSettings();
+  }
+
+  onMasterSwitchChange() {
+    if (!this.notificationSettings.masterSwitch) {
+      this.notificationSettings.streakNotifications = false;
+      this.notificationSettings.achievementNotifications = false;
+      this.notificationSettings.studyReminders = false;
+      this.notificationSettings.tipsNotifications = false;
+      this.notificationSettings.goalNotifications = false;
+      this.notificationSettings.weeklyReport = false;
+      this.notificationSettings.motivationalMessages = false;
+      this.notificationSettings.pushNotifications = false;
+    }
+    this.saveSettings();
+  }
+
+  // ========================================
+  // NAVEGACIÓN
+  // ========================================
+  goBack() {
+    this.router.navigate(['/home']);
   }
 }

@@ -48,36 +48,44 @@ const routes: Routes = [
     loadComponent: () => import('./pages/felicidades/felicidades.page').then(m => m.FelicidadesPage)
   },
 
-  // ========================================
-  // HOME Y DASHBOARD
-  // ========================================
-  {
-    path: 'home',
-    loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage)
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
-  },
 
   // ========================================
-  // NOTIFICACIONES, SETTINGS, RACHA, PERFIL
+// HOME Y DASHBOARD
+// ========================================
+{
+  path: 'home',
+  loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage)
+},
+{
+  path: 'dashboard',
+  loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
+},
+{
+  path: 'racha',
+  loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
+},
+{
+  path: 'profile',
+  loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
+},
+
+{
+  path: 'logros',
+  loadComponent: () => import('./pages/logros/logros.page').then(m => m.LogrosPage)
+},
+
+{
+  path: 'historial',
+  loadComponent: () => import('./pages/historial/historial.page').then(m => m.HistorialPage)
+},
+
   // ========================================
-  {
+  // NOTIFICACIONES
+  // ========================================
+
+ {
     path: 'notifications',
     loadComponent: () => import('./pages/notifications/notifications.page').then(m => m.NotificationsPage)
-  },
-  {
-    path: 'settings',
-    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage)
-  },
-  {
-    path: 'racha',
-    loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
-  },
-  {
-    path: 'profile',
-    loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
   },
 
   // ========================================
