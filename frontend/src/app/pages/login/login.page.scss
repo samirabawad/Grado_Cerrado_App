@@ -9,7 +9,6 @@
     flex-direction: column;
   }
 
-  // Header Section (igual que registro)
   .header-section {
     position: relative;
     height: 200px;
@@ -18,17 +17,17 @@
 
     .background-image {
       position: absolute;
-      top: 0;                     /* Alineada arriba */
-      left: 50%;                  /* Centrada horizontalmente */
+      top: 0;                     
+      left: 50%;                  
       transform: translateX(-50%);
-      width: 100vw;               /* Ocupa todo el ancho visible de la ventana */
-      height: auto;               /* La altura se ajusta automáticamente para no deformar la imagen */
+      width: 100vw;              
+      height: auto;               
       z-index: 1;
 
       .superior-gris {
         width: 100%;
-        height: auto;             /* Mantiene la proporción original */
-        object-fit: contain;      /* Muestra toda la imagen sin recortes */
+        height: auto;             
+        object-fit: contain;      
       }
     }
 
@@ -40,8 +39,8 @@
       color: #666;
       --color: #666;
       z-index: 3;
-      background: rgba(255, 255, 255, 0.8);
-      --background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0);
+      --background: rgba(255, 255, 255, 0);
       border-radius: 50%;
       width: 40px;
       height: 40px;
@@ -133,25 +132,26 @@
 
   // Botón de login
   .login-btn {
-    --background: #4a90e2;
-    --background-activated: #357abd;
-    --border-radius: 12px;
-    --box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-    height: 50px;
-    font-weight: 600;
-    font-size: 16px;
-    margin: 24px 0 16px 0;
-    text-transform: none;
+  --background: #10b981;
+  --background-activated: #059669;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  height: 50px;
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 16px;
+  margin: 24px 0 16px 0;
+  text-transform: none;
 
-    &:disabled {
-      --background: #cccccc;
-      --box-shadow: none;
-    }
-
-    ion-spinner {
-      margin-right: 8px;
-    }
+  &:disabled {
+    --background: #cccccc;
+    --box-shadow: none;
   }
+
+  ion-spinner {
+    margin-right: 8px;
+  }
+}
 
   // Link de registro
   .register-link {
@@ -161,7 +161,7 @@
     margin: 16px 0;
 
     .link-text {
-      color: #4a90e2;
+      color: #10b981;
       font-weight: 600;
       text-decoration: none;
       cursor: pointer;

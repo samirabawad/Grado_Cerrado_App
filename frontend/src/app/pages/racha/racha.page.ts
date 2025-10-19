@@ -33,9 +33,6 @@ interface CalendarDay {
 export class RachaPage implements OnInit {
 
   currentStreak: number = 0;
-  bestStreak: number = 0;
-  totalDays: number = 0;
-  nextGoal: number = 0;
   isLoading: boolean = true;
 
   calendarDays: CalendarDay[] = [];
@@ -84,16 +81,10 @@ export class RachaPage implements OnInit {
         if (statsResponse && statsResponse.success) {
           const stats = statsResponse.data;
           this.currentStreak = stats.streak || 0;
-          this.totalDays = stats.totalTests || 0;
-          this.bestStreak = Math.max(this.currentStreak, this.totalDays);
-          this.nextGoal = this.calculateNextGoal(this.currentStreak);
           this.unlockAchievements(this.currentStreak);
           
           console.log('Datos de racha cargados:', {
-            current: this.currentStreak,
-            best: this.bestStreak,
-            total: this.totalDays,
-            nextGoal: this.nextGoal
+            current: this.currentStreak
           });
         }
 
@@ -119,10 +110,6 @@ export class RachaPage implements OnInit {
     }
   }
 
-  calculateNextGoal(current: number): number {
-    const goals = [3, 7, 14, 30, 60, 90, 180, 365];
-    return goals.find(g => g > current) || current + 30;
-  }
 
   unlockAchievements(streak: number) {
     this.achievements.forEach(achievement => {

@@ -8,46 +8,59 @@
   <!-- Contenido principal -->
   <div class="content-area">
 
-    <!-- Temas a Reforzar - PRIMERO -->
-    <div class="section-card" *ngIf="!isLoading">
-      <h2 class="section-title">Temas a Reforzar</h2>
-      
-      <div class="weak-topics-list" *ngIf="weakTopics.length > 0">
-        <div class="weak-topic-card" *ngFor="let topic of weakTopics">
-          <div class="topic-header">
-            <div class="topic-info">
-              <h3>{{ topic.tema }}</h3>
-              <p class="topic-area">{{ topic.area }}</p>
+    <!-- Temas a Reforzar -->
+    <div class="section">
+      <h2 class="section-title">
+        <ion-icon name="trending-down" style="color: #ff6b35; margin-right: 8px;"></ion-icon>
+        Temas a Reforzar
+      </h2>
+
+      <!-- Skeleton Loading -->
+      <div *ngIf="isLoading" class="loading-skeleton">
+        <ion-skeleton-text animated style="width: 100%; height: 72px; border-radius: 16px; margin-bottom: 12px;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 100%; height: 72px; border-radius: 16px; margin-bottom: 12px;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 100%; height: 72px; border-radius: 16px;"></ion-skeleton-text>
+      </div>
+
+      <!-- Lista de temas débiles - NUEVO DISEÑO -->
+      <div *ngIf="!isLoading && weakTopics.length > 0" class="weak-topics-list-new">
+        <div *ngFor="let topic of weakTopics" 
+             class="topic-card-new" 
+             (click)="selectWeakTopic(topic)">
+          
+          <!-- Indicador de prioridad (círculo izquierda) -->
+          <div class="priority-indicator"
+               [class.priority-high]="topic.tasaError >= 70"
+               [class.priority-medium]="topic.tasaError >= 40 && topic.tasaError < 70"
+               [class.priority-low]="topic.tasaError < 40">
+          </div>
+
+          <!-- Contenido del card -->
+          <div class="topic-content-new">
+            <div class="topic-main">
+              <h3 class="topic-title-new">{{ topic.nombre }}</h3>
+              <p class="topic-subtitle-new">{{ topic.totalErrores }} de {{ topic.totalIntentos }} incorrectas</p>
             </div>
-            <div class="topic-stats">
-              <div class="topic-percentage" 
-                   [class.critical]="topic.tasaAcierto < 40" 
-                   [class.weak]="topic.tasaAcierto >= 40 && topic.tasaAcierto < 60">
-                {{ topic.tasaAcierto }}%
+
+            <div class="topic-right">
+              <div class="error-badge"
+                   [class.badge-high]="topic.tasaError >= 70"
+                   [class.badge-medium]="topic.tasaError >= 40 && topic.tasaError < 70"
+                   [class.badge-low]="topic.tasaError < 40">
+                {{ topic.tasaError }}%
               </div>
+              <ion-icon name="chevron-forward" class="chevron-new"></ion-icon>
             </div>
-          </div>
-          
-          <div class="topic-progress-bar">
-            <div class="topic-progress-fill" [style.width.%]="topic.tasaAcierto"></div>
-          </div>
-          
-          <div class="topic-meta">
-            <span class="meta-item">
-              <ion-icon name="help-circle-outline"></ion-icon>
-              {{ topic.intentos }} intentos
-            </span>
-            <span class="meta-item" *ngIf="topic.diasSinPracticar > 0">
-              <ion-icon name="time-outline"></ion-icon>
-              {{ topic.diasSinPracticar }} días sin practicar
-            </span>
           </div>
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="weakTopics.length === 0">
-        <ion-icon name="trophy-outline"></ion-icon>
-        <p>¡No tienes temas débiles! Sigue practicando.</p>
+      <!-- Mensaje cuando no hay temas débiles -->
+      <div *ngIf="!isLoading && weakTopics.length === 0" class="no-weak-topics">
+        <ion-icon name="trophy" style="font-size: 48px; color: #fbbf24;"></ion-icon>
+        <h3>¡Excelente trabajo!</h3>
+        <p>No tienes temas que necesiten refuerzo en este momento.</p>
+        <p class="subtitle">Sigue practicando para mantener tu rendimiento.</p>
       </div>
     </div>
 
@@ -89,101 +102,108 @@
       </div>
     </div>
 
-    <!-- Selector de cantidad de preguntas -->
-    <div class="selection-card">
-      <label class="selection-label">Cantidad de preguntas</label>
-      <select class="custom-select" [(ngModel)]="selectedQuantity">
-        <option [value]="3">3 preguntas</option>
-        <option [value]="5">5 preguntas</option>
-        <option [value]="10">10 preguntas</option>
-        <option [value]="15">15 preguntas</option>
-      </select>
-    </div>
+    <!-- Sección Test de Refuerzo -->
+    <div class="test-section">
+      <h2 class="test-section-title">
+        <ion-icon name="fitness"></ion-icon>
+        Test de Refuerzo
+      </h2>
 
-    <!-- Selector de alcance -->
-    <div class="selection-card">
-      <label class="selection-label">Alcance del test</label>
-      <div class="scope-options">
-        <div 
-          class="scope-option"
-          [class.active]="scopeType === 'all'"
-          (click)="selectScope('all')">
-          <ion-icon name="globe-outline"></ion-icon>
-          <span>Todo Derecho Civil</span>
-        </div>
-        <div 
-          class="scope-option"
-          [class.active]="scopeType === 'tema' || scopeType === 'subtema'"
-          (click)="selectScope('tema')">
-          <ion-icon name="list-outline"></ion-icon>
-          <span>Seleccionar tema/subtema</span>
-        </div>
+      <!-- Selector de cantidad de preguntas -->
+      <div class="selection-card">
+        <label class="selection-label">Cantidad de preguntas</label>
+        <select class="custom-select" [(ngModel)]="selectedQuantity">
+          <option [value]="1">1 pregunta</option>
+          <option [value]="5">5 preguntas</option>
+          <option [value]="10">10 preguntas</option>
+          <option [value]="15">15 preguntas</option>
+        </select>
       </div>
-    </div>
 
-    <!-- Selector de temas con acordeón -->
-    <div class="selection-card" *ngIf="scopeType === 'tema' || scopeType === 'subtema'">
-      <label class="selection-label">Temas de Derecho Civil</label>
-      
-      <div class="accordion-list">
-        <div 
-          *ngFor="let tema of temas" 
-          class="accordion-item"
-          [class.disabled]="tema.cantidadPreguntas === 0">
-          
+      <!-- Selector de alcance -->
+      <div class="selection-card">
+        <label class="selection-label">Alcance del test</label>
+        <div class="scope-options">
           <div 
-            class="accordion-header"
-            [class.active]="expandedTema === tema.id || selectedTemaId === tema.id"
-            (click)="toggleTema(tema)">
-            <div class="tema-info">
-              <span class="tema-nombre">{{ tema.nombre }}</span>
-              <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
-            </div>
-            <div class="tema-actions">
-              <ion-icon 
-                *ngIf="selectedTemaId === tema.id && !selectedSubtemaId"
-                name="checkmark-circle" 
-                class="check-icon">
-              </ion-icon>
-              <ion-icon 
-                [name]="expandedTema === tema.id ? 'chevron-up' : 'chevron-down'"
-                class="chevron-icon">
-              </ion-icon>
-            </div>
+            class="scope-option"
+            [class.active]="scopeType === 'all'"
+            (click)="selectScope('all')">
+            <ion-icon name="globe-outline"></ion-icon>
+            <span>Todo Derecho Civil</span>
           </div>
+          <div 
+            class="scope-option"
+            [class.active]="scopeType === 'tema' || scopeType === 'subtema'"
+            (click)="toggleThemeSelector()">
+            <ion-icon name="list-outline"></ion-icon>
+            <span>Seleccionar tema/subtema</span>
+          </div>
+        </div>
+      </div>
 
-          <div class="accordion-content" *ngIf="expandedTema === tema.id && tema.subtemas && tema.subtemas.length > 0">
+      <!-- Selector de temas con acordeón -->
+      <div class="selection-card theme-accordion" *ngIf="showThemeSelector">
+        <label class="selection-label">Temas de Derecho Civil</label>
+        
+        <div class="accordion-list">
+          <div 
+            *ngFor="let tema of temas" 
+            class="accordion-item"
+            [class.disabled]="tema.cantidadPreguntas === 0">
+            
             <div 
-              *ngFor="let subtema of tema.subtemas"
-              class="subtema-item"
-              [class.active]="selectedSubtemaId === subtema.id"
-              [class.disabled]="subtema.cantidadPreguntas === 0"
-              (click)="selectSubtema(subtema)">
-              <div class="subtema-info">
-                <span class="subtema-nombre">{{ subtema.nombre }}</span>
-                <span class="subtema-count">{{ subtema.cantidadPreguntas }} preguntas</span>
+              class="accordion-header"
+              [class.active]="expandedTema === tema.id || selectedTemaId === tema.id"
+              (click)="toggleTema(tema)">
+              <div class="tema-info">
+                <span class="tema-nombre">{{ tema.nombre }}</span>
+                <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
               </div>
-              <ion-icon 
-                *ngIf="selectedSubtemaId === subtema.id"
-                name="checkmark-circle" 
-                class="check-icon">
-              </ion-icon>
+              <div class="tema-actions">
+                <ion-icon 
+                  *ngIf="selectedTemaId === tema.id && !selectedSubtemaId"
+                  name="checkmark-circle" 
+                  class="check-icon">
+                </ion-icon>
+                <ion-icon 
+                  [name]="expandedTema === tema.id ? 'chevron-up' : 'chevron-down'"
+                  class="chevron-icon">
+                </ion-icon>
+              </div>
+            </div>
+
+            <div class="accordion-content" *ngIf="expandedTema === tema.id && tema.subtemas && tema.subtemas.length > 0">
+              <div 
+                *ngFor="let subtema of tema.subtemas"
+                class="subtema-item"
+                [class.active]="selectedSubtemaId === subtema.id"
+                [class.disabled]="subtema.cantidadPreguntas === 0"
+                (click)="selectSubtema(subtema)">
+                <div class="subtema-info">
+                  <span class="subtema-nombre">{{ subtema.nombre }}</span>
+                  <span class="subtema-count">{{ subtema.cantidadPreguntas }} preguntas</span>
+                </div>
+                <ion-icon 
+                  *ngIf="selectedSubtemaId === subtema.id"
+                  name="checkmark-circle" 
+                  class="check-icon">
+                </ion-icon>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-
-    <!-- Botón empezar test -->
-    <div class="start-button-container">
-      <ion-button 
-        expand="block" 
-        class="start-button"
-        (click)="startTest()">
-        <ion-icon name="play" slot="start"></ion-icon>
-        Empezar Test de Refuerzo
-      </ion-button>
+      <!-- Botón empezar test -->
+      <div class="start-button-container">
+        <ion-button 
+          expand="block" 
+          class="start-button"
+          (click)="startTest()">
+          <ion-icon name="play" slot="start"></ion-icon>
+          Empezar Test
+        </ion-button>
+      </div>
     </div>
 
   </div>

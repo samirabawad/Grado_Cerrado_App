@@ -78,6 +78,183 @@ ion-content.civil-content {
 }
 
 // ========================================
+// SECCIÓN TEST DE REFUERZO
+// ========================================
+.test-section {
+  margin-top: 24px;
+}
+
+.test-section-title {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #FF6F00;
+  display: flex;
+  align-items: center;
+
+  ion-icon {
+    color: #FF6F00;
+    font-size: 24px;
+    margin-right: 8px;
+  }
+}
+
+// ========================================
+// NUEVO DISEÑO - TEMAS A REFORZAR
+// ========================================
+.weak-topics-list-new {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.topic-card-new {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.priority-indicator {
+  width: 5px;
+  flex-shrink: 0;
+  
+  &.priority-high {
+    background: #ef4444;
+  }
+  
+  &.priority-medium {
+    background: #f59e0b;
+  }
+  
+  &.priority-low {
+    background: #fbbf24;
+  }
+}
+
+.topic-content-new {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  gap: 12px;
+}
+
+.topic-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.topic-title-new {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topic-subtitle-new {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.topic-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.error-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  
+  &.badge-high {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  
+  &.badge-medium {
+    background: #fed7aa;
+    color: #d97706;
+  }
+  
+  &.badge-low {
+    background: #fef3c7;
+    color: #d97706;
+  }
+}
+
+.chevron-new {
+  font-size: 20px;
+  color: #cbd5e1;
+}
+
+// ========================================
+// LOADING SKELETON
+// ========================================
+.loading-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ========================================
+// ESTADO VACÍO
+// ========================================
+.no-weak-topics {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fff 100%);
+  border-radius: 16px;
+  border: 2px dashed #fbbf24;
+
+  ion-icon {
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+}
+
+// ========================================
 // SECTION COLLAPSIBLE
 // ========================================
 .section-card.collapsible {
@@ -120,101 +297,6 @@ ion-content.civil-content {
   to {
     opacity: 1;
     max-height: 1000px;
-  }
-}
-
-// ========================================
-// TEMAS A REFORZAR
-// ========================================
-.weak-topics-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.weak-topic-card {
-  background: #FFF3E0;
-  border-left: 4px solid #FF6F00;
-  border-radius: 8px;
-  padding: 16px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.15);
-  }
-}
-
-.topic-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.topic-info {
-  flex: 1;
-
-  h3 {
-    margin: 0 0 4px 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #333;
-  }
-
-  .topic-area {
-    margin: 0;
-    font-size: 13px;
-    color: #666;
-  }
-}
-
-.topic-stats {
-  .topic-percentage {
-    font-size: 24px;
-    font-weight: 800;
-    color: #FF6F00;
-
-    &.critical {
-      color: #f44336;
-    }
-
-    &.weak {
-      color: #FF9800;
-    }
-  }
-}
-
-.topic-progress-bar {
-  height: 8px;
-  background: #FFE0B2;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 12px;
-
-  .topic-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #FF6F00, #F57C00);
-    border-radius: 4px;
-    transition: width 0.5s ease;
-  }
-}
-
-.topic-meta {
-  display: flex;
-  gap: 16px;
-
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #666;
-
-    ion-icon {
-      font-size: 16px;
-      color: #FF6F00;
-    }
   }
 }
 
@@ -329,11 +411,17 @@ ion-content.civil-content {
   }
 }
 
+.theme-accordion {
+  animation: slideDown 0.3s ease;
+  margin-top: 12px;
+}
+
 // ========================================
 // SELECT SUTIL
 // ========================================
 .custom-select {
   width: 100%;
+  padding: 12px;
   padding: 12px 16px;
   font-size: 15px;
   font-weight: 500;
@@ -464,115 +552,94 @@ ion-content.civil-content {
 
         .check-icon {
           font-size: 20px;
-          color: #4CAF50;
+          color: #10b981;
         }
 
         .chevron-icon {
           font-size: 20px;
-          color: #666;
+          color: #999;
         }
       }
     }
 
     .accordion-content {
-      background: white;
-      border-top: 1px solid #e0e0e0;
       padding: 8px;
-
-      .subtema-item {
-        padding: 12px 16px;
-        margin: 4px 0;
-        background: #fafafa;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        transition: all 0.3s ease;
-
-        &:hover:not(.disabled) {
-          background: #f0f0f0;
-          transform: translateX(4px);
-        }
-
-        &.active {
-          background: #FFF3E0;
-          border: 1px solid #FF6F00;
-        }
-
-        &.disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-
-        .subtema-info {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-
-          .subtema-nombre {
-            font-size: 14px;
-            font-weight: 500;
-            color: #333;
-          }
-
-          .subtema-count {
-            font-size: 11px;
-            color: #999;
-          }
-        }
-
-        .check-icon {
-          font-size: 18px;
-          color: #4CAF50;
-        }
-      }
+      background: white;
     }
   }
 }
 
+.subtema-item {
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &.active {
+    background: #FFF3E0;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .subtema-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .subtema-nombre {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .subtema-count {
+      font-size: 11px;
+      color: #999;
+    }
+  }
+
+  .check-icon {
+    font-size: 20px;
+    color: #10b981;
+  }
+}
 
 // ========================================
 // BOTÓN EMPEZAR TEST
 // ========================================
 .start-button-container {
-  margin-bottom: 20px;
-
-  .start-button {
-    --background: #FF6F00;
-    --background-activated: #F57C00;
-    --color: white;
-    --border-radius: 12px;
-    height: 50px;
-    font-weight: 700;
-    font-size: 16px;
-    box-shadow: 0 4px 15px rgba(255, 111, 0, 0.3);
-
-    ion-icon {
-      margin-right: 8px;
-    }
-  }
+  margin-top: 24px;
 }
 
-
-
-// ========================================
-// EMPTY STATE
-// ========================================
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: #999;
+.start-button {
+  --background: #FF6F00;
+  --background-activated: #E65100;
+  --border-radius: 12px;
+  --color: white;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
 
   ion-icon {
-    font-size: 64px;
-    color: #ddd;
-    margin-bottom: 16px;
-  }
-
-  p {
-    margin: 0;
-    font-size: 15px;
+    margin-right: 8px;
   }
 }

@@ -366,4 +366,90 @@ export class DashboardPage implements OnInit {
     
     return Math.ceil(questions / 50) * 50;
   }
+
+  // ========================================
+  // MÉTODOS PARA SISTEMA DE LOGROS
+  // ========================================
+  
+  // Obtener sesiones dentro del milestone actual (de 0 a 50)
+  getSessionsInCurrentMilestone(): number {
+    return this.totalSessions % 50;
+  }
+
+  // Obtener el siguiente milestone (múltiplo de 50)
+  getNextMilestone(): number {
+    return Math.ceil((this.totalSessions + 1) / 50) * 50;
+  }
+
+  // Obtener el nivel del logro actual (cuántos milestones de 50 has completado)
+  getCurrentAchievementLevel(): number {
+    return Math.floor(this.totalSessions / 50) + 1;
+  }
+
+  // Obtener el nombre del logro actual
+  getCurrentAchievementName(): string {
+    const level = this.getCurrentAchievementLevel();
+    
+    const names = [
+      'Principiante',      // 1-50
+      'Aprendiz',          // 51-100
+      'Estudiante',        // 101-150
+      'Dedicado',          // 151-200
+      'Perseverante',      // 201-250
+      'Comprometido',      // 251-300
+      'Avanzado',          // 301-350
+      'Experto',           // 351-400
+      'Maestro',           // 401-450
+      'Sabio',             // 451-500
+      'Erudito',           // 501-550
+      'Virtuoso',          // 551-600
+      'Prodigio',          // 601-650
+      'Genio',             // 651-700
+      'Leyenda',           // 701-750
+      'Titán',             // 751-800
+      'Campeón',           // 801-850
+      'Héroe',             // 851-900
+      'Inmortal',          // 901-950
+      'Supremo',           // 951-1000
+      'Trascendental',     // 1001-1050
+      'Divino',            // 1051-1100
+      'Omnisciente',       // 1101-1150
+      'Absoluto',          // 1151-1200
+      'Infinito',          // 1201-1250
+      'Eterno',            // 1251-1300
+      'Celestial',         // 1301-1350
+      'Ilimitado',         // 1351-1400
+      'Perfecto',          // 1401-1450
+      'Definitivo'         // 1451-1500
+    ];
+    
+    return names[Math.min(level - 1, names.length - 1)] || 'Maestro Supremo';
+  }
+
+  // Obtener mensaje motivacional
+  getSessionMessage(): string {
+    const remaining = this.getNextMilestone() - this.totalSessions;
+    
+    if (this.totalSessions === 0) {
+      return '¡Empieza a aprender!';
+    }
+    
+    if (remaining === 0) {
+      return '¡Logro desbloqueado! 🎉';
+    }
+    
+    if (remaining <= 5) {
+      return `¡Solo ${remaining} para el logro!`;
+    }
+    
+    if (this.totalSessions >= 30) {
+      return '¡Vas excelente!';
+    }
+    
+    if (this.totalSessions >= 10) {
+      return '¡Tú puedes más!';
+    }
+    
+    return '¡Sigue así!';
+  }
 }

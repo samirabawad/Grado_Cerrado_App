@@ -63,21 +63,46 @@ export class CivilPage implements OnInit, OnDestroy {
       const studentId = currentUser.id;
       console.log('Cargando estadísticas de Civil para estudiante:', studentId);
 
-      const areaResponse = await this.apiService.getAreaStats(studentId).toPromise();
+      const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
       console.log('Respuesta completa del API:', areaResponse);
       
       if (areaResponse && areaResponse.success && areaResponse.data) {
-        console.log('Todas las áreas recibidas:', areaResponse.data);
+        console.log('Datos jerárquicos recibidos:', areaResponse.data);
         
-        const civilArea = areaResponse.data.find((area: any) => 
-          area.area === 'Derecho Civil'
+        const civilArea = areaResponse.data.find((item: any) => 
+          item.type === 'area' && item.area === 'Derecho Civil'
         );
         
         if (civilArea) {
-          this.civilStats = civilArea;
+          // Calcular successRate desde los temas
+          const temasConPorcentaje = civilArea.temas.map((tema: any) => {
+            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
+              const porcentaje = subtema.totalPreguntas > 0 
+                ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
+                : 0;
+              return porcentaje;
+            });
+            
+            const porcentajeTema = subtemasConPorcentaje.length > 0
+              ? Math.round(subtemasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / subtemasConPorcentaje.length)
+              : 0;
+            
+            return porcentajeTema;
+          });
+          
+          const successRate = temasConPorcentaje.length > 0
+            ? Math.round(temasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / temasConPorcentaje.length)
+            : 0;
+          
+          this.civilStats = {
+            area: civilArea.area,
+            successRate: successRate,
+            temas: civilArea.temas
+          };
+          
           console.log('✅ Estadísticas de Derecho Civil:', this.civilStats);
         } else {
-          console.log('❌ No se encontró "Derecho Civil"');
+          console.log('⚠️ No se encontró Derecho Civil');
         }
       }
       

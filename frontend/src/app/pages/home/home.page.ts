@@ -26,10 +26,12 @@ export class HomePage implements OnInit {
   isLoading: boolean = true;
 
   constructor(
+
     private router: Router,
     private apiService: ApiService,
     private pushService: PushNotificationService
-  ) { }
+    private alertController: AlertController
+) {}
 
   async ngOnInit() {
     this.loadUserData();
@@ -129,4 +131,17 @@ export class HomePage implements OnInit {
     console.log('Navegando a Procesal...');
     this.router.navigate(['/civil']);
   }
+  goToRacha() {
+  this.router.navigate(['/racha']);
+}
+
+async goToFullHistory() {
+  const alert = await this.alertController.create({
+    header: 'Página en Construcción',
+    message: 'Esta funcionalidad estará disponible próximamente.',
+    buttons: ['OK']
+  });
+  await alert.present();
+}
+
 }

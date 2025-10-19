@@ -154,6 +154,33 @@ export class ApiService {
       );
   }
 
+  updateUserProfile(userId: number, updates: { name?: string, email?: string }): Observable<any> {
+    const url = `${this.API_URL}/auth/update-profile/${userId}`;
+    
+    console.log('Actualizando perfil:', updates);
+    
+    return this.http.put<any>(url, updates, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Perfil actualizado:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error actualizando perfil:', error);
+          
+          let errorMessage = 'Error al actualizar el perfil';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
   logout(): void {
     localStorage.removeItem('currentUser');
     this.clearCurrentSession();
@@ -177,15 +204,15 @@ export class ApiService {
   // SESIONES DE ESTUDIO
   // ========================================
 
-  /**
-   * ✅ ACTUALIZADO: Iniciar sesión ESCRITA con soporte de modo adaptativo
-   */
   startStudySession(config: {
     studentId: number;
     difficulty: string;
     legalAreas: string[];
     questionCount?: number;
+    numberOfQuestions?: number;
     adaptiveMode?: boolean;
+    TemaId?: number;
+    SubtemaId?: number;
   }): Observable<any> {
     const url = `${this.API_URL}/Study/start-session`;
     
@@ -211,13 +238,24 @@ export class ApiService {
     
     console.log('🎯 Modo adaptativo:', adaptiveEnabled);
     
-    const requestBody = {
+    const requestBody: any = {
       studentId: config.studentId,
       difficulty: config.difficulty || "basico",
       legalAreas: config.legalAreas || [],
-      questionCount: config.questionCount || 5,
-      adaptiveMode: adaptiveEnabled // ✅ INCLUIR modo adaptativo
+      questionCount: config.numberOfQuestions || config.questionCount || 5,
+      adaptiveMode: adaptiveEnabled
     };
+
+  
+    if (config.TemaId) {
+      requestBody.TemaId = config.TemaId;
+      console.log('📚 Filtro de Tema aplicado:', config.TemaId);
+    }
+
+    if (config.SubtemaId) {
+      requestBody.SubtemaId = config.SubtemaId;
+      console.log('📖 Filtro de Subtema aplicado:', config.SubtemaId);
+    }
     
     console.log('📚 Iniciando sesión ESCRITA:', requestBody);
     
@@ -374,6 +412,22 @@ export class ApiService {
       );
   }
 
+    finishTest(testId: number): Observable<any> {
+    const url = `${this.API_URL}/Study/finish-test/${testId}`;
+    
+    return this.http.put<any>(url, {}, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('✅ Test finalizado:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('❌ Error finalizando test:', error);
+          throw error;
+        })
+      );
+  }
+
   // ========================================
   // MODO ADAPTATIVO
   // ========================================
@@ -498,6 +552,23 @@ export class ApiService {
         })
       );
   }
+
+  getTestDetail(testId: number): Observable<any> {
+  const url = `${this.API_URL}/Dashboard/test-detail/${testId}`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Detalle del test obtenido:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo detalle del test:', error);
+        throw error;
+      })
+    );
+}
+
 
   getAreaStats(studentId: number): Observable<any> {
     const url = `${this.API_URL}/Dashboard/area-stats/${studentId}`;
@@ -795,4 +866,34 @@ export class ApiService {
       });
     });
   }
+  // ========================================
+    //  PREGUNTAS DE REEMPLAZO
+    // ========================================
+    
+    /**
+     * Obtener pregunta de reemplazo cuando una no tiene opciones válidas
+     */
+    getReplacementQuestion(testId: number): Observable<any> {
+      const url = `${this.API_URL}/Study/replacement-question/${testId}`;
+      
+      console.log('🔄 Solicitando pregunta de reemplazo para test:', testId);
+      
+      return this.http.get<any>(url, this.httpOptions)
+        .pipe(
+          map((response: any) => {
+            console.log('✅ Pregunta de reemplazo recibida:', response);
+            return response;
+          }),
+          catchError((error: any) => {
+            console.error('❌ Error obteniendo pregunta de reemplazo:', error);
+            
+            // Retornar null en caso de error para que se pueda saltar
+            return of({
+              success: false,
+              question: null
+            });
+          })
+        );
+    }
+
 }
