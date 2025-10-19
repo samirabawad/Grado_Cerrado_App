@@ -15,12 +15,16 @@ import { ApiService } from '../../../services/api.service';
 })
 export class CivilReforzarPage implements OnInit {
   
-  // Datos
   weakTopics: any[] = [];
   recentSessions: any[] = [];
   temas: any[] = [];
   
-  // Selección
+  expandedSections: { [key: string]: boolean } = {
+    weakTopics: false,
+    recentSessions: false,
+    testSection: false
+  };
+  
   selectedQuantity: number = 5;
   scopeType: 'all' | 'tema' | 'subtema' = 'all';
   selectedTemaId: number | null = null;
@@ -28,9 +32,7 @@ export class CivilReforzarPage implements OnInit {
   expandedTema: number | null = null;
   showThemeSelector: boolean = false;
   
-  // Estado
   isLoading: boolean = true;
-  sessionsExpanded: boolean = false;
 
   constructor(
     private router: Router,
@@ -41,7 +43,23 @@ export class CivilReforzarPage implements OnInit {
 
   ngOnInit() {
     this.loadData();
-    this.loadTemas();
+  }
+
+  toggleSection(section: string) {
+    this.expandedSections[section] = !this.expandedSections[section];
+  }
+
+  toggleTema(temaId: number) {
+  this.expandedTema = this.expandedTema === temaId ? null : temaId;
+}
+
+  isSectionExpanded(section: string): boolean {
+    return this.expandedSections[section];
+  }
+
+  getMainRecommendation() {
+    if (this.weakTopics.length === 0) return null;
+    return this.weakTopics[0];
   }
 
   async loadData() {
@@ -58,7 +76,6 @@ export class CivilReforzarPage implements OnInit {
 
       const studentId = currentUser.id;
 
-      // Cargar temas débiles
       try {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
@@ -70,12 +87,23 @@ export class CivilReforzarPage implements OnInit {
         this.weakTopics = [];
       }
 
-      // Cargar sesiones recientes
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
+        console.log('📦 Respuesta RAW del backend:', sessionsResponse);
+        
         if (sessionsResponse && sessionsResponse.success) {
-          this.recentSessions = sessionsResponse.data || [];
-          console.log('✅ Sesiones recientes:', this.recentSessions);
+          this.recentSessions = (sessionsResponse.data || []).map((s: any) => ({
+            id: s.id,
+            testId: s.id,
+            date: s.date,
+            area: s.area,
+            durationSeconds: s.duration || 0,
+            totalQuestions: s.questions || 0,
+            correctAnswers: s.correct || 0,
+            successRate: s.successRate || 0
+          }));
+          
+          console.log('✅ TODAS las sesiones mapeadas:', this.recentSessions);
         }
       } catch (error) {
         console.error('Error cargando sesiones recientes:', error);
@@ -89,133 +117,32 @@ export class CivilReforzarPage implements OnInit {
     }
   }
 
-  loadTemas() {
-    this.temas = [
-      { 
-        id: 135, 
-        nombre: 'Parte General', 
-        cantidadPreguntas: 15,
-        subtemas: [
-          { id: 41, nombre: 'Bienes', cantidadPreguntas: 5 },
-          { id: 40, nombre: 'Personas jurídicas', cantidadPreguntas: 5 },
-          { id: 39, nombre: 'Personas naturales', cantidadPreguntas: 5 },
-        ]
-      },
-      { 
-        id: 136, 
-        nombre: 'Derechos Reales', 
-        cantidadPreguntas: 11,
-        subtemas: [
-          { id: 43, nombre: 'Concepto general de derechos reales', cantidadPreguntas: 6 },
-          { id: 44, nombre: 'Posesión', cantidadPreguntas: 5 },
-        ]
-      },
-      { 
-        id: 137, 
-        nombre: 'Obligaciones y Contratos', 
-        cantidadPreguntas: 3,
-        subtemas: [
-          { id: 50, nombre: 'Contratos en general', cantidadPreguntas: 3 },
-        ]
-      },
-    ];
-  }
-
   selectWeakTopic(topic: any) {
-    console.log('📖 Tema débil seleccionado:', topic);
-    
-    this.scopeType = 'tema';
-    this.selectedTemaId = topic.temaId;
-    this.selectedSubtemaId = null;
+    console.log('🎯 Tema débil seleccionado:', topic);
+    this.selectedSubtemaId = topic.subtemaId;
+    this.scopeType = 'subtema';
     this.showThemeSelector = true;
-    
-    setTimeout(() => {
-      const testSection = document.querySelector('.test-section');
-      if (testSection) {
-        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-    
-    this.showToast(`Tema seleccionado: ${topic.nombre}`, 'primary');
   }
 
-  formatDate(dateString: string): string {
-    if (!dateString) return '';
-    
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - date.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 0) return 'Hoy';
-      if (diffDays === 1) return 'Ayer';
-      if (diffDays < 7) return `Hace ${diffDays} días`;
-      if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
-      
-      return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-    } catch (error) {
-      return '';
-    }
+  toggleTemaExpansion(temaId: number) {
+    this.expandedTema = this.expandedTema === temaId ? null : temaId;
   }
 
-  async showToast(message: string, color: string = 'primary') {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 2000,
-      position: 'bottom',
-      color: color,
-      cssClass: 'custom-toast'
-    });
-    await toast.present();
-  }
-
-  toggleSessions() {
-    this.sessionsExpanded = !this.sessionsExpanded;
-  }
-
-  toggleThemeSelector() {
-    this.showThemeSelector = !this.showThemeSelector;
-    
-    if (this.showThemeSelector) {
-      this.scopeType = 'tema';
-    } else {
-      this.scopeType = 'all';
-      this.selectedTemaId = null;
-      this.selectedSubtemaId = null;
-      this.expandedTema = null;
-    }
-  }
-
-  selectScope(type: 'all' | 'tema') {
+  selectScope(type: 'all' | 'tema' | 'subtema', id: number | null = null) {
     this.scopeType = type;
     
     if (type === 'all') {
-      this.showThemeSelector = false;
       this.selectedTemaId = null;
       this.selectedSubtemaId = null;
-      this.expandedTema = null;
-    }
-  }
-
-  toggleTema(tema: any) {
-    if (tema.cantidadPreguntas === 0) return;
-    
-    // Si ya está expandido, lo contraemos
-    if (this.expandedTema === tema.id) {
-      this.expandedTema = null;
-    } else {
-      // Expandimos y seleccionamos el tema
-      this.expandedTema = tema.id;
-      this.selectedTemaId = tema.id;
+      console.log('✅ Seleccionado: Todo Derecho Civil');
+    } else if (type === 'tema') {
+      this.selectedTemaId = id;
       this.selectedSubtemaId = null;
-      this.scopeType = 'tema';
+      console.log('✅ Tema seleccionado:', id);
     }
   }
 
   selectSubtema(subtema: any) {
-    if (subtema.cantidadPreguntas === 0) return;
-    
     this.scopeType = 'subtema';
     this.selectedSubtemaId = subtema.id;
     
@@ -252,7 +179,6 @@ export class CivilReforzarPage implements OnInit {
         numberOfQuestions: this.selectedQuantity
       };
 
-      // ✅ CRITICAL: Aplicar filtros según la selección
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
         sessionData.SubtemaId = this.selectedSubtemaId;
         console.log('🎯 Iniciando test de SUBTEMA:', this.selectedSubtemaId);
@@ -291,6 +217,7 @@ export class CivilReforzarPage implements OnInit {
 
   viewSession(session: any) {
     console.log('📊 Ver detalle de sesión:', session);
-    this.router.navigate(['/detalle-test', session.id]);
+    const testId = session.testId || session.id;
+    this.router.navigate(['/detalle-test', testId]);
   }
 }
