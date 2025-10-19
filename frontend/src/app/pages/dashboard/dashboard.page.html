@@ -63,30 +63,45 @@
     </div>
 
     <!-- Estadísticas Generales - SOLO SESIONES -->
-    <div class="stats-overview">
-      <div class="stat-card sessions-card">
-        <h4 class="stat-title">Sesiones</h4>
-        <div class="sessions-badges">
-          <ng-container *ngFor="let milestone of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; let i = index">
-            <div class="session-badge" 
-                [class.completed]="totalSessions >= (i + 1) * 5" 
-                [class.pending]="totalSessions < (i + 1) * 5">
-              <ion-icon *ngIf="totalSessions >= (i + 1) * 5" name="checkmark-circle"></ion-icon>
-              <ion-icon *ngIf="totalSessions < (i + 1) * 5" name="ellipse-outline"></ion-icon>
-            </div>
-          </ng-container>
+<div class="stats-overview">
+  <div class="stat-card sessions-card">
+    <h4 class="stat-title">Test Realizados</h4>
+    
+    <!-- Logro Actual -->
+    <div class="current-achievement">
+      <div class="achievement-left">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-info">
+          <p class="achievement-level">LOGRO {{ getCurrentAchievementLevel() }}</p>
+          <p class="achievement-name">{{ getCurrentAchievementName() }}</p>
         </div>
-        <p class="sessions-progress">
-          <span class="sessions-current">{{ totalSessions }}</span> 
-          <span class="sessions-de">de</span> 
-          <span class="sessions-total">50</span>
+      </div>
+      
+      <div class="achievement-right">
+        <p class="sessions-progress-inline">
+          <span class="sessions-current">{{ totalSessions }}</span>
+          <span class="sessions-de">de</span>
+          <span class="sessions-total">{{ getNextMilestone() }}</span>
         </p>
-        <p class="sessions-message" *ngIf="totalSessions === 0">¡Empieza a aprender!</p>
-        <p class="sessions-message" *ngIf="totalSessions > 0 && totalSessions < 10">¡Sigue así!</p>
-        <p class="sessions-message" *ngIf="totalSessions >= 10 && totalSessions < 30">¡Tú puedes más!</p>
-        <p class="sessions-message" *ngIf="totalSessions >= 30">¡Vas excelente!</p>
       </div>
     </div>
+
+    <!-- Circulitos de progreso (10 círculos de 5 en 5) -->
+    <div class="sessions-badges">
+      <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+        <div class="session-badge" 
+            [class.completed]="getSessionsInCurrentMilestone() >= i * 5" 
+            [class.pending]="getSessionsInCurrentMilestone() < i * 5">
+          <ion-icon *ngIf="getSessionsInCurrentMilestone() >= i * 5" name="checkmark-circle"></ion-icon>
+          <ion-icon *ngIf="getSessionsInCurrentMilestone() < i * 5" name="ellipse-outline"></ion-icon>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Mensaje motivacional debajo de los círculos -->
+    <p class="sessions-message-bottom">{{ getSessionMessage() }}</p>
+  </div>
+</div>
 
     <!-- Gráfico Semanal -->
     <div class="weekly-chart-container">

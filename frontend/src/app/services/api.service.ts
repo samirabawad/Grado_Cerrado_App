@@ -867,4 +867,34 @@ export class ApiService {
       });
     });
   }
+  // ========================================
+    //  PREGUNTAS DE REEMPLAZO
+    // ========================================
+    
+    /**
+     * Obtener pregunta de reemplazo cuando una no tiene opciones válidas
+     */
+    getReplacementQuestion(testId: number): Observable<any> {
+      const url = `${this.API_URL}/Study/replacement-question/${testId}`;
+      
+      console.log('🔄 Solicitando pregunta de reemplazo para test:', testId);
+      
+      return this.http.get<any>(url, this.httpOptions)
+        .pipe(
+          map((response: any) => {
+            console.log('✅ Pregunta de reemplazo recibida:', response);
+            return response;
+          }),
+          catchError((error: any) => {
+            console.error('❌ Error obteniendo pregunta de reemplazo:', error);
+            
+            // Retornar null en caso de error para que se pueda saltar
+            return of({
+              success: false,
+              question: null
+            });
+          })
+        );
+    }
+
 }

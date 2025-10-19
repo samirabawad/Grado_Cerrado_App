@@ -26,8 +26,7 @@
     margin-right: 12px;
   }
 
-  .header-title {
-    color: rgb(0, 0, 0);
+  .header-title {color: rgb(0, 0, 0);
     font-size: 18px;
     font-weight: 600;
     margin: 0;
@@ -238,11 +237,82 @@
 .sessions-card {
   width: 100%;
 
+  // Logro actual
+  .current-achievement {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-radius: 12px;
+    border: 2px solid #10b981;
+
+    .achievement-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+
+      .achievement-icon {
+        font-size: 48px;
+      }
+
+      .achievement-info {
+        .achievement-level {
+          margin: 0 0 2px 0;
+          font-size: 12px;
+          font-weight: 700;
+          color: #065f46;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .achievement-name {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 800;
+          color: #047857;
+        }
+      }
+    }
+
+    .achievement-right {
+      text-align: right;
+
+      .sessions-progress-inline {
+        margin: 0;
+        font-size: 14px;
+        color: #065f46;
+
+        .sessions-current {
+          font-size: 33px;
+          font-weight: 700;
+          color: #047857;
+        }
+
+        .sessions-de {
+          font-size: 14px;
+          color: #065f46;
+          margin: 0 4px;
+        }
+
+        .sessions-total {
+          font-size: 20px;
+          font-weight: 600;
+          color: #065f46;
+        }
+      }
+    }
+  }
+
+  // Circulitos de progreso (10 círculos)
   .sessions-badges {
     display: flex;
     gap: 6px;
     justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 
     .session-badge {
       width: 28px;
@@ -271,37 +341,13 @@
     }
   }
 
-  .sessions-progress {
-    text-align: center;
-    margin: 12px 0;
-    font-size: 14px;
-    color: #64748b;
-
-    .sessions-current {
-      font-size: 32px;
-      font-weight: 700;
-      color: #10b981;
-    }
-
-    .sessions-de {
-      font-size: 16px;
-      color: #64748b;
-      margin: 0 4px;
-    }
-
-    .sessions-total {
-      font-size: 18px;
-      font-weight: 600;
-      color: #1e293b;
-    }
-  }
-
-  .sessions-message {
+  // Mensaje motivacional debajo de los círculos
+  .sessions-message-bottom {
     text-align: center;
     margin: 8px 0 0 0;
-    font-size: 13px;
+    font-size: 33px;
     color: #10b981;
-    font-weight: 500;
+    font-weight: 600;
   }
 }
 
@@ -777,8 +823,6 @@
     }
   }
 }
-
-
 
 // ========================================
 // BOTÓN ACCIÓN

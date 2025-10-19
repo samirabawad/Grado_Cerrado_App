@@ -162,22 +162,25 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
     
     return backendQuestions.map((q: any, index: number) => {
-      const convertedQuestion: Question = {
-        id: q.id?.toString() || `temp-${index}`,
-        text: q.questionText || q.text || 'Texto no disponible',
-        questionText: q.questionText || q.text || 'Texto no disponible',
-        type: q.type || 'seleccion_multiple',
-        category: q.tema || q.category || q.legalArea || 'Sin categoría',
-        tema: q.tema || q.category || q.legalArea || 'Sin categoría',
-        legalArea: q.legalArea || q.tema || q.category || 'General',
-        difficulty: q.difficulty || q.level || 2,
-        correctAnswer: q.correctAnswer || 'A',
-        explanation: q.explanation || 'Explicación no disponible',
-        options: q.options || []
-      };
-
-      return convertedQuestion;
+      return this.convertSingleQuestion(q, index);
     });
+  }
+
+  // ✅ NUEVO: Convertir una sola pregunta
+  convertSingleQuestion(q: any, index: number): Question {
+    return {
+      id: q.id?.toString() || `temp-${index}`,
+      text: q.questionText || q.text || 'Texto no disponible',
+      questionText: q.questionText || q.text || 'Texto no disponible',
+      type: q.type || 'seleccion_multiple',
+      category: q.tema || q.category || q.legalArea || 'Sin categoría',
+      tema: q.tema || q.category || q.legalArea || 'Sin categoría',
+      legalArea: q.legalArea || q.tema || q.category || 'General',
+      difficulty: q.difficulty || q.level || 2,
+      correctAnswer: q.correctAnswer || 'A',
+      explanation: q.explanation || 'Explicación no disponible',
+      options: q.options || []
+    };
   }
 
   getCurrentQuestion(): Question | null {
@@ -189,58 +192,51 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return question?.questionText || question?.text || 'Pregunta no disponible';
   }
 
-  // ✅ CATEGORÍA REAL DE LA BD
   getCurrentQuestionCategory(): string {
     const question = this.getCurrentQuestion();
     return question?.tema || question?.category || question?.legalArea || 'Sin categoría';
   }
 
   getCurrentQuestionOptions(): string[] {
-  const question = this.getCurrentQuestion();
-  
-  if (!question) {
-    console.warn('⚠️ No hay pregunta actual');
+    const question = this.getCurrentQuestion();
+    
+    if (!question) {
+      console.warn('⚠️ No hay pregunta actual');
+      return [];
+    }
+
+    // Verdadero/Falso
+    if (this.isTrueFalseQuestion()) {
+      return ['Verdadero', 'Falso'];
+    }
+
+    // Selección múltiple
+    if (Array.isArray(question.options) && question.options.length > 0) {
+      const firstOption = question.options[0];
+      
+      if (typeof firstOption === 'object') {
+        if ('text' in firstOption && firstOption.text) {
+          return question.options.map((opt: any) => opt.text);
+        }
+        if ('Text' in firstOption && firstOption.Text) {
+          return question.options.map((opt: any) => opt.Text);
+        }
+      }
+      
+      if (typeof firstOption === 'string') {
+        return question.options;
+      }
+    }
+
+    // SI NO TIENE OPCIONES VÁLIDAS
+    console.error('❌ Pregunta sin opciones válidas:', question);
+    
+    if (!question.userAnswer) {
+      question.userAnswer = 'SKIP';
+    }
+    
     return [];
   }
-
-  // ✅ Verdadero/Falso
-  if (this.isTrueFalseQuestion()) {
-    return ['Verdadero', 'Falso'];
-  }
-
-  // ✅ Selección múltiple
-  if (Array.isArray(question.options) && question.options.length > 0) {
-    const firstOption = question.options[0];
-    
-    if (typeof firstOption === 'object') {
-      // Probar con minúscula primero (formato del backend)
-      if ('text' in firstOption && firstOption.text) {
-        const optionsArray = question.options.map((opt: any) => opt.text);
-        return optionsArray;
-      }
-      // Probar con mayúscula
-      if ('Text' in firstOption && firstOption.Text) {
-        const optionsArray = question.options.map((opt: any) => opt.Text);
-        return optionsArray;
-      }
-    }
-    
-    // Si ya son strings directamente
-    if (typeof firstOption === 'string') {
-      return question.options;
-    }
-  }
-
-  // ✅ SI NO TIENE OPCIONES VÁLIDAS, SALTAR ESTA PREGUNTA
-  console.error('❌ Pregunta sin opciones válidas, saltando...', question);
-  
-  // Marcar como respondida automáticamente para poder avanzar
-  if (!question.userAnswer) {
-    question.userAnswer = 'SKIP';
-  }
-  
-  return [];
-}
 
   isTrueFalseQuestion(): boolean {
     const question = this.getCurrentQuestion();
@@ -248,143 +244,134 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   async selectAnswer(optionText: string) {
-  if (this.hasAnsweredCurrentQuestion()) {
-    console.log('Ya respondiste esta pregunta');
-    return;
-  }
-  
-  const question = this.getCurrentQuestion();
-  if (!question) return;
-
-  let normalizedAnswer: string;
-  
-  // ✅ Verdadero/Falso
-  if (this.isTrueFalseQuestion()) {
-    normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
-  } 
-  // ✅ Selección múltiple
-  else {
-    const options = this.getCurrentQuestionOptions();
-    const optionIndex = options.indexOf(optionText);
-    
-    if (optionIndex !== -1) {
-      normalizedAnswer = String.fromCharCode(65 + optionIndex);
-      console.log(`✅ Opción seleccionada: Letra ${normalizedAnswer} = "${optionText}"`);
-    } else {
-      console.error('❌ No se encontró la opción en el array');
+    if (this.hasAnsweredCurrentQuestion()) {
+      console.log('Ya respondiste esta pregunta');
       return;
     }
-  }
-  
-  question.userAnswer = normalizedAnswer;
-  
-  const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
-  
-  // ✅ LEER CONFIGURACIÓN DE CORRECCIÓN
-  const correctionConfig = localStorage.getItem('correctionConfig');
-  const showImmediateCorrection = correctionConfig 
-    ? JSON.parse(correctionConfig).immediate 
-    : true; // Por defecto: corrección inmediata
-  
-  // ✅ MOSTRAR POP-UP SOLO SI ESTÁ ACTIVADA LA CORRECCIÓN INMEDIATA Y SE EQUIVOCÓ
-  if (showImmediateCorrection && !isCorrect) {
-    await this.showExplanationAlert(question.explanation);
-  }
-  
-  await this.sendAnswerToBackend(question, normalizedAnswer);
-  this.cdr.detectChanges();
-}
+    
+    const question = this.getCurrentQuestion();
+    if (!question) return;
 
-async showExplanationAlert(explanation: string) {
-  const alert = await this.alertController.create({
-    header: '💡 Explicación',
-    message: explanation,
-    cssClass: 'explanation-alert',
-    backdropDismiss: false,
-    buttons: [
-      {
-        text: 'Entendido',
-        cssClass: 'alert-button-confirm',
-        role: 'confirm'
+    let normalizedAnswer: string;
+    
+    if (this.isTrueFalseQuestion()) {
+      normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
+    } else {
+      const options = this.getCurrentQuestionOptions();
+      const optionIndex = options.indexOf(optionText);
+      
+      if (optionIndex !== -1) {
+        normalizedAnswer = String.fromCharCode(65 + optionIndex);
+        console.log(`✅ Opción seleccionada: Letra ${normalizedAnswer} = "${optionText}"`);
+      } else {
+        console.error('❌ No se encontró la opción en el array');
+        return;
       }
-    ]
-  });
-
-  await alert.present();
-
-  // ✅ Aplicar estilos después de que el alert se presente
-  setTimeout(() => {
-    const alertElement = document.querySelector('ion-alert.explanation-alert');
-    if (alertElement) {
-      const wrapper = alertElement.shadowRoot?.querySelector('.alert-wrapper') as HTMLElement;
-      const head = alertElement.shadowRoot?.querySelector('.alert-head') as HTMLElement;
-      const message = alertElement.shadowRoot?.querySelector('.alert-message') as HTMLElement;
-      const buttonGroup = alertElement.shadowRoot?.querySelector('.alert-button-group') as HTMLElement;
-      const buttons = alertElement.shadowRoot?.querySelectorAll('.alert-button');
-
-      if (wrapper) {
-        wrapper.style.background = 'linear-gradient(135deg, rgba(255, 111, 0, 0.95) 0%, rgba(251, 146, 60, 0.95) 100%)';
-        wrapper.style.backdropFilter = 'blur(10px)';
-        wrapper.style.borderRadius = '20px';
-        wrapper.style.boxShadow = '0 8px 32px rgba(255, 111, 0, 0.5)';
-        wrapper.style.border = '2px solid rgba(255, 255, 255, 0.2)';
-        wrapper.style.maxWidth = '90%';
-      }
-
-      if (head) {
-        head.style.padding = '24px 20px 16px 20px';
-        head.style.textAlign = 'center';
-        head.style.borderBottom = '1px solid rgba(255, 255, 255, 0.2)';
-        const h2 = head.querySelector('h2');
-        if (h2) {
-          h2.style.color = 'white';
-          h2.style.fontSize = '22px';
-          h2.style.fontWeight = '700';
-          h2.style.margin = '0';
-          h2.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-        }
-      }
-
-      if (message) {
-        message.style.padding = '20px';
-        message.style.color = 'white';
-        message.style.fontSize = '16px';
-        message.style.lineHeight = '1.7';
-        message.style.textAlign = 'left';
-        message.style.maxHeight = '50vh';
-        message.style.overflowY = 'auto';
-        message.style.textShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
-      }
-
-      if (buttonGroup) {
-        buttonGroup.style.padding = '16px 20px 20px 20px';
-        buttonGroup.style.borderTop = '1px solid rgba(255, 255, 255, 0.2)';
-      }
-
-      buttons?.forEach((button) => {
-        const btn = button as HTMLElement;
-        btn.style.background = 'white';
-        btn.style.color = '#FF6F00';
-        btn.style.borderRadius = '12px';
-        btn.style.fontWeight = '700';
-        btn.style.fontSize = '16px';
-        btn.style.padding = '14px 24px';
-        btn.style.margin = '0';
-        btn.style.height = 'auto';
-        btn.style.textTransform = 'none';
-        btn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-
-        const inner = btn.querySelector('.alert-button-inner') as HTMLElement;
-        if (inner) {
-          inner.style.color = '#FF6F00';
-          inner.style.fontWeight = '700';
-        }
-      });
     }
-  }, 100);
+    
+    question.userAnswer = normalizedAnswer;
+    
+    const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+    
+    const correctionConfig = localStorage.getItem('correctionConfig');
+    const showImmediateCorrection = correctionConfig 
+      ? JSON.parse(correctionConfig).immediate 
+      : true;
+    
+    if (showImmediateCorrection && !isCorrect) {
+      await this.showExplanationAlert(question.explanation);
+    }
+    
+    await this.sendAnswerToBackend(question, normalizedAnswer);
+    this.cdr.detectChanges();
+  }
 
+  async showExplanationAlert(explanation: string) {
+    const alert = await this.alertController.create({
+      header: '💡 Explicación',
+      message: explanation,
+      cssClass: 'explanation-alert',
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: 'Entendido',
+          cssClass: 'alert-button-confirm',
+          role: 'confirm'
+        }
+      ]
+    });
 
     await alert.present();
+
+    setTimeout(() => {
+      const alertElement = document.querySelector('ion-alert.explanation-alert');
+      if (alertElement) {
+        const wrapper = alertElement.shadowRoot?.querySelector('.alert-wrapper') as HTMLElement;
+        const head = alertElement.shadowRoot?.querySelector('.alert-head') as HTMLElement;
+        const message = alertElement.shadowRoot?.querySelector('.alert-message') as HTMLElement;
+        const buttonGroup = alertElement.shadowRoot?.querySelector('.alert-button-group') as HTMLElement;
+        const buttons = alertElement.shadowRoot?.querySelectorAll('.alert-button');
+
+        if (wrapper) {
+          wrapper.style.background = 'linear-gradient(135deg, rgba(255, 111, 0, 0.95) 0%, rgba(251, 146, 60, 0.95) 100%)';
+          wrapper.style.backdropFilter = 'blur(10px)';
+          wrapper.style.borderRadius = '20px';
+          wrapper.style.boxShadow = '0 8px 32px rgba(255, 111, 0, 0.5)';
+          wrapper.style.border = '2px solid rgba(255, 255, 255, 0.2)';
+          wrapper.style.maxWidth = '90%';
+        }
+
+        if (head) {
+          head.style.padding = '24px 20px 16px 20px';
+          head.style.textAlign = 'center';
+          head.style.borderBottom = '1px solid rgba(255, 255, 255, 0.2)';
+          const h2 = head.querySelector('h2');
+          if (h2) {
+            h2.style.color = 'white';
+            h2.style.fontSize = '22px';
+            h2.style.fontWeight = '700';
+            h2.style.margin = '0';
+            h2.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+          }
+        }
+
+        if (message) {
+          message.style.padding = '20px';
+          message.style.color = 'white';
+          message.style.fontSize = '16px';
+          message.style.lineHeight = '1.7';
+          message.style.textAlign = 'left';
+          message.style.maxHeight = '50vh';
+          message.style.overflowY = 'auto';
+          message.style.textShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
+        }
+
+        if (buttonGroup) {
+          buttonGroup.style.padding = '16px 20px 20px 20px';
+          buttonGroup.style.borderTop = '1px solid rgba(255, 255, 255, 0.2)';
+        }
+
+        buttons?.forEach((button) => {
+          const btn = button as HTMLElement;
+          btn.style.background = 'white';
+          btn.style.color = '#FF6F00';
+          btn.style.borderRadius = '12px';
+          btn.style.fontWeight = '700';
+          btn.style.fontSize = '16px';
+          btn.style.padding = '14px 24px';
+          btn.style.margin = '0';
+          btn.style.height = 'auto';
+          btn.style.textTransform = 'none';
+          btn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+
+          const inner = btn.querySelector('.alert-button-inner') as HTMLElement;
+          if (inner) {
+            inner.style.color = '#FF6F00';
+            inner.style.fontWeight = '700';
+          }
+        });
+      }
+    }, 100);
   }
 
   async sendAnswerToBackend(question: Question, answer: string) {
@@ -419,24 +406,23 @@ async showExplanationAlert(explanation: string) {
   }
 
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
-  const normalizedUser = userAnswer.trim().toUpperCase();
-  const normalizedCorrect = correctAnswer.trim().toUpperCase();
-  
-  if (normalizedUser === normalizedCorrect) return true;
-  
-  // V/F comparisons
-  if ((normalizedUser === 'V' || normalizedUser === 'VERDADERO' || normalizedUser === 'TRUE') &&
-      (normalizedCorrect === 'V' || normalizedCorrect === 'VERDADERO' || normalizedCorrect === 'TRUE')) {
-    return true;
+    const normalizedUser = userAnswer.trim().toUpperCase();
+    const normalizedCorrect = correctAnswer.trim().toUpperCase();
+    
+    if (normalizedUser === normalizedCorrect) return true;
+    
+    if ((normalizedUser === 'V' || normalizedUser === 'VERDADERO' || normalizedUser === 'TRUE') &&
+        (normalizedCorrect === 'V' || normalizedCorrect === 'VERDADERO' || normalizedCorrect === 'TRUE')) {
+      return true;
+    }
+    
+    if ((normalizedUser === 'F' || normalizedUser === 'FALSO' || normalizedUser === 'FALSE') &&
+        (normalizedCorrect === 'F' || normalizedCorrect === 'FALSO' || normalizedCorrect === 'FALSE')) {
+      return true;
+    }
+    
+    return false;
   }
-  
-  if ((normalizedUser === 'F' || normalizedUser === 'FALSO' || normalizedUser === 'FALSE') &&
-      (normalizedCorrect === 'F' || normalizedCorrect === 'FALSO' || normalizedCorrect === 'FALSE')) {
-    return true;
-  }
-  
-  return false;
-}
 
   async nextQuestion() {
     if (!this.hasAnsweredCurrentQuestion()) {
@@ -472,27 +458,25 @@ async showExplanationAlert(explanation: string) {
   }
 
   async showAnswerRequiredAlert() {
-  const alert = await this.alertController.create({
-    header: 'Respuesta requerida',
-    message: 'Debes seleccionar una respuesta antes de continuar.',
-    buttons: ['OK']
-  });
-  
-  await alert.present();
-}
+    const alert = await this.alertController.create({
+      header: 'Respuesta requerida',
+      message: 'Debes seleccionar una respuesta antes de continuar.',
+      buttons: ['OK']
+    });
+    
+    await alert.present();
+  }
 
   isOptionSelected(optionText: string): boolean {
     const question = this.getCurrentQuestion();
     if (!question || !question.userAnswer) return false;
     
-    // Para V/F
     if (this.isTrueFalseQuestion()) {
       if (question.userAnswer === 'V' && optionText === 'Verdadero') return true;
       if (question.userAnswer === 'F' && optionText === 'Falso') return true;
       return false;
     }
     
-    // Para selección múltiple
     const options = this.getCurrentQuestionOptions();
     const optionIndex = options.indexOf(optionText);
     if (optionIndex !== -1) {
@@ -519,72 +503,60 @@ async showExplanationAlert(explanation: string) {
   }
 
   getOptionState(optionText: string): 'correct' | 'incorrect' | 'selected' | 'default' {
-  if (!this.hasAnsweredCurrentQuestion()) return 'default';
-  
-  // ✅ LEER CONFIGURACIÓN
-  const correctionConfig = localStorage.getItem('correctionConfig');
-  const showImmediateCorrection = correctionConfig 
-    ? JSON.parse(correctionConfig).immediate 
-    : true;
-  
-  const question = this.getCurrentQuestion();
-  if (!question) return 'default';
-
-  // ✅ SI ESTÁ EN MODO "CORRECCIÓN AL FINAL", SOLO MARCAR COMO SELECCIONADA
-  if (!showImmediateCorrection) {
-    return this.isOptionSelected(optionText) ? 'selected' : 'default';
-  }
-
-  // ✅ SI ESTÁ EN MODO "CORRECCIÓN INMEDIATA", MOSTRAR CORRECTA/INCORRECTA
-  console.log('🔍 DEBUG getOptionState:', {
-    optionText,
-    questionType: question.type,
-    correctAnswer: question.correctAnswer,
-    userAnswer: question.userAnswer
-  });
-
-  // Para VERDADERO/FALSO
-  if (this.isTrueFalseQuestion()) {
-    const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
-    const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
-                               correctAnswerNorm === 'v' || 
-                               correctAnswerNorm === 'verdadero';
+    if (!this.hasAnsweredCurrentQuestion()) return 'default';
     
-    const optionIsVerdadero = optionText === 'Verdadero';
-    const optionIsFalso = optionText === 'Falso';
+    const correctionConfig = localStorage.getItem('correctionConfig');
+    const showImmediateCorrection = correctionConfig 
+      ? JSON.parse(correctionConfig).immediate 
+      : true;
     
-    if ((optionIsVerdadero && isVerdaderoCorrect) || (optionIsFalso && !isVerdaderoCorrect)) {
-      return 'correct';
+    const question = this.getCurrentQuestion();
+    if (!question) return 'default';
+
+    if (!showImmediateCorrection) {
+      return this.isOptionSelected(optionText) ? 'selected' : 'default';
     }
+
+    if (this.isTrueFalseQuestion()) {
+      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
+      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
+                                 correctAnswerNorm === 'v' || 
+                                 correctAnswerNorm === 'verdadero';
+      
+      const optionIsVerdadero = optionText === 'Verdadero';
+      const optionIsFalso = optionText === 'Falso';
+      
+      if ((optionIsVerdadero && isVerdaderoCorrect) || (optionIsFalso && !isVerdaderoCorrect)) {
+        return 'correct';
+      }
+      
+      if (question.userAnswer === 'V' && optionIsVerdadero && !isVerdaderoCorrect) {
+        return 'incorrect';
+      }
+      if (question.userAnswer === 'F' && optionIsFalso && isVerdaderoCorrect) {
+        return 'incorrect';
+      }
+      
+      return 'default';
+    }
+
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(optionText);
     
-    if (question.userAnswer === 'V' && optionIsVerdadero && !isVerdaderoCorrect) {
-      return 'incorrect';
-    }
-    if (question.userAnswer === 'F' && optionIsFalso && isVerdaderoCorrect) {
-      return 'incorrect';
-    }
+    if (optionIndex === -1) return 'default';
+    
+    const optionLetter = String.fromCharCode(65 + optionIndex);
+    
+    const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
+    const isSelected = question.userAnswer === optionLetter;
+    
+    if (isCorrect) return 'correct';
+    if (isSelected && !isCorrect) return 'incorrect';
     
     return 'default';
   }
 
-  // Para SELECCIÓN MÚLTIPLE
-  const options = this.getCurrentQuestionOptions();
-  const optionIndex = options.indexOf(optionText);
-  
-  if (optionIndex === -1) return 'default';
-  
-  const optionLetter = String.fromCharCode(65 + optionIndex);
-  
-  const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
-  const isSelected = question.userAnswer === optionLetter;
-  
-  if (isCorrect) return 'correct';
-  if (isSelected && !isCorrect) return 'incorrect';
-  
-  return 'default';
-}
-
-getOptionIcon(option: string): string {
+  getOptionIcon(option: string): string {
     const state = this.getOptionState(option);
     if (state === 'correct') return 'checkmark-circle';
     if (state === 'incorrect') return 'close-circle';
@@ -599,73 +571,68 @@ getOptionIcon(option: string): string {
   }
 
   async finishTest() {
-  if (!this.hasAnsweredCurrentQuestion()) {
-    await this.showAnswerRequiredAlert();
-    return;
-  }
-
-  const loading = await this.loadingController.create({
-    message: 'Guardando resultados...',
-    spinner: 'crescent',
-    cssClass: 'custom-loading'
-  });
-  
-  await loading.present();
-
-  try {
-    // Calcular resultados
-    const results = this.calculateResults();
-    
-    console.log('📊 Resultados calculados:', results);
-    
-    // ✅ GUARDAR EN EL BACKEND
-    const currentSession = this.apiService.getCurrentSession();
-    if (currentSession && currentSession.testId) {
-      try {
-        const response = await this.apiService.finishTest(currentSession.testId).toPromise();
-        console.log('✅ Test guardado en BD:', response);
-      } catch (error) {
-        console.error('❌ Error guardando test en BD:', error);
-      }
+    if (!this.hasAnsweredCurrentQuestion()) {
+      await this.showAnswerRequiredAlert();
+      return;
     }
-    
-    // Guardar en localStorage para la página de resumen
-    localStorage.setItem('current_test_results', JSON.stringify(results));
-    
-    await loading.dismiss();
-    
-    // Limpiar sesión actual
-    this.apiService.clearCurrentSession();
-    
-    // Navegar a resumen
-    console.log('🎯 Navegando a resumen...');
-    await this.router.navigate(['/civil/civil-escrito/resumen-test-civil']);
-    
-  } catch (error) {
-    console.error('❌ Error finalizando test:', error);
-    await loading.dismiss();
-    
-    const alert = await this.alertController.create({
-      header: 'Error',
-      message: 'Hubo un problema al guardar los resultados. ¿Deseas intentar de nuevo?',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Reintentar',
-          handler: () => {
-            this.finishTest();
-          }
-        }
-      ]
+
+    const loading = await this.loadingController.create({
+      message: 'Guardando resultados...',
+      spinner: 'crescent',
+      cssClass: 'custom-loading'
     });
     
-    await loading.dismiss();
-    await alert.present();
+    await loading.present();
+
+    try {
+      const results = this.calculateResults();
+      
+      console.log('📊 Resultados calculados:', results);
+      
+      const currentSession = this.apiService.getCurrentSession();
+      if (currentSession && currentSession.testId) {
+        try {
+          const response = await this.apiService.finishTest(currentSession.testId).toPromise();
+          console.log('✅ Test guardado en BD:', response);
+        } catch (error) {
+          console.error('❌ Error guardando test en BD:', error);
+        }
+      }
+      
+      localStorage.setItem('current_test_results', JSON.stringify(results));
+      
+      await loading.dismiss();
+      
+      this.apiService.clearCurrentSession();
+      
+      console.log('🎯 Navegando a resumen...');
+      await this.router.navigate(['/civil/civil-escrito/resumen-test-civil']);
+      
+    } catch (error) {
+      console.error('❌ Error finalizando test:', error);
+      await loading.dismiss();
+      
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'Hubo un problema al guardar los resultados. ¿Deseas intentar de nuevo?',
+        buttons: [
+          {
+            text: 'Cancelar',
+            role: 'cancel'
+          },
+          {
+            text: 'Reintentar',
+            handler: () => {
+              this.finishTest();
+            }
+          }
+        ]
+      });
+      
+      await loading.dismiss();
+      await alert.present();
+    }
   }
-}
 
   calculateResults(): TestResults {
     let correctAnswers = 0;
@@ -674,12 +641,16 @@ getOptionIcon(option: string): string {
     const allQuestions: any[] = []; 
 
     this.questions.forEach((question, index) => {
+      if (question.userAnswer === 'SKIP') {
+        console.log(`⏭️ Pregunta ${index + 1} saltada (sin opciones), no se incluye en resultados`);
+        return;
+      }
+
       const isCorrect = this.compareAnswers(
         question.userAnswer || '',
         question.correctAnswer
       );
 
-      // ✅ Guardar información completa de TODAS las preguntas
       const questionData = {
         questionNumber: index + 1,
         questionText: question.questionText || question.text,
@@ -717,7 +688,7 @@ getOptionIcon(option: string): string {
       correctAnswers,
       incorrectAnswers,
       totalAnswered,
-      totalQuestions: this.totalQuestions,
+      totalQuestions: allQuestions.length,
       percentage,
       grade: this.getGradeFromPercentage(percentage),
       level: this.getLevelFromPercentage(percentage),
@@ -752,28 +723,69 @@ getOptionIcon(option: string): string {
     this.isLoading = true;
     this.loadSessionFromBackend();
   }
-  skipInvalidQuestions() {
-  // Verificar si la pregunta actual tiene opciones válidas
-  const options = this.getCurrentQuestionOptions();
-  
-  if (options.length === 0) {
-    console.log('⏭️ Saltando pregunta sin opciones automáticamente...');
+
+  // ✅ ACTUALIZADO: Reemplazar preguntas inválidas
+  async skipInvalidQuestions() {
+    const options = this.getCurrentQuestionOptions();
     
-    // Marcar como respondida para poder avanzar
-    const question = this.getCurrentQuestion();
-    if (question && !question.userAnswer) {
+    if (options.length === 0) {
+      console.log('⏭️ Pregunta sin opciones detectada, solicitando reemplazo...');
+      
+      const question = this.getCurrentQuestion();
+      if (!question) return;
+      
       question.userAnswer = 'SKIP';
+      
+      try {
+        const newQuestion = await this.requestReplacementQuestion();
+        
+        if (newQuestion) {
+          console.log('✅ Pregunta de reemplazo recibida:', newQuestion);
+          
+          this.questions[this.currentQuestionIndex] = this.convertSingleQuestion(newQuestion, this.currentQuestionIndex);
+          
+          this.questions[this.currentQuestionIndex].userAnswer = undefined;
+          
+          this.cdr.detectChanges();
+          
+          console.log('✅ Pregunta reemplazada exitosamente');
+        } else {
+          console.warn('⚠️ No se pudo obtener pregunta de reemplazo, saltando...');
+          this.autoSkipQuestion();
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo pregunta de reemplazo:', error);
+        this.autoSkipQuestion();
+      }
     }
-    
-    // Avanzar a la siguiente pregunta automáticamente
+  }
+
+  // ✅ NUEVO: Método para solicitar pregunta de reemplazo
+  async requestReplacementQuestion(): Promise<any> {
+    try {
+      const response = await this.apiService.getReplacementQuestion(this.testId).toPromise();
+      
+      if (response && response.success && response.question) {
+        return response.question;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error solicitando pregunta de reemplazo:', error);
+      return null;
+    }
+  }
+
+  // ✅ NUEVO: Saltar automáticamente si no hay reemplazo
+  autoSkipQuestion() {
     setTimeout(() => {
       if (this.currentQuestionIndex < this.questions.length - 1) {
-        this.nextQuestion();
+        this.currentQuestionIndex++;
+        this.currentQuestionNumber++;
+        this.skipInvalidQuestions();
       } else {
-        // Si es la última pregunta, finalizar el test
         this.finishTest();
       }
     }, 100);
   }
-}
 }
