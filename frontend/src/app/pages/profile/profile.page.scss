@@ -397,7 +397,7 @@
 }
 
 // ========================================
-// CONTADOR DE DÍAS (SIN DEGRADÉ)
+// CONTADOR DE DÍAS
 // ========================================
 
 .days-counter {
@@ -406,14 +406,14 @@
   justify-content: center;
   gap: 20px;
   padding: 20px;
-  background: #10b981;
-  border: 3px solid #059669;
+  background: white;
+  border: 3px solid #10b981;
   border-radius: 16px;
   margin-bottom: 16px;
 
   .counter-btn {
     background: white;
-    border: 2px solid #059669;
+    border: 2px solid #10b981;
     border-radius: 50%;
     width: 48px;
     height: 48px;
@@ -452,13 +452,13 @@
     .counter-number {
       font-size: 48px;
       font-weight: 700;
-      color: white;
+      color: #10b981;
       line-height: 1;
     }
 
     .counter-label {
       font-size: 14px;
-      color: white;
+      color: #64748b;
       margin-top: 5px;
       font-weight: 500;
     }
@@ -563,21 +563,21 @@
   align-items: flex-start;
   gap: 10px;
   padding: 12px 16px;
-  background: #dbeafe;
-  border-left: 4px solid #3b82f6;
+  background: #d1fae5;
+  border-left: 4px solid #10b981;
   border-radius: 8px;
   margin-bottom: 16px;
 
   ion-icon {
     font-size: 20px;
-    color: #3b82f6;
+    color: #10b981;
     flex-shrink: 0;
     margin-top: 2px;
   }
 
   span {
     font-size: 13px;
-    color: #1e40af;
+    color: #047857;
     line-height: 1.5;
   }
 }
@@ -703,17 +703,34 @@
       width: 48px;
       height: 48px;
       border-radius: 12px;
+      border: 2px solid #10b981;
+      background: white;
       display: flex;
       align-items: center;
       justify-content: center;
       
       ion-icon {
         font-size: 24px;
-        color: white;
+        color: #10b981;
       }
       
-      &.dashboard { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-      &.achievements { background: linear-gradient(135deg, #10b981, #059669); }
+      &.dashboard { 
+        border-color: #10b981;
+        background: white;
+        
+        ion-icon {
+          color: #10b981;
+        }
+      }
+      
+      &.achievements { 
+        border-color: #10b981;
+        background: white;
+        
+        ion-icon {
+          color: #10b981;
+        }
+      }
     }
     
     .action-text {
@@ -760,7 +777,48 @@
   border: 1px solid #f1f5f9;
   
   &:hover {
-    background: #f8fafc;
+    background: #ffffff;
+  }
+}
+
+// ========================================
+// BOTÓN CERRAR SESIÓN
+// ========================================
+.logout-section {
+  margin-top: 30px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: flex-end;
+  
+  .logout-btn {
+    width: auto;
+    padding: 10px 20px;
+    background: transparent;
+    color: #ef4444;
+    border: 2px solid #ef4444;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    ion-icon {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: #ef4444;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 }
 
@@ -792,4 +850,7 @@
       }
     }
   }
+
+  
+  
 }

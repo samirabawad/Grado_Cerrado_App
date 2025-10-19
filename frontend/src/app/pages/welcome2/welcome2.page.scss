@@ -11,7 +11,7 @@
   justify-content: center;
   align-items: center;
   position: relative;
-  background-color: #FFD700;
+  background-color: #E8E8E8;
 }
 
 // Logo igual que welcome original
@@ -46,68 +46,67 @@
 .action-btn {
   width: 280px;
   padding: 16px 20px;
-  border: 2px solid #4A90A4; // Borde azul
-  border-radius: 10px;
-  background: transparent; // Fondo transparente
-  color: #4A90A4; // Texto azul
+  border: none;
+  border-radius: 12px;
+  background: #10b981;
+  color: white;
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   
   &:hover {
-    background: #4A90A4;
-    color: white;
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
   }
   
   &:active {
-    background: #3A7A8E;
-    color: white;
+    background: #047857;
+    transform: translateY(0);
   }
 }
 
-// Mapache igual que welcome
-.mascot-container {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.mascot-image {
-  max-width: 100%;
-  max-height: 400px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
+// Mapache de extremo a extremo
+  .mascot-container {
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    z-index: 0;
+    display: flex;
+    justify-content: center;
+  
+  .mascot-image {
+    width: 100vw !important;
+    height: 300px !important;
+    object-fit: cover;
+    object-position: center bottom;
+  }
 }
 
 // Responsive
 @media (max-width: 480px) {
-  .logo-container {
-    padding: 40px 20px 20px 20px;
-    
-    .main-logo {
-      max-width: 85%;
-      max-height: 150px;
-    }
+  .logo-container .main-logo {
+    width: auto !important; 
+    max-width: 85% !important; 
+    max-height: 200px !important;  
   }
   
   .buttons-container {
-    bottom: 220px;
+    bottom: 180px;
   }
   
   .action-btn {
     width: 250px;
-    padding: 14px 16px;
+    padding: 16px 20px;
     font-size: 16px;
   }
   
-  .mascot-image {
-    max-width: 85%;
-    max-height: 350px;
+  .mascot-container .mascot-image {
+    width: 100vw !important;
+    height: 350px !important;
   }
 }

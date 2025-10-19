@@ -242,4 +242,42 @@
       }
     }
   }
+
+  // ========================================
+  // BOTÓN HISTORIAL COMPLETO
+  // ========================================
+  .history-button-section {
+    padding: 0 20px;
+    margin: 20px 0;
+
+    .history-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 4px solid #10b981;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      }
+
+      .history-icon {
+        font-size: 48px;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1f2937;
+      }
+    }
+  }
 }

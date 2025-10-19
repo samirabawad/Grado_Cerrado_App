@@ -4,6 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -25,9 +26,10 @@ export class HomePage implements OnInit {
   isLoading: boolean = true;
 
   constructor(
-    private router: Router,
-    private apiService: ApiService
-  ) { }
+  private router: Router,
+  private apiService: ApiService,
+  private alertController: AlertController
+) {}
 
   ngOnInit() {
     this.loadUserData();
@@ -125,4 +127,14 @@ export class HomePage implements OnInit {
   goToRacha() {
   this.router.navigate(['/racha']);
 }
+
+async goToFullHistory() {
+  const alert = await this.alertController.create({
+    header: 'Página en Construcción',
+    message: 'Esta funcionalidad estará disponible próximamente.',
+    buttons: ['OK']
+  });
+  await alert.present();
+}
+
 }
