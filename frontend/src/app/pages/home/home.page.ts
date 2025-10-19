@@ -4,6 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -25,12 +26,13 @@ export class HomePage implements OnInit {
   isLoading: boolean = true;
 
   constructor(
-    private router: Router,
-    private apiService: ApiService
-  ) { }
+  private router: Router,
+  private apiService: ApiService,
+  private alertController: AlertController
+) {}
 
   ngOnInit() {
-  this.loadUserData();
+    this.loadUserData();
   }
 
   ionViewWillEnter() {
@@ -77,6 +79,11 @@ export class HomePage implements OnInit {
     }
   }
 
+  getFirstName(): string {
+    if (!this.userName) return 'Estudiante';
+    return this.userName.split(' ')[0];
+  }
+
   getProgressMessage(): string {
     if (this.totalSessions === 0) {
       return '¡Comienza tu primera sesión!';
@@ -88,15 +95,19 @@ export class HomePage implements OnInit {
   }
 
   getProgressSubtitle(): string {
-    if (this.totalSessions === 0) {
-      return 'Aún no tienes progreso';
-    } else if (this.userStreak === 0) {
-      return 'Mantén una racha estudiando diario';
-    } else if (this.userStreak === 1) {
-      return '¡Racha de 1 día!';
-    } else {
-      return `¡Racha de ${this.userStreak} días!`;
+    const sessions = this.totalSessions ?? 0;
+    const streak = this.userStreak ?? 0;
+
+    if (sessions <= 0) {
+      return 'Aún no registras progreso. ¡Empieza tu primera sesión!';
     }
+    if (streak <= 0) {
+      return 'Retoma tu racha hoy.';
+    }
+    if (streak === 1) {
+      return '¡Llevas 1 día seguido!';
+    }
+    return `¡Llevas ${streak} días seguidos!`;
   }
 
   getProgressPercentage(): number {
@@ -113,4 +124,17 @@ export class HomePage implements OnInit {
     console.log('Navegando a Procesal...');
     this.router.navigate(['/civil']);
   }
+  goToRacha() {
+  this.router.navigate(['/racha']);
+}
+
+async goToFullHistory() {
+  const alert = await this.alertController.create({
+    header: 'Página en Construcción',
+    message: 'Esta funcionalidad estará disponible próximamente.',
+    buttons: ['OK']
+  });
+  await alert.present();
+}
+
 }

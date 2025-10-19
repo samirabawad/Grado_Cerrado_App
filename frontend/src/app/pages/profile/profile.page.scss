@@ -1,130 +1,38 @@
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
 .profile-content {
   --background: #f8f9fa;
 }
 
 // ========================================
-// HEADER CON MAPACHE (ESTILO LOGIN)
+// HEADER ESTILO DASHBOARD
 // ========================================
-.header-section {
-  position: relative;
-  background: #f8f9fa;
-  padding-bottom: 40px;
-  
-  .background-image {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100vw;
-    height: auto;
-    z-index: 1;
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #d1d5db;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-    .superior-gris {
-      width: 100%;
-      height: auto;
-      object-fit: contain;
-    }
+  .back-icon {
+    font-size: 24px;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    margin-right: 12px;
   }
-  
-  .back-button {
-    position: absolute;
-    left: 20px;
-    top: 40px;
-    z-index: 10;
-    --color: #333;
-    --padding-start: 0;
-    --padding-end: 0;
-  }
-  
-  .profile-header {
-    position: relative;
-    z-index: 2;
-    padding: 80px 20px 30px 20px;
-    text-align: center;
-    
-    .avatar-container {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 20px auto;
-      cursor: pointer;
-      
-      .avatar-image {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 4px solid white;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        object-fit: cover;
-        background: white;
-        transition: all 0.3s ease;
-      }
-      
-      .avatar-edit-badge {
-        position: absolute;
-        bottom: 5px;
-        right: 5px;
-        width: 32px;
-        height: 32px;
-        background: #10b981;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        
-        ion-icon {
-          color: white;
-          font-size: 16px;
-        }
-      }
-      
-      &:hover {
-        .avatar-image {
-          transform: scale(1.05);
-        }
-      }
-    }
-    
-    h1 {
-      margin: 0 0 8px 0;
-      font-size: 26px;
-      font-weight: 800;
-      color: #1e293b;
-    }
-    
-    .user-email {
-      margin: 0 0 20px 0;
-      font-size: 14px;
-      color: #64748b;
-    }
-    
-    .edit-profile-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      background: white;
-      border: 2px solid #e5e7eb;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #64748b;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      
-      ion-icon {
-        font-size: 18px;
-      }
-      
-      &:hover {
-        border-color: #10b981;
-        color: #10b981;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-      }
-    }
+
+  .header-title {
+    color: rgb(0, 0, 0);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
   }
 }
 
@@ -132,16 +40,16 @@
 // CONTENIDO SCROLLABLE
 // ========================================
 .scrollable-content {
+  margin-top: 60px;
+  padding: 30px 20px 100px 20px;
   background: white;
   border-radius: 25px 25px 0 0;
-  margin-top: -20px;
-  padding: 30px 20px 100px 20px;
   position: relative;
   z-index: 2;
 }
 
 // ========================================
-// ESTADÍSTICAS RÁPIDAS
+// ESTADÍSTICAS RÁPIDAS (SIN DEGRADÉ)
 // ========================================
 .quick-stats {
   display: grid;
@@ -150,7 +58,8 @@
   margin-bottom: 30px;
   
   .stat-box {
-    background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+    background: white;
+    border: 2px solid #e5e7eb;
     border-radius: 16px;
     padding: 20px 12px;
     text-align: center;
@@ -159,10 +68,7 @@
     .stat-icon {
       font-size: 28px;
       margin-bottom: 8px;
-      
-      &.streak { color: #f97316; }
-      &.trophy { color: #10b981; }
-      &.time { color: #3b82f6; }
+      color: #10b981;
     }
     
     h3 {
@@ -184,16 +90,42 @@
 // ========================================
 // SECCIONES
 // ========================================
+
 .section {
-  margin-bottom: 30px;
+  margin-bottom: 16px;
   
   .section-title {
-    margin: 0 0 15px 0;
-    font-size: 16px;
+    background: white;
+    padding: 20px;
+    margin: 0;
+    font-size: 17px;
     font-weight: 700;
-    color: #1e293b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: #1f2937;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-left: 4px solid #10b981;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    ion-icon {
+      font-size: 24px;
+      color: #10b981;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      background: #f9fafb;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
   }
 }
 
@@ -206,11 +138,97 @@
   padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #f1f5f9;
+  margin-top: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
   
-  .info-item {
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  > ion-icon:first-child {
+    font-size: 24px;
+    color: #10b981;
+    flex-shrink: 0;
+  }
+  
+  .info-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .info-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    
+    .info-value {
+      font-size: 15px;
+      color: #1e293b;
+      font-weight: 600;
+    }
+  }
+  
+  .edit-icon {
+    font-size: 20px;
+    color: #94a3b8;
+  }
+  
+  &.editable {
+    cursor: pointer;
+    transition: background 0.2s;
+    
+    &:hover {
+      background: #f8fafc;
+    }
+  }
+}
+
+.last-update-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  margin: 8px;
+  
+  ion-icon {
+    font-size: 18px;
+    color: #3b82f6;
+  }
+  
+  span {
+    font-size: 12px;
+    color: #1e40af;
+    font-weight: 500;
+  }
+}
+
+// ========================================
+// SETTINGS CARD (USADO EN MODO ADAPTATIVO Y FRECUENCIA)
+// ========================================
+.settings-card {
+  background: white;
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
+  margin: 16px 0;
+  
+  
+  .setting-item {
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: space-between;
     padding: 14px;
     border-bottom: 1px solid #f1f5f9;
     
@@ -218,74 +236,501 @@
       border-bottom: none;
     }
     
-    ion-icon {
-      font-size: 22px;
-      color: #64748b;
-      flex-shrink: 0;
-    }
-    
-    .info-text {
-      flex: 1;
+    .setting-info {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-      
-      .info-label {
-        font-size: 12px;
-        color: #94a3b8;
-        font-weight: 500;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+
+      .setting-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 4px;
+
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+
+      .setting-description {
+        font-size: 13px;
+        color: #64748b;
+        margin-left: 28px;
+        line-height: 1.4;
       }
       
-      .info-value {
+      ion-icon {
+        font-size: 22px;
+        color: #10b981;
+      }
+      
+      span {
         font-size: 14px;
+        font-weight: 500;
         color: #1e293b;
-        font-weight: 600;
+      }
+    }
+    
+    ion-toggle {
+      --background: #e5e7eb;
+      --background-checked: #10b981;
+      --handle-background: white;
+      --handle-background-checked: white;
+      margin-left: 12px;
+    }
+  }
+}
+
+// Información cuando está activo
+.adaptive-info {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+
+  ion-note {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+
+    ion-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #059669;
+      font-size: 14px;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+    }
+  }
+}
+
+// Información cuando está desactivado
+.adaptive-info-disabled {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #64748b;
+
+  ion-note {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+
+    ion-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+}
+
+// ========================================
+// FRECUENCIA DE ESTUDIO - SUBSECCIONES
+// ========================================
+
+.frequency-subsection {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 12px 0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.subsection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 8px;
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  .subsection-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+
+    ion-icon {
+      font-size: 20px;
+      color: #10b981;
+    }
+  }
+
+  > ion-icon {
+    font-size: 20px;
+    color: #94a3b8;
+  }
+}
+
+.subsection-content {
+  padding: 16px 12px;
+}
+
+.subsection-description {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+// ========================================
+// CONTADOR DE DÍAS
+// ========================================
+
+.days-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border: 3px solid #10b981;
+  border-radius: 16px;
+  margin-bottom: 16px;
+
+  .counter-btn {
+    background: white;
+    border: 2px solid #10b981;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    ion-icon {
+      font-size: 32px;
+      color: #10b981;
+    }
+
+    &:hover:not(:disabled) {
+      background: #f0fdf4;
+      transform: scale(1.1);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  .counter-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+
+    .counter-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: #10b981;
+      line-height: 1;
+    }
+
+    .counter-label {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+  }
+}
+
+// ========================================
+// OPCIONES PREDEFINIDAS
+// ========================================
+
+.frequency-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+
+  .preset-btn {
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #10b981;
+      color: #10b981;
+      transform: translateY(-2px);
+    }
+
+    &.active {
+      border-color: #10b981;
+      background: #10b981;
+      color: white;
+      font-weight: 600;
+    }
+  }
+}
+
+
+// ========================================
+// SELECTOR DE DÍAS
+// ========================================
+
+.days-selector {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+
+  .day-btn {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    .day-letter {
+      font-size: 16px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .day-name {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    &:hover {
+      border-color: #10b981;
+      transform: translateY(-2px);
+    }
+
+    &.selected {
+      border-color: #10b981;
+      background: #10b981;
+      
+      .day-letter,
+      .day-name {
+        color: white;
       }
     }
   }
 }
 
 // ========================================
-// TARJETAS DE ACCIÓN
+// NOTA INFORMATIVA
 // ========================================
+
+.info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #d1fae5;
+  border-left: 4px solid #10b981;
+  border-radius: 8px;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 20px;
+    color: #10b981;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  span {
+    font-size: 13px;
+    color: #047857;
+    line-height: 1.5;
+  }
+}
+
+// ========================================
+// SELECTOR DE HORA
+// ========================================
+
+.time-picker-container {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+
+  .time-label {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .time-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+
+    .time-select {
+      padding: 10px 16px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: #10b981;
+      }
+    }
+
+    .time-separator {
+      font-size: 24px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .time-icon {
+      font-size: 24px;
+      color: #10b981;
+      margin-left: 8px;
+    }
+  }
+}
+
+// ========================================
+// BOTÓN GUARDAR
+// ========================================
+
+.save-button {
+  width: 100%;
+  padding: 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 24px;
+
+  ion-icon {
+    font-size: 20px;
+  }
+
+  &:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  &:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+}
+
+// ========================================
+// PROGRESO Y LOGROS
+// ========================================
+
 .action-cards {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 12px;
   
   .action-card {
     background: white;
     border-radius: 16px;
-    padding: 18px;
+    padding: 20px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     border: 1px solid #f1f5f9;
     cursor: pointer;
     transition: all 0.3s ease;
     
     &:hover {
-      transform: translateX(5px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
     
     .action-icon {
       width: 48px;
       height: 48px;
       border-radius: 12px;
+      border: 2px solid #10b981;
+      background: white;
       display: flex;
       align-items: center;
       justify-content: center;
       
       ion-icon {
         font-size: 24px;
-        color: white;
+        color: #10b981;
       }
       
-      &.dashboard { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-      &.achievements { background: linear-gradient(135deg, #10b981, #059669); }
-      &.certificates { background: linear-gradient(135deg, #f59e0b, #d97706); }
+      &.dashboard { 
+        border-color: #10b981;
+        background: white;
+        
+        ion-icon {
+          color: #10b981;
+        }
+      }
+      
+      &.achievements { 
+        border-color: #10b981;
+        background: white;
+        
+        ion-icon {
+          color: #10b981;
+        }
+      }
     }
     
     .action-text {
@@ -315,121 +760,65 @@
 // ========================================
 // CONFIGURACIÓN
 // ========================================
-.settings-card {
+
+.settings-list {
+  margin-top: 12px;
+}
+
+.setting-item.action {
+  cursor: pointer;
   background: white;
-  border-radius: 16px;
-  padding: 8px;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #f1f5f9;
   
-  .setting-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px;
-    border-bottom: 1px solid #f1f5f9;
-    
-    &:last-child {
-      border-bottom: none;
-    }
-    
-    .setting-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      
-      ion-icon {
-        font-size: 22px;
-        color: #64748b;
-      }
-      
-      span {
-        font-size: 14px;
-        font-weight: 500;
-        color: #1e293b;
-      }
-    }
-    
-    ion-toggle {
-      --background: #e5e7eb;
-      --background-checked: #10b981;
-      --handle-background: white;
-      --handle-background-checked: white;
-    }
-  }
-}
-
-// ========================================
-// BOTONES DE AYUDA
-// ========================================
-.help-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  
-  .help-btn {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    
-    ion-icon {
-      font-size: 22px;
-    }
-    
-    &:hover {
-      border-color: #3b82f6;
-      color: #3b82f6;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-    }
+  &:hover {
+    background: #ffffff;
   }
 }
 
 // ========================================
 // BOTÓN CERRAR SESIÓN
 // ========================================
-.logout-btn {
-  width: 100%;
-  background: white;
-  border: 2px solid #ef4444;
-  border-radius: 16px;
-  padding: 16px;
+.logout-section {
+  margin-top: 30px;
+  padding: 0 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #ef4444;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  justify-content: flex-end;
   
-  ion-icon {
-    font-size: 20px;
-  }
-  
-  &:hover {
-    background: #ef4444;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-  }
-}
+  .logout-btn {
+    width: auto;
+    padding: 10px 20px;
+    background: transparent;
+    color: #ef4444;
+    border: 2px solid #ef4444;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 
-.setting-item.action {
-  cursor: pointer;
-  
-  &:hover {
-    background: #f8fafc;
+    ion-icon {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: #ef4444;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 }
 
@@ -444,26 +833,6 @@
 // RESPONSIVE
 // ========================================
 @media (max-width: 768px) {
-  .header-section {
-    .profile-header {
-      padding: 70px 15px 25px 15px;
-      
-      .avatar-container {
-        width: 100px;
-        height: 100px;
-        
-        .avatar-image {
-          width: 100px;
-          height: 100px;
-        }
-      }
-      
-      h1 {
-        font-size: 22px;
-      }
-    }
-  }
-  
   .scrollable-content {
     padding: 25px 15px 100px 15px;
   }
@@ -481,4 +850,76 @@
       }
     }
   }
+
+  // ========================================
+  // CONFIGURACIÓN DE CORRECCIÓN
+  // ========================================
+  .correction-info {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+
+    ion-note {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+
+      ion-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: #10b981;
+      }
+
+      strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #059669;
+        font-size: 14px;
+      }
+
+      p {
+        margin: 0;
+        color: #64748b;
+      }
+    }
+  }
+
+  .correction-info-disabled {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #64748b;
+
+    ion-note {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+
+      ion-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: #64748b;
+      }
+
+      strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #475569;
+        font-size: 14px;
+      }
+
+      p {
+        margin: 0;
+        color: #64748b;
+      }
+    }
+  }
+  
 }

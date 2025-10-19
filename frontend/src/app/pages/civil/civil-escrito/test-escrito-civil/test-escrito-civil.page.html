@@ -1,93 +1,105 @@
 <ion-content class="test-content">
-  <!-- Header personalizado -->
-  <div class="custom-header-section">
-    <div class="orange-background">
-      <!-- Imagen de extremo a extremo -->
-      <div class="derecho-civil-container-full">
-        <img src="assets/image/civil/logo_derecho_civil_escrito.png" alt="Derecho Civil Escrito" class="derecho-civil-image-responsive">
-      </div>
-    </div>
+  <!-- ✅ HEADER IGUAL QUE CIVIL.PAGE -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="exitTest()"></ion-icon>
+    <h1 class="header-title">Derecho Civil</h1>
   </div>
 
   <!-- Contenido principal -->
-  <div class="content-area" *ngIf="getCurrentQuestion()">
+  <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
     
-    <!-- Progreso y número de pregunta -->
-    <div class="progress-section">
-      <div class="progress-text">Pregunta {{ currentQuestionNumber }} de {{ totalQuestions }}</div>
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="getProgress()"></div>
+    <!-- ✅ PUNTITOS DE PROGRESO -->
+    <div class="progress-dots">
+      <div 
+        *ngFor="let q of questions; let i = index"
+        class="dot"
+        [class.completed]="i < currentQuestionIndex"
+        [class.current]="i === currentQuestionIndex">
       </div>
     </div>
 
-    <!-- Chip de categoría -->
-    <div class="category-chip" [style.background-color]="getCategoryColor()">
-      <ion-icon name="document-text"></ion-icon>
-      <span>Pregunta {{ currentQuestionNumber }} de {{ totalQuestions }} • {{ getCurrentQuestionCategory() }}</span>
-    </div>
-
-    <!-- Chip verde de categoría -->
-    <div class="category-badge">
-      <span>{{ getCurrentQuestionCategory() }}</span>
-    </div>
-
-    <!-- Número de pregunta -->
-    <div class="question-number">
-      <h2>Pregunta {{ currentQuestionNumber }}</h2>
+    <!-- ✅ CATEGORÍA REAL DE LA BD -->
+    <div class="category-chip">
+      {{ getCurrentQuestionCategory() }}
     </div>
 
     <!-- Texto de la pregunta -->
     <div class="question-text">
-      <p>{{ getCurrentQuestionText() }}</p>
+      <p><strong>{{ getCurrentQuestionText() }}</strong></p>
     </div>
 
-    <!-- Opciones de respuesta con feedback visual -->
+    <!-- Opciones de respuesta -->
     <div class="options-container">
       <div 
-        *ngFor="let option of getCurrentQuestionOptions()"
-        class="option-card"
-        [class.selected]="isOptionSelected(option.id) && !hasAnsweredCurrentQuestion()"
-        [class.correct]="getOptionState(option.id) === 'correct'"
-        [class.incorrect]="getOptionState(option.id) === 'incorrect'"
+        *ngFor="let option of getCurrentQuestionOptions(); let i = index"
+        class="option-button"
+        [class.selected]="getOptionState(option) === 'selected'"        
+        [class.correct]="getOptionState(option) === 'correct'"
+        [class.incorrect]="getOptionState(option) === 'incorrect'"
         [class.disabled]="!canSelectOption()"
-        (click)="selectAnswer(option.id)">
+        (click)="selectAnswer(option)">
         
-        <div class="option-letter">{{ option.letter || option.id }}</div>
+        <div class="option-letter">{{ getOptionLetter(i) }}</div>
+        <div class="option-text">{{ option }}</div>
 
-        <div class="option-text">{{ option.text }}</div>
-        
-        <!-- Ícono de feedback (checkmark o cruz) -->
-        <div class="option-feedback" *ngIf="shouldShowOptionIcon(option.id)">
-          <ion-icon 
-            [name]="getOptionIcon(option.id)"
-            [style.color]="getOptionIconColor(option.id)">
-          </ion-icon>
-        </div>
+        <ion-icon 
+          *ngIf="shouldShowOptionIcon(option)"
+          [name]="getOptionIcon(option)"
+          [style.color]="getOptionIconColor(option)"
+          class="option-icon">
+        </ion-icon>
       </div>
     </div>
 
-    <!-- Explicación de la respuesta (mostrar después de responder) -->
-    <div class="explanation-container" *ngIf="hasAnsweredCurrentQuestion() && getCurrentQuestion()?.explanation">
-      <div class="explanation-header">
-        <ion-icon name="bulb" color="warning"></ion-icon>
-        <span>Explicación</span>
-      </div>
-      <div class="explanation-text">
-        {{ getCurrentQuestion()?.explanation }}
-      </div>
-    </div>
-
-    <!-- Botón justo después de la explicación -->
-    <div class="static-next-container" *ngIf="hasSelectedAnswer()">
+    <!-- Botones de navegación -->
+    <div class="navigation-buttons">
       <ion-button 
-        expand="block" 
-        shape="round" 
-        class="next-button-static"
-        (click)="nextQuestion()">
-        <ion-icon name="checkmark" slot="start"></ion-icon>
-        {{ currentQuestionIndex < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar Test' }}
+        *ngIf="currentQuestionIndex > 0"
+        fill="outline" 
+        (click)="previousQuestion()"
+        class="nav-btn">
+        <ion-icon name="chevron-back" slot="start"></ion-icon>
+        Anterior
+      </ion-button>
+
+      <ion-button 
+        *ngIf="currentQuestionIndex < totalQuestions - 1"
+        (click)="nextQuestion()"
+        class="nav-btn primary">
+        Siguiente
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-button>
+
+      <ion-button 
+        *ngIf="currentQuestionIndex === totalQuestions - 1"
+        (click)="finishTest()"
+        class="nav-btn finish">
+        Finalizar Test
+        <ion-icon name="checkmark-circle" slot="end"></ion-icon>
       </ion-button>
     </div>
 
+    <!-- Botón para abandonar -->
+    <div class="exit-button-container">
+      <button class="exit-btn" (click)="exitTest()">
+        <ion-icon name="exit-outline"></ion-icon>
+        Abandonar test
+      </button>
+    </div>
+
   </div>
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>Cargando preguntas...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="loadingError && !isLoading" class="error-container">
+    <ion-icon name="alert-circle"></ion-icon>
+    <p>Error al cargar el test</p>
+    <ion-button (click)="retryLoading()">Reintentar</ion-button>
+  </div>
+
 </ion-content>

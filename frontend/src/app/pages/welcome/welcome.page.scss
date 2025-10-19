@@ -1,5 +1,5 @@
 .welcome-content {
-  --background: #FFD102; // Color amarillo exacto de tu mockup
+  --background: #E8E8E8;
 }
 
 .welcome-container {
@@ -10,7 +10,7 @@
   justify-content: center;
   align-items: center;
   position: relative;
-  background-color: #FFD102;
+  background-color: #E8E8E8;
 }
 
 .logo-container {
@@ -22,9 +22,9 @@
 }
 
 .main-logo {
-  max-width: 80% !important;  // Cambiar de 200% a 80%
-  max-height: 250px !important;  // Aumentar de 200px a 250px
-  width: auto !important;  // Cambiar de 100px a auto
+  max-width: 80% !important; 
+  max-height: 250px !important;  
+  width: auto !important;  
   height: auto;
   object-fit: contain;
 }
@@ -51,9 +51,9 @@
 // Responsive
 @media (max-width: 480px) {
   .logo-container .main-logo {
-    width: auto !important;  // Cambiar de 280px a auto
-    max-width: 85% !important;  // Agregar max-width
-    max-height: 200px !important;  // Agregar max-height
+    width: auto !important; 
+    max-width: 85% !important; 
+    max-height: 200px !important;  
   }
   
   .buttons-container {
