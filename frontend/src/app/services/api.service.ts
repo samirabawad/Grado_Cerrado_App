@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-
+import { environment } from 'src/environments/environment';
 // ========================================
 // INTERFACES 
 // ========================================
@@ -61,7 +60,7 @@ export interface CumplimientoResponse {
   providedIn: 'root'
 })
 export class ApiService {
-  private API_URL = 'http://localhost:5183/api';
+  private API_URL = environment.apiUrl;
   private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
   
   // ✅ NUEVO: BehaviorSubject para manejar la sesión actual
@@ -84,7 +83,7 @@ export class ApiService {
   // ========================================
 
   registerUser(userData: { name: string, email: string, password: string }): Observable<any> {
-    const url = `${this.API_URL}/auth/register`;
+    const url = `${this.API_URL}/Auth/register`;
     
     if (!userData.name || !userData.email || !userData.password) {
       console.error('Datos incompletos para registro:', userData);
@@ -122,7 +121,7 @@ export class ApiService {
   }
 
   loginUser(loginData: { email: string, password: string }): Observable<any> {
-    const url = `${this.API_URL}/auth/login`;
+    const url = `${this.API_URL}/Auth/login`;  // ✅ CORRECTO: 'Auth' con mayúscula
     
     console.log('Enviando login a:', url, { email: loginData.email });
     

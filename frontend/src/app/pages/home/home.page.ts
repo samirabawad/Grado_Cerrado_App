@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
-import { AlertController } from '@ionic/angular';
+import { PushNotificationService } from 'src/app/services/push-notification.service';
 
 @Component({
   selector: 'app-home',
@@ -26,13 +26,20 @@ export class HomePage implements OnInit {
   isLoading: boolean = true;
 
   constructor(
-  private router: Router,
-  private apiService: ApiService,
-  private alertController: AlertController
+
+    private router: Router,
+    private apiService: ApiService,
+    private pushService: PushNotificationService
+    private alertController: AlertController
 ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.loadUserData();
+    // Obtener ID del estudiante (desde tu AuthService)
+    const estudianteId = 1; // O desde localStorage/AuthService
+    
+    // Inicializar notificaciones
+    await this.pushService.initializePushNotifications(estudianteId);
   }
 
   ionViewWillEnter() {
