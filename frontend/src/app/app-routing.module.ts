@@ -61,23 +61,12 @@ const routes: Routes = [
   },
 
   // ========================================
-  // NOTIFICACIONES, SETTINGS, RACHA, PERFIL
+  // NOTIFICACIONES
   // ========================================
+
   {
     path: 'notifications',
     loadComponent: () => import('./pages/notifications/notifications.page').then(m => m.NotificationsPage)
-  },
-  {
-    path: 'settings',
-    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage)
-  },
-  {
-    path: 'racha',
-    loadComponent: () => import('./pages/racha/racha.page').then(m => m.RachaPage)
-  },
-  {
-    path: 'profile',
-    loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
   },
 
   // ========================================

@@ -6,106 +6,33 @@
 }
 
 // ========================================
-// HEADER FIJO
+// HEADER ESTILO DASHBOARD
 // ========================================
-.header-section {
+.dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  height: 60px;
+  background: #d1d5db;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
   z-index: 1000;
-  height: 160px;
-  
-  .background-image {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100vw;
-    height: auto;
-    z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-    .superior-gris {
-      width: 100%;
-      height: auto;
-      object-fit: contain;
-    }
+  .back-icon {
+    font-size: 24px;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    margin-right: 12px;
   }
-  
-  .header-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    padding: 35px 20px 20px 20px;
-    
-    .back-button {
-      --color: #333;
-      --padding-start: 0;
-      --padding-end: 0;
-      margin: 0;
-      position: absolute;
-      left: 20px;
-    }
-    
-    h1 {
-      flex: 1;
-      margin: 0;
-      font-size: 24px;
-      font-weight: 800;
-      color: #222;
-      text-align: center;
-    }
-    
-    .header-right {
-      position: absolute;
-      right: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      
-      .config-btn {
-        --color: #666;
-        --padding-start: 0;
-        --padding-end: 0;
-        margin: 0;
-        
-        ion-icon {
-          font-size: 24px;
-        }
-      }
-      
-      .bell-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        
-        .bell-icon {
-          font-size: 28px;
-          color: #666;
-        }
-        
-        .notification-badge {
-          position: absolute;
-          top: -4px;
-          right: -6px;
-          background: #f97316;
-          color: white;
-          min-width: 18px;
-          height: 18px;
-          border-radius: 9px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 11px;
-          font-weight: 700;
-          padding: 0 5px;
-          border: 2px solid #f8f9fa;
-          box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
-        }
-      }
-    }
+
+  .header-title {
+    color: rgb(0, 0, 0);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
   }
 }
 
@@ -113,204 +40,400 @@
 // CONTENIDO SCROLLABLE
 // ========================================
 .scrollable-content {
-  margin-top: 160px;
+  margin-top: 60px;
   padding: 20px;
+  padding-bottom: 100px;
   background: white;
   border-radius: 25px 25px 0 0;
-  min-height: calc(100vh - 160px);
+  min-height: calc(100vh - 60px);
+}
+
+// ========================================
+// SECCIONES EXPANDIBLES (ESTILO PROFILE)
+// ========================================
+.section {
+  margin-bottom: 16px;
+  
+  .section-title {
+    background: white;
+    padding: 20px;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1f2937;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-left: 4px solid #10b981;
+    transition: all 0.3s ease;
+    user-select: none;
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    ion-icon {
+      font-size: 24px;
+      color: #10b981;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      background: #f9fafb;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+  }
 }
 
 // ========================================
 // LISTA DE NOTIFICACIONES
 // ========================================
-.notifications-list {
-  .list-header {
+.list-header {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+  
+  .action-btn {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
     
-    .action-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border: 1px solid #e5e7eb;
-      background: white;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #64748b;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      
-      ion-icon {
-        font-size: 16px;
-      }
+    ion-icon {
+      font-size: 16px;
+    }
+    
+    &:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    &.danger {
+      color: #ef4444;
+      border-color: #fee2e2;
       
       &:hover {
-        border-color: #3b82f6;
-        color: #3b82f6;
-      }
-      
-      &.danger:hover {
-        border-color: #ef4444;
-        color: #ef4444;
+        background: #fef2f2;
+        border-color: #fecaca;
       }
     }
   }
+}
+
+.notifications-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.notification-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
   
-  .notifications-container {
+  &.unread {
+    background: #f0f9ff;
+    border-left: 4px solid #10b981;
+  }
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  .notification-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     
-    .notification-card {
-      position: relative;
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+  
+  .notification-content {
+    flex: 1;
+    
+    h3 {
+      margin: 0 0 4px 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    
+    p {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+    
+    .notification-time {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+  }
+  
+  .delete-btn {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.3s ease;
+    
+    ion-icon {
+      font-size: 20px;
+    }
+    
+    &:hover {
+      color: #ef4444;
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  
+  ion-icon {
+    font-size: 80px;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+  }
+  
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #64748b;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #94a3b8;
+  }
+}
+
+// ========================================
+// CARD UNIFICADO PARA TODAS LAS SECCIONES
+// ========================================
+.unified-settings-card {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+}
+
+.master-switch-section {
+  padding: 20px;
+  background: white;
+}
+
+.master-switch-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .master-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 28px;
+      color: white;
+    }
+  }
+
+  .master-text {
+    flex: 1;
+
+    h3 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+  }
+}
+
+.divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0;
+}
+
+.notifications-settings-list {
+  padding: 0;
+
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info {
       display: flex;
-      align-items: flex-start;
-      gap: 15px;
-      padding: 16px;
-      background: white;
-      border-radius: 12px;
-      border: 1px solid #f1f5f9;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      
-      &.unread {
-        background: #f0f9ff;
-        border-color: #bae6fd;
-      }
-      
-      &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-      }
-      
-      .notification-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+
+      ion-icon {
         flex-shrink: 0;
-        
-        ion-icon {
-          font-size: 24px;
-        }
       }
-      
-      .notification-content {
-        flex: 1;
-        min-width: 0;
-        
-        h3 {
-          margin: 0 0 6px 0;
+
+      .setting-text {
+        h4 {
+          margin: 0 0 4px 0;
           font-size: 15px;
           font-weight: 600;
           color: #1e293b;
         }
-        
+
         p {
-          margin: 0 0 8px 0;
+          margin: 0;
           font-size: 13px;
           color: #64748b;
-          line-height: 1.4;
-        }
-        
-        .notification-time {
-          font-size: 11px;
-          color: #94a3b8;
-          font-weight: 500;
         }
       }
-      
-      .delete-btn {
-        width: 32px;
-        height: 32px;
+    }
+
+    &.time-picker-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+
+      .time-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e5e7eb;
         border-radius: 8px;
-        border: none;
-        background: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #94a3b8;
-        
-        ion-icon {
-          font-size: 20px;
-        }
-        
-        &:hover {
-          background: #fee2e2;
-          color: #ef4444;
-        }
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+        background: white;
       }
-    }
-  }
-  
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    
-    ion-icon {
-      font-size: 80px;
-      color: #cbd5e1;
-      margin-bottom: 20px;
-    }
-    
-    h3 {
-      margin: 0 0 10px 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #64748b;
-    }
-    
-    p {
-      margin: 0;
-      font-size: 14px;
-      color: #94a3b8;
     }
   }
 }
 
 // ========================================
-// ESPACIADO INFERIOR
+// TOGGLES VERDES
+// ========================================
+.green-toggle {
+  --background: #cbd5e1;
+  --background-checked: #10b981;
+  --handle-background: white;
+  --handle-background-checked: white;
+}
+
+ion-toggle {
+  --background: #cbd5e1;
+  --background-checked: #10b981;
+  --handle-background: white;
+  --handle-background-checked: white;
+}
+
+// ========================================
+// INFORMACIÓN DE GUARDADO
+// ========================================
+.save-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  margin: 20px 0;
+  background: #f0fdf4;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+
+  ion-icon {
+    font-size: 20px;
+    color: #10b981;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #059669;
+    font-weight: 500;
+  }
+}
+
+// ========================================
+// SUBSECTION DIVIDER
+// ========================================
+.subsection-divider {
+  padding: 12px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  
+  span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+// ========================================
+// BOTTOM SPACER
 // ========================================
 .bottom-spacer {
-  height: 100px;
-}
-
-// ========================================
-// RESPONSIVE
-// ========================================
-@media (max-width: 768px) {
-  .header-section {
-    height: 140px;
-    
-    .header-content {
-      padding: 30px 15px 15px 15px;
-      
-      h1 {
-        font-size: 20px;
-      }
-    }
-  }
-  
-  .scrollable-content {
-    margin-top: 140px;
-    padding: 15px;
-  }
-  
-  .notifications-list {
-    .list-header {
-      .action-btn {
-        flex: 1;
-        justify-content: center;
-      }
-    }
-  }
+  height: 80px;
 }

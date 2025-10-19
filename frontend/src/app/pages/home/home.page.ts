@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
 import { PushNotificationService } from 'src/app/services/push-notification.service';
+import { AlertController } from '@ionic/angular';
+
 
 @Component({
   selector: 'app-home',
@@ -29,7 +31,7 @@ export class HomePage implements OnInit {
 
     private router: Router,
     private apiService: ApiService,
-    private pushService: PushNotificationService
+    private pushService: PushNotificationService,
     private alertController: AlertController
 ) {}
 

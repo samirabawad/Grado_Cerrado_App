@@ -17,13 +17,56 @@ export class NotificationsPage implements OnInit {
   notifications: any[] = [];
   unreadCount: number = 0;
 
+  // Secciones expandibles
+  expandedSections: { [key: string]: boolean } = {
+    lastNotifications: true,  // Abierta por defecto
+    notificationTypes: false,
+    reminders: false,
+    channels: false,
+    advanced: false
+  };
+
+  // Configuración de notificaciones
+  notificationSettings = {
+    masterSwitch: true,
+    streakNotifications: true,
+    achievementNotifications: true,
+    studyReminders: true,
+    tipsNotifications: true,
+    goalNotifications: true,
+    weeklyReport: true,
+    motivationalMessages: true,
+    dailyReminder: true,
+    dailyReminderTime: '20:00',
+    pushNotifications: true,
+    soundEnabled: true,
+    vibrationEnabled: true,
+    doNotDisturbEnabled: false,
+    doNotDisturbStart: '22:00',
+    doNotDisturbEnd: '08:00'
+  };
+
   constructor(private router: Router) { }
 
   ngOnInit() {
     this.loadNotifications();
+    this.loadSettings();
   }
 
-  // Cargar notificaciones
+  // ========================================
+  // SECCIONES EXPANDIBLES
+  // ========================================
+  toggleSection(section: string) {
+    this.expandedSections[section] = !this.expandedSections[section];
+  }
+
+  isSectionExpanded(section: string): boolean {
+    return this.expandedSections[section];
+  }
+
+  // ========================================
+  // NOTIFICACIONES
+  // ========================================
   loadNotifications() {
     this.notifications = [
       {
@@ -86,7 +129,6 @@ export class NotificationsPage implements OnInit {
     this.unreadCount = this.notifications.filter(n => !n.read).length;
   }
 
-  // Marcar notificación como leída
   markAsRead(notification: any) {
     if (!notification.read) {
       notification.read = true;
@@ -98,13 +140,11 @@ export class NotificationsPage implements OnInit {
     }
   }
 
-  // Marcar todas como leídas
   markAllAsRead() {
     this.notifications.forEach(n => n.read = true);
     this.unreadCount = 0;
   }
 
-  // Eliminar notificación
   deleteNotification(notification: any, event: Event) {
     event.stopPropagation();
     const index = this.notifications.indexOf(notification);
@@ -116,19 +156,48 @@ export class NotificationsPage implements OnInit {
     }
   }
 
-  // Limpiar todas
   clearAll() {
     this.notifications = [];
     this.unreadCount = 0;
   }
 
-  // Volver a home
-  goBack() {
-    this.router.navigate(['/home']);
+  // ========================================
+  // CONFIGURACIÓN
+  // ========================================
+  loadSettings() {
+    const saved = localStorage.getItem('notificationSettings');
+    if (saved) {
+      this.notificationSettings = JSON.parse(saved);
+    }
   }
 
-  // Ir a configuración
-  goToSettings() {
-    this.router.navigate(['/settings']);
+  saveSettings() {
+    localStorage.setItem('notificationSettings', JSON.stringify(this.notificationSettings));
+    console.log('Configuración guardada:', this.notificationSettings);
+  }
+
+  onSettingChange() {
+    this.saveSettings();
+  }
+
+  onMasterSwitchChange() {
+    if (!this.notificationSettings.masterSwitch) {
+      this.notificationSettings.streakNotifications = false;
+      this.notificationSettings.achievementNotifications = false;
+      this.notificationSettings.studyReminders = false;
+      this.notificationSettings.tipsNotifications = false;
+      this.notificationSettings.goalNotifications = false;
+      this.notificationSettings.weeklyReport = false;
+      this.notificationSettings.motivationalMessages = false;
+      this.notificationSettings.pushNotifications = false;
+    }
+    this.saveSettings();
+  }
+
+  // ========================================
+  // NAVEGACIÓN
+  // ========================================
+  goBack() {
+    this.router.navigate(['/home']);
   }
 }

@@ -1,21 +1,28 @@
 <div class="bottom-nav">
   <div class="nav-item" (click)="goToHome()" [class.active]="isActive('/home')">
     <ion-icon name="home"></ion-icon>
+    <span class="nav-label">Casa</span>
   </div>
   
   <div class="nav-item" (click)="goToStats()" [class.active]="isActive('/dashboard')">
     <ion-icon name="bar-chart"></ion-icon>
+    <span class="nav-label">Progreso</span>
   </div>
   
   <div class="nav-item" (click)="goToRacha()" [class.active]="isActive('/racha')">
     <ion-icon name="flame"></ion-icon>
+    <span class="nav-label">Racha</span>
   </div>
   
   <div class="nav-item" (click)="goToNotifications()" [class.active]="isActive('/notifications')">
     <ion-icon name="notifications"></ion-icon>
+    <span class="nav-label">Notificaciones</span>
   </div>
   
   <div class="nav-item" (click)="goToProfile()" [class.active]="isActive('/profile')">
-    <img src="assets/image/msombra.png" alt="Perfil" class="profile-icon">
+    <ion-icon name="person"></ion-icon>
+    <span class="nav-label">Perfil</span>
   </div>
 </div>
+```
+
