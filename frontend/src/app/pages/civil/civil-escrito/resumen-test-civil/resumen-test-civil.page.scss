@@ -60,7 +60,7 @@ ion-content.results-content {
 }
 
 // ========================================
-// ✅ MENSAJE MOTIVACIONAL REDISEÑADO
+// MENSAJE MOTIVACIONAL
 // ========================================
 .motivational-section {
   text-align: center;
@@ -83,7 +83,7 @@ ion-content.results-content {
 }
 
 // ========================================
-// ✅ NIVEL Y MAPACHE EN LA MISMA LÍNEA
+// NIVEL Y MAPACHE
 // ========================================
 .level-mapache-row {
   display: flex;
@@ -127,7 +127,7 @@ ion-content.results-content {
 }
 
 // ========================================
-// ✅ BLOQUES DE CORRECTAS E INCORRECTAS
+// STATS GRID
 // ========================================
 .stats-grid {
   display: grid;
@@ -177,16 +177,13 @@ ion-content.results-content {
     &.correct {
       .stat-icon {
         background: rgba(76, 175, 80, 0.15);
-
         ion-icon {
           color: #4CAF50;
         }
       }
-
       .stat-number {
         color: #4CAF50;
       }
-
       .stat-label {
         color: #2E7D32;
       }
@@ -195,16 +192,13 @@ ion-content.results-content {
     &.incorrect {
       .stat-icon {
         background: rgba(244, 67, 54, 0.15);
-
         ion-icon {
           color: #F44336;
         }
       }
-
       .stat-number {
         color: #F44336;
       }
-
       .stat-label {
         color: #C62828;
       }
@@ -213,7 +207,7 @@ ion-content.results-content {
 }
 
 // ========================================
-// CÍRCULOS DE PREGUNTAS CON DESPLEGABLE
+// QUESTIONS SECTION
 // ========================================
 .questions-section {
   background: white;
@@ -269,7 +263,6 @@ ion-content.results-content {
         }
       }
 
-      // Desplegable ocupa todo el ancho
       .question-dropdown {
         grid-column: 1 / -1;
         margin: 8px 0 12px 0;
@@ -286,109 +279,8 @@ ion-content.results-content {
             font-size: 15px;
             font-weight: 600;
             color: #1f2937;
-            margin: 0 0 12px 0;
+            margin: 0 0 16px 0;
             line-height: 1.5;
-          }
-
-          .answer-details {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-
-            .answer-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin: 8px 0;
-              gap: 12px;
-
-              .label {
-                font-size: 13px;
-                font-weight: 600;
-                color: #6b7280;
-                flex-shrink: 0;
-              }
-
-              .value {
-                font-size: 14px;
-                font-weight: 700;
-                text-align: right;
-                flex: 1;
-
-                &.incorrect-value {
-                  color: #F44336;
-                }
-
-                &.correct-value {
-                  color: #4CAF50;
-                }
-              }
-            }
-
-            .explanation-box {
-              background: rgba(59, 130, 246, 0.1);
-              border-radius: 8px;
-              padding: 12px;
-              margin-top: 12px;
-              display: flex;
-              gap: 10px;
-              align-items: flex-start;
-
-              ion-icon {
-                color: #3b82f6;
-                font-size: 20px;
-                flex-shrink: 0;
-                margin-top: 2px;
-              }
-
-              p {
-                margin: 0;
-                font-size: 13px;
-                line-height: 1.5;
-                color: #1f2937;
-              }
-            }
-          }
-
-          .correct-answer-box {
-            .correct-badge-inline {
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              color: #4CAF50;
-              font-weight: 700;
-              font-size: 14px;
-              margin-bottom: 12px;
-
-              ion-icon {
-                font-size: 24px;
-              }
-            }
-
-            .answer-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 10px;
-              background: rgba(76, 175, 80, 0.1);
-              border-radius: 8px;
-              border-left: 3px solid #4CAF50;
-
-              .label {
-                font-size: 13px;
-                font-weight: 600;
-                color: #2E7D32;
-              }
-
-              .value {
-                font-size: 14px;
-                font-weight: 700;
-
-                &.correct-value {
-                  color: #4CAF50;
-                }
-              }
-            }
           }
         }
       }
@@ -396,6 +288,105 @@ ion-content.results-content {
   }
 }
 
+// ========================================
+// ALTERNATIVAS
+// ========================================
+.alternatives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.alternative-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+
+  &.alt-selected {
+    border-color: #FF6F00;
+    background: #fff3e0;
+  }
+
+  &.alt-correct {
+    border-color: #4CAF50;
+    background: #f0fdf4;
+  }
+
+  &.alt-selected.alt-correct {
+    border-color: #4CAF50;
+    background: #dcfce7;
+  }
+
+  .alt-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 22px;
+
+      &[name="checkmark-circle"] {
+        color: #4CAF50;
+      }
+
+      &[name="close-circle"] {
+        color: #F44336;
+      }
+
+      &[name="ellipse-outline"] {
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .alt-text {
+    flex: 1;
+    font-size: 14px;
+    color: #1f2937;
+    line-height: 1.5;
+  }
+}
+
+// ========================================
+// EXPLANATION BOX
+// ========================================
+.explanation-box {
+  margin-top: 16px;
+  padding: 14px;
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+  ion-icon {
+    font-size: 20px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #374151;
+  }
+}
+
+// ========================================
+// ANIMACIÓN
+// ========================================
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -408,7 +399,7 @@ ion-content.results-content {
 }
 
 // ========================================
-// ✅ BOTONES DE ACCIÓN
+// BOTONES DE ACCIÓN
 // ========================================
 .action-buttons {
   display: flex;

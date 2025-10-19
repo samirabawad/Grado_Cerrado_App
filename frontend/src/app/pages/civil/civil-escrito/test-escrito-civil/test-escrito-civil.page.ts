@@ -671,7 +671,7 @@ getOptionIcon(option: string): string {
     let correctAnswers = 0;
     let incorrectAnswers = 0;
     const incorrectQuestions: any[] = [];
-    const allQuestions: any[] = []; // ✅ NUEVO: Guardamos TODAS las preguntas
+    const allQuestions: any[] = []; 
 
     this.questions.forEach((question, index) => {
       const isCorrect = this.compareAnswers(
@@ -686,7 +686,9 @@ getOptionIcon(option: string): string {
         userAnswer: question.userAnswer || '',
         correctAnswer: question.correctAnswer,
         explanation: question.explanation || '',
-        isCorrect: isCorrect
+        isCorrect: isCorrect,
+        options: question.options || [],
+        type: question.type
       };
 
       allQuestions.push(questionData);

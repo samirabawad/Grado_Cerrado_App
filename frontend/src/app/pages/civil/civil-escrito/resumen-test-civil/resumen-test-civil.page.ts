@@ -1,10 +1,9 @@
-// INICIO DEL ARCHIVO - Copiar desde aquí
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, transition, style, animate } from '@angular/animations'; 
 
 interface QuestionResult {
   questionNumber: number;
@@ -13,6 +12,8 @@ interface QuestionResult {
   correctAnswer: string;
   explanation: string;
   isCorrect: boolean;
+  options?: any[]; 
+  type?: string;   
 }
 
 @Component({
@@ -21,14 +22,14 @@ interface QuestionResult {
   styleUrls: ['./resumen-test-civil.page.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule, BottomNavComponent],
-  animations: [
+  animations: [ 
     trigger('slideDown', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        style({ height: '0', opacity: 0, overflow: 'hidden' }),
+        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
       ]),
       transition(':leave', [
-        animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' }))
+        animate('300ms ease-in', style({ height: '0', opacity: 0 }))
       ])
     ])
   ]
@@ -176,4 +177,84 @@ export class ResumenTestCivilPage implements OnInit {
     localStorage.removeItem('current_test_results');
     this.router.navigate(['/dashboard']);
   }
+
+  // ✅ Obtener opciones de la pregunta
+getQuestionOptions(question: any): string[] {
+  // Para Verdadero/Falso
+  if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+    return ['Verdadero', 'Falso'];
+  }
+  
+  // Para selección múltiple
+  if (Array.isArray(question.options) && question.options.length > 0) {
+    const firstOption = question.options[0];
+    
+    if (typeof firstOption === 'object') {
+      if ('text' in firstOption && firstOption.text) {
+        return question.options.map((opt: any) => opt.text);
+      }
+      if ('Text' in firstOption && firstOption.Text) {
+        return question.options.map((opt: any) => opt.Text);
+      }
+    }
+    
+    if (typeof firstOption === 'string') {
+      return question.options;
+    }
+  }
+  
+  return [];
+}
+
+// ✅ Verificar si una opción fue seleccionada
+isOptionSelected(question: any, option: string): boolean {
+  // Verdadero/Falso
+  if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+    if (question.userAnswer === 'V' && option === 'Verdadero') return true;
+    if (question.userAnswer === 'F' && option === 'Falso') return true;
+    return false;
+  }
+  
+  // Selección múltiple
+  const options = this.getQuestionOptions(question);
+  const optionIndex = options.indexOf(option);
+  if (optionIndex !== -1) {
+    const letter = String.fromCharCode(65 + optionIndex);
+    return question.userAnswer === letter;
+  }
+  
+  return false;
+}
+
+// ✅ Verificar si una opción es la correcta
+isOptionCorrect(question: any, option: string): boolean {
+  // Verdadero/Falso
+  if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+    const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
+    const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
+                                correctAnswerNorm === 'v' || 
+                                correctAnswerNorm === 'verdadero';
+    
+    if (option === 'Verdadero' && isVerdaderoCorrect) return true;
+    if (option === 'Falso' && !isVerdaderoCorrect) return true;
+    return false;
+  }
+  
+  // Selección múltiple
+  const options = this.getQuestionOptions(question);
+  const optionIndex = options.indexOf(option);
+  if (optionIndex !== -1) {
+    const letter = String.fromCharCode(65 + optionIndex);
+    return question.correctAnswer.toUpperCase() === letter;
+  }
+  
+  return false;
+}
+
+// ✅ Obtener letra de la opción
+getOptionLetter(index: number): string {
+  return String.fromCharCode(65 + index);
+}
+
+
 }

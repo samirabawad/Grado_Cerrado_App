@@ -72,34 +72,35 @@
             *ngIf="expandedQuestionIndex === i"
             [@slideDown]>
             <div class="dropdown-content">
+              <!-- TEXTO DE LA PREGUNTA -->
               <p class="question-text">{{ question.questionText }}</p>
               
-              <!-- Mostrar info adicional solo si es incorrecta -->
-              <div *ngIf="!question.isCorrect" class="answer-details">
-                <div class="answer-row">
-                  <span class="label">Tu respuesta:</span>
-                  <span class="value incorrect-value">{{ question.userAnswer }}</span>
-                </div>
-                <div class="answer-row">
-                  <span class="label">Respuesta correcta:</span>
-                  <span class="value correct-value">{{ question.correctAnswer }}</span>
-                </div>
-                <div class="explanation-box" *ngIf="question.explanation">
-                  <ion-icon name="information-circle-outline"></ion-icon>
-                  <p>{{ question.explanation }}</p>
+              <!-- ✅ ALTERNATIVAS -->
+              <div class="alternatives-list">
+                <div *ngFor="let option of getQuestionOptions(question); let optIndex = index"
+                     class="alternative-item"
+                     [class.alt-selected]="isOptionSelected(question, option)"
+                     [class.alt-correct]="isOptionCorrect(question, option)">
+                  
+                  <div class="alt-icon">
+                    <ion-icon *ngIf="isOptionCorrect(question, option)" 
+                              name="checkmark-circle"></ion-icon>
+                    <ion-icon *ngIf="!isOptionCorrect(question, option) && isOptionSelected(question, option)" 
+                              name="close-circle"></ion-icon>
+                    <ion-icon *ngIf="!isOptionCorrect(question, option) && !isOptionSelected(question, option)" 
+                              name="ellipse-outline"></ion-icon>
+                  </div>
+                  
+                  <div class="alt-text">
+                    {{ getOptionLetter(optIndex) }}. {{ option }}
+                  </div>
                 </div>
               </div>
-              
-              <!-- Badge de correcta con respuesta -->
-              <div *ngIf="question.isCorrect" class="correct-answer-box">
-                <div class="correct-badge-inline">
-                  <ion-icon name="checkmark-circle"></ion-icon>
-                  ¡Respuesta correcta!
-                </div>
-                <div class="answer-row">
-                  <span class="label">Respuesta correcta:</span>
-                  <span class="value correct-value">{{ question.correctAnswer }}</span>
-                </div>
+
+              <!-- ✅ EXPLICACIÓN -->
+              <div class="explanation-box" *ngIf="question.explanation">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                <p>{{ question.explanation }}</p>
               </div>
             </div>
           </div>
