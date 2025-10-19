@@ -157,8 +157,15 @@ ion-content.test-content {
   }
 
   &.selected {
-    border-color: #FF6F00;
-    background: rgba(255, 111, 0, 0.05);
+    background: #e2e8f0;
+    border-color: #64748b;
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.2);
+  }
+
+  &.selected .option-letter {
+    background: #64748b;
+    color: white;
+    box-shadow: 0 2px 6px rgba(100, 116, 139, 0.3);
   }
 
   &.correct {
@@ -167,10 +174,20 @@ ion-content.test-content {
     pointer-events: none;
   }
 
+  &.correct .option-letter {
+    background: #4CAF50;
+    color: white;
+  }
+
   &.incorrect {
     border-color: #F44336;
     background: rgba(244, 67, 54, 0.1);
     pointer-events: none;
+  }
+
+  &.incorrect .option-letter {
+    background: #F44336;
+    color: white;
   }
 
   &.disabled {
@@ -190,21 +207,7 @@ ion-content.test-content {
     font-size: 16px;
     color: #64748b;
     flex-shrink: 0;
-  }
-
-  &.selected .option-letter {
-    background: #FF6F00;
-    color: white;
-  }
-
-  &.correct .option-letter {
-    background: #4CAF50;
-    color: white;
-  }
-
-  &.incorrect .option-letter {
-    background: #F44336;
-    color: white;
+    transition: all 0.3s ease;
   }
 
   .option-text {

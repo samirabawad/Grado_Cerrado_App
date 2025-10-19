@@ -33,7 +33,7 @@
       <div 
         *ngFor="let option of getCurrentQuestionOptions(); let i = index"
         class="option-button"
-        [class.selected]="isOptionSelected(option) && !hasAnsweredCurrentQuestion()"
+        [class.selected]="getOptionState(option) === 'selected'"        
         [class.correct]="getOptionState(option) === 'correct'"
         [class.incorrect]="getOptionState(option) === 'incorrect'"
         [class.disabled]="!canSelectOption()"

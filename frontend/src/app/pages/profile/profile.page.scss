@@ -851,6 +851,75 @@
     }
   }
 
-  
+  // ========================================
+  // CONFIGURACIÓN DE CORRECCIÓN
+  // ========================================
+  .correction-info {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+
+    ion-note {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+
+      ion-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: #10b981;
+      }
+
+      strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #059669;
+        font-size: 14px;
+      }
+
+      p {
+        margin: 0;
+        color: #64748b;
+      }
+    }
+  }
+
+  .correction-info-disabled {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #64748b;
+
+    ion-note {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+
+      ion-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: #64748b;
+      }
+
+      strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #475569;
+        font-size: 14px;
+      }
+
+      p {
+        margin: 0;
+        color: #64748b;
+      }
+    }
+  }
   
 }

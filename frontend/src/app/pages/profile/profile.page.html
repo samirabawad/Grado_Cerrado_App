@@ -325,18 +325,54 @@
         <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
       </h2>
 
-      <div *ngIf="isSectionExpanded('configuration')" class="settings-list">
-        <div class="setting-item action" (click)="saveSettings()">
-          <div class="setting-info">
-            <ion-icon name="save"></ion-icon>
-            <span>Guardar Configuración</span>
-          </div>
-          <ion-icon name="chevron-forward"></ion-icon>
-        </div>
+      <div *ngIf="isSectionExpanded('configuration')">
+        <ion-card class="settings-card">
+          <ion-card-header>
+            <ion-card-subtitle>Modo de Corrección en Tests</ion-card-subtitle>
+          </ion-card-header>
+
+          <ion-card-content>
+            <div class="setting-item">
+              <div class="setting-info" style="flex-direction: column; align-items: flex-start;">
+                <div class="setting-label">
+                  <ion-icon name="checkmark-done"></ion-icon>
+                  Corrección Inmediata
+                </div>
+                <div class="setting-description">
+                  Muestra si la respuesta es correcta inmediatamente después de seleccionarla
+                </div>
+              </div>
+              <ion-toggle 
+                [(ngModel)]="correctionConfig.immediate" 
+                (ionChange)="onCorrectionModeChange()"
+                color="success">
+              </ion-toggle>
+            </div>
+
+            <div class="correction-info" *ngIf="correctionConfig.immediate">
+              <ion-note color="success">
+                <ion-icon name="flash"></ion-icon>
+                <div>
+                  <strong>Modo Activo: Corrección Inmediata</strong>
+                  <p>Verás la respuesta correcta y la explicación justo después de responder cada pregunta.</p>
+                </div>
+              </ion-note>
+            </div>
+
+            <div class="correction-info-disabled" *ngIf="!correctionConfig.immediate">
+              <ion-note color="medium">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <div>
+                  <strong>Modo Activo: Corrección al Final</strong>
+                  <p>Responderás todas las preguntas primero. Las correcciones y explicaciones se mostrarán al finalizar el test.</p>
+                </div>
+              </ion-note>
+            </div>
+          </ion-card-content>
+        </ion-card>
       </div>
     </div>
-
-  </div>
+  </div>  
 
  <!-- BOTÓN CERRAR SESIÓN -->
     <div class="logout-section">

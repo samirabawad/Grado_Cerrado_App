@@ -584,39 +584,51 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   async showDetailedFeedback(
-    isCorrect: boolean,
-    userAnswer: string,
-    correctAnswer: string,
-    explanation: string,
-    confidence: number
-  ) {
-    const header = isCorrect ? '✅ ¡Correcto!' : '❌ Incorrecto';
-
-    let message = `Tu respuesta:\n"${userAnswer || 'Sin transcripción'}"\n\n`;
-    
-    if (!isCorrect) {
-      message += `Respuesta correcta:\n${correctAnswer}\n\n`;
-    }
-    
-    if (explanation && explanation !== 'No hay explicación disponible.') {
-      message += `Explicación:\n${explanation}`;
-    }
-
-    const alert = await this.alertController.create({
-      header: header,
-      message: message,
-      cssClass: isCorrect ? 'oral-alert-correct' : 'oral-alert-incorrect',
-      buttons: [
-        {
-          text: 'Continuar',
-          role: 'confirm'
-        }
-      ]
-    });
-
-    await alert.present();
-    await alert.onDidDismiss();
+  isCorrect: boolean,
+  userAnswer: string,
+  correctAnswer: string,
+  explanation: string,
+  confidence: number
+) {
+  // ✅ LEER CONFIGURACIÓN DE CORRECCIÓN
+  const correctionConfig = localStorage.getItem('correctionConfig');
+  const showImmediateCorrection = correctionConfig 
+    ? JSON.parse(correctionConfig).immediate 
+    : true; // Por defecto: corrección inmediata
+  
+  // ✅ SOLO MOSTRAR FEEDBACK SI ESTÁ ACTIVADA LA CORRECCIÓN INMEDIATA
+  if (!showImmediateCorrection) {
+    console.log('⏭️ Corrección al final activada - saltando feedback inmediato');
+    return;
   }
+  
+  const header = isCorrect ? '✅ ¡Correcto!' : '❌ Incorrecto';
+
+  let message = `Tu respuesta:\n"${userAnswer || 'Sin transcripción'}"\n\n`;
+  
+  if (!isCorrect) {
+    message += `Respuesta correcta:\n${correctAnswer}\n\n`;
+  }
+  
+  if (explanation && explanation !== 'No hay explicación disponible.') {
+    message += `Explicación:\n${explanation}`;
+  }
+
+  const alert = await this.alertController.create({
+    header: header,
+    message: message,
+    cssClass: isCorrect ? 'oral-alert-correct' : 'oral-alert-incorrect',
+    buttons: [
+      {
+        text: 'Continuar',
+        role: 'confirm'
+      }
+    ]
+  });
+
+  await alert.present();
+  await alert.onDidDismiss();
+}
 
   canGoToNext(): boolean {
     return this.hasRecording || this.hasAnsweredCurrentQuestion();

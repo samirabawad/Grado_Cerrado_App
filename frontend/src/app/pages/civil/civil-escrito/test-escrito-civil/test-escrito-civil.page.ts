@@ -238,46 +238,52 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   async selectAnswer(optionText: string) {
-    if (this.hasAnsweredCurrentQuestion()) {
-      console.log('Ya respondiste esta pregunta');
+  if (this.hasAnsweredCurrentQuestion()) {
+    console.log('Ya respondiste esta pregunta');
+    return;
+  }
+  
+  const question = this.getCurrentQuestion();
+  if (!question) return;
+
+  let normalizedAnswer: string;
+  
+  // ✅ Verdadero/Falso
+  if (this.isTrueFalseQuestion()) {
+    normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
+  } 
+  // ✅ Selección múltiple
+  else {
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(optionText);
+    
+    if (optionIndex !== -1) {
+      normalizedAnswer = String.fromCharCode(65 + optionIndex);
+      console.log(`✅ Opción seleccionada: Letra ${normalizedAnswer} = "${optionText}"`);
+    } else {
+      console.error('❌ No se encontró la opción en el array');
       return;
     }
-    
-    const question = this.getCurrentQuestion();
-    if (!question) return;
-
-    let normalizedAnswer: string;
-    
-    // ✅ Verdadero/Falso
-    if (this.isTrueFalseQuestion()) {
-      normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
-    } 
-    // ✅ Selección múltiple
-    else {
-      const options = this.getCurrentQuestionOptions();
-      const optionIndex = options.indexOf(optionText);
-      
-      if (optionIndex !== -1) {
-        normalizedAnswer = String.fromCharCode(65 + optionIndex);
-        console.log(`✅ Opción seleccionada: Letra ${normalizedAnswer} = "${optionText}"`);
-      } else {
-        console.error('❌ No se encontró la opción en el array');
-        return;
-      }
-    }
-    
-    question.userAnswer = normalizedAnswer;
-    
-    const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
-    
-    // ✅ MOSTRAR POP-UP SI SE EQUIVOCÓ
-    if (!isCorrect) {
-      await this.showExplanationAlert(question.explanation);
-    }
-    
-    await this.sendAnswerToBackend(question, normalizedAnswer);
-    this.cdr.detectChanges();
   }
+  
+  question.userAnswer = normalizedAnswer;
+  
+  const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+  
+  // ✅ LEER CONFIGURACIÓN DE CORRECCIÓN
+  const correctionConfig = localStorage.getItem('correctionConfig');
+  const showImmediateCorrection = correctionConfig 
+    ? JSON.parse(correctionConfig).immediate 
+    : true; // Por defecto: corrección inmediata
+  
+  // ✅ MOSTRAR POP-UP SOLO SI ESTÁ ACTIVADA LA CORRECCIÓN INMEDIATA Y SE EQUIVOCÓ
+  if (showImmediateCorrection && !isCorrect) {
+    await this.showExplanationAlert(question.explanation);
+  }
+  
+  await this.sendAnswerToBackend(question, normalizedAnswer);
+  this.cdr.detectChanges();
+}
 
 async showExplanationAlert(explanation: string) {
   const alert = await this.alertController.create({
@@ -502,12 +508,24 @@ async showExplanationAlert(explanation: string) {
     return this.hasAnsweredCurrentQuestion();
   }
 
-  getOptionState(optionText: string): 'correct' | 'incorrect' | 'default' {
+  getOptionState(optionText: string): 'correct' | 'incorrect' | 'selected' | 'default' {
   if (!this.hasAnsweredCurrentQuestion()) return 'default';
+  
+  // ✅ LEER CONFIGURACIÓN
+  const correctionConfig = localStorage.getItem('correctionConfig');
+  const showImmediateCorrection = correctionConfig 
+    ? JSON.parse(correctionConfig).immediate 
+    : true;
   
   const question = this.getCurrentQuestion();
   if (!question) return 'default';
 
+  // ✅ SI ESTÁ EN MODO "CORRECCIÓN AL FINAL", SOLO MARCAR COMO SELECCIONADA
+  if (!showImmediateCorrection) {
+    return this.isOptionSelected(optionText) ? 'selected' : 'default';
+  }
+
+  // ✅ SI ESTÁ EN MODO "CORRECCIÓN INMEDIATA", MOSTRAR CORRECTA/INCORRECTA
   console.log('🔍 DEBUG getOptionState:', {
     optionText,
     questionType: question.type,
@@ -515,9 +533,8 @@ async showExplanationAlert(explanation: string) {
     userAnswer: question.userAnswer
   });
 
-  // ✅ PARA VERDADERO/FALSO
+  // Para VERDADERO/FALSO
   if (this.isTrueFalseQuestion()) {
-    // Normalizar respuesta correcta
     const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
     const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
                                correctAnswerNorm === 'v' || 
@@ -526,12 +543,10 @@ async showExplanationAlert(explanation: string) {
     const optionIsVerdadero = optionText === 'Verdadero';
     const optionIsFalso = optionText === 'Falso';
     
-    // Si esta opción es la correcta, marcarla en verde
     if ((optionIsVerdadero && isVerdaderoCorrect) || (optionIsFalso && !isVerdaderoCorrect)) {
       return 'correct';
     }
     
-    // Si el usuario seleccionó esta opción y es incorrecta
     if (question.userAnswer === 'V' && optionIsVerdadero && !isVerdaderoCorrect) {
       return 'incorrect';
     }
@@ -542,7 +557,7 @@ async showExplanationAlert(explanation: string) {
     return 'default';
   }
 
-  // ✅ PARA SELECCIÓN MÚLTIPLE
+  // Para SELECCIÓN MÚLTIPLE
   const options = this.getCurrentQuestionOptions();
   const optionIndex = options.indexOf(optionText);
   
@@ -552,12 +567,6 @@ async showExplanationAlert(explanation: string) {
   
   const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
   const isSelected = question.userAnswer === optionLetter;
-  
-  console.log('🔍 Opción múltiple:', {
-    optionLetter,
-    isCorrect,
-    isSelected
-  });
   
   if (isCorrect) return 'correct';
   if (isSelected && !isCorrect) return 'incorrect';

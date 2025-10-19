@@ -105,10 +105,13 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.loadAllUserData();
+    this.loadCorrectionConfig();
   }
+  
 
   ngAfterViewInit() {
   }
+  
 
   // ============================================
   // CARGAR TODOS LOS DATOS
@@ -363,6 +366,13 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   // ============================================
+  // CONFIGURACIÓN DE CORRECCIÓN
+  // ============================================
+  correctionConfig: any = {
+    immediate: true // Por defecto corrección inmediata
+  };
+
+  // ============================================
   // SECCIONES
   // ============================================
 
@@ -493,4 +503,36 @@ export class ProfilePage implements OnInit, AfterViewInit {
     console.log('🔄 Profile: Recargando datos al entrar a la página');
     this.loadAllUserData();
   }
+
+  // ============================================
+  // CONFIGURACIÓN DE CORRECCIÓN
+  // ============================================
+  
+  loadCorrectionConfig() {
+    const saved = localStorage.getItem('correctionConfig');
+    if (saved) {
+      this.correctionConfig = JSON.parse(saved);
+    } else {
+      // Por defecto: corrección inmediata
+      this.correctionConfig = { immediate: true };
+    }
+    console.log('✅ Configuración de corrección cargada:', this.correctionConfig);
+  }
+
+  async onCorrectionModeChange() {
+    try {
+      localStorage.setItem('correctionConfig', JSON.stringify(this.correctionConfig));
+      
+      const message = this.correctionConfig.immediate 
+        ? '✅ Corrección inmediata activada' 
+        : '✅ Corrección al final activada';
+      await this.showToast(message, 'success');
+      
+      console.log('💾 Configuración de corrección guardada:', this.correctionConfig);
+    } catch (error) {
+      console.error('Error guardando configuración de corrección:', error);
+      await this.showToast('❌ Error al guardar la configuración', 'danger');
+    }
+  }
+  
 }
