@@ -137,13 +137,8 @@ export class HomePage implements OnInit {
   this.router.navigate(['/racha']);
 }
 
-async goToFullHistory() {
-  const alert = await this.alertController.create({
-    header: 'Página en Construcción',
-    message: 'Esta funcionalidad estará disponible próximamente.',
-    buttons: ['OK']
-  });
-  await alert.present();
+goToFullHistory() {
+  this.router.navigate(['/historial']);
 }
 
 }

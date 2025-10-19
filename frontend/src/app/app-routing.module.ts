@@ -48,17 +48,6 @@ const routes: Routes = [
     loadComponent: () => import('./pages/felicidades/felicidades.page').then(m => m.FelicidadesPage)
   },
 
-  // ========================================
-  // HOME Y DASHBOARD
-  // ========================================
-  {
-    path: 'home',
-    loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage)
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
-  },
 
   // ========================================
 // HOME Y DASHBOARD
@@ -78,6 +67,16 @@ const routes: Routes = [
 {
   path: 'profile',
   loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
+},
+
+{
+  path: 'logros',
+  loadComponent: () => import('./pages/logros/logros.page').then(m => m.LogrosPage)
+},
+
+{
+  path: 'historial',
+  loadComponent: () => import('./pages/historial/historial.page').then(m => m.HistorialPage)
 },
 
   // ========================================

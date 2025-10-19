@@ -1,0 +1,105 @@
+<ion-content class="logros-content">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Logros</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="circular"></ion-spinner>
+  </div>
+
+  <div *ngIf="!isLoading" class="content-area">
+
+    <!-- LOGROS DE RACHA -->
+    <div class="section">
+      <h2 class="section-title" (click)="toggleSection('racha')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span style="display: flex; align-items: center; gap: 12px;">
+          <ion-icon name="flame" style="font-size: 24px; color: #f59e0b;"></ion-icon>
+          Logros de Racha
+        </span>
+        <ion-icon [name]="isSectionExpanded('racha') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </h2>
+
+      <div *ngIf="isSectionExpanded('racha')">
+        <p class="section-description">Desbloquea logros manteniendo tu racha diaria</p>
+        
+        <div class="achievements-grid">
+          <div 
+            *ngFor="let achievement of achievements"
+            class="achievement-card"
+            [class.unlocked]="achievement.unlocked"
+            [class.locked]="!achievement.unlocked">
+            
+            <div class="achievement-icon" [style.background]="achievement.unlocked ? achievement.color : '#e5e7eb'">
+              <ion-icon [name]="achievement.icon"></ion-icon>
+            </div>
+            
+            <div class="achievement-info">
+              <div class="achievement-title">{{ achievement.title }}</div>
+              <div class="achievement-description">{{ achievement.description }}</div>
+            </div>
+            
+            <div class="achievement-status">
+              <ion-icon 
+                *ngIf="achievement.unlocked" 
+                name="checkmark-circle" 
+                class="unlocked-check"></ion-icon>
+              <ion-icon 
+                *ngIf="!achievement.unlocked" 
+                name="lock-closed" 
+                class="locked-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGROS TEST REALIZADOS -->
+    <div class="section">
+      <h2 class="section-title" (click)="toggleSection('tests')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span style="display: flex; align-items: center; gap: 12px;">
+          <ion-icon name="trophy" style="font-size: 24px; color: #10b981;"></ion-icon>
+          Logros Test Realizados
+        </span>
+        <ion-icon [name]="isSectionExpanded('tests') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </h2>
+
+      <div *ngIf="isSectionExpanded('tests')">
+        <p class="section-description">Alcanza logros completando tests de estudio</p>
+        
+        <div class="achievements-grid">
+          <div 
+            *ngFor="let achievement of testAchievements"
+            class="achievement-card"
+            [class.unlocked]="achievement.unlocked"
+            [class.locked]="!achievement.unlocked">
+            
+            <div class="achievement-icon" [style.background]="achievement.unlocked ? achievement.color : '#e5e7eb'">
+              <ion-icon [name]="achievement.icon"></ion-icon>
+            </div>
+            
+            <div class="achievement-info">
+              <div class="achievement-title">{{ achievement.title }}</div>
+              <div class="achievement-description">{{ achievement.description }}</div>
+            </div>
+            
+            <div class="achievement-status">
+              <ion-icon 
+                *ngIf="achievement.unlocked" 
+                name="checkmark-circle" 
+                class="unlocked-check"></ion-icon>
+              <ion-icon 
+                *ngIf="!achievement.unlocked" 
+                name="lock-closed" 
+                class="locked-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <app-bottom-nav></app-bottom-nav>
+</ion-content>

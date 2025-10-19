@@ -492,11 +492,11 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   async viewHistory() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/historial']);
   }
 
   async viewAchievements() {
-    this.router.navigate(['/racha']);
+    this.router.navigate(['/logros']);
   }
 
   ionViewWillEnter() {

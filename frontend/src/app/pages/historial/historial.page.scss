@@ -1,0 +1,239 @@
+.historial-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+// ========================================
+// HEADER
+// ========================================
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #10b981;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .back-icon {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-right: 12px;
+  }
+
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+// ========================================
+// CONTENIDO
+// ========================================
+.content-area {
+  margin-top: 80px;
+  padding: 20px 16px 100px;
+  background: transparent;
+  min-height: calc(100vh - 100px);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 20px;
+  margin-top: 60px;
+}
+
+// ========================================
+// EMPTY STATE
+// ========================================
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  
+  ion-icon {
+    font-size: 80px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #64748b;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 0;
+  }
+}
+
+// ========================================
+// CONTENEDOR DE SESIONES
+// ========================================
+.sessions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.day-group {
+  .day-header {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.2s;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    .day-title-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+
+      .calendar-icon {
+        font-size: 20px;
+        color: #10b981;
+      }
+
+      .day-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        text-transform: capitalize;
+      }
+
+      .session-count {
+        font-size: 12px;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 4px 8px;
+        border-radius: 8px;
+      }
+    }
+
+    .toggle-icon {
+      font-size: 20px;
+      color: #9ca3af;
+    }
+  }
+}
+
+// ========================================
+// LISTA DE SESIONES
+// ========================================
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.session-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+
+  .session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .session-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+
+      ion-icon {
+        font-size: 20px;
+        color: #10b981;
+      }
+    }
+
+    .session-time {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+  }
+
+  .session-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #64748b;
+
+      ion-icon {
+        font-size: 16px;
+        color: #94a3b8;
+      }
+    }
+  }
+
+  .session-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+
+    .success-rate {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .arrow-icon {
+      font-size: 20px;
+      color: #cbd5e1;
+    }
+  }
+}
