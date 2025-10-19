@@ -637,6 +637,11 @@ export class ApiService {
     return this.http.get(url, this.httpOptions);
   }
 
+ getMonthlyProgress(studentId: number, semester: number = 1): Observable<any> {
+    const url = `${this.API_URL}/Dashboard/monthly-progress/${studentId}/${semester}`;
+    return this.http.get<any>(url, this.httpOptions);
+  }
+
   // ========================================
   // DEBILIDADES (WEAKNESS)
   // ========================================
