@@ -6,7 +6,7 @@
 }
 
 // ========================================
-// HEADER ESTILO DASHBOARD
+// HEADER
 // ========================================
 .dashboard-header {
   position: fixed;
@@ -14,7 +14,7 @@
   left: 0;
   right: 0;
   height: 60px;
-  background: #d1d5db;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -23,13 +23,13 @@
 
   .back-icon {
     font-size: 24px;
-    color: rgb(0, 0, 0);
+    color: white;
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: rgb(0, 0, 0);
+    color: white;
     font-size: 18px;
     font-weight: 600;
     margin: 0;
@@ -37,16 +37,54 @@
 }
 
 // ========================================
+// BADGE DENTRO DEL BOTÓN
+// ========================================
+.correction-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 40px;
+
+  > ion-icon { 
+    font-size: 11px !important; 
+  }
+
+  &.green {
+    background: #d1fae5;
+    color: #059669;
+
+    > ion-icon {  
+      color: #10b981 !important;
+      font-size: 11px !important;
+    }
+  }
+
+  &.yellow {
+    background: #fef3c7;
+    color: #d97706;
+
+    > ion-icon {  
+      color: #f59e0b !important;
+      font-size: 11px !important;
+    }
+  }
+}
+
+
+// ========================================
 // CONTENIDO SCROLLABLE
 // ========================================
 .scrollable-content {
-  margin-top: 60px;
-  padding: 30px 20px 100px 20px;
-  background: white;
-  border-radius: 25px 25px 0 0;
-  position: relative;
-  z-index: 2;
+  padding: 25px 20px 100px 20px;
+  margin-top: 80px; 
+  overflow-y: auto;
+  height: calc(100vh - 190px);
 }
+
 
 // ========================================
 // ESTADÍSTICAS RÁPIDAS (SIN DEGRADÉ)
@@ -852,74 +890,159 @@
   }
 
   // ========================================
-  // CONFIGURACIÓN DE CORRECCIÓN
+  // HEADER DE CORRECCIÓN - TÍTULO + TOGGLE
   // ========================================
-  .correction-info {
-    margin-top: 20px;
+  .correction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 16px;
-    background: #f0fdf4;
-    border-radius: 8px;
-    border-left: 4px solid #10b981;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 16px;
 
-    ion-note {
+    .correction-title {
       display: flex;
-      gap: 12px;
-      font-size: 13px;
-      line-height: 1.5;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
 
       ion-icon {
-        font-size: 24px;
-        flex-shrink: 0;
-        margin-top: 2px;
+        font-size: 22px;
         color: #10b981;
       }
+    }
 
-      strong {
-        display: block;
-        margin-bottom: 8px;
-        color: #059669;
-        font-size: 14px;
-      }
-
-      p {
-        margin: 0;
-        color: #64748b;
-      }
+    ion-toggle {
+      --background: #e5e7eb;
+      --background-checked: #10b981;
+      --handle-background: white;
+      --handle-background-checked: white;
     }
   }
 
-  .correction-info-disabled {
-    margin-top: 20px;
-    padding: 16px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border-left: 4px solid #64748b;
+// ========================================
+// CONFIGURACIÓN DE CORRECCIÓN - VERDE Y AMARILLO
+// ========================================
+.correction-info {
+  margin-top: 0;
+  padding: 16px;
+  border-radius: 8px;
 
-    ion-note {
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-      line-height: 1.5;
+  ion-note {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.5;
 
-      ion-icon {
-        font-size: 24px;
-        flex-shrink: 0;
-        margin-top: 2px;
-        color: #64748b;
-      }
+    ion-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
 
-      strong {
-        display: block;
-        margin-bottom: 8px;
-        color: #475569;
-        font-size: 14px;
-      }
+    strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
 
-      p {
-        margin: 0;
-        color: #64748b;
-      }
+    p {
+      margin: 0;
+      color: #64748b;
     }
   }
+
+  // Verde - Corrección Inmediata
+  &.correction-active-green {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+
+    ion-icon {
+      color: #10b981;
+    }
+
+    strong {
+      color: #059669;
+    }
+  }
+
+  // Amarillo - Corrección al Final
+  &.correction-active-yellow {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+
+    ion-icon {
+      color: #f59e0b;
+    }
+
+    strong {
+      color: #d97706;
+    }
+  }
+}
+
+// ========================================
+// CONFIGURACIÓN DE CORRECCIÓN - VERDE Y AMARILLO
+// ========================================
+.correction-info {
+  margin-top: 0;
+  padding: 16px;
+  border-radius: 8px;
+
+  ion-note {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+
+    ion-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+    }
+  }
+
+  // Verde - Corrección Inmediata
+  &.correction-active-green {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+
+    ion-icon {
+      color: #10b981;
+    }
+
+    strong {
+      color: #059669;
+    }
+  }
+
+  // Amarillo - Corrección al Final
+  &.correction-active-yellow {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+
+    ion-icon {
+      color: #f59e0b;
+    }
+
+    strong {
+      color: #d97706;
+    }
+  }
+}
   
 }
