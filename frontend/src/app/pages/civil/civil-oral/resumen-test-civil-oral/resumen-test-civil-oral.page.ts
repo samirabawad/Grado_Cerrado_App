@@ -4,6 +4,11 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
 
+interface QuestionStatus {
+  questionNumber: number;
+  isCorrect: boolean;
+}
+
 @Component({
   selector: 'app-resumen-test-civil-oral',
   templateUrl: './resumen-test-civil-oral.page.html',
@@ -18,102 +23,101 @@ export class ResumenTestCivilOralPage implements OnInit {
   incorrectAnswers: number = 0;
   totalQuestions: number = 5;
   percentage: number = 0;
-  timeUsed: string = '0:00 min';
   
-  // Variables de nivel
+  // Variables de nivel y motivación
   levelTitle: string = 'NIVEL PRINCIPIANTE';
   levelSubtitle: string = '¡Sigue practicando!';
+  motivationalMessage: string = '¡Sigue practicando!';
   
-  // Estado de preguntas
-  questionsStatus: any[] = [];
-  
-  // Resultados completos
-  testResults: any = null;
+  // Estado de preguntas para los círculos
+  questionsStatus: QuestionStatus[] = [];
 
   constructor(private router: Router) { }
 
   ngOnInit() {
-    this.loadTestResults();
-    this.generateQuestionsStatus();
-    this.setLevelInfo();
+    this.loadResults();
   }
 
-  // Cargar resultados del test desde localStorage
-  loadTestResults() {
+  loadResults() {
     try {
-      const savedResults = localStorage.getItem('current_oral_test_results');
-      console.log('📊 Cargando resultados del test oral:', savedResults);
+      const resultsString = localStorage.getItem('current_oral_test_results');
       
-      if (savedResults) {
-        this.testResults = JSON.parse(savedResults);
-        
-        this.correctAnswers = this.testResults.correctAnswers || 0;
-        this.incorrectAnswers = this.testResults.incorrectAnswers || 0;
-        this.totalQuestions = this.testResults.totalQuestions || 5;
-        this.percentage = this.testResults.percentage || 0;
-        this.timeUsed = this.testResults.timeUsedFormatted || '0:00 min';
+      if (!resultsString) {
+        console.warn('No hay resultados guardados');
+        this.router.navigate(['/civil/civil-oral']);
+        return;
+      }
+
+      const results = JSON.parse(resultsString);
+      
+      console.log('📊 Resultados cargados:', results);
+
+      this.correctAnswers = results.correctAnswers || 0;
+      this.incorrectAnswers = results.incorrectAnswers || 0;
+      this.totalQuestions = results.totalQuestions || 5;
+      this.percentage = results.percentage || 0;
+
+      // Generar estado de preguntas para los círculos
+      if (results.questionDetails && results.questionDetails.length > 0) {
+        this.questionsStatus = results.questionDetails.map((q: any) => ({
+          questionNumber: q.questionNumber,
+          isCorrect: q.correct
+        }));
       } else {
-        console.warn('⚠️ No se encontraron resultados guardados');
-        this.correctAnswers = 0;
-        this.incorrectAnswers = 5;
-        this.totalQuestions = 5;
-        this.percentage = 0;
+        // Método alternativo basado en correctas/incorrectas
+        this.questionsStatus = [];
+        for (let i = 1; i <= this.totalQuestions; i++) {
+          this.questionsStatus.push({
+            questionNumber: i,
+            isCorrect: i <= this.correctAnswers
+          });
+        }
       }
+
+      this.calculateLevel();
+      this.setMotivationalMessage();
+
     } catch (error) {
-      console.error('❌ Error cargando resultados:', error);
-      this.correctAnswers = 0;
-      this.incorrectAnswers = 5;
-      this.totalQuestions = 5;
-      this.percentage = 0;
+      console.error('Error cargando resultados:', error);
+      this.router.navigate(['/civil/civil-oral']);
     }
   }
 
-  // Generar el estado de cada pregunta para los círculos
-  generateQuestionsStatus() {
-    this.questionsStatus = [];
-    
-    if (this.testResults && this.testResults.questionDetails) {
-      this.questionsStatus = this.testResults.questionDetails.map((q: any) => ({
-        questionNumber: q.questionNumber,
-        isCorrect: q.correct
-      }));
-    } else {
-      // Generar estado basado en correctas/incorrectas
-      for (let i = 1; i <= this.totalQuestions; i++) {
-        this.questionsStatus.push({
-          questionNumber: i,
-          isCorrect: i <= this.correctAnswers
-        });
-      }
-    }
-    
-    console.log('✅ Estado de preguntas generado:', this.questionsStatus);
-  }
-
-  // Determinar nivel según porcentaje
-  setLevelInfo() {
+  calculateLevel() {
     if (this.percentage >= 80) {
       this.levelTitle = 'NIVEL AVANZADO';
-      this.levelSubtitle = '¡Excelente dominio!';
+      this.levelSubtitle = '¡Excelente trabajo!';
     } else if (this.percentage >= 60) {
       this.levelTitle = 'NIVEL INTERMEDIO';
-      this.levelSubtitle = '¡Excelente progreso!';
+      this.levelSubtitle = '¡Muy bien!';
     } else {
       this.levelTitle = 'NIVEL PRINCIPIANTE';
       this.levelSubtitle = '¡Sigue practicando!';
     }
   }
 
-  // Hacer nuevo test
+  setMotivationalMessage() {
+    if (this.percentage >= 90) {
+      this.motivationalMessage = '¡Excelente! Dominas el tema';
+    } else if (this.percentage >= 80) {
+      this.motivationalMessage = '¡Muy bien! Vas por buen camino';
+    } else if (this.percentage >= 70) {
+      this.motivationalMessage = '¡Buen trabajo! Sigue así';
+    } else if (this.percentage >= 60) {
+      this.motivationalMessage = 'Vas progresando, continúa';
+    } else if (this.percentage >= 40) {
+      this.motivationalMessage = 'Sigue practicando, ¡tú puedes!';
+    } else {
+      this.motivationalMessage = 'No te rindas, ¡inténtalo de nuevo!';
+    }
+  }
+
   takeNewTest() {
-    console.log('🔄 Iniciando nuevo test oral...');
     localStorage.removeItem('current_oral_test_results');
     this.router.navigate(['/civil/civil-oral']);
   }
 
-  // Volver al inicio
   goBack() {
-    console.log('🏠 Volviendo al inicio...');
     localStorage.removeItem('current_oral_test_results');
     this.router.navigate(['/civil/civil-oral']);
   }

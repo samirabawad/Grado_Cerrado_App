@@ -32,6 +32,8 @@ export class DashboardPage implements OnInit {
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
+  currentSemester: number = 1; 
+  currentMonthName: string = '';
   expandedArea: string | null = null;
   expandedTema: string | null = null;
   isGeneralExpanded: boolean = false;
@@ -287,9 +289,54 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  changeTimeFrame(timeFrame: string) {
-    this.selectedTimeFrame = timeFrame;
+async changeTimeFrame(timeFrame: string) {
+  this.selectedTimeFrame = timeFrame;
+  if (timeFrame === 'month') {
+    // Determinar semestre actual (0 = Ene-Jun, 1 = Jul-Dic)
+    const currentMonth = new Date().getMonth() + 1; // 1-12
+    this.currentSemester = currentMonth <= 6 ? 0 : 1;
+    await this.loadMonthlyData();
+  } else {
+    await this.generateChartData();
   }
+}
+
+async loadMonthlyData() {
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    if (!currentUser || !currentUser.id) return;
+
+    const progressResponse = await this.apiService.getMonthlyProgress(
+      currentUser.id, 
+      this.currentSemester
+    ).toPromise();
+    
+    if (progressResponse && progressResponse.success) {
+      this.chartData = progressResponse.data;
+      this.updateMonthName();
+    }
+  } catch (error) {
+    console.error('Error cargando datos mensuales:', error);
+    this.chartData = [];
+  }
+}
+
+updateMonthName() {
+  const year = new Date().getFullYear();
+  this.currentMonthName = this.currentSemester === 0 
+    ? `Enero - Junio ${year}` 
+    : `Julio - Diciembre ${year}`;
+}
+
+async navigateMonth(direction: number) {
+  // Cambiar entre semestre 0 y 1
+  if (direction > 0 && this.currentSemester < 1) {
+    this.currentSemester = 1;
+  } else if (direction < 0 && this.currentSemester > 0) {
+    this.currentSemester = 0;
+  }
+  await this.loadMonthlyData();
+}
 
   goBack() {
     this.router.navigate(['/home']);
@@ -309,6 +356,13 @@ export class DashboardPage implements OnInit {
 
   getMaxValue(): number {
     if (this.chartData.length === 0) return 10;
+    
+    // Si estamos en vista mensual, el máximo siempre es 100
+    if (this.selectedTimeFrame === 'month') {
+      return 100;
+    }
+    
+    // Si estamos en vista semanal, calculamos el máximo dinámicamente
     const maxCivil = Math.max(...this.chartData.map(d => d.civil || 0));
     const maxProcesal = Math.max(...this.chartData.map(d => d.procesal || 0));
     const maxTotal = Math.max(maxCivil, maxProcesal);

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, LoadingController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../../services/api.service';
 
@@ -10,67 +11,31 @@ import { ApiService } from '../../../services/api.service';
   templateUrl: './civil-oral.page.html',
   styleUrls: ['./civil-oral.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, BottomNavComponent]
+  imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class CivilOralPage implements OnInit, OnDestroy {
-
-  carouselImages: string[] = [
-    'assets/image/banner-9.png',
-    'assets/image/banner-10.png',
-    'assets/image/banner-11.png'
-  ];
-  currentImageIndex: number = 0;
-  carouselInterval: any;
+  
+  selectedQuantity: number = 1;
 
   constructor(
-    private router: Router,
-    private loadingController: LoadingController,
+    private router: Router, 
+    private loadingController: LoadingController, 
     private apiService: ApiService
   ) { }
 
   ngOnInit() {
-    this.startCarousel();
   }
 
   ngOnDestroy() {
-    this.stopCarousel();
   }
 
-  ionViewWillEnter() {
-    this.startCarousel();
-  }
-
-  ionViewWillLeave() {
-    this.stopCarousel();
-  }
-
-  startCarousel() {
-    this.carouselInterval = setInterval(() => {
-      this.nextSlide();
-    }, 4000);
-  }
-
-  stopCarousel() {
-    if (this.carouselInterval) {
-      clearInterval(this.carouselInterval);
-    }
-  }
-
-  nextSlide() {
-    this.currentImageIndex = (this.currentImageIndex + 1) % this.carouselImages.length;
-  }
-
-  goToSlide(index: number) {
-    this.currentImageIndex = index;
-    this.stopCarousel();
-    this.startCarousel();
+  goBack() {
+    this.router.navigate(['/civil']);
   }
 
   async startVoicePractice() {
-    console.log('🎤 Iniciando práctica rápida - modo voz ORAL');
-    
     const loading = await this.loadingController.create({
-      message: 'Preparando tu test oral...',
+      message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
@@ -87,28 +52,32 @@ export class CivilOralPage implements OnInit, OnDestroy {
         return;
       }
 
-      const sessionData = {
+      const sessionData: any = {
         studentId: currentUser.id,
         difficulty: "intermedio",
         legalAreas: ["Derecho Civil"],
-        numberOfQuestions: 5
+        questionCount: Number(this.selectedQuantity)
       };
       
-      console.log('📤 Enviando datos de sesión ORAL:', sessionData);
+      console.log('📤 Enviando request ORAL:', sessionData);
       
       const sessionResponse = await this.apiService.startOralStudySession(sessionData).toPromise();
-      console.log('✅ Sesión ORAL creada exitosamente:', sessionResponse);
+      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
       
-      this.apiService.setCurrentSession(sessionResponse);
+      if (sessionResponse && sessionResponse.success) {
+        console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
+        this.apiService.setCurrentSession(sessionResponse);
+        await this.router.navigate(['/civil/civil-oral/test-oral-civil']);
+        await loading.dismiss();
+      } else {
+        await loading.dismiss();
+        alert('No se pudo iniciar el test oral. Intenta nuevamente.');
+      }
       
-      await this.router.navigate(['/civil/civil-oral/test-oral-civil']);
-      
+    } catch (error) {
       await loading.dismiss();
-      
-    } catch (error: any) {
-      console.error('Error iniciando test oral:', error);
-      await loading.dismiss();
-      alert('Error al iniciar el test. Por favor intenta de nuevo.');
+      console.error('❌ Error al iniciar test oral:', error);
+      alert('Hubo un error al iniciar el test oral. Intenta nuevamente.');
     }
   }
 }

@@ -1,50 +1,45 @@
 <ion-content class="test-content">
-  <!-- Header personalizado -->
-  <div class="custom-header-section">
-    <div class="orange-background">
-      <!-- Imagen de extremo a extremo con estado de conversación -->
-      <div class="derecho-civil-container-full">
-        <img src="assets/image/civil/logo_civil.png" alt="Derecho Civil" class="derecho-civil-image-responsive">
-        
-        <!-- Indicador de modo conversación -->
-        <div class="conversation-indicator">
-          <div class="conversation-badge">
-            <span>CONVERSACIÓN</span>
-            <ion-icon name="volume-high" class="audio-icon"></ion-icon>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Header -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="confirmExit()"></ion-icon>
+    <h1 class="header-title">Derecho Civil Oral</h1>
   </div>
 
   <!-- Contenido principal -->
-  <div class="content-area" *ngIf="getCurrentQuestion()">
+  <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
     
-    <!-- Progreso y número de pregunta -->
-    <div class="progress-section">
-      <div class="progress-text">Pregunta {{ currentQuestionNumber }} de {{ totalQuestions }}</div>
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="getProgress()"></div>
+    <!-- Puntitos de progreso -->
+    <div class="progress-dots">
+      <div 
+        *ngFor="let q of questions; let i = index"
+        class="dot"
+        [class.completed]="i < (currentQuestionNumber - 1)"
+        [class.current]="i === (currentQuestionNumber - 1)">
       </div>
     </div>
 
-    <!-- Número de pregunta -->
-    <div class="question-number">
-      <h2>Pregunta {{ currentQuestionNumber }}</h2>
+    <!-- Categoría -->
+    <div class="category-chip">
+      {{ getCurrentQuestion()?.category || 'Derecho Civil' }}
     </div>
 
-    <!-- Reemplazar la sección comentada del texto por esto: -->
-  <div class="listening-indicator" *ngIf="!audioCompleted">
-    <ion-icon name="volume-high" class="pulse-icon"></ion-icon>
-    <p>Escucha atentamente la pregunta...</p>
-  </div>
-  
-    <!-- Control de audio para escuchar la pregunta -->
-    <div class="audio-control-section">
-      <div class="audio-player" [class.playing]="isPlaying" [class.completed]="audioCompleted">
-        <div class="audio-icon-container" (click)="toggleAudio()">
+    <!-- Texto de la pregunta -->
+    <div class="question-text">
+      <p><strong>{{ getCurrentQuestion()?.questionText }}</strong></p>
+    </div>
+
+    <!-- Control de audio para escuchar pregunta -->
+    <div class="audio-section">
+      <div 
+        class="audio-player" 
+        [class.playing]="isPlaying"
+        [class.completed]="audioCompleted"
+        (click)="isPlaying ? pauseAudio() : playAudio()">
+        
+        <div class="audio-icon-container">
           <ion-icon [name]="getAudioIcon()" class="audio-play-icon"></ion-icon>
         </div>
+        
         <div class="audio-text">
           <span class="audio-status">{{ getAudioStatus() }}</span>
           <span class="audio-duration">{{ audioProgress }}</span>
@@ -52,19 +47,7 @@
       </div>
     </div>
 
-<div class="response-timer" *ngIf="audioCompleted && questionReadyTime > 0">
-  <div class="timer-container">
-    <ion-icon name="timer-outline" class="timer-icon"></ion-icon>
-    <div class="timer-info">
-      <span class="timer-label">Tiempo de respuesta</span>
-      <span class="timer-display" [class.warning]="getTimerWarning()">
-        {{ elapsedResponseTime }}
-      </span>
-    </div>
-  </div>
-</div>
-
-    <!-- Sección de grabación de respuesta -->
+    <!-- Sección de grabación -->
     <div class="recording-section">
       <div class="recording-controls">
         
@@ -80,7 +63,6 @@
               <ion-icon [name]="getRecordingIcon()" class="recording-icon"></ion-icon>
             </div>
             
-            <!-- Indicador de grabación activa -->
             <div class="recording-pulse" *ngIf="isRecording"></div>
           </div>
           
@@ -90,54 +72,100 @@
           </div>
         </div>
 
-<!-- Controles adicionales -->
-<div class="recording-actions" *ngIf="hasRecording">
-  <button class="action-button replay" (click)="replayRecording()">
-    <ion-icon [name]="isPlayingRecording ? 'pause' : 'play'"></ion-icon>
-    <span>{{ getReplayButtonText() }}</span>
-  </button>
-  
-  <button class="action-button restart" (click)="restartRecording()">
-    <ion-icon name="refresh"></ion-icon>
-    <span>Reiniciar</span>
-  </button>
-</div>
+        <!-- Controles: Reproducir y Reiniciar -->
+        <div class="recording-actions" *ngIf="hasRecording">
+          <button class="action-button replay" (click)="replayRecording()">
+            <ion-icon [name]="isPlayingRecording ? 'pause' : 'play'"></ion-icon>
+            <span>{{ getReplayButtonText() }}</span>
+          </button>
+          
+          <button class="action-button restart" (click)="restartRecording()">
+            <ion-icon name="refresh"></ion-icon>
+            <span>Reiniciar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+<!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
+    <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
+      <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
+        <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+        <span>{{ evaluationResult?.isCorrect ? '¡Correcto!' : 'Incorrecto' }}</span>
+      </div>
+
+      <div class="evaluation-body">
+        <div class="eval-section">
+          <div class="eval-label">Tu respuesta:</div>
+          <div class="eval-text">{{ evaluationResult?.userAnswer }}</div>
+        </div>
+
+        <div class="eval-section">
+          <div class="eval-label">Explicación:</div>
+          <div class="eval-text explanation">{{ evaluationResult?.explanation }}</div>
+        </div>
       </div>
     </div>
 
     <!-- Botón para enviar respuesta -->
-    <div class="submit-section" *ngIf="hasRecording">
+    <div class="submit-section" *ngIf="hasRecording && !showEvaluation">
       <button class="submit-voice-button" (click)="submitVoiceAnswer()">
         <ion-icon name="send"></ion-icon>
-        <span>Enviar Respuesta de Voz</span>
+        <span>Enviar Respuesta</span>
       </button>
     </div>
 
     <!-- Botones de navegación -->
     <div class="navigation-buttons">
-      <button 
-        class="nav-button secondary" 
-        [disabled]="currentQuestionNumber === 1"
-        (click)="previousQuestion()">
-        <ion-icon name="chevron-back"></ion-icon>
-        <span>Anterior</span>
-      </button>
-      
-      <button 
-        class="nav-button primary" 
+      <ion-button 
+        *ngIf="currentQuestionNumber > 1"
+        fill="outline" 
+        (click)="previousQuestion()"
+        class="nav-btn">
+        <ion-icon name="chevron-back" slot="start"></ion-icon>
+        Anterior
+      </ion-button>
+
+      <ion-button 
+        *ngIf="currentQuestionNumber < totalQuestions"
+        (click)="nextQuestion()"
         [disabled]="!canGoToNext()"
-        (click)="nextQuestion()">
-        <span>{{ isLastQuestion() ? 'Finalizar' : 'Siguiente' }}</span>
-        <ion-icon name="chevron-forward"></ion-icon>
+        class="nav-btn primary">
+        Siguiente
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-button>
+
+      <ion-button 
+        *ngIf="currentQuestionNumber === totalQuestions"
+        (click)="nextQuestion()"
+        [disabled]="!canGoToNext()"
+        class="nav-btn finish">
+        Finalizar Test
+        <ion-icon name="checkmark-circle" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- Botón para abandonar -->
+    <div class="exit-button-container">
+      <button class="exit-btn" (click)="confirmExit()">
+        <ion-icon name="exit-outline"></ion-icon>
+        Abandonar test
       </button>
     </div>
 
   </div>
 
   <!-- Loading state -->
-  <div class="loading-container" *ngIf="!getCurrentQuestion()">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Cargando preguntas...</p>
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando preguntas orales...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-container" *ngIf="loadingError">
+    <ion-icon name="alert-circle" color="danger"></ion-icon>
+    <p>Error al cargar las preguntas</p>
+    <ion-button (click)="exitTest()">Volver</ion-button>
   </div>
 
 </ion-content>

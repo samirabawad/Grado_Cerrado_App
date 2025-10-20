@@ -103,14 +103,25 @@
   </div>
 </div>
 
-    <!-- Gráfico Semanal -->
+    <!-- Gráfico Semanal/Mensual -->
     <div class="weekly-chart-container">
       <div class="chart-header">
-        <h2>Actividad Semanal</h2>
+        <h2>{{ selectedTimeFrame === 'week' ? 'Actividad Semanal' : 'Actividad Mensual' }}</h2>
         <div class="time-filters">
           <button class="time-btn" [class.active]="selectedTimeFrame === 'week'" (click)="changeTimeFrame('week')">Semana</button>
           <button class="time-btn" [class.active]="selectedTimeFrame === 'month'" (click)="changeTimeFrame('month')">Mes</button>
         </div>
+      </div>
+
+      <!-- Navegación mensual (solo visible cuando está en modo mes) -->
+      <div class="month-navigation" *ngIf="selectedTimeFrame === 'month'">
+        <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
+          <ion-icon name="chevron-back"></ion-icon>
+        </button>
+        <span class="month-label">{{ currentMonthName }}</span>
+        <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </button>
       </div>
 
       <div class="chart-legend">
@@ -125,14 +136,14 @@
       </div>
 
       <div class="chart-area">
-        <div class="chart-bars">
+        <div class="chart-bars" [class.monthly]="selectedTimeFrame === 'month'">
           <div *ngFor="let day of chartData" class="bar-group">
             <div class="bar-container">
               <div class="bar bar-civil" [style.height.%]="getBarHeight(day.civil, 'civil')">
-                <span class="bar-value">{{ day.civil }}</span>
+                <span class="bar-value" *ngIf="day.civil > 0">{{ day.civil }}</span>
               </div>
               <div class="bar bar-procesal" [style.height.%]="getBarHeight(day.procesal, 'procesal')">
-                <span class="bar-value">{{ day.procesal }}</span>
+                <span class="bar-value" *ngIf="day.procesal > 0">{{ day.procesal }}</span>
               </div>
             </div>
             <div class="bar-label">{{ day.date }}</div>
@@ -140,7 +151,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- Estadísticas por Área - SOLO CIVIL Y PROCESAL -->
     <div class="area-stats-container" #areaStatsSection>

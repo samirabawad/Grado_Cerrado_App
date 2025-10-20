@@ -1,99 +1,88 @@
 <ion-content class="results-content">
-  <!-- Header personalizado igual que otras páginas -->
-  <div class="custom-header-section">
-    <div class="orange-background">
-      <div class="derecho-civil-container-full">
-        <img src="assets/image/civil/logo_civil.png" alt="Derecho Civil" class="derecho-civil-image-responsive">
-      </div>
-    </div>
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Derecho Civil</h1>
   </div>
 
   <!-- Contenido principal -->
   <div class="content-area">
     
-    <!-- Card principal de resultados -->
-    <div class="results-main-card">
-      
-      <!-- Sección de medalla y nivel -->
-      <div class="medal-section">
-        <div class="medal-container">
-          <div class="medal-ribbon">
-            <ion-icon name="ribbon-outline" class="ribbon-icon"></ion-icon>
-          </div>
-          <div class="medal-circle">
-            <span class="medal-number">3</span>
-          </div>
-        </div>
-        <div class="mapache-celebration">
-          <img src="assets/image/mok.png" alt="Mapache celebrando" class="mapache-result">
-        </div>
-      </div>
-
-      <!-- Título del nivel -->
-      <h2 class="level-title">{{ levelTitle }}</h2>
-      <p class="level-subtitle">{{ levelSubtitle }}</p>
-
-      <!-- Porcentaje principal -->
-      <div class="score-main">
-        <div class="percentage-display">{{ percentage }}%</div>
-        <p class="score-label">Puntuación del test</p>
-      </div>
-
+    <!-- MENSAJE MOTIVACIONAL -->
+    <div class="motivational-section">
+      <p class="message-small">{{ motivationalMessage }}</p>
+      <h1 class="message-large">{{ percentage }}%</h1>
     </div>
 
-    <!-- Resumen de respuestas -->
-    <div class="summary-section">
-      <h3 class="summary-title">
-        <ion-icon name="bar-chart-outline"></ion-icon>
-        Resumen de Respuestas
-      </h3>
-      
-      <div class="summary-stats">
-        <div class="stat-correct">
-          <div class="stat-number">{{ correctAnswers }}</div>
-          <div class="stat-label">CORRECTAS</div>
+    <!-- NIVEL Y MAPACHE EN LA MISMA LÍNEA -->
+    <div class="level-mapache-row">
+      <div class="level-info">
+        <p class="level-label">{{ levelTitle }}</p>
+        <h2 class="level-message">{{ levelSubtitle }}</h2>
+      </div>
+      <div class="mapache-container">
+        <img src="assets/image/mok.png" alt="Mapache" class="mapache-image">
+      </div>
+    </div>
+
+    <!-- SOLO BLOQUES DE CORRECTAS E INCORRECTAS -->
+    <div class="stats-grid">
+      <div class="stat-item correct">
+        <div class="stat-icon">
+          <ion-icon name="checkmark-circle"></ion-icon>
         </div>
-        <div class="stat-incorrect">
-          <div class="stat-number">{{ incorrectAnswers }}</div>
-          <div class="stat-label">INCORRECTAS</div>
+        <div class="stat-info">
+          <span class="stat-number">{{ correctAnswers }}</span>
+          <span class="stat-label">Correctas</span>
         </div>
       </div>
 
-      <!-- Círculos numerados de preguntas -->
-      <div class="questions-grid">
+      <div class="stat-item incorrect">
+        <div class="stat-icon">
+          <ion-icon name="close-circle"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ incorrectAnswers }}</span>
+          <span class="stat-label">Incorrectas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CÍRCULOS DE PREGUNTAS -->
+    <div class="questions-section">
+      <h3 class="section-title">Resumen de preguntas</h3>
+      <div class="questions-container">
         <div 
-          class="question-circle" 
-          [class.correct]="status.isCorrect" 
-          [class.incorrect]="!status.isCorrect"
-          *ngFor="let status of questionsStatus">
-          {{ status.questionNumber }}
+          *ngFor="let status of questionsStatus; let i = index"
+          class="question-wrapper">
+          
+          <!-- Círculo -->
+          <div 
+            class="question-circle"
+            [class.correct]="status.isCorrect"
+            [class.incorrect]="!status.isCorrect">
+            {{ status.questionNumber }}
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Información adicional de tiempo -->
-    <div class="info-section">
-      <div class="info-item">
-        <ion-icon name="time-outline"></ion-icon>
-        <span>Tiempo utilizado: {{ timeUsed }}</span>
-      </div>
-    </div>
-
-    <!-- Botones de acción -->
+    <!-- BOTONES DE ACCIÓN -->
     <div class="action-buttons">
-      <ion-button expand="block" class="btn-new-test" (click)="takeNewTest()">
+      <ion-button expand="block" class="btn-nuevo-test" (click)="takeNewTest()">
         <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        Hacer Nuevo Test
+        Hacer Nuevo Test Oral
       </ion-button>
-      
-      <ion-button expand="block" fill="outline" class="btn-back" (click)="goBack()">
+
+      <ion-button expand="block" fill="outline" class="btn-home" (click)="goBack()">
         <ion-icon name="home-outline" slot="start"></ion-icon>
         Volver al Inicio
       </ion-button>
     </div>
 
   </div>
-<!-- Bottom Navigation -->
+
+  <!-- Bottom Navigation -->
   <app-bottom-nav></app-bottom-nav>
 
 </ion-content>

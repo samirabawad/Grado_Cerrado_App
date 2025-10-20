@@ -637,6 +637,11 @@ export class ApiService {
     return this.http.get(url, this.httpOptions);
   }
 
+ getMonthlyProgress(studentId: number, semester: number = 1): Observable<any> {
+    const url = `${this.API_URL}/Dashboard/monthly-progress/${studentId}/${semester}`;
+    return this.http.get<any>(url, this.httpOptions);
+  }
+
   // ========================================
   // DEBILIDADES (WEAKNESS)
   // ========================================
@@ -949,4 +954,59 @@ getUnreadNotificationsCount(studentId: number): Observable<any> {
         );
     }
 
+    // ========================================
+// MÉTODOS PARA TEST ORAL
+// ========================================
+
+transcribeAudio(base64Audio: string): Observable<any> {
+  const url = `${this.API_URL}/Speech/speech-to-text`;
+  
+  // Crear FormData
+  const formData = new FormData();
+  
+  // Convertir base64 a Blob
+  const byteCharacters = atob(base64Audio);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: 'audio/webm' });
+  
+  formData.append('audioFile', blob, 'recording.webm');
+  
+  console.log('🎤 Enviando audio para transcripción');
+  
+  return this.http.post<any>(url, formData)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Transcripción recibida:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error transcribiendo audio:', error);
+        throw error;
+      })
+    );
+    
+}
+
+transcribeAudioDirect(formData: FormData): Observable<any> {
+  const url = `${this.API_URL}/Speech/speech-to-text`;
+  
+  console.log('🎤 Enviando audio directo para transcripción');
+  
+  // No incluir Content-Type para que el navegador lo establezca automáticamente con boundary
+  return this.http.post<any>(url, formData)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Transcripción recibida:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error transcribiendo audio:', error);
+        throw error;
+      })
+    );
+}
 }

@@ -3,9 +3,9 @@ import { Router } from '@angular/router';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { AudioService, AudioRecordingState } from '../../../../services/audio';  // ✅ CORREGIDO
+import { trigger, transition, style, animate } from '@angular/animations';
+import { AudioService, AudioRecordingState } from '../../../../services/audio';
 import { ApiService } from '../../../../services/api.service';
-
 
 interface Question {
   id: string;
@@ -26,7 +26,18 @@ interface Question {
   templateUrl: './test-oral-civil.page.html',
   styleUrls: ['./test-oral-civil.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule],
+  animations: [
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ height: 0, opacity: 0, overflow: 'hidden' }),
+        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ height: 0, opacity: 0, overflow: 'hidden' }))
+      ])
+    ])
+  ]
 })
 export class TestOralCivilPage implements OnInit, OnDestroy {
 
@@ -64,6 +75,10 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   private currentSession: any = null;
   isLoading: boolean = true;
   loadingError: boolean = false;
+  currentTranscription: string = '';
+  
+  showEvaluation: boolean = false;
+  evaluationResult: any = null;
 
   constructor(
     private router: Router,
@@ -140,68 +155,35 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
           this.totalQuestions = this.questions.length;
           this.currentQuestionNumber = 1;
           
-          console.log(`✅ ${this.totalQuestions} preguntas cargadas`);
+          console.log('✅ Preguntas cargadas:', this.questions.length);
+          console.log('📝 Primera pregunta:', this.questions[0]);
           
           this.isLoading = false;
           this.cdr.detectChanges();
           
           setTimeout(() => {
             this.playAudio();
-            console.log('▶️ Reproduciendo automáticamente la primera pregunta');
           }, 500);
           
-        } catch (conversionError) {
-          console.error('Error en conversión de preguntas:', conversionError);
+        } catch (error) {
+          console.error('❌ Error procesando preguntas:', error);
           this.loadingError = true;
           this.isLoading = false;
+          this.cdr.detectChanges();
         }
       }, 100);
       
     } catch (error) {
-      console.error('Error en loadQuestionsFromBackend:', error);
+      console.error('❌ Error cargando preguntas:', error);
       this.loadingError = true;
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
-  }
-
-  convertBackendQuestions(backendQuestions: any[]): Question[] {
-    if (!Array.isArray(backendQuestions)) {
-      console.error('backendQuestions no es un array:', backendQuestions);
-      return [];
-    }
-    
-    return backendQuestions.map((q: any, index: number) => {
-      const convertedQuestion: Question = {
-        id: q.id || `temp-${index}`,
-        text: q.questionText || q.text || q.enunciado || 'Texto no disponible',
-        questionText: q.questionText || q.text || q.enunciado || 'Texto no disponible',
-        type: q.type || 1,
-        category: q.category || q.legalArea || 'Sin categoría',
-        legalArea: q.legalArea || q.category || 'General',
-        difficulty: q.difficulty || 3,
-        correctAnswer: q.correctAnswer || 'A',
-        explanation: q.explanation || 'Explicación no disponible'
-      };
-
-      try {
-        Object.keys(q || {}).forEach(key => {
-          if (!(key in convertedQuestion)) {
-            (convertedQuestion as any)[key] = q[key];
-          }
-        });
-      } catch (error) {
-        console.warn('Error copiando propiedades adicionales:', error);
-      }
-
-      return convertedQuestion;
-    });
   }
 
   ngOnDestroy() {
-    this.stopResponseTimer();
-    
-    if (this.recordingStateSubscription) {
-      this.recordingStateSubscription.unsubscribe();
+    if (this.responseTimer) {
+      clearInterval(this.responseTimer);
     }
     
     if (this.currentAudio) {
@@ -214,59 +196,134 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       this.recordingAudio = null;
     }
     
-    this.audioService.stopMediaStreams();
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
+    if (this.recordingStateSubscription) {
+      this.recordingStateSubscription.unsubscribe();
+    }
+    
+    this.audioService.clearRecording();
   }
 
   getCurrentQuestion(): Question | null {
-    return this.questions[this.currentQuestionNumber - 1] || null;
-  }
-
-  getCurrentQuestionText(): string {
-    const question = this.getCurrentQuestion();
-    return question ? question.text : '';
-  }
-
-  getProgress(): number {
-    if (this.totalQuestions === 0) return 0;
-    return (this.currentQuestionNumber / this.totalQuestions) * 100;
-  }
-
-  getTimerWarning(): boolean {
-    if (this.questionReadyTime === 0) return false;
-    const elapsed = Math.floor((Date.now() - this.questionReadyTime) / 1000);
-    return elapsed > 120;
-  }
-
-  getTimerMessage(): string {
-    if (this.questionReadyTime === 0) return '';
-    
-    const elapsed = Math.floor((Date.now() - this.questionReadyTime) / 1000);
-    
-    if (elapsed < 30) return '⚡ Buen ritmo';
-    else if (elapsed < 60) return '👍 Tiempo razonable';
-    else if (elapsed < 120) return '⏰ Considera finalizar pronto';
-    else return '⚠️ Tiempo extenso';
-  }
-
-  toggleAudio() {
-    if (this.isPlaying) {
-      this.pauseAudio();
-    } else {
-      this.playAudio();
+    if (!this.questions || this.questions.length === 0) {
+      return null;
     }
+    const index = this.currentQuestionNumber - 1;
+    return this.questions[index] || null;
+  }
+
+  canGoToNext(): boolean {
+    return this.hasRecording && !!this.userAnswers[this.getCurrentQuestion()?.id || ''];
+  }
+
+  isLastQuestion(): boolean {
+    return this.currentQuestionNumber === this.totalQuestions;
+  }
+
+  async confirmExit() {
+    const alert = await this.alertController.create({
+      header: 'Abandonar Test',
+      message: '¿Estás seguro que deseas abandonar el test? Se perderá tu progreso.',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Abandonar',
+          role: 'confirm',
+          handler: () => {
+            this.exitTest();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  exitTest() {
+    this.router.navigate(['/civil/civil-oral']);
+  }
+
+  convertBackendQuestions(backendQuestions: any[]): Question[] {
+    return backendQuestions.map((q: any) => ({
+      id: q.id?.toString() || Math.random().toString(),
+      text: q.texto_pregunta || q.questionText || q.text || '',
+      questionText: q.texto_pregunta || q.questionText || q.text || '',
+      type: q.tipo || q.type || 3,
+      category: q.tema || q.category || 'Derecho Civil',
+      tema: q.tema || q.category || 'Derecho Civil',
+      legalArea: q.legalArea || 'Derecho Civil',
+      difficulty: q.nivel || q.difficulty || 2,
+      correctAnswer: q.respuesta_modelo || q.correctAnswer || '',
+      explanation: q.explicacion || q.explanation || 'Sin explicación disponible',
+      userAnswer: ''
+    }));
   }
 
   playAudio() {
-    const questionText = this.getCurrentQuestionText();
-    console.log('🎙️ Reproduciendo pregunta:', questionText);
-    
-    this.isPlaying = true;
+    const question = this.getCurrentQuestion();
+    if (!question || !question.questionText) {
+      console.warn('⚠️ No hay pregunta para reproducir');
+      return;
+    }
+
+    console.log('🔊 Reproduciendo pregunta con voz:', question.questionText);
     
     if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(questionText);
-      utterance.lang = 'es-ES';
-      utterance.rate = 0.9;
+      window.speechSynthesis.cancel();
       
+      const utterance = new SpeechSynthesisUtterance(question.questionText);
+      
+      const voices = window.speechSynthesis.getVoices();
+      
+      const preferredVoices = [
+        'Jorge',
+        'Monica',
+        'Juan',
+        'Paulina',
+        'Diego',
+        'Google español',
+        'es-ES',
+        'es-MX',
+        'es-AR'
+      ];
+      
+      let selectedVoice = null;
+      
+      for (const voiceName of preferredVoices) {
+        selectedVoice = voices.find(v => 
+          v.name.includes(voiceName) || 
+          v.lang.includes('es')
+        );
+        if (selectedVoice) {
+          console.log('✅ Voz seleccionada:', selectedVoice.name);
+          break;
+        }
+      }
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        utterance.lang = selectedVoice.lang;
+      } else {
+        utterance.lang = 'es-ES';
+      }
+      
+      utterance.rate = 0.85;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      utterance.onstart = () => {
+        this.isPlaying = true;
+        this.audioCompleted = false;
+        this.audioProgress = 'Reproduciendo...';
+        this.cdr.detectChanges();
+      };
+
       utterance.onend = () => {
         this.isPlaying = false;
         this.audioCompleted = true;
@@ -278,15 +335,33 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
         console.log('⏱️ INTERROGATORIO INICIADO');
         this.cdr.detectChanges();
       };
-      
-      utterance.onerror = () => {
+
+      utterance.onerror = (error) => {
+        console.error('❌ Error reproduciendo voz:', error);
         this.isPlaying = false;
-        console.error('Error al reproducir audio');
+        this.audioCompleted = true;
+        this.audioProgress = 'Error';
         this.cdr.detectChanges();
       };
+
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          const newVoices = window.speechSynthesis.getVoices();
+          const spanishVoice = newVoices.find(v => v.lang.includes('es'));
+          if (spanishVoice) {
+            utterance.voice = spanishVoice;
+            utterance.lang = spanishVoice.lang;
+          }
+          window.speechSynthesis.speak(utterance);
+        };
+      } else {
+        window.speechSynthesis.speak(utterance);
+      }
       
-      window.speechSynthesis.speak(utterance);
     } else {
+      console.warn('⚠️ speechSynthesis no disponible, usando fallback');
+      this.isPlaying = true;
+      
       setTimeout(() => {
         this.isPlaying = false;
         this.audioCompleted = true;
@@ -302,7 +377,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   pauseAudio() {
-    console.log('Pausando audio');
+    console.log('⏸️ Pausando audio');
     
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -355,28 +430,38 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     }
   }
 
-  startRecording() {
-    console.log('🎤 Iniciando grabación de respuesta');
-    
-    if (this.responseStartTime === 0 && this.questionReadyTime > 0) {
-      this.responseStartTime = Date.now();
-      const thinkingTime = Math.round((this.responseStartTime - this.questionReadyTime) / 1000);
-      console.log(`💭 Tiempo de pensamiento: ${thinkingTime} segundos`);
-    }
-    
-    this.audioService.startRecording();
+   startRecording() {
+  console.log('🎤 Iniciando grabación de respuesta');
+  
+  // ✅ DETENER LA VOZ DE LA PREGUNTA ANTES DE GRABAR
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    this.isPlaying = false;
+    this.audioCompleted = true;
+    this.audioProgress = 'Completado';
   }
+  
+  if (this.responseStartTime === 0 && this.questionReadyTime > 0) {
+    this.responseStartTime = Date.now();
+    const thinkingTime = Math.round((this.responseStartTime - this.questionReadyTime) / 1000);
+    console.log(`💭 Tiempo de pensamiento: ${thinkingTime} segundos`);
+  }
+  
+  this.audioService.startRecording();
+  this.cdr.detectChanges();
+}
 
   stopRecording() {
-    console.log('Deteniendo grabación');
+    console.log('⏹️ Deteniendo grabación');
     this.audioService.stopRecording();
   }
 
   restartRecording() {
-    console.log('Reiniciando grabación');
+    console.log('🔄 Reiniciando grabación');
     this.audioService.clearRecording();
     this.recordingTime = '00:00';
     this.hasRecording = false;
+    this.currentTranscription = '';
     
     setTimeout(() => {
       this.startRecording();
@@ -385,11 +470,11 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
 
   replayRecording() {
     if (!this.audioUrl) {
-      console.warn('No hay audio para reproducir');
+      console.warn('⚠️ No hay audio para reproducir');
       return;
     }
     
-    console.log('Reproduciendo grabación');
+    console.log('▶️ Reproduciendo grabación');
     
     if (this.isPlayingRecording && this.recordingAudio) {
       this.recordingAudio.pause();
@@ -408,7 +493,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       
       this.recordingAudio.onerror = (error) => {
         this.isPlayingRecording = false;
-        console.error('Error al reproducir:', error);
+        console.error('❌ Error al reproducir:', error);
         this.cdr.detectChanges();
       };
     }
@@ -419,7 +504,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       })
       .catch(error => {
-        console.error('Error al reproducir audio:', error);
+        console.error('❌ Error al reproducir audio:', error);
         this.isPlayingRecording = false;
         this.cdr.detectChanges();
       });
@@ -439,6 +524,76 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     return this.isPlayingRecording ? 'Pausar' : 'Reproducir';
   }
 
+  private async convertToWav(blob: Blob): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e: any) => {
+        try {
+          const audioContext = new AudioContext();
+          const arrayBuffer = e.target.result;
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          
+          const wavBuffer = this.audioBufferToWav(audioBuffer);
+          const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+          
+          resolve(wavBlob);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(blob);
+    });
+  }
+
+  private audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
+    const length = buffer.length * buffer.numberOfChannels * 2 + 44;
+    const arrayBuffer = new ArrayBuffer(length);
+    const view = new DataView(arrayBuffer);
+    let pos = 0;
+
+    const setUint16 = (data: number) => {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    };
+    const setUint32 = (data: number) => {
+      view.setUint32(pos, data, true);
+      pos += 4;
+    };
+
+    setUint32(0x46464952);
+    setUint32(length - 8);
+    setUint32(0x45564157);
+    setUint32(0x20746d66);
+    setUint32(16);
+    setUint16(1);
+    setUint16(buffer.numberOfChannels);
+    setUint32(buffer.sampleRate);
+    setUint32(buffer.sampleRate * 2 * buffer.numberOfChannels);
+    setUint16(buffer.numberOfChannels * 2);
+    setUint16(16);
+    setUint32(0x61746164);
+    setUint32(length - pos - 4);
+
+    const channels: Float32Array[] = [];
+    for (let i = 0; i < buffer.numberOfChannels; i++) {
+      channels.push(buffer.getChannelData(i));
+    }
+
+    let offset = 0;
+    while (pos < length) {
+      for (let i = 0; i < buffer.numberOfChannels; i++) {
+        let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+        sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+        view.setInt16(pos, sample, true);
+        pos += 2;
+      }
+      offset++;
+    }
+
+    return arrayBuffer;
+  }
+
   async submitVoiceAnswer() {
     if (!this.hasRecording || !this.audioBlob) {
       const alert = await this.alertController.create({
@@ -453,198 +608,167 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     const question = this.getCurrentQuestion();
     if (!question) return;
 
-    if (this.questionReadyTime > 0) {
-      const now = Date.now();
-      this.questionResponseTime = Math.round((now - this.questionReadyTime) / 1000);
-      
-      const thinkingTime = this.responseStartTime > 0 
-        ? Math.round((this.responseStartTime - this.questionReadyTime) / 1000)
-        : 0;
-      
-      console.log('===== ANÁLISIS DEL INTERROGATORIO =====');
-      console.log(`Tiempo TOTAL de respuesta: ${this.questionResponseTime}s`);
-      console.log(`  • Tiempo pensando: ${thinkingTime}s`);
-      console.log('========================================');
-    } else {
-      this.questionResponseTime = 0;
-    }
+    const loading = await this.loadingController.create({
+      message: 'Procesando tu respuesta...',
+      spinner: 'crescent'
+    });
     
-    this.stopResponseTimer();
-    
+    await loading.present();
+
     try {
-      const loading = await this.loadingController.create({
-        message: 'Procesando tu respuesta...',
-        spinner: 'crescent'
+      console.log('📱 Plataforma:', navigator.userAgent);
+      console.log('🎤 Audio original:', {
+        type: this.audioBlob.type,
+        size: this.audioBlob.size
       });
-      await loading.present();
+
+      console.log('🔄 Convirtiendo audio a WAV...');
+      const wavBlob = await this.convertToWav(this.audioBlob);
+      console.log('✅ Audio convertido a WAV:', {
+        type: wavBlob.type,
+        size: wavBlob.size
+      });
+
+      const formData = new FormData();
+      formData.append('audioFile', wavBlob, 'recording.wav');
+      formData.append('testId', this.testId.toString());
+      formData.append('preguntaGeneradaId', question.id);
+      formData.append('numeroOrden', this.currentQuestionNumber.toString());
       
-      const response = await this.audioService.uploadAudio(
-        this.audioBlob,
-        question.id,
-        this.sessionId,
-        this.currentQuestionNumber,
-        this.questionResponseTime
-      );
-      
-      console.log('Transcripción recibida:', response);
-      
-      let isCorrect = false;
-      let confidence = 0;
-      let feedback = '';
-      let correctAnswerText = '';
-      let explanation = '';
-      
-      if (response.success && response.transcription) {
-        loading.message = 'Evaluando tu respuesta...';
+      console.log('📤 Enviando FormData al backend');
+
+      try {
+        const transcriptionResponse = await this.apiService.transcribeAudioDirect(formData).toPromise();
         
-        try {
-          const evaluation = await this.apiService.evaluateOralAnswer({
-            testId: parseInt(this.sessionId),
-            preguntaGeneradaId: parseInt(question.id),
-            numeroOrden: this.currentQuestionNumber,
-            transcription: response.transcription
-          }).toPromise();
+        if (transcriptionResponse && transcriptionResponse.transcription) {
+          this.currentTranscription = transcriptionResponse.transcription;
+          console.log('✅ Transcripción recibida:', this.currentTranscription);
           
-          console.log('Evaluación recibida:', evaluation);
+          this.userAnswers[question.id] = this.currentTranscription;
           
-          isCorrect = evaluation.isCorrect;
-          confidence = evaluation.confidence;
-          feedback = evaluation.feedback;
-          correctAnswerText = evaluation.correctAnswer;
-          explanation = evaluation.explanation || '';
+          const correctionConfig = this.getCorrectionConfig();
           
-        } catch (evalError) {
-          console.error('Error al evaluar respuesta:', evalError);
-          isCorrect = false;
-          confidence = 0;
-          feedback = 'No se pudo evaluar la respuesta automáticamente.';
-          explanation = '';
+          if (correctionConfig.immediate) {
+            await loading.dismiss();
+            await this.evaluateAnswer(question, this.currentTranscription);
+          } else {
+            await loading.dismiss();
+            const alert = await this.alertController.create({
+              header: '✅ Respuesta Guardada',
+              message: 'Tu respuesta ha sido guardada. Se evaluará al final del test.',
+              buttons: ['OK']
+            });
+            await alert.present();
+          }
+        } else {
+          await loading.dismiss();
+          const alert = await this.alertController.create({
+            header: 'Error',
+            message: 'No se pudo transcribir el audio. Por favor, intenta de nuevo.',
+            buttons: ['OK']
+          });
+          await alert.present();
         }
-      }
-      
-      await loading.dismiss();
-      
-      this.userAnswers[question.id] = JSON.stringify({
-        type: 'voice',
-        transcription: response.transcription || 'Texto no disponible',
-        audioId: response.audioId || 'voice_' + this.currentQuestionNumber,
-        timestamp: new Date().toISOString(),
-        responseTime: this.questionResponseTime,
-        recordingDuration: this.recordingDuration,
-        size: this.audioBlob.size,
-        confidence: confidence,
-        isCorrect: isCorrect,
-        feedback: feedback,
-        correctAnswer: correctAnswerText,
-        explanation: explanation
-      });
-      
-      this.questionReadyTime = 0;
-      this.responseStartTime = 0;
-      this.questionResponseTime = 0;
-      this.elapsedResponseTime = '00:00';
-      
-      this.audioService.clearRecording();
-      
-      if (this.recordingAudio) {
-        this.recordingAudio.pause();
-        this.recordingAudio = null;
-        this.isPlayingRecording = false;
-      }
-      
-      await this.showDetailedFeedback(
-        isCorrect, 
-        response.transcription, 
-        correctAnswerText, 
-        explanation,
-        confidence
-      );
-      
-      setTimeout(() => {
-        this.nextQuestion();
-      }, 500);
-      
-    } catch (error: any) {
-      console.error('Error al enviar respuesta:', error);
-      
-      this.stopResponseTimer();
-      
-      const loading = await this.loadingController.getTop();
-      if (loading) {
+      } catch (error: any) {
+        console.error('❌ Error transcribiendo:', error);
         await loading.dismiss();
+        
+        let errorMessage = 'Hubo un error al procesar tu respuesta.';
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        const alert = await this.alertController.create({
+          header: 'Error de Transcripción',
+          message: errorMessage,
+          buttons: ['OK']
+        });
+        await alert.present();
       }
       
+    } catch (error) {
+      console.error('❌ Error convirtiendo audio:', error);
+      await loading.dismiss();
       const alert = await this.alertController.create({
         header: 'Error',
-        message: error.message || 'Hubo un problema al procesar tu respuesta.',
+        message: 'No se pudo convertir el audio. Intenta grabar de nuevo.',
         buttons: ['OK']
       });
       await alert.present();
     }
   }
 
-  async showDetailedFeedback(
-  isCorrect: boolean,
-  userAnswer: string,
-  correctAnswer: string,
-  explanation: string,
-  confidence: number
-) {
-  // ✅ LEER CONFIGURACIÓN DE CORRECCIÓN
-  const correctionConfig = localStorage.getItem('correctionConfig');
-  const showImmediateCorrection = correctionConfig 
-    ? JSON.parse(correctionConfig).immediate 
-    : true; // Por defecto: corrección inmediata
-  
-  // ✅ SOLO MOSTRAR FEEDBACK SI ESTÁ ACTIVADA LA CORRECCIÓN INMEDIATA
-  if (!showImmediateCorrection) {
-    console.log('⏭️ Corrección al final activada - saltando feedback inmediato');
-    return;
-  }
-  
-  const header = isCorrect ? '✅ ¡Correcto!' : '❌ Incorrecto';
-
-  let message = `Tu respuesta:\n"${userAnswer || 'Sin transcripción'}"\n\n`;
-  
-  if (!isCorrect) {
-    message += `Respuesta correcta:\n${correctAnswer}\n\n`;
-  }
-  
-  if (explanation && explanation !== 'No hay explicación disponible.') {
-    message += `Explicación:\n${explanation}`;
-  }
-
-  const alert = await this.alertController.create({
-    header: header,
-    message: message,
-    cssClass: isCorrect ? 'oral-alert-correct' : 'oral-alert-incorrect',
-    buttons: [
-      {
-        text: 'Continuar',
-        role: 'confirm'
+  getCorrectionConfig(): any {
+    try {
+      const saved = localStorage.getItem('correctionConfig');
+      if (saved) {
+        return JSON.parse(saved);
       }
-    ]
-  });
-
-  await alert.present();
-  await alert.onDidDismiss();
-}
-
-  canGoToNext(): boolean {
-    return this.hasRecording || this.hasAnsweredCurrentQuestion();
+    } catch (error) {
+      console.error('Error leyendo correctionConfig:', error);
+    }
+    return { immediate: true };
   }
 
-  hasAnsweredCurrentQuestion(): boolean {
-    const questionId = this.getCurrentQuestion()?.id;
-    return questionId ? !!this.userAnswers[questionId] : false;
-  }
+  async evaluateAnswer(question: Question, transcription: string) {
+    const loading = await this.loadingController.create({
+      message: 'Evaluando tu respuesta...',
+      spinner: 'crescent'
+    });
+    
+    await loading.present();
 
-  isLastQuestion(): boolean {
-    return this.currentQuestionNumber === this.totalQuestions;
+    try {
+      const evaluationData = {
+        testId: this.testId,
+        preguntaGeneradaId: parseInt(question.id),
+        numeroOrden: this.currentQuestionNumber,
+        transcription: transcription
+      };
+
+      console.log('📊 Datos de evaluación:', evaluationData);
+
+      const response = await this.apiService.evaluateOralAnswer(evaluationData).toPromise();
+      
+      console.log('✅ Respuesta completa del backend:', response);
+
+      await loading.dismiss();
+
+      if (response && response.success) {
+        const data = response.data || response;
+        
+        this.evaluationResult = {
+          isCorrect: data.isCorrect || false,
+          userAnswer: transcription,
+          correctAnswer: data.correctAnswer || question.correctAnswer,
+          explanation: data.explanation || data.explicacion || question.explanation
+        };
+        
+        this.showEvaluation = true;
+        this.cdr.detectChanges();
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Error evaluando respuesta:', error);
+      await loading.dismiss();
+      
+      this.evaluationResult = {
+        isCorrect: false,
+        userAnswer: transcription,
+        correctAnswer: question.correctAnswer,
+        explanation: question.explanation
+      };
+      
+      this.showEvaluation = true;
+      this.cdr.detectChanges();
+    }
   }
 
   nextQuestion() {
-    if (!this.canGoToNext()) return;
+    if (!this.canGoToNext()) {
+      console.warn('⚠️ No se puede avanzar sin respuesta guardada');
+      return;
+    }
     
     if (this.isLastQuestion()) {
       this.completeTest();
@@ -665,6 +789,9 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     this.isPlaying = false;
     this.audioCompleted = false;
     this.audioProgress = '00:02';
+    this.currentTranscription = '';
+    this.showEvaluation = false;
+    this.evaluationResult = null;
     
     if (this.currentAudio) {
       this.currentAudio.pause();
@@ -700,155 +827,91 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   async completeTest() {
-    console.log('Completando test oral con respuestas:', this.userAnswers);
+    console.log('🏁 Completando test oral');
     
-    const alert = await this.alertController.create({
-      header: 'Test Completado',
-      message: 'Has completado todas las preguntas del modo oral.',
-      buttons: [
-        {
-          text: 'Ver Resultados',
-          handler: () => {
-            this.saveResultsAndNavigateToSummary();
-          }
-        }
-      ]
+    const loading = await this.loadingController.create({
+      message: 'Finalizando test...',
+      spinner: 'crescent'
     });
-
-    await alert.present();
-  }
-
-  saveResultsAndNavigateToSummary() {
-    const results = this.calculateResults();
-    localStorage.setItem('current_oral_test_results', JSON.stringify(results));
-    this.apiService.clearCurrentSession();
-    this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
-  }
-
-  calculateResults() {
-    const totalQuestions = this.questions.length;
-    const answeredQuestions = Object.keys(this.userAnswers).length;
     
-    let correctAnswers = 0;
+    await loading.present();
     
-    const questionDetails = this.questions.map((question, index) => {
-      const answerData = this.userAnswers[question.id];
+    try {
+      let correctCount = 0;
+      let incorrectCount = 0;
       
-      if (answerData) {
-        try {
-          const parsedAnswer = JSON.parse(answerData);
-          const isCorrect = parsedAnswer.isCorrect || false;
-          
-          if (isCorrect) {
-            correctAnswers++;
-          }
-          
-          return {
-            questionNumber: index + 1,
-            question: question.text,
-            answered: true,
-            correct: isCorrect,
-            userAnswer: parsedAnswer.transcription || 'Sin respuesta',
-            correctAnswer: parsedAnswer.correctAnswer || question.correctAnswer || 'N/A',
-            feedback: parsedAnswer.feedback || '',
-            confidence: parsedAnswer.confidence || 0,
-            responseTime: parsedAnswer.responseTime || 0
-          };
-        } catch (error) {
-          console.error('Error parseando respuesta:', error);
-          return {
-            questionNumber: index + 1,
-            question: question.text,
-            answered: false,
-            correct: false,
-            userAnswer: 'Error al procesar',
-            correctAnswer: question.correctAnswer || 'N/A',
-            responseTime: 0
-          };
+      this.questions.forEach(q => {
+        const answer = this.userAnswers[q.id];
+        if (answer && answer.trim().length > 0) {
+          correctCount++;
+        } else {
+          incorrectCount++;
         }
-      } else {
-        return {
+      });
+      
+      const totalAnswered = correctCount + incorrectCount;
+      const percentage = totalAnswered > 0 
+        ? Math.round((correctCount / this.totalQuestions) * 100) 
+        : 0;
+      
+      const results = {
+        correctAnswers: correctCount,
+        incorrectAnswers: incorrectCount,
+        totalQuestions: this.totalQuestions,
+        percentage: percentage,
+        timeUsedFormatted: '0:00 min',
+        questionDetails: this.questions.map((q, index) => ({
           questionNumber: index + 1,
-          question: question.text,
-          answered: false,
-          correct: false,
-          userAnswer: 'Sin respuesta',
-          correctAnswer: question.correctAnswer || 'N/A',
-          responseTime: 0
-        };
-      }
-    });
-
-    const percentage = totalQuestions > 0 
-      ? Math.round((correctAnswers / totalQuestions) * 100) 
-      : 0;
-
-    console.log('📊 RESULTADOS FINALES:', {
-      total: totalQuestions,
-      correctas: correctAnswers,
-      incorrectas: totalQuestions - correctAnswers,
-      porcentaje: percentage
-    });
-
-    return {
-      totalQuestions,
-      correctAnswers,
-      incorrectAnswers: totalQuestions - correctAnswers,
-      percentage,
-      questionDetails,
-      testType: 'oral',
-      completedAt: new Date().toISOString()
-    };
+          questionText: q.questionText,
+          correct: !!this.userAnswers[q.id]
+        }))
+      };
+      
+      localStorage.setItem('current_oral_test_results', JSON.stringify(results));
+      console.log('✅ Resultados guardados:', results);
+      
+      await loading.dismiss();
+      
+      await this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
+      
+    } catch (error) {
+      console.error('❌ Error completando test:', error);
+      await loading.dismiss();
+      
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'Hubo un error al finalizar el test',
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
   }
- 
+
   async showUnsupportedAlert() {
     const alert = await this.alertController.create({
-      header: 'Función no disponible',
-      message: 'Tu navegador no soporta la grabación de audio. Por favor, usa un navegador compatible como Chrome, Firefox o Safari.',
-      buttons: [
-        {
-          text: 'Volver',
-          handler: () => {
-            this.router.navigate(['/civil/civil-oral']);
-          }
+      header: 'Grabación no disponible',
+      message: 'Tu navegador no soporta la grabación de audio. Por favor, usa Chrome, Firefox o Safari.',
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.router.navigate(['/civil/civil-oral']);
         }
-      ]
+      }]
     });
     await alert.present();
   }
 
   async showMicrophoneErrorAlert() {
     const alert = await this.alertController.create({
-      header: 'Error de micrófono',
-      message: 'No se pudo acceder al micrófono. Por favor, verifica los permisos y que el micrófono esté conectado.',
-      buttons: [
-        {
-          text: 'Reintentar',
-          handler: async () => {
-            const initialized = await this.audioService.initializeRecording();
-            if (!initialized) {
-              this.showMicrophoneErrorAlert();
-            }
-          }
-        },
-        {
-          text: 'Volver',
-          handler: () => {
-            this.router.navigate(['/civil/civil-oral']);
-          }
+      header: 'Permiso de micrófono',
+      message: 'No se pudo acceder al micrófono. Por favor, permite el acceso al micrófono en la configuración de tu navegador.',
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.router.navigate(['/civil/civil-oral']);
         }
-      ]
+      }]
     });
     await alert.present();
-  }
-
-  retryLoading() {
-    this.loadingError = false;
-    this.isLoading = true;
-    this.loadQuestionsFromBackend();
-  }
-
-  playQuestion() {
-    this.playAudio();
   }
 }

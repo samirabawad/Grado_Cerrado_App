@@ -1,57 +1,4 @@
 // ========================================
-// CONTADOR DE TIEMPO DE RESPUESTA
-// ========================================
-.response-timer {
-  margin-bottom: 24px;
-  animation: fadeIn 0.5s ease;
-
-  .timer-container {
-    background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
-    border: 2px solid #2196F3;
-    border-radius: 16px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
-
-    .timer-icon {
-      font-size: 2rem;
-      color: #1976D2;
-      animation: pulse 2s infinite;
-    }
-
-    .timer-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-
-      .timer-label {
-        font-size: 0.85rem;
-        color: #1565C0;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .timer-display {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #0D47A1;
-        font-family: 'Courier New', monospace;
-        letter-spacing: 2px;
-
-        &.warning {
-          color: #E65100;
-          animation: blink 1s infinite;
-        }
-      }
-    }
-  }
-}
-
-// ========================================
 // CONFIGURACIÓN BÁSICA
 // ========================================
 .test-content {
@@ -64,69 +11,39 @@
   min-height: 100vh;
 }
 
+ion-content.test-content {
+  --overflow: auto;
+  height: 100%;
+}
+
 // ========================================
-// HEADER FIJO CON INDICADOR DE CONVERSACIÓN
+// HEADER NARANJA
 // ========================================
-.custom-header-section {
+.dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  height: 60px;
+  background: #FF6F00;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
   z-index: 1000;
-  background: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-  .orange-background {
-    background: transparent;
-    padding: 0;
-    border-radius: 0;
-    position: relative;
-    overflow: visible;
-    width: 100vw;
+  .back-icon {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-right: 12px;
+  }
 
-    .derecho-civil-container-full {
-      display: block;
-      width: 100%;
-      height: auto;
-      position: relative;
-      z-index: 3;
-
-      .derecho-civil-image-responsive {
-        display: block;
-        width: 100vw;
-        height: auto;
-        min-height: 120px;
-        max-height: 200px;
-        object-fit: cover;
-        object-position: center;
-        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
-      }
-
-      .conversation-indicator {
-        position: absolute;
-        top: 50%;
-        right: 20px;
-        transform: translateY(-50%);
-        z-index: 4;
-
-        .conversation-badge {
-          background: linear-gradient(135deg, #4CAF50, #2E7D32);
-          color: white;
-          padding: 8px 12px;
-          border-radius: 20px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-
-          .audio-icon {
-            font-size: 1rem;
-            animation: pulse 2s infinite;
-          }
-        }
-      }
-    }
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
   }
 }
 
@@ -134,75 +51,89 @@
 // CONTENIDO PRINCIPAL
 // ========================================
 .content-area {
-  margin-top: 140px;
+  margin-top: 80px;
   padding: 20px 16px 100px 16px;
   position: relative;
   z-index: 2;
   background: transparent;
-  border-radius: 30px 30px 0 0;
   min-height: calc(100vh - 100px);
 }
 
 // ========================================
-// PROGRESO Y PREGUNTA
+// PUNTITOS DE PROGRESO
 // ========================================
-.progress-section {
-  margin-bottom: 20px;
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 16px 0;
 
-  .progress-text {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 8px;
-    text-align: center;
-    font-weight: 500;
-  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
 
-  .progress-bar {
-    height: 8px;
-    background: #E5E7EB;
-    border-radius: 4px;
-    overflow: hidden;
+    &.current {
+      background: #FF6F00;
+      border-color: #FF6F00;
+      transform: scale(1.3);
+      box-shadow: 0 0 8px rgba(255, 111, 0, 0.4);
+    }
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
-      transition: width 0.3s ease;
+    &.completed {
+      background: #4CAF50;
+      border-color: #4CAF50;
     }
   }
 }
 
-.question-number {
-  margin-bottom: 16px;
-
-  h2 {
-    color: #4CAF50;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-    text-align: center;
-  }
+// ========================================
+// CHIP DE CATEGORÍA
+// ========================================
+.category-chip {
+  display: inline-block;
+  background: rgba(255, 111, 0, 0.1);
+  border: 1px solid rgba(255, 111, 0, 0.3);
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FF6F00;
+  text-align: center;
 }
 
+// ========================================
+// TEXTO DE LA PREGUNTA
+// ========================================
 .question-text {
-  margin-bottom: 24px;
   background: white;
-  padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 120px;
 
   p {
-    font-size: 1.1rem;
-    line-height: 1.6;
     margin: 0;
-    color: #333;
-    text-align: center;
+    font-size: 17px;
+    line-height: 1.6;
+    color: #1e293b;
+
+    strong {
+      font-weight: 600;
+    }
   }
 }
 
 // ========================================
-// CONTROL DE AUDIO
+// SECCIÓN DE AUDIO (ESCUCHAR PREGUNTA)
 // ========================================
-.audio-control-section {
+.audio-section {
   margin-bottom: 32px;
 
   .audio-player {
@@ -217,17 +148,17 @@
     transition: all 0.3s ease;
 
     &.playing {
-      box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 4px 20px rgba(255, 111, 0, 0.3);
     }
 
     &.completed {
-      background: linear-gradient(135deg, #E8F5E8, #F1F8E9);
+      background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
     }
 
     .audio-icon-container {
       width: 56px;
       height: 56px;
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      background: linear-gradient(135deg, #FF6F00, #E65100);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -291,13 +222,13 @@
         .recording-circle {
           width: 80px;
           height: 80px;
-          background: #FF5722;
+          background: #FF6F00;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+          box-shadow: 0 4px 15px rgba(255, 111, 0, 0.3);
 
           .recording-icon {
             font-size: 2rem;
@@ -339,7 +270,7 @@
 
         .recording-timer {
           display: block;
-          color: #FF5722;
+          color: #FF6F00;
           font-size: 1rem;
           font-weight: 600;
         }
@@ -373,15 +304,62 @@
           font-weight: 500;
         }
 
-        &:hover {
-          border-color: #4CAF50;
+        &:active {
+          transform: scale(0.95);
+        }
+
+        &.replay:hover {
+          border-color: #FF6F00;
           
           ion-icon, span {
-            color: #4CAF50;
+            color: #FF6F00;
+          }
+        }
+
+        &.restart:hover {
+          border-color: #666;
+          
+          ion-icon, span {
+            color: #333;
           }
         }
       }
     }
+  }
+}
+
+// ========================================
+// CUADRO DE TRANSCRIPCIÓN
+// ========================================
+.transcription-box {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 100%;
+
+  .transcription-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #FF6F00;
+    font-weight: 600;
+    font-size: 0.95rem;
+
+    ion-icon {
+      font-size: 1.2rem;
+    }
+  }
+
+  .transcription-text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1e293b;
+    white-space: pre-wrap;
   }
 }
 
@@ -393,7 +371,7 @@
 
   .submit-voice-button {
     width: 100%;
-    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    background: linear-gradient(135deg, #FF6F00, #E65100);
     color: white;
     border: none;
     border-radius: 16px;
@@ -406,11 +384,11 @@
     gap: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 111, 0, 0.3);
 
     &:active {
       transform: translateY(2px);
-      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+      box-shadow: 0 2px 8px rgba(255, 111, 0, 0.4);
     }
 
     ion-icon {
@@ -425,146 +403,110 @@
 .navigation-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
+  margin-bottom: 20px;
 
-  .nav-button {
+  .nav-btn {
     flex: 1;
-    padding: 14px 20px;
-    border-radius: 12px;
-    font-size: 1rem;
+    height: 48px;
+    font-size: 15px;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: none;
+    text-transform: none;
+    --border-radius: 12px;
 
     &.primary {
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
-      color: white;
-      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-
-      &:active {
-        transform: translateY(1px);
-      }
+      --background: #FF6F00;
+      --background-activated: #E65100;
+      --color: white;
     }
 
-    &.secondary {
-      background: white;
-      color: #666;
-      border: 2px solid #E0E0E0;
-
-      &:hover:not(:disabled) {
-        border-color: #4CAF50;
-        color: #4CAF50;
-      }
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    ion-icon {
-      font-size: 1.2rem;
+    &.finish {
+      --background: #4CAF50;
+      --background-activated: #388E3C;
+      --color: white;
     }
   }
 }
 
 // ========================================
-// LOADING STATE
+// BOTÓN DE ABANDONAR
 // ========================================
-.loading-container {
+.exit-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+
+  .exit-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #64748b;
+    }
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+// ========================================
+// ESTADOS DE LOADING Y ERROR
+// ========================================
+.loading-container,
+.error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
-  gap: 16px;
+  min-height: 60vh;
+  padding: 40px 20px;
+  text-align: center;
 
   ion-spinner {
-    --color: #4CAF50;
-    width: 48px;
-    height: 48px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+  }
+
+  ion-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
   }
 
   p {
+    font-size: 16px;
     color: #666;
-    font-size: 1.1rem;
-    margin: 0;
+    margin-bottom: 20px;
   }
-}
 
-// ========================================
-// INDICADOR DE ESCUCHA
-// ========================================
-.listening-indicator {
-  text-align: center;
-  padding: 30px 20px;
-  margin-bottom: 20px;
-  
-  .pulse-icon {
-    font-size: 3rem;
-    color: #4CAF50;
-    animation: pulse 1.5s infinite;
-  }
-  
-  p {
-    margin-top: 15px;
-    font-size: 1.1rem;
-    color: #666;
-    font-weight: 500;
+  ion-button {
+    margin-top: 20px;
   }
 }
 
 // ========================================
 // ANIMACIONES
 // ========================================
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.1);
-  }
-}
-
-@keyframes blink {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
 @keyframes recordingPulse {
   0%, 100% {
-    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
   }
   50% {
-    transform: scale(1.05);
+    box-shadow: 0 4px 25px rgba(244, 67, 54, 0.6);
   }
 }
 
 @keyframes pulseRing {
   0% {
-    transform: scale(1);
+    transform: scale(0.9);
     opacity: 1;
   }
   100% {
@@ -578,7 +520,7 @@
 // ========================================
 @media (max-width: 480px) {
   .content-area {
-    padding: 16px 12px 80px 12px;
+    padding: 20px 12px 100px 12px;
   }
 
   .recording-button-container .recording-button {
@@ -588,99 +530,200 @@
     .recording-circle {
       width: 70px;
       height: 70px;
-
-      .recording-icon {
-        font-size: 1.8rem;
-      }
     }
-  }
-
-  .navigation-buttons {
-    flex-direction: column;
-    gap: 8px;
   }
 }
 
 // ========================================
-// ESTILOS PARA ALERTS PERSONALIZADOS
+// MODAL DE EVALUACIÓN PERSONALIZADO
 // ========================================
-::ng-deep {
-  .oral-alert-correct,
-  .oral-alert-incorrect {
+:host ::ng-deep {
+  .custom-oral-evaluation {
+    --backdrop-opacity: 0.6;
+    
     .alert-wrapper {
-      max-width: 340px;
-      background: white !important;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      max-width: 100%;
+      width: 100%;
+      margin: 0;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+      animation: slideUp 0.3s ease-out;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .alert-head {
-      padding: 20px 16px 15px;
-      text-align: center;
-      background: transparent !important;
-      
-      h2 {
-        font-weight: 700 !important;
-        font-size: 1.3rem !important;
-      }
+      padding: 24px 20px 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      flex-shrink: 0;
     }
-    
+
+    .alert-title {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      margin: 0;
+    }
+
     .alert-message {
-      font-size: 0.95rem !important;
-      line-height: 1.6;
-      padding: 20px !important;
-      white-space: pre-line;
-      text-align: left;
-      color: #333 !important;
-      background: white !important;
-      max-height: 400px;
+      padding: 0;
+      flex: 1;
       overflow-y: auto;
     }
-    
+
     .alert-button-group {
-      border-top: 1px solid #E0E0E0;
-      background: white !important;
-      padding: 16px;
+      padding: 16px 20px;
+      border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+
+    .alert-button {
+      margin: 0;
       
-      button {
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        text-transform: uppercase;
+      .alert-button-inner {
+        height: 52px;
+        border-radius: 12px;
+        background: #FF6F00;
+        color: white;
+        font-size: 17px;
+        font-weight: 600;
+        justify-content: center;
       }
     }
   }
 
-  .oral-alert-correct {
-    .alert-wrapper {
-      border-top: 4px solid #4CAF50;
-    }
+  // Contenido de la evaluación
+  .evaluation-content {
+    padding: 20px;
+  }
 
-    .alert-head {
-      background: linear-gradient(to bottom, #E8F5E9, #fff) !important;
-      
-      h2 {
-        color: #2E7D32 !important;
-      }
-    }
-    
-    .alert-button-group button {
-      color: #2E7D32 !important;
+  .evaluation-section {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 
-  .oral-alert-incorrect {
-    .alert-wrapper {
-      border-top: 4px solid #F44336;
-    }
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
 
-    .alert-head {
-      background: linear-gradient(to bottom, #FFEBEE, #fff) !important;
-      
-      h2 {
-        color: #C62828 !important;
-      }
+  .section-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1e293b;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border-left: 4px solid transparent;
+  }
+
+  .user-answer {
+    border-left-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  .correct-answer {
+    border-left-color: #10b981;
+    background: #f0fdf4;
+  }
+
+  .explanation {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+  }
+
+  // Animación de deslizamiento
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
     }
-    
-    .alert-button-group button {
-      color: #C62828 !important;
+    to {
+      transform: translateY(0);
+      opacity: 1;
     }
   }
+
+  // ========================================
+// PANEL DE EVALUACIÓN DESPLEGABLE
+// ========================================
+.evaluation-panel {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  overflow: hidden;
+
+  .evaluation-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+
+    &.correct {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    &.incorrect {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    ion-icon {
+      font-size: 28px;
+    }
+  }
+
+  .evaluation-body {
+    padding: 20px;
+  }
+
+  .eval-section {
+    margin-bottom: 20px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .eval-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .eval-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1e293b;
+    padding: 14px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    border-left: 4px solid #cbd5e1;
+
+    &.correct {
+      background: #f0fdf4;
+      border-left-color: #10b981;
+    }
+  }
+}
 }
