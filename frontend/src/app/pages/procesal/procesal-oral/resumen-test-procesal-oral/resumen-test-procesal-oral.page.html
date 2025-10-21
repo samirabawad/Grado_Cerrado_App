@@ -1,0 +1,87 @@
+<ion-content class="procesal-content">
+  <div class="results-header">
+    <ion-icon name="close" class="close-icon" (click)="goToHome()"></ion-icon>
+    <h1>Resultados</h1>
+  </div>
+
+  <div class="content-area">
+    <div class="score-card">
+      <div class="score-circle">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" class="circle-bg"></circle>
+          <circle cx="50" cy="50" r="45" class="circle-progress" 
+                  [style.stroke-dashoffset]="283 - (283 * percentage / 100)"></circle>
+        </svg>
+        <div class="score-text">
+          <span class="percentage">{{ percentage }}%</span>
+          <span class="label">Completadas</span>
+        </div>
+      </div>
+
+      <div class="score-details">
+        <div class="detail-item correct">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <span>{{ correctAnswers }} Respondidas</span>
+        </div>
+        <div class="detail-item incorrect">
+          <ion-icon name="close-circle"></ion-icon>
+          <span>{{ incorrectAnswers }} Pendientes</span>
+        </div>
+      </div>
+
+      <div class="level-badge">
+        <h2>{{ levelTitle }}</h2>
+        <p>{{ levelSubtitle }}</p>
+      </div>
+
+      <p class="motivational">{{ motivationalMessage }}</p>
+    </div>
+
+    <div class="actions-card">
+      <ion-button expand="block" (click)="takeNewTest()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Nuevo Test Oral
+      </ion-button>
+    </div>
+
+    <div class="questions-review" *ngIf="questionResults.length > 0">
+      <h3>Revisión de Preguntas</h3>
+      
+      <div class="question-item" *ngFor="let question of questionResults; let i = index"
+           [class.correct]="question.isCorrect"
+           [class.incorrect]="!question.isCorrect">
+        
+        <div class="question-header" (click)="toggleQuestion(i)">
+          <div class="question-info">
+            <ion-icon [name]="question.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+            <span class="question-number">Pregunta {{ question.questionNumber }}</span>
+          </div>
+          <ion-icon [name]="expandedQuestionIndex === i ? 'chevron-up' : 'chevron-down'" 
+                    class="expand-icon"></ion-icon>
+        </div>
+
+        <div class="question-details" *ngIf="expandedQuestionIndex === i" @slideDown>
+          <p class="question-text">{{ question.questionText }}</p>
+          
+          <div class="answer-section">
+            <div class="answer-item user-answer">
+              <strong>Tu respuesta:</strong>
+              <span>{{ question.userAnswer }}</span>
+            </div>
+            <div class="answer-item model-answer">
+              <strong>Respuesta modelo:</strong>
+              <p>{{ question.modelAnswer }}</p>
+            </div>
+          </div>
+
+          <div class="explanation" *ngIf="question.explanation">
+            <strong>Explicación:</strong>
+            <p>{{ question.explanation }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-bottom-nav></app-bottom-nav>
+</ion-content>

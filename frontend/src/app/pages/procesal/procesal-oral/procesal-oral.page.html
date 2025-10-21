@@ -1,7 +1,7 @@
-<ion-content class="civil-content">
+<ion-content class="procesal-content">
   <div class="dashboard-header">
     <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
-    <h1 class="header-title">Derecho Civil Oral</h1>
+    <h1 class="header-title">Modo Oral</h1>
   </div>
 
   <div class="content-area">
@@ -17,13 +17,6 @@
         </div>
         
         <div class="quantity-option" 
-             [class.selected]="selectedQuantity === 3" 
-             (click)="selectedQuantity = 3">
-          <span class="number">3</span>
-          <span class="label">Preguntas</span>
-        </div>
-        
-        <div class="quantity-option" 
              [class.selected]="selectedQuantity === 5" 
              (click)="selectedQuantity = 5">
           <span class="number">5</span>
@@ -31,16 +24,23 @@
         </div>
         
         <div class="quantity-option" 
-             [class.selected]="selectedQuantity === 7" 
-             (click)="selectedQuantity = 7">
-          <span class="number">7</span>
+             [class.selected]="selectedQuantity === 10" 
+             (click)="selectedQuantity = 10">
+          <span class="number">10</span>
+          <span class="label">Preguntas</span>
+        </div>
+        
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 20" 
+             (click)="selectedQuantity = 20">
+          <span class="number">20</span>
           <span class="label">Preguntas</span>
         </div>
       </div>
 
       <ion-button expand="block" class="start-button" (click)="startVoicePractice()">
         <ion-icon name="mic" slot="start"></ion-icon>
-        Empezar Test Oral
+        Comenzar Test Oral
       </ion-button>
     </div>
   </div>

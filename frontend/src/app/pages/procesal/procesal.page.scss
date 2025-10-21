@@ -1,0 +1,217 @@
+// ========================================
+// FONDO Y MODO CLARO
+// ========================================
+:host,
+ion-content.procesal-content {
+  --ion-background-color: #ffffff !important;
+  --background: #ffffff !important;
+  background: #ffffff !important;
+  color-scheme: light;
+}
+
+.procesal-content {
+  background-image: none !important;
+}
+
+// ========================================
+// HEADER ESTILO DASHBOARD
+// ========================================
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #3b82f6;
+  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .back-icon {
+    font-size: 28px;
+    color: #ffffff;
+    cursor: pointer;
+  }
+
+  .header-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+}
+
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
+.content-area {
+  padding: calc(env(safe-area-inset-top) + 80px) 20px 100px;
+}
+
+// ========================================
+// PROGRESO CARD - ESTILO DASHBOARD CON AZUL
+// ========================================
+.progreso-card-dashboard {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+
+  .progreso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .progreso-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .progreso-emoji {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+
+      .progreso-emoji.procesal-icon img {
+        filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(199deg) brightness(98%) contrast(97%);
+      }
+
+      .progreso-info {
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+      }
+    }
+
+    .progreso-right {
+      .progreso-percentage {
+        font-size: 28px;
+        font-weight: 700;
+        color: #3b82f6;
+      }
+    }
+  }
+
+  .progreso-progress {
+    .progreso-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+
+      .progreso-fill.procesal {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        border-radius: 999px;
+        transition: width 0.3s ease;
+      }
+    }
+  }
+}
+
+// ========================================
+// TÍTULO DE SECCIÓN
+// ========================================
+.section-title-container {
+  margin-bottom: 40px;
+
+  .section-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+  }
+}
+
+// ========================================
+// GRID 2x2 - 4 BOTONES CON AZUL
+// ========================================
+.study-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  .study-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+
+    &:active {
+      transform: scale(0.96);
+      border-color: #3b83f6bd;
+    }
+
+    .study-emoji {
+      margin: 0 auto 12px auto;
+
+      ion-icon {
+        font-size: 64px;
+        color: #3b83f6bd;
+      }
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (min-width: 768px) {
+  .content-area {
+    padding: 24px 32px 100px;
+  }
+
+  .study-grid {
+    max-width: 600px;
+    margin: 0 auto 32px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 360px) {
+  .study-grid {
+    gap: 12px;
+
+    .study-card {
+      padding: 24px 16px;
+
+      .study-emoji {
+        font-size: 56px;
+        height: 70px;
+      }
+
+      h3 {
+        font-size: 14px;
+      }
+    }
+  }
+}

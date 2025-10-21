@@ -6,15 +6,15 @@ import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-na
 import { ApiService } from '../../services/api.service';
 
 @Component({
-  selector: 'app-civil',
-  templateUrl: './civil.page.html',
-  styleUrls: ['./civil.page.scss'],
+  selector: 'app-procesal',
+  templateUrl: './procesal.page.html',
+  styleUrls: ['./procesal.page.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule, BottomNavComponent]
 })
-export class CivilPage implements OnInit, OnDestroy {
+export class ProcesalPage implements OnInit, OnDestroy {
   
-  civilStats: any = null;
+  procesalStats: any = null;
   isLoading: boolean = true;
   
   carouselImages: string[] = [
@@ -31,7 +31,7 @@ export class CivilPage implements OnInit, OnDestroy {
   ) { }
   
   ngOnInit() {
-    this.loadCivilStats();
+    this.loadProcesalStats();
     this.startCarousel();
   }
 
@@ -40,7 +40,7 @@ export class CivilPage implements OnInit, OnDestroy {
   }
 
   ionViewWillEnter() {
-    this.loadCivilStats();
+    this.loadProcesalStats();
     this.startCarousel();
   }
 
@@ -48,7 +48,7 @@ export class CivilPage implements OnInit, OnDestroy {
     this.stopCarousel();
   }
 
-  async loadCivilStats() {
+  async loadProcesalStats() {
     this.isLoading = true;
     
     try {
@@ -61,7 +61,7 @@ export class CivilPage implements OnInit, OnDestroy {
       }
 
       const studentId = currentUser.id;
-      console.log('Cargando estadísticas de Civil para estudiante:', studentId);
+      console.log('Cargando estadísticas de Procesal para estudiante:', studentId);
 
       const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
       console.log('Respuesta completa del API:', areaResponse);
@@ -69,13 +69,12 @@ export class CivilPage implements OnInit, OnDestroy {
       if (areaResponse && areaResponse.success && areaResponse.data) {
         console.log('Datos jerárquicos recibidos:', areaResponse.data);
         
-        const civilArea = areaResponse.data.find((item: any) => 
-          item.type === 'area' && item.area === 'Derecho Civil'
+        const procesalArea = areaResponse.data.find((item: any) => 
+          item.type === 'area' && item.area === 'Derecho Procesal'
         );
         
-        if (civilArea) {
-          // Calcular successRate desde los temas
-          const temasConPorcentaje = civilArea.temas.map((tema: any) => {
+        if (procesalArea) {
+          const temasConPorcentaje = procesalArea.temas.map((tema: any) => {
             const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
               const porcentaje = subtema.totalPreguntas > 0 
                 ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
@@ -94,20 +93,20 @@ export class CivilPage implements OnInit, OnDestroy {
             ? Math.round(temasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / temasConPorcentaje.length)
             : 0;
           
-          this.civilStats = {
-            area: civilArea.area,
+          this.procesalStats = {
+            area: procesalArea.area,
             successRate: successRate,
-            temas: civilArea.temas
+            temas: procesalArea.temas
           };
           
-          console.log('✅ Estadísticas de Derecho Civil:', this.civilStats);
+          console.log('✅ Estadísticas de Derecho Procesal:', this.procesalStats);
         } else {
-          console.log('⚠️ No se encontró Derecho Civil');
+          console.log('⚠️ No se encontró Derecho Procesal');
         }
       }
       
     } catch (error) {
-      console.error('❌ Error cargando estadísticas de Civil:', error);
+      console.error('❌ Error cargando estadísticas de Procesal:', error);
     } finally {
       this.isLoading = false;
     }
@@ -136,23 +135,23 @@ export class CivilPage implements OnInit, OnDestroy {
   }
 
   goToEscrito() {
-    this.router.navigate(['/civil/civil-escrito']);
+    this.router.navigate(['/procesal/procesal-escrito']);
   }
 
   goToConversacion() {
-    this.router.navigate(['/civil/civil-oral']);
+    this.router.navigate(['/procesal/procesal-oral']);
   }
 
   goToMaterialEstudio() {
-    this.router.navigate(['/civil/material-estudio-civil']);
+    this.router.navigate(['/procesal/material-estudio-procesal']);
   }
 
   goToReforzar() {
-    this.router.navigate(['/civil/civil-reforzar']);
+    this.router.navigate(['/procesal/procesal-reforzar']);
   }
 
   goBack() {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/dashboard']);
   }
 
   goToDashboard() {

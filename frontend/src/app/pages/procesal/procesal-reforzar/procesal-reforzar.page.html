@@ -1,15 +1,15 @@
-<ion-content class="civil-content">
+<ion-content class="procesal-content">
   <!-- Header estilo dashboard -->
   <div class="dashboard-header">
     <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
-    <h1 class="header-title">Reforzar - Derecho Civil</h1>
+    <h1 class="header-title">Reforzar - Derecho Procesal</h1>
   </div>
 
   <!-- Contenido principal -->
   <div class="content-area">
 
-    <!-- ========================================
-         RECOMENDACIÓN DE ESTUDIO (BANNER SIEMPRE VISIBLE)
+<!-- ========================================
+         BANNER - MENSAJE CUANDO NO HAY DATOS
          ======================================== -->
     <div class="recommendation-banner" *ngIf="!isLoading && getMainRecommendation()">
       <div class="banner-icon">
@@ -25,6 +25,13 @@
       <button class="banner-btn" (click)="selectWeakTopic(getMainRecommendation())">
         <ion-icon name="play-circle-outline"></ion-icon>
       </button>
+    </div>
+
+    <!-- Mensaje cuando no hay datos -->
+    <div class="empty-state-banner" *ngIf="!isLoading && !getMainRecommendation() && weakTopics.length === 0">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <h3>Comienza tu estudio en Procesal</h3>
+      <p>Realiza tests para ver tus estadísticas y recomendaciones aquí</p>
     </div>
 
     <!-- ========================================
@@ -110,11 +117,11 @@
             <!-- Contenido principal -->
             <div class="session-info">
               <h3 class="session-title">Test General</h3>
-              <p class="session-subtitle">{{ session.area || 'Derecho Civil' }}</p>
+              <p class="session-subtitle">{{ session.area || 'Derecho Procesal' }}</p>
               <p class="session-date">{{ session.date | date: 'dd/MM/yyyy HH:mm' }}</p>
             </div>
 
-            <!-- Badge naranja igual que detalle-test -->
+            <!-- Badge azul igual que detalle-test -->
             <div class="stat-badge">
               <ion-icon name="checkmark-circle"></ion-icon>
               <span>{{ session.correctAnswers || 0 }}/{{ session.totalQuestions || 0 }}</span>
@@ -172,13 +179,13 @@
           <div class="config-section">
             <h3>Alcance del test</h3>
             
-            <!-- Botón "Todo Derecho Civil" -->
+            <!-- Botón "Todo Derecho Procesal" -->
             <button 
               class="scope-btn"
               [class.active]="scopeType === 'all'"
               (click)="selectScope('all')">
               <ion-icon name="globe"></ion-icon>
-              Todo Derecho Civil
+              Todo Derecho Procesal
             </button>
 
             <!-- Botón "Seleccionar tema/subtema" -->
