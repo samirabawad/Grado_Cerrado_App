@@ -5,6 +5,7 @@
     <h1 class="header-title">Mi Perfil</h1>
   </div>
 
+
   <div class="scrollable-content">
 
     <div class="quick-stats">
@@ -293,7 +294,7 @@
       <div *ngIf="isSectionExpanded('progress')" class="action-cards">
         <div class="action-card" (click)="viewHistory()">
           <div class="action-icon dashboard">
-            <ion-icon name="bar-chart"></ion-icon>
+            <ion-icon name="book"></ion-icon>
           </div>
           <div class="action-text">
             <h3>Historial de Estudio</h3>
@@ -316,65 +317,68 @@
     </div>
 
     <!-- CONFIGURACIÓN -->
-    <div class="section">
-      <h2 class="section-title" (click)="toggleSection('configuration')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-        <span style="display: flex; align-items: center; gap: 12px;">
-          <ion-icon name="settings" style="font-size: 24px;"></ion-icon>
-          Corrección Test
-        </span>
-        <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
-      </h2>
-
-      <div *ngIf="isSectionExpanded('configuration')">
-        <ion-card class="settings-card">
-          <ion-card-header>
-            <ion-card-subtitle>Modo de Corrección en Tests</ion-card-subtitle>
-          </ion-card-header>
-
-          <ion-card-content>
-            <div class="setting-item">
-              <div class="setting-info" style="flex-direction: column; align-items: flex-start;">
-                <div class="setting-label">
-                  <ion-icon name="checkmark-done"></ion-icon>
-                  Corrección Inmediata
-                </div>
-                <div class="setting-description">
-                  Muestra si la respuesta es correcta inmediatamente después de seleccionarla
-                </div>
-              </div>
-              <ion-toggle 
-                [(ngModel)]="correctionConfig.immediate" 
-                (ionChange)="onCorrectionModeChange()"
-                color="success">
-              </ion-toggle>
-            </div>
-
-            <div class="correction-info" *ngIf="correctionConfig.immediate">
-              <ion-note color="success">
-                <ion-icon name="flash"></ion-icon>
-                <div>
-                  <strong>Modo Activo: Corrección Inmediata</strong>
-                  <p>Verás la respuesta correcta y la explicación justo después de responder cada pregunta.</p>
-                </div>
-              </ion-note>
-            </div>
-
-            <div class="correction-info-disabled" *ngIf="!correctionConfig.immediate">
-              <ion-note color="medium">
-                <ion-icon name="document-text-outline"></ion-icon>
-                <div>
-                  <strong>Modo Activo: Corrección al Final</strong>
-                  <p>Responderás todas las preguntas primero. Las correcciones y explicaciones se mostrarán al finalizar el test.</p>
-                </div>
-              </ion-note>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </div>
+<div class="section">
+  <h2 class="section-title" (click)="toggleSection('configuration')" style="cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <span style="display: flex; align-items: center; gap: 12px;">
+        <ion-icon name="settings" style="font-size: 24px;"></ion-icon>
+        Corrección Test
+      </span>
+      <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
     </div>
-  </div>  
+    
+    <!-- ✅ BADGE DENTRO DEL BOTÓN -->
+    <div class="correction-status-badge" [class.green]="correctionConfig.immediate" [class.yellow]="!correctionConfig.immediate">
+      <ion-icon [name]="correctionConfig.immediate ? 'flash' : 'document-text'"></ion-icon>
+      <span>{{ correctionConfig.immediate ? 'Corrección Inmediata' : 'Corrección al Final' }}</span>
+    </div>
+  </h2>
 
- <!-- BOTÓN CERRAR SESIÓN -->
+  <div *ngIf="isSectionExpanded('configuration')">
+    <ion-card class="settings-card">
+      <ion-card-content>
+        
+        <!-- TÍTULO Y TOGGLE EN LA MISMA LÍNEA -->
+        <div class="correction-header">
+          <div class="correction-title">
+            <ion-icon name="checkmark-done"></ion-icon>
+            <span>Modo de Corrección en Tests</span>
+          </div>
+          <ion-toggle 
+            [(ngModel)]="correctionConfig.immediate" 
+            (ionChange)="onCorrectionModeChange()"
+            [color]="correctionConfig.immediate ? 'success' : 'warning'">
+          </ion-toggle>
+        </div>
+
+        <!-- BOX VERDE - Corrección Inmediata -->
+        <div class="correction-info correction-active-green" *ngIf="correctionConfig.immediate">
+          <ion-note>
+            <ion-icon name="flash"></ion-icon>
+            <div>
+              <strong>Modo Activo: Corrección Inmediata</strong>
+              <p>Verás la respuesta correcta y la explicación justo después de responder cada pregunta.</p>
+            </div>
+          </ion-note>
+        </div>
+
+        <!-- BOX AMARILLO - Corrección al Final -->
+        <div class="correction-info correction-active-yellow" *ngIf="!correctionConfig.immediate">
+          <ion-note>
+            <ion-icon name="document-text"></ion-icon>
+            <div>
+              <strong>Modo Activo: Corrección al Final</strong>
+              <p>Responderás todas las preguntas primero. Las correcciones y explicaciones se mostrarán al finalizar el test.</p>
+            </div>
+          </ion-note>
+        </div>
+
+      </ion-card-content>
+    </ion-card>
+  </div>
+</div>
+
+     <!-- BOTÓN CERRAR SESIÓN -->
     <div class="logout-section">
       <button class="logout-btn" (click)="logout()">
         <ion-icon name="log-out-outline"></ion-icon>
@@ -383,6 +387,9 @@
     </div>
 
     <div class="bottom-spacer"></div>
+  </div>  
+
+
 
   <app-bottom-nav></app-bottom-nav>
 </ion-content>

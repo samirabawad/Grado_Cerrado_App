@@ -436,48 +436,129 @@ async navigateMonth(direction: number) {
   }
 
   // Obtener el nivel del logro actual (cuántos milestones de 50 has completado)
+  // Obtener el nivel del logro actual (cuántos logros has desbloqueado)
   getCurrentAchievementLevel(): number {
-    return Math.floor(this.totalSessions / 50) + 1;
+    // Si no has completado ningún logro, estás en nivel 0
+    if (this.totalSessions < 50) return 0;
+    
+    // Calcular cuántos logros de 50 tests has completado
+    return Math.floor(this.totalSessions / 50);
   }
 
   // Obtener el nombre del logro actual
   getCurrentAchievementName(): string {
     const level = this.getCurrentAchievementLevel();
     
+    // Si no has completado el primer logro
+    if (level === 0) {
+      return 'En progreso';
+    }
+    
     const names = [
-      'Principiante',      // 1-50
-      'Aprendiz',          // 51-100
-      'Estudiante',        // 101-150
-      'Dedicado',          // 151-200
-      'Perseverante',      // 201-250
-      'Comprometido',      // 251-300
-      'Avanzado',          // 301-350
-      'Experto',           // 351-400
-      'Maestro',           // 401-450
-      'Sabio',             // 451-500
-      'Erudito',           // 501-550
-      'Virtuoso',          // 551-600
-      'Prodigio',          // 601-650
-      'Genio',             // 651-700
-      'Leyenda',           // 701-750
-      'Titán',             // 751-800
-      'Campeón',           // 801-850
-      'Héroe',             // 851-900
-      'Inmortal',          // 901-950
-      'Supremo',           // 951-1000
-      'Trascendental',     // 1001-1050
-      'Divino',            // 1051-1100
-      'Omnisciente',       // 1101-1150
-      'Absoluto',          // 1151-1200
-      'Infinito',          // 1201-1250
-      'Eterno',            // 1251-1300
-      'Celestial',         // 1301-1350
-      'Ilimitado',         // 1351-1400
-      'Perfecto',          // 1401-1450
-      'Definitivo'         // 1451-1500
+      'Principiante',      // 50
+      'Aprendiz',          // 100
+      'Estudiante',        // 150
+      'Dedicado',          // 200
+      'Perseverante',      // 250
+      'Comprometido',      // 300
+      'Avanzado',          // 350
+      'Experto',           // 400
+      'Maestro',           // 450
+      'Sabio',             // 500
+      'Erudito',           // 550
+      'Virtuoso',          // 600
+      'Prodigio',          // 650
+      'Genio',             // 700
+      'Leyenda',           // 750
+      'Titán',             // 800
+      'Campeón',           // 850
+      'Héroe',             // 900
+      'Inmortal',          // 950
+      'Supremo',           // 1000
+      'Trascendental',     // 1050
+      'Divino',            // 1100
+      'Omnisciente',       // 1150
+      'Absoluto',          // 1200
+      'Infinito',          // 1250
+      'Eterno',            // 1300
+      'Celestial',         // 1350
+      'Ilimitado',         // 1400
+      'Perfecto',          // 1450
+      'Definitivo'         // 1500
     ];
     
-    return names[Math.min(level - 1, names.length - 1)] || 'Maestro Supremo';
+    return names[level - 1] || 'Maestro Supremo';
+  }
+
+  // Obtener el ícono del logro actual
+  getCurrentAchievementIcon(): string {
+    const level = this.getCurrentAchievementLevel();
+    
+    // Si no has completado ningún logro, mostrar un ícono de "en progreso"
+    if (level === 0) {
+      return 'time-outline';
+    }
+    
+    const icons = [
+      'ribbon',          // 50 Principiante
+      'school',          // 100 Aprendiz
+      'book',            // 150 Estudiante
+      'heart',           // 200 Dedicado
+      'fitness',         // 250 Perseverante
+      'medal',           // 300 Comprometido
+      'trending-up',     // 350 Avanzado
+      'star',            // 400 Experto
+      'trophy',          // 450 Maestro
+      'diamond',         // 500 Sabio
+      'bulb',            // 550 Erudito
+      'musical-notes',   // 600 Virtuoso
+      'sparkles',        // 650 Prodigio
+      'flash',           // 700 Genio
+      'rocket',          // 750 Leyenda
+      'shield',          // 800 Titán
+      'flag',            // 850 Campeón
+      'star-half',       // 900 Héroe
+      'infinite',        // 950 Inmortal
+      'diamond',         // 1000 Supremo
+      'prism',           // 1050 Trascendental
+      'sunny',           // 1100 Divino
+      'eye',             // 1150 Omnisciente
+      'nuclear',         // 1200 Absoluto
+      'infinite',        // 1250 Infinito
+      'time',            // 1300 Eterno
+      'planet',          // 1350 Celestial
+      'expand',          // 1400 Ilimitado
+      'checkmark-circle',// 1450 Perfecto
+      'star'             // 1500 Definitivo
+    ];
+    
+    return icons[level - 1] || 'trophy';
+  }
+
+  // Obtener el color del logro actual
+  getCurrentAchievementColor(): string {
+    const level = this.getCurrentAchievementLevel();
+    
+    // Si no has completado ningún logro
+    if (level === 0) {
+      return '#9ca3af';
+    }
+    
+    const colors = [
+      '#10b981', '#059669', '#047857', '#065f46', '#064e3b',
+      '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e',
+      '#7c2d12', '#78350f', '#10b981', '#059669', '#047857',
+      '#065f46', '#064e3b', '#fbbf24', '#f59e0b', '#d97706',
+      '#b45309', '#92400e', '#7c2d12', '#78350f', '#10b981',
+      '#059669', '#047857', '#065f46', '#064e3b', '#fbbf24'
+    ];
+    
+    return colors[level - 1] || '#10b981';
+  }
+
+  // Navegar a página de logros
+  navigateToAchievements() {
+    this.router.navigate(['/logros']);
   }
 
   // Obtener mensaje motivacional

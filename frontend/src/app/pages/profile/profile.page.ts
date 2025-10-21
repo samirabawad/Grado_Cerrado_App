@@ -522,11 +522,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   async onCorrectionModeChange() {
     try {
       localStorage.setItem('correctionConfig', JSON.stringify(this.correctionConfig));
-      
-      const message = this.correctionConfig.immediate 
-        ? '✅ Corrección inmediata activada' 
-        : '✅ Corrección al final activada';
-      await this.showToast(message, 'success');
+  
       
       console.log('💾 Configuración de corrección guardada:', this.correctionConfig);
     } catch (error) {

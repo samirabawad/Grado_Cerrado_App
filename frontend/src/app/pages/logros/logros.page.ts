@@ -30,7 +30,7 @@ export class LogrosPage implements OnInit {
 
   // Secciones expandibles
   expandedSections: { [key: string]: boolean } = {
-    racha: true,  // Abierta por defecto
+    racha: false, 
     tests: false
   };
 

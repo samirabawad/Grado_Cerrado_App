@@ -91,14 +91,15 @@
         gap: 12px;
 
         .general-emoji {
-          font-size: 48px;
-          width: 64px;
-          height: 64px;
+          font-size: 40px;
+          margin-right: 4px;
           display: flex;
           align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          background: rgba(0, 0, 0, 0.03);
+          
+          ion-icon {
+            font-size: 40px;
+            color: #10b981;
+          }
         }
 
         .general-info {
@@ -236,6 +237,12 @@
 
 .sessions-card {
   width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
 
   // Logro actual
   .current-achievement {
@@ -256,7 +263,17 @@
       flex: 1;
 
       .achievement-icon {
-        font-size: 48px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        ion-icon {
+          font-size: 32px;
+          color: white;
+        }
       }
 
       .achievement-info {
@@ -599,29 +616,36 @@
       .area-header-duo {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
         cursor: pointer;
         margin-bottom: 16px;
         user-select: none;
 
-        .area-left-duo {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          flex: 1;
-          min-width: 0;
+      .area-left-duo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
 
-          .area-emoji {
-            font-size: 48px;
-            width: 64px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.03);
-            flex-shrink: 0;
-          }
+        .area-emoji {
+                  font-size: 48px;
+                  width: 64px;
+                  height: 64px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  border-radius: 50%;
+                  background: rgba(0, 0, 0, 0.03);
+                  flex-shrink: 0;
+
+                  img {
+                    width: 48px;
+                    height: 48px;
+                    object-fit: contain;
+                  }
+                }
+
 
           .area-title-info {
             flex: 1;
@@ -921,4 +945,21 @@
 
 .bottom-spacer {
   height: 100px;
+}
+
+// Colores de iconos por área - círculo con fondo de color
+.area-card-duolingo[data-area="Derecho Civil"] .area-emoji {
+  background: #f97316 !important;
+  
+  img {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.area-card-duolingo[data-area="Derecho Procesal"] .area-emoji {
+  background: #3b82f6 !important;
+  
+  img {
+    filter: brightness(0) invert(1);
+  }
 }

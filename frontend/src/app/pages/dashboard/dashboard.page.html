@@ -18,7 +18,9 @@
       <div class="general-card">
         <div class="general-header" (click)="toggleGeneralExpansion()">
           <div class="general-left">
-            <div class="general-emoji">🎯</div>
+            <div class="general-emoji">
+              <ion-icon name="analytics"></ion-icon>
+            </div>
             <div class="general-info">
               <h3>General</h3>
             </div>
@@ -63,45 +65,47 @@
     </div>
 
     <!-- Estadísticas Generales - SOLO SESIONES -->
-<div class="stats-overview">
-  <div class="stat-card sessions-card">
-    <h4 class="stat-title">Test Realizados</h4>
-    
-    <!-- Logro Actual -->
-    <div class="current-achievement">
-      <div class="achievement-left">
-        <div class="achievement-icon">🏆</div>
-        <div class="achievement-info">
-          <p class="achievement-level">LOGRO {{ getCurrentAchievementLevel() }}</p>
-          <p class="achievement-name">{{ getCurrentAchievementName() }}</p>
+    <div class="stats-overview">
+      <div class="stat-card sessions-card" (click)="navigateToAchievements()">
+        <h4 class="stat-title">Test Realizados</h4>
+        
+        <!-- Logro Actual -->
+        <div class="current-achievement">
+          <div class="achievement-left">
+            <div class="achievement-icon" [style.background]="getCurrentAchievementColor()">
+              <ion-icon [name]="getCurrentAchievementIcon()"></ion-icon>
+            </div>
+            <div class="achievement-info">
+              <p class="achievement-level">LOGRO {{ getCurrentAchievementLevel() }}</p>
+              <p class="achievement-name">{{ getCurrentAchievementName() }}</p>
+            </div>
+          </div>
+          
+          <div class="achievement-right">
+            <p class="sessions-progress-inline">
+              <span class="sessions-current">{{ totalSessions }}</span>
+              <span class="sessions-de">de</span>
+              <span class="sessions-total">{{ getNextMilestone() }}</span>
+            </p>
+          </div>
         </div>
-      </div>
-      
-      <div class="achievement-right">
-        <p class="sessions-progress-inline">
-          <span class="sessions-current">{{ totalSessions }}</span>
-          <span class="sessions-de">de</span>
-          <span class="sessions-total">{{ getNextMilestone() }}</span>
-        </p>
+
+        <!-- Circulitos de progreso (10 círculos de 5 en 5) -->
+        <div class="sessions-badges">
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+            <div class="session-badge" 
+                [class.completed]="getSessionsInCurrentMilestone() >= i * 5" 
+                [class.pending]="getSessionsInCurrentMilestone() < i * 5">
+              <ion-icon *ngIf="getSessionsInCurrentMilestone() >= i * 5" name="checkmark-circle"></ion-icon>
+              <ion-icon *ngIf="getSessionsInCurrentMilestone() < i * 5" name="ellipse-outline"></ion-icon>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Mensaje motivacional debajo de los círculos -->
+        <p class="sessions-message-bottom">{{ getSessionMessage() }}</p>
       </div>
     </div>
-
-    <!-- Circulitos de progreso (10 círculos de 5 en 5) -->
-    <div class="sessions-badges">
-      <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
-        <div class="session-badge" 
-            [class.completed]="getSessionsInCurrentMilestone() >= i * 5" 
-            [class.pending]="getSessionsInCurrentMilestone() < i * 5">
-          <ion-icon *ngIf="getSessionsInCurrentMilestone() >= i * 5" name="checkmark-circle"></ion-icon>
-          <ion-icon *ngIf="getSessionsInCurrentMilestone() < i * 5" name="ellipse-outline"></ion-icon>
-        </div>
-      </ng-container>
-    </div>
-
-    <!-- Mensaje motivacional debajo de los círculos -->
-    <p class="sessions-message-bottom">{{ getSessionMessage() }}</p>
-  </div>
-</div>
 
     <!-- Gráfico Semanal/Mensual -->
     <div class="weekly-chart-container">
@@ -162,14 +166,22 @@
           [attr.data-area]="area.area"
           [id]="'area-' + area.area">
           
-          <!-- HEADER del área -->
-          <div class="area-header-duo" (click)="toggleAreaExpansion(area.area)">
-            <div class="area-left-duo">
-              <div class="area-emoji">{{ area.area === 'Derecho Civil' ? '⚖️' : '📖' }}</div>
-              <div class="area-title-info">
-                <h3>{{ area.area }}</h3>
-              </div>
-            </div>
+     <div class="area-header-duo" (click)="toggleAreaExpansion(area.area)">
+      <div class="area-left-duo">
+        <div class="area-emoji">
+          <img *ngIf="area.area === 'Derecho Civil'" 
+              src="assets/image/law1.png" 
+              alt="Civil"
+              class="area-icon-img">
+          <img *ngIf="area.area === 'Derecho Procesal'" 
+              src="assets/image/law2.png" 
+              alt="Procesal"
+              class="area-icon-img">
+        </div>
+        <div class="area-title-info">
+          <h3>{{ area.area }}</h3>
+        </div>
+      </div>
 
             <div class="area-right-duo">
               <div class="porcentaje-area">
