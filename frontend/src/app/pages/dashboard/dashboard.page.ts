@@ -135,8 +135,8 @@ export class DashboardPage implements OnInit {
             }
           });
 
-          // Agregar Derecho Procesal si no existe
           if (!areasNoGenerales.find(a => a.area === 'Derecho Procesal')) {
+            const temasProcesalBase = this.getDefaultProcesalTemas();
             areasNoGenerales.push({
               area: 'Derecho Procesal',
               sessions: 0,
@@ -145,7 +145,7 @@ export class DashboardPage implements OnInit {
               successRate: 0,
               isGeneral: false,
               colorBarra: 'azul',
-              temas: []
+              temas: temasProcesalBase
             });
           }
 
@@ -188,6 +188,53 @@ export class DashboardPage implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  getDefaultProcesalTemas(): any[] {
+    const temasBase = [
+      { id: 1, nombre: 'Jurisdicción' },
+      { id: 2, nombre: 'Acción procesal' },
+      { id: 3, nombre: 'Proceso' },
+      { id: 4, nombre: 'Competencia' },
+      { id: 5, nombre: 'Prueba' },
+      { id: 6, nombre: 'Cosa juzgada' },
+      { id: 7, nombre: 'Organización judicial' },
+      { id: 8, nombre: 'Procedimientos' },
+      { id: 9, nombre: 'Medidas cautelares e incidentes' },
+      { id: 10, nombre: 'Representación procesal' },
+      { id: 11, nombre: 'Recursos' }
+    ];
+
+    return temasBase.map(tema => ({
+      temaId: tema.id,
+      temaNombre: tema.nombre,
+      totalPreguntas: 0,
+      preguntasCorrectas: 0,
+      porcentajeAcierto: 0,
+      subtemas: [
+        {
+          subtemaId: tema.id * 100 + 1,
+          subtemaNombre: 'Conceptos básicos',
+          totalPreguntas: 0,
+          preguntasCorrectas: 0,
+          porcentajeAcierto: 0
+        },
+        {
+          subtemaId: tema.id * 100 + 2,
+          subtemaNombre: 'Aplicación práctica',
+          totalPreguntas: 0,
+          preguntasCorrectas: 0,
+          porcentajeAcierto: 0
+        },
+        {
+          subtemaId: tema.id * 100 + 3,
+          subtemaNombre: 'Casos especiales',
+          totalPreguntas: 0,
+          preguntasCorrectas: 0,
+          porcentajeAcierto: 0
+        }
+      ]
+    }));
   }
 
   calculateAreaSuccessRate(temas: any[]): number {
