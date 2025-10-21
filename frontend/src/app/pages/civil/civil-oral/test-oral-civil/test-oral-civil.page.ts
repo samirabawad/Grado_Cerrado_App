@@ -44,8 +44,9 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   questions: Question[] = [];
   currentQuestionNumber: number = 1;
   totalQuestions: number = 5;
-  userAnswers: { [questionId: string]: string } = {};
-  
+  userAnswers: { [key: string]: string } = {};
+  questionEvaluations: { [key: string]: { isCorrect: boolean, correctAnswer: string, explanation: string } } = {};
+    
   isPlaying: boolean = false;
   audioCompleted: boolean = false;
   audioProgress: string = '00:02';
@@ -743,6 +744,12 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
           correctAnswer: data.correctAnswer || question.correctAnswer,
           explanation: data.explanation || data.explicacion || question.explanation
         };
+
+        this.questionEvaluations[question.id] = {
+          isCorrect: this.evaluationResult.isCorrect,
+          correctAnswer: this.evaluationResult.correctAnswer,
+          explanation: this.evaluationResult.explanation
+        };
         
         this.showEvaluation = true;
         this.cdr.detectChanges();
@@ -826,66 +833,82 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     }, 300);
   }
 
-  async completeTest() {
-    console.log('🏁 Completando test oral');
+async completeTest() {
+  console.log('🏁 Completando test oral');
+  
+  const loading = await this.loadingController.create({
+    message: 'Finalizando test...',
+    spinner: 'crescent'
+  });
+  
+  await loading.present();
+  
+  try {
+    let correctCount = 0;
+    let incorrectCount = 0;
+    const questionDetails: any[] = [];
     
-    const loading = await this.loadingController.create({
-      message: 'Finalizando test...',
-      spinner: 'crescent'
-    });
-    
-    await loading.present();
-    
-    try {
-      let correctCount = 0;
-      let incorrectCount = 0;
+    // Recorrer todas las preguntas y obtener sus evaluaciones
+    this.questions.forEach((q, index) => {
+      const questionId = q.id;
+      const evaluation = this.questionEvaluations[questionId];
       
-      this.questions.forEach(q => {
-        const answer = this.userAnswers[q.id];
-        if (answer && answer.trim().length > 0) {
+      if (evaluation && evaluation.isCorrect !== undefined) {
+        if (evaluation.isCorrect) {
           correctCount++;
         } else {
           incorrectCount++;
         }
-      });
-      
-      const totalAnswered = correctCount + incorrectCount;
-      const percentage = totalAnswered > 0 
-        ? Math.round((correctCount / this.totalQuestions) * 100) 
-        : 0;
-      
-      const results = {
-        correctAnswers: correctCount,
-        incorrectAnswers: incorrectCount,
-        totalQuestions: this.totalQuestions,
-        percentage: percentage,
-        timeUsedFormatted: '0:00 min',
-        questionDetails: this.questions.map((q, index) => ({
+        
+        questionDetails.push({
           questionNumber: index + 1,
           questionText: q.questionText,
-          correct: !!this.userAnswers[q.id]
-        }))
-      };
-      
-      localStorage.setItem('current_oral_test_results', JSON.stringify(results));
-      console.log('✅ Resultados guardados:', results);
-      
-      await loading.dismiss();
-      
-      await this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
-      
-    } catch (error) {
-      console.error('❌ Error completando test:', error);
-      await loading.dismiss();
-      
-      const alert = await this.alertController.create({
-        header: 'Error',
-        message: 'Hubo un error al finalizar el test',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+          correct: evaluation.isCorrect
+        });
+      } else {
+        // Si no hay evaluación, contar como incorrecta
+        incorrectCount++;
+        questionDetails.push({
+          questionNumber: index + 1,
+          questionText: q.questionText,
+          correct: false
+        });
+      }
+    });
+    
+    const totalAnswered = correctCount + incorrectCount;
+    const percentage = totalAnswered > 0 
+      ? Math.round((correctCount / this.totalQuestions) * 100) 
+      : 0;
+    
+    const results = {
+      correctAnswers: correctCount,
+      incorrectAnswers: incorrectCount,
+      totalQuestions: this.totalQuestions,
+      percentage: percentage,
+      timeUsedFormatted: '0:00 min',
+      questionDetails: questionDetails
+    };
+    
+    localStorage.setItem('current_oral_test_results', JSON.stringify(results));
+    console.log('✅ Resultados guardados:', results);
+    
+    await loading.dismiss();
+    
+    await this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
+    
+  } catch (error) {
+    console.error('❌ Error completando test:', error);
+    await loading.dismiss();
+    
+    const alert = await this.alertController.create({
+      header: 'Error',
+      message: 'Hubo un error al finalizar el test',
+      buttons: ['OK']
+    });
+    await alert.present();
   }
+}
 
   async showUnsupportedAlert() {
     const alert = await this.alertController.create({

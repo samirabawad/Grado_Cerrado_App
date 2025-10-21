@@ -134,17 +134,23 @@ export class CivilReforzarPage implements OnInit {
     if (type === 'all') {
       this.selectedTemaId = null;
       this.selectedSubtemaId = null;
+      this.showThemeSelector = false;
       console.log('✅ Seleccionado: Todo Derecho Civil');
     } else if (type === 'tema') {
       this.selectedTemaId = id;
       this.selectedSubtemaId = null;
+      this.showThemeSelector = true;
       console.log('✅ Tema seleccionado:', id);
+    } else if (type === 'subtema') {
+      this.showThemeSelector = true;
+      console.log('✅ Modo subtema activado');
     }
   }
 
   selectSubtema(subtema: any) {
     this.scopeType = 'subtema';
     this.selectedSubtemaId = subtema.id;
+    this.selectedTemaId = null;
     
     console.log('✅ Subtema seleccionado:', {
       subtemaId: subtema.id,

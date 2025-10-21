@@ -1,37 +1,49 @@
 <ion-content class="civil-content">
-  <!-- Header estilo dashboard -->
   <div class="dashboard-header">
     <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
     <h1 class="header-title">Derecho Civil Escrito</h1>
   </div>
 
-  <!-- Contenido principal -->
   <div class="content-area">
-    
-    <!-- Selector de cantidad de preguntas -->
-    <div class="selection-card">
-      <label class="selection-label">Cantidad de preguntas</label>
-      <select class="custom-select" [(ngModel)]="selectedQuantity">
-        <option [value]="1">1 pregunta</option>
-        <option [value]="5">5 preguntas</option>
-        <option [value]="10">10 preguntas</option>
-        <option [value]="15">15 preguntas</option>
-      </select>
-    </div>
+    <div class="selector-card">
+      <h2>¿Cuántas preguntas?</h2>
+      
+      <div class="quantity-selector">
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 1" 
+             (click)="selectedQuantity = 1">
+          <span class="number">1</span>
+          <span class="label">Pregunta</span>
+        </div>
+        
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 5" 
+             (click)="selectedQuantity = 5">
+          <span class="number">5</span>
+          <span class="label">Preguntas</span>
+        </div>
+        
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 10" 
+             (click)="selectedQuantity = 10">
+          <span class="number">10</span>
+          <span class="label">Preguntas</span>
+        </div>
+        
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 20" 
+             (click)="selectedQuantity = 20">
+          <span class="number">20</span>
+          <span class="label">Preguntas</span>
+        </div>
+      </div>
 
-    <!-- Botón de inicio -->
-    <div class="start-button-container">
-      <ion-button 
-        expand="block" 
-        class="start-test-btn"
-        (click)="startQuickPractice()">
+      <ion-button expand="block" class="start-button" (click)="startQuickPractice()">
+        <ion-icon name="play" slot="start"></ion-icon>
         Empezar Test
       </ion-button>
     </div>
-
   </div>
 
-  <!-- Bottom Navigation Component -->
   <app-bottom-nav></app-bottom-nav>
-
 </ion-content>

@@ -1,132 +1,113 @@
-.civil-content {
-  --ion-background-color: #f8fafc;
-  --background: #f8fafc;
+:host,
+ion-content.civil-content {
+  --ion-background-color: #ffffff !important;
+  --background: #ffffff !important;
+  background: #ffffff !important;
 }
 
-// ========================================
-// HEADER FIJO
-// ========================================
 .dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  z-index: 1000;
   background: #FF6F00;
+  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   .back-icon {
-    font-size: 24px;
-    color: white;
+    font-size: 28px;
+    color: #ffffff;
     cursor: pointer;
-    margin-right: 12px;
   }
 
   .header-title {
-    color: white;
-    font-size: 18px;
-    font-weight: 600;
     margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
   }
 }
 
-// ========================================
-// CONTENIDO
-// ========================================
 .content-area {
-  margin-top: 80px;
-  padding: 20px 16px 100px 16px;
+  padding: calc(env(safe-area-inset-top) + 100px) 20px 100px;
 }
 
-// ========================================
-// TARJETA DE SELECCIÓN
-// ========================================
-.selection-card {
+.selector-card {
   background: white;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-  .selection-label {
-    display: block;
-    font-size: 16px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 12px;
+  h2 {
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
   }
 
-  .custom-select {
-    width: 100%;
-    padding: 14px;
-    font-size: 15px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    background: white;
-    color: #1e293b;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  .quantity-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
 
-    &:focus {
-      outline: none;
-      border-color: #FF6F00;
-      box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
+    .quantity-option {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &.selected {
+        background: #fff4e6;
+        border-color: #FF6F00;
+
+        .number {
+          color: #FF6F00;
+        }
+
+        .label {
+          color: #FF6F00;
+        }
+      }
+
+      &:active {
+        transform: scale(0.96);
+      }
+
+      .number {
+        display: block;
+        font-size: 32px;
+        font-weight: 700;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+
+      .label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #9ca3af;
+      }
     }
   }
-}
 
-// ========================================
-// BOTÓN DE INICIO
-// ========================================
-.start-button-container {
-  margin: 20px 0;
-
-  .start-test-btn {
-    --background: #FF6F00;
+  .start-button {
+    --background: linear-gradient(135deg, #FF6F00, #FF8F00);
     --background-activated: #E65100;
-    --border-radius: 12px;
+    --border-radius: 16px;
+    --color: #ffffff;
     height: 56px;
     font-size: 16px;
     font-weight: 600;
     text-transform: none;
-    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
-  }
-}
-
-// ========================================
-// CUSTOM LOADING
-// ========================================
-:global(.custom-loading) {
-  --backdrop-opacity: 0.6;
-  --background: rgba(255, 255, 255, 0.95);
-  --color: #FF6F00;
-  border-radius: 15px;
-
-  .loading-wrapper {
-    border-radius: 15px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-    
-    .loading-content {
-      font-size: 1rem;
-      font-weight: 500;
-      color: #FF6F00;
-    }
-    
-    .loading-spinner {
-      --color: #FF6F00;
-    }
-  }
-}
-
-// ========================================
-// RESPONSIVE
-// ========================================
-@media (max-width: 480px) {
-  .content-area {
-    padding: 20px 12px 100px 12px;
+    letter-spacing: 0;
   }
 }

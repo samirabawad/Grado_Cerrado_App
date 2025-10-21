@@ -169,7 +169,7 @@ export class ResumenTestCivilPage implements OnInit {
   // ✅ VOLVER A CIVIL
   goBack() {
     localStorage.removeItem('current_test_results');
-    this.router.navigate(['/civil/civil-escrito']);
+    this.router.navigate(['/civil']);
   }
 
   // ✅ VOLVER AL HOME

@@ -119,6 +119,6 @@ export class ResumenTestCivilOralPage implements OnInit {
 
   goBack() {
     localStorage.removeItem('current_oral_test_results');
-    this.router.navigate(['/civil/civil-oral']);
+    this.router.navigate(['/civil']);
   }
 }
