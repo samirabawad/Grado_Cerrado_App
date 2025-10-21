@@ -71,20 +71,53 @@
       gap: 12px;
 
       .progreso-emoji {
-        font-size: 48px;
         width: 64px;
         height: 64px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        background: rgba(0, 0, 0, 0.03);
+        background: #f97316;
+        flex-shrink: 0;
+
+        img {
+          width: 48px;
+          height: 48px;
+          object-fit: contain;
+          filter: brightness(0) invert(1);
+        }
+      }
+    }
+
+    .progreso-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      .progreso-emoji {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f97316;
+        flex-shrink: 0;
+
+        img {
+          width: 48px;
+          height: 48px;
+          object-fit: contain;
+          filter: brightness(0) invert(1);
+        }
       }
 
       .progreso-info {
+        flex: 1;
+        
         h3 {
           margin: 0;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 700;
           color: #111111;
         }
@@ -133,11 +166,11 @@
 // TÍTULO DE SECCIÓN
 // ========================================
 .section-title-container {
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 
   .section-title {
-    margin: 0;
-    font-size: 20px;
+    margin: 10;
+    font-size: 24px;
     font-weight: 700;
     color: #1e293b;
     text-align: center;
@@ -169,12 +202,12 @@
     }
 
     .study-emoji {
-      font-size: 64px;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 80px;
+      margin: 0 auto 12px auto;
+
+      ion-icon {
+        font-size: 64px;
+        color: #f97416c0;
+      }
     }
 
     h3 {

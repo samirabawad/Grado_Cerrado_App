@@ -44,12 +44,16 @@
         <h2 class="section-title">Elige qué quieres aprender hoy</h2>
         <div class="area-cards">
           <div class="area-card civil" (click)="goToCivil()">
-            <div class="area-icon">📜</div>
+            <div class="area-icon">
+              <img src="assets/image/law1.png" alt="Civil">
+            </div>
             <h3>Derecho Civil</h3>
           </div>
           
           <div class="area-card procesal">
-            <div class="area-icon">🏛️</div>
+            <div class="area-icon">
+              <img src="assets/image/law2.png" alt="Procesal">
+            </div>
             <h3>Derecho Procesal</h3>
             <p class="coming-soon">Próximamente</p>
           </div>
@@ -59,7 +63,9 @@
       <!-- Botón Historial Completo -->
       <div class="history-button-section">
         <div class="history-card" (click)="goToFullHistory()">
-          <div class="history-icon">📖</div>
+          <div class="history-icon">
+            <ion-icon name="book"></ion-icon>
+          </div>
           <h3>Ver Historial Completo</h3>
         </div>
       </div>

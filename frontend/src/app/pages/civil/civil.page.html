@@ -8,11 +8,13 @@
   <!-- Resto del contenido -->
   <div class="content-area">
 
-    <!-- Progreso Civil - ESTILO DASHBOARD -->
+   <!-- Progreso Civil - ESTILO DASHBOARD -->
     <div class="progreso-card-dashboard">
       <div class="progreso-header">
         <div class="progreso-left">
-          <div class="progreso-emoji">📜</div>
+          <div class="progreso-emoji">
+            <img src="assets/image/law1.png" alt="Civil">
+          </div>
           <div class="progreso-info">
             <h3>Tu avance en Civil</h3>
           </div>
@@ -38,23 +40,31 @@
     <div class="study-grid">
       <!-- Fila 1 -->
       <div class="study-card" (click)="goToEscrito()">
-        <div class="study-emoji">💬</div>
+        <div class="study-emoji">
+          <ion-icon name="create"></ion-icon>
+        </div>
         <h3>Escrito</h3>
       </div>
       
       <div class="study-card" (click)="goToConversacion()">
-        <div class="study-emoji">🎤</div>
+        <div class="study-emoji">
+          <ion-icon name="mic"></ion-icon>
+        </div>
         <h3>Conversación</h3>
       </div>
       
       <!-- Fila 2 -->
       <div class="study-card" (click)="goToReforzar()">
-        <div class="study-emoji">📖</div>
+        <div class="study-emoji">
+          <ion-icon name="book"></ion-icon>
+        </div>
         <h3>Reforzar</h3>
       </div>
       
       <div class="study-card" (click)="goToMaterialEstudio()">
-        <div class="study-emoji">📁</div>
+        <div class="study-emoji">
+          <ion-icon name="folder-open"></ion-icon>
+        </div>
         <h3>Material</h3>
       </div>
     </div>
