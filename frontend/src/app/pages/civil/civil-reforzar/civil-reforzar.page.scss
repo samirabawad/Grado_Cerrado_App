@@ -589,3 +589,45 @@ ion-content.civil-content {
   flex-direction: column;
   gap: 12px;
 }
+
+// Chips de cantidad de preguntas
+.quantity-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+
+  .chip {
+    flex: 1;
+    padding: 12px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &.selected {
+      background: #fff7ed;
+      border-color: #FF6F00;
+      color: #FF6F00;
+    }
+  }
+}
+
+.config-section {
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+}

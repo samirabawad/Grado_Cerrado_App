@@ -149,16 +149,24 @@
       <div *ngIf="isSectionExpanded('testSection')">
         <div class="test-config-card">
           
-          <!-- Cantidad de preguntas -->
-          <div class="config-section">
-            <h3>Cantidad de preguntas</h3>
-            <select [(ngModel)]="selectedQuantity" class="quantity-selector">
-              <option [value]="5">5 preguntas</option>
-              <option [value]="10">10 preguntas</option>
-              <option [value]="15">15 preguntas</option>
-              <option [value]="20">20 preguntas</option>
-            </select>
-          </div>
+      <!-- Cantidad de preguntas -->
+      <div class="config-section">
+        <h3>Cantidad de preguntas</h3>
+        <div class="quantity-chips">
+          <div class="chip" 
+              [class.selected]="selectedQuantity === 1" 
+              (click)="selectedQuantity = 1">1</div>
+          <div class="chip" 
+              [class.selected]="selectedQuantity === 5" 
+              (click)="selectedQuantity = 5">5</div>
+          <div class="chip" 
+              [class.selected]="selectedQuantity === 10" 
+              (click)="selectedQuantity = 10">10</div>
+          <div class="chip" 
+              [class.selected]="selectedQuantity === 15" 
+              (click)="selectedQuantity = 15">15</div>
+        </div>
+      </div>
 
           <!-- Alcance del test -->
           <div class="config-section">

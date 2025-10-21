@@ -62,60 +62,110 @@ export class CivilReforzarPage implements OnInit {
     return this.weakTopics[0];
   }
 
-  async loadData() {
-    this.isLoading = true;
+async loadData() {
+  this.isLoading = true;
 
-    try {
-      const currentUser = this.apiService.getCurrentUser();
-      
-      if (!currentUser || !currentUser.id) {
-        console.warn('No hay usuario logueado');
-        this.router.navigate(['/login']);
-        return;
-      }
-
-      const studentId = currentUser.id;
-
-      try {
-        const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
-        if (weakResponse && weakResponse.success) {
-          this.weakTopics = weakResponse.data || [];
-          console.log('✅ Temas débiles:', this.weakTopics);
-        }
-      } catch (error) {
-        console.error('Error cargando temas débiles:', error);
-        this.weakTopics = [];
-      }
-
-      try {
-        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
-        console.log('📦 Respuesta RAW del backend:', sessionsResponse);
-        
-        if (sessionsResponse && sessionsResponse.success) {
-          this.recentSessions = (sessionsResponse.data || []).map((s: any) => ({
-            id: s.id,
-            testId: s.id,
-            date: s.date,
-            area: s.area,
-            durationSeconds: s.duration || 0,
-            totalQuestions: s.questions || 0,
-            correctAnswers: s.correct || 0,
-            successRate: s.successRate || 0
-          }));
-          
-          console.log('✅ TODAS las sesiones mapeadas:', this.recentSessions);
-        }
-      } catch (error) {
-        console.error('Error cargando sesiones recientes:', error);
-        this.recentSessions = [];
-      }
-
-    } catch (error) {
-      console.error('Error general cargando datos:', error);
-    } finally {
-      this.isLoading = false;
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    
+    if (!currentUser || !currentUser.id) {
+      console.warn('No hay usuario logueado');
+      this.router.navigate(['/login']);
+      return;
     }
+
+    const studentId = currentUser.id;
+
+    // Cargar temas débiles
+    try {
+      const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
+      if (weakResponse && weakResponse.success) {
+        this.weakTopics = weakResponse.data || [];
+        console.log('✅ Temas débiles:', this.weakTopics);
+      }
+    } catch (error) {
+      console.error('Error cargando temas débiles:', error);
+      this.weakTopics = [];
+    }
+
+    // Cargar sesiones recientes
+    try {
+      const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
+      console.log('📦 Respuesta RAW del backend:', sessionsResponse);
+      
+      if (sessionsResponse && sessionsResponse.success) {
+        this.recentSessions = (sessionsResponse.data || []).map((s: any) => ({
+          id: s.id,
+          testId: s.id,
+          date: s.date,
+          area: s.area,
+          durationSeconds: s.duration || 0,
+          totalQuestions: s.questions || 0,
+          correctAnswers: s.correct || 0,
+          successRate: s.successRate || 0
+        }));
+        
+        console.log('✅ TODAS las sesiones mapeadas:', this.recentSessions);
+      }
+    } catch (error) {
+      console.error('Error cargando sesiones recientes:', error);
+      this.recentSessions = [];
+    }
+
+    // **NUEVO: Cargar TODOS los temas y subtemas de Derecho Civil**
+    try {
+      const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+      
+      if (statsResponse && statsResponse.success && statsResponse.data) {
+        const civilArea = statsResponse.data.find((item: any) => 
+          item.type === 'area' && item.area === 'Derecho Civil'
+        );
+        
+        if (civilArea && civilArea.temas) {
+          this.temas = civilArea.temas.map((tema: any) => {
+            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
+              const porcentaje = subtema.totalPreguntas > 0 
+                ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
+                : 0;
+              return {
+                id: subtema.subtemaId,
+                nombre: subtema.subtemaNombre,
+                totalPreguntas: subtema.totalPreguntas,
+                preguntasCorrectas: subtema.preguntasCorrectas,
+                porcentaje: porcentaje,
+                cantidadPreguntas: subtema.totalPreguntas
+              };
+            });
+            
+            const porcentajeTema = subtemasConPorcentaje.length > 0
+              ? Math.round(subtemasConPorcentaje.reduce((sum: number, s: any) => sum + s.porcentaje, 0) / subtemasConPorcentaje.length)
+              : 0;
+            
+            return {
+              id: tema.temaId,
+              nombre: tema.temaNombre,
+              totalPreguntas: tema.totalPreguntas,
+              preguntasCorrectas: tema.preguntasCorrectas,
+              porcentaje: porcentajeTema,
+              cantidadPreguntas: tema.totalPreguntas,
+              subtemas: subtemasConPorcentaje
+            };
+          });
+
+          console.log('✅ Temas cargados para selector:', this.temas);
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando temas:', error);
+      this.temas = [];
+    }
+
+  } catch (error) {
+    console.error('Error general cargando datos:', error);
+  } finally {
+    this.isLoading = false;
   }
+}
 
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
