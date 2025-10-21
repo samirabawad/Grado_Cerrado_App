@@ -153,6 +153,67 @@ const routes: Routes = [
     loadComponent: () => import('./pages/detalle-test/detalle-test.page').then(m => m.DetalleTestPage)
   },
 
+// ========================================
+  // PROCESAL - PÁGINA PRINCIPAL
+  // ========================================
+  {
+    path: 'procesal',
+    loadComponent: () => import('./pages/procesal/procesal.page').then(m => m.ProcesalPage)
+  },
+
+  // ========================================
+  // PROCESAL - ESCRITO
+  // ========================================
+  {
+    path: 'procesal/procesal-escrito',
+    loadComponent: () => import('./pages/procesal/procesal-escrito/procesal-escrito.page').then(m => m.ProcesalEscritoPage)
+  },
+  {
+    path: 'procesal/procesal-escrito/test-escrito-procesal',
+    loadComponent: () => import('./pages/procesal/procesal-escrito/test-escrito-procesal/test-escrito-procesal.page').then(m => m.TestEscritoProcesalPage)
+  },
+  {
+    path: 'procesal/procesal-escrito/resumen-test-procesal',
+    loadComponent: () => import('./pages/procesal/procesal-escrito/resumen-test-procesal/resumen-test-procesal.page').then(m => m.ResumenTestProcesalPage)
+  },
+
+  // ========================================
+  // PROCESAL - REFORZAR
+  // ========================================
+  {
+    path: 'procesal/procesal-reforzar',
+    loadComponent: () => import('./pages/procesal/procesal-reforzar/procesal-reforzar.page').then(m => m.ProcesalReforzarPage)
+  },
+
+  // ========================================
+  // PROCESAL - ORAL
+  // ========================================
+  {
+    path: 'procesal/procesal-oral',
+    loadComponent: () => import('./pages/procesal/procesal-oral/procesal-oral.page').then(m => m.ProcesalOralPage)
+  },
+  {
+    path: 'procesal/procesal-oral/test-oral-procesal',
+    loadComponent: () => import('./pages/procesal/procesal-oral/test-oral-procesal/test-oral-procesal.page').then(m => m.TestOralProcesalPage)
+  },
+  {
+    path: 'procesal/procesal-oral/resumen-test-procesal-oral',
+    loadComponent: () => import('./pages/procesal/procesal-oral/resumen-test-procesal-oral/resumen-test-procesal-oral.page').then(m => m.ResumenTestProcesalOralPage)
+  },
+
+  // ========================================
+  // PROCESAL - RECURSOS
+  // ========================================
+  {
+    path: 'procesal/material-estudio-procesal',
+    loadComponent: () => import('./pages/procesal/material-estudio-procesal/material-estudio-procesal.page').then(m => m.MaterialEstudioProcesalPage)
+  },
+  {
+    path: 'procesal/plan-estudio-procesal',
+    loadComponent: () => import('./pages/procesal/plan-estudio-procesal/plan-estudio-procesal.page').then(m => m.PlanEstudioProcesalPage)
+  },
+  
+
   // ========================================
   // FALLBACK
   // ========================================

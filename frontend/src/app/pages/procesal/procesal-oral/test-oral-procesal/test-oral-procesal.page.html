@@ -1,0 +1,77 @@
+<ion-content class="procesal-content">
+  <div class="test-header">
+    <div class="header-top">
+      <ion-icon name="close" class="close-icon" (click)="exitTest()"></ion-icon>
+      <div class="progress-info">
+        <span class="question-counter">{{ currentQuestionIndex + 1 }} / {{ questions.length }}</span>
+      </div>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" [style.width.%]="progress"></div>
+    </div>
+  </div>
+
+  <div class="question-container" *ngIf="currentQuestion">
+    <div class="question-card">
+      <div class="question-header">
+        <span class="question-label">Pregunta {{ currentQuestionIndex + 1 }}</span>
+        <span class="question-theme" *ngIf="currentQuestion.tema">{{ currentQuestion.tema }}</span>
+      </div>
+
+      <h2 class="question-text">{{ currentQuestion.text }}</h2>
+
+      <div class="recording-section">
+        <div class="recording-button" 
+             [class.recording]="isRecording"
+             (click)="toggleRecording()">
+          <ion-icon [name]="isRecording ? 'stop-circle' : 'mic'"></ion-icon>
+        </div>
+
+        <div class="recording-info">
+          <p class="recording-status" *ngIf="!isRecording && !currentQuestion.isAnswered">
+            Presiona el micrófono para responder
+          </p>
+          <p class="recording-status recording-active" *ngIf="isRecording">
+            Grabando... {{ formattedTime }}
+          </p>
+          <p class="recording-status completed" *ngIf="!isRecording && currentQuestion.isAnswered">
+            ✓ Respuesta grabada
+          </p>
+        </div>
+      </div>
+
+      <div class="model-answer" *ngIf="currentQuestion.modelAnswer && currentQuestion.isAnswered">
+        <h4>Respuesta Modelo:</h4>
+        <p>{{ currentQuestion.modelAnswer }}</p>
+      </div>
+    </div>
+
+    <div class="navigation-buttons">
+      <ion-button 
+        fill="outline" 
+        [disabled]="currentQuestionIndex === 0"
+        (click)="previousQuestion()">
+        <ion-icon name="chevron-back" slot="start"></ion-icon>
+        Anterior
+      </ion-button>
+
+      <ion-button 
+        *ngIf="currentQuestionIndex < questions.length - 1"
+        (click)="nextQuestion()">
+        Siguiente
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-button>
+
+      <ion-button 
+        *ngIf="currentQuestionIndex === questions.length - 1"
+        class="submit-button"
+        [disabled]="isSubmitting"
+        (click)="submitTest()">
+        <ion-icon name="checkmark-done" slot="start"></ion-icon>
+        Finalizar Test
+      </ion-button>
+    </div>
+  </div>
+
+  <app-bottom-nav></app-bottom-nav>
+</ion-content>

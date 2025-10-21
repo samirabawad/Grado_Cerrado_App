@@ -1,0 +1,49 @@
+<ion-content class="procesal-content">
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Modo Oral</h1>
+  </div>
+
+  <div class="content-area">
+    <div class="selector-card">
+      <h2>¿Cuántas preguntas?</h2>
+      
+      <div class="quantity-selector">
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 1" 
+             (click)="selectedQuantity = 1">
+          <span class="number">1</span>
+          <span class="label">Pregunta</span>
+        </div>
+        
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 5" 
+             (click)="selectedQuantity = 5">
+          <span class="number">5</span>
+          <span class="label">Preguntas</span>
+        </div>
+        
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 10" 
+             (click)="selectedQuantity = 10">
+          <span class="number">10</span>
+          <span class="label">Preguntas</span>
+        </div>
+        
+        <div class="quantity-option" 
+             [class.selected]="selectedQuantity === 20" 
+             (click)="selectedQuantity = 20">
+          <span class="number">20</span>
+          <span class="label">Preguntas</span>
+        </div>
+      </div>
+
+      <ion-button expand="block" class="start-button" (click)="startVoicePractice()">
+        <ion-icon name="mic" slot="start"></ion-icon>
+        Comenzar Test Oral
+      </ion-button>
+    </div>
+  </div>
+
+  <app-bottom-nav></app-bottom-nav>
+</ion-content>

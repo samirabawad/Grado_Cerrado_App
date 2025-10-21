@@ -1,0 +1,112 @@
+:host,
+ion-content.procesal-content {
+  --ion-background-color: #ffffff !important;
+  --background: #ffffff !important;
+  background: #ffffff !important;
+}
+
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .back-icon {
+    font-size: 28px;
+    color: #1f2937;
+    cursor: pointer;
+  }
+
+  .header-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.content-area {
+  padding: calc(env(safe-area-inset-top) + 100px) 20px 100px;
+}
+
+.selector-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  h2 {
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+  }
+
+  .quantity-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+
+    .quantity-option {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &.selected {
+        background: #eff6ff;
+        border-color: #3b82f6;
+
+        .number {
+          color: #3b82f6;
+        }
+
+        .label {
+          color: #3b82f6;
+        }
+      }
+
+      &:active {
+        transform: scale(0.96);
+      }
+
+      .number {
+        display: block;
+        font-size: 32px;
+        font-weight: 700;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+
+      .label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .start-button {
+    --background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    --background-activated: #2563eb;
+    --border-radius: 16px;
+    height: 56px;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+}

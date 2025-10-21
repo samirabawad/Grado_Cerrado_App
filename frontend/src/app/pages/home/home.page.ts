@@ -130,9 +130,9 @@ export class HomePage implements OnInit {
   }
 
   goToProcesal() {
-    console.log('Navegando a Procesal...');
-    this.router.navigate(['/civil']);
+    this.router.navigate(['/procesal']);
   }
+
   goToRacha() {
   this.router.navigate(['/racha']);
 }

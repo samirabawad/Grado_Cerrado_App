@@ -1,0 +1,124 @@
+<ion-content class="procesal-content">
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Reforzar Procesal</h1>
+  </div>
+
+  <div class="content-area">
+
+    <!-- Temas débiles -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggleSection('weakTopics')">
+        <div class="section-title">
+          <ion-icon name="alert-circle" class="section-icon"></ion-icon>
+          <h3>Temas a Reforzar</h3>
+        </div>
+        <ion-icon [name]="expandedSections['weakTopics'] ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </div>
+
+      <div class="section-content" *ngIf="expandedSections['weakTopics']">
+        <div class="weak-topics-list" *ngIf="weakTopics.length > 0">
+          <div class="topic-item" *ngFor="let topic of weakTopics">
+            <div class="topic-info">
+              <span class="topic-name">{{ topic.tema }}</span>
+              <span class="topic-stats">{{ topic.totalPreguntas }} preguntas</span>
+            </div>
+            <div class="topic-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" 
+                     [style.width.%]="topic.porcentaje"
+                     [class.low]="topic.porcentaje < 50"
+                     [class.medium]="topic.porcentaje >= 50 && topic.porcentaje < 70"
+                     [class.high]="topic.porcentaje >= 70"></div>
+              </div>
+              <span class="progress-text">{{ topic.porcentaje }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="weakTopics.length === 0">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <p>¡Excelente! No tienes temas débiles</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crear test de refuerzo -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggleSection('testSection')">
+        <div class="section-title">
+          <ion-icon name="create" class="section-icon"></ion-icon>
+          <h3>Crear Test de Refuerzo</h3>
+        </div>
+        <ion-icon [name]="expandedSections['testSection'] ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </div>
+
+      <div class="section-content" *ngIf="expandedSections['testSection']">
+        
+        <!-- Selector de cantidad -->
+        <div class="config-group">
+          <label>Cantidad de preguntas</label>
+          <div class="quantity-chips">
+            <div class="chip" [class.selected]="selectedQuantity === 5" (click)="selectedQuantity = 5">5</div>
+            <div class="chip" [class.selected]="selectedQuantity === 10" (click)="selectedQuantity = 10">10</div>
+            <div class="chip" [class.selected]="selectedQuantity === 15" (click)="selectedQuantity = 15">15</div>
+            <div class="chip" [class.selected]="selectedQuantity === 20" (click)="selectedQuantity = 20">20</div>
+          </div>
+        </div>
+
+        <!-- Selector de alcance -->
+        <div class="config-group">
+          <label>Alcance del test</label>
+          <div class="scope-options">
+            <div class="scope-option" [class.selected]="scopeType === 'all'" (click)="selectScope('all')">
+              <ion-icon name="globe"></ion-icon>
+              <span>Todos los temas</span>
+            </div>
+            <div class="scope-option" [class.selected]="scopeType === 'tema'" (click)="selectScope('tema')">
+              <ion-icon name="folder"></ion-icon>
+              <span>Por tema</span>
+            </div>
+            <div class="scope-option" [class.selected]="scopeType === 'subtema'" (click)="selectScope('subtema')">
+              <ion-icon name="document"></ion-icon>
+              <span>Por subtema</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selector de temas/subtemas -->
+        <div class="theme-selector" *ngIf="showThemeSelector">
+          <div class="tema-item" *ngFor="let tema of temas">
+            <div class="tema-header" (click)="toggleTema(tema.temaId)">
+              <div class="tema-info">
+                <ion-icon [name]="expandedTema === tema.temaId ? 'chevron-down' : 'chevron-forward'"></ion-icon>
+                <span class="tema-name">{{ tema.tema }}</span>
+               </div>
+                <ion-radio 
+                  *ngIf="scopeType === 'tema'"
+                  [value]="tema.temaId"
+                  (ionSelect)="selectTema(tema.temaId)"></ion-radio>            
+                </div>
+
+            <div class="subtemas-list" *ngIf="expandedTema === tema.temaId && scopeType === 'subtema'">
+              <div class="subtema-item" *ngFor="let subtema of tema.subtemas" (click)="selectSubtema(subtema.subtemaId)">
+                <span class="subtema-name">{{ subtema.subtema }}</span>
+                  <ion-radio 
+                    [value]="subtema.subtemaId"
+                    (ionSelect)="selectSubtema(subtema.subtemaId)">
+                  </ion-radio>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ion-button expand="block" class="start-button" (click)="startReinforcement()">
+          <ion-icon name="play" slot="start"></ion-icon>
+          Comenzar Test de Refuerzo
+        </ion-button>
+      </div>
+    </div>
+
+  </div>
+
+  <app-bottom-nav></app-bottom-nav>
+</ion-content>

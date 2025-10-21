@@ -1,0 +1,75 @@
+<ion-content class="procesal-content">
+  <!-- Header estilo dashboard -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Derecho Procesal</h1>
+  </div>
+
+  <!-- Resto del contenido -->
+  <div class="content-area">
+
+   <!-- Progreso Procesal - ESTILO DASHBOARD -->
+    <div class="progreso-card-dashboard">
+      <div class="progreso-header">
+        <div class="progreso-left">
+          <div class="progreso-emoji procesal-icon">
+            <img src="assets/image/law1.png" alt="Procesal">
+          </div>
+          <div class="progreso-info">
+            <h3>Tu avance en Procesal</h3>
+          </div>
+        </div>
+        <div class="progreso-right">
+          <div class="progreso-percentage">{{ procesalStats?.successRate || 0 }}%</div>
+        </div>
+      </div>
+
+      <div class="progreso-progress">
+        <div class="progreso-bar">
+          <div class="progreso-fill procesal" [style.width.%]="procesalStats?.successRate || 0"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Título único -->
+    <div class="section-title-container">
+      <h2 class="section-title">¿Cómo quieres estudiar?</h2>
+    </div>
+
+    <!-- Grid 2x2 - 4 BOTONES -->
+    <div class="study-grid">
+      <!-- Fila 1 -->
+      <div class="study-card" (click)="goToEscrito()">
+        <div class="study-emoji">
+          <ion-icon name="create"></ion-icon>
+        </div>
+        <h3>Escrito</h3>
+      </div>
+      
+      <div class="study-card" (click)="goToConversacion()">
+        <div class="study-emoji">
+          <ion-icon name="mic"></ion-icon>
+        </div>
+        <h3>Conversación</h3>
+      </div>
+      
+      <!-- Fila 2 -->
+      <div class="study-card" (click)="goToReforzar()">
+        <div class="study-emoji">
+          <ion-icon name="book"></ion-icon>
+        </div>
+        <h3>Reforzar</h3>
+      </div>
+      
+      <div class="study-card" (click)="goToMaterialEstudio()">
+        <div class="study-emoji">
+          <ion-icon name="folder-open"></ion-icon>
+        </div>
+        <h3>Material</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <app-bottom-nav></app-bottom-nav>
+</ion-content>
