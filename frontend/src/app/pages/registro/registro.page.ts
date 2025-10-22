@@ -4,6 +4,7 @@ import { LoadingController, AlertController, IonicModule } from '@ionic/angular'
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
+import { PushNotificationService } from 'src/app/services/push-notification.service';
 
 @Component({
   selector: 'app-registro',
@@ -35,7 +36,9 @@ export class RegistroPage implements OnInit {
     private router: Router,
     private loadingController: LoadingController,
     private alertController: AlertController,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private pushService: PushNotificationService  // 👈 AGREGAR
+
   ) { }
 
   ngOnInit() {
@@ -74,7 +77,7 @@ export class RegistroPage implements OnInit {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  // Método principal de registro
+   // Método principal de registro
   async registrarUsuario() {
     if (!this.isFormValid()) {
       await this.showAlert('Error de validación', 'Por favor, completa correctamente todos los campos obligatorios.');
@@ -89,10 +92,8 @@ export class RegistroPage implements OnInit {
     await loading.present();
     this.isLoading = true;
 
-    // Crear nombre completo para enviar al backend
     const nombreCompleto = this.buildNombreCompleto();
 
-    // Datos para enviar al backend
     const registerData = {
       name: nombreCompleto,
       email: this.correoElectronico.toLowerCase().trim(),
@@ -100,33 +101,51 @@ export class RegistroPage implements OnInit {
     };
 
     try {
-      // LLAMADA REAL AL BACKEND usando ApiService
+      // LLAMADA REAL AL BACKEND
       const response = await this.apiService.registerUser(registerData).toPromise();
       
-      console.log('Usuario registrado exitosamente en BD:', response);
-      
-      await loading.dismiss();
-      this.isLoading = false;
+      console.log('✅ Usuario registrado exitosamente:', response);
       
       if (response.success) {
         // Guardar datos del usuario en localStorage
         localStorage.setItem('currentUser', JSON.stringify(response.user));
         
-        // Navegar directamente a felicitaciones sin mostrar pop-up
+        // 🎉 NUEVO: Inicializar notificaciones push
+        try {
+          console.log('🔔 Inicializando notificaciones para usuario recién registrado...');
+          await this.pushService.initializePushNotifications(response.user.id);
+          console.log('✅ Notificaciones inicializadas');
+          
+          // 🎉 NUEVO: Enviar notificación de bienvenida
+          console.log('🎉 Enviando notificación de bienvenida...');
+          await this.pushService.sendWelcomeNotification(response.user.id);
+          console.log('✅ Notificación de bienvenida enviada');
+          
+        } catch (notifError) {
+          console.warn('⚠️ Error con notificaciones (no crítico):', notifError);
+          // No bloqueamos el registro si falla la notificación
+        }
+        
+        await loading.dismiss();
+        this.isLoading = false;
+        
+        // Navegar a felicitaciones
         this.router.navigate(['/felicidades']);
+        
       } else {
+        await loading.dismiss();
+        this.isLoading = false;
         await this.showAlert('Error en el registro', response.message || 'Error desconocido');
       }
       
     } catch (error: any) {
-      console.error('Error en registro:', error);
+      console.error('❌ Error en registro:', error);
       
       await loading.dismiss();
       this.isLoading = false;
       
       let errorMessage = 'Error al crear la cuenta. Inténtalo nuevamente.';
       
-      // Manejo específico de errores del backend
       if (error.status === 400) {
         errorMessage = 'El email ya está registrado. Intenta con otro email.';
       } else if (error.status === 0) {

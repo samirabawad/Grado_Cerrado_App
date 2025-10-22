@@ -25,6 +25,7 @@
     "@capacitor/android": "^6.1.2",
     "@capacitor/cli": "^6.1.2",
     "@capacitor/core": "^6.1.2",
+    "@capacitor/push-notifications": "^6.0.4",
     "@ionic/angular": "^8.7.3",
     "firebase": "^10.14.1",
     "ionicons": "^7.0.0",
