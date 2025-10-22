@@ -101,8 +101,13 @@
         </div>
 
         <div class="eval-section">
-          <div class="eval-label">Explicación:</div>
-          <div class="eval-text explanation">{{ evaluationResult?.explanation }}</div>
+          <button 
+            class="explanation-play-button" 
+            (click)="isPlayingExplanation ? pauseExplanationAudio() : playExplanationAudio()">
+            <ion-icon [name]="isPlayingExplanation ? 'pause-circle' : 'play-circle'"></ion-icon>
+            <span>{{ isPlayingExplanation ? 'Pausar explicación' : 'Reproducir explicación' }}</span>
+          </button>
+          <div class="eval-text explanation"><strong>Explicación:</strong> {{ evaluationResult?.explanation }}</div>
         </div>
       </div>
     </div>

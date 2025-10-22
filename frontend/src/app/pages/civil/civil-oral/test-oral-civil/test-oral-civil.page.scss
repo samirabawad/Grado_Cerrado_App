@@ -726,4 +726,32 @@ ion-content.test-content {
     }
   }
 }
+
+.explanation-play-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: #FF6F00;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  width: 100%;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 111, 0, 0.3);
+  
+  ion-icon {
+    font-size: 20px;
+  }
+  
+  &:active {
+    transform: scale(0.98);
+    background: #E65100;
+  }
+}
 }
