@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.0'
+        classpath 'com.android.tools.build:gradle:8.3.2'  // 👈 CAMBIAR de 8.2.0 a 8.3.2
         classpath 'com.google.gms:google-services:4.4.0'
     }
 }
@@ -19,8 +19,8 @@ allprojects {
     
     // 👇 CAMBIAR A VERSION_22
     tasks.withType(JavaCompile) {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21  // 👈 CAMBIAR A 21
+        targetCompatibility = JavaVersion.VERSION_21  // 👈 CAMBIAR A 21
     }
     // 👆
 }
