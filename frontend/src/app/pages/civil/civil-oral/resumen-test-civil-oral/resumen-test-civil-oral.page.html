@@ -48,20 +48,21 @@
       </div>
     </div>
 
-    <!-- CÍRCULOS DE PREGUNTAS -->
+    <!-- CÍRCULOS DE PREGUNTAS - AHORA CON CLICK -->
     <div class="questions-section">
       <h3 class="section-title">Resumen de preguntas</h3>
       <div class="questions-container">
         <div 
-          *ngFor="let status of questionsStatus; let i = index"
-          class="question-wrapper">
+          *ngFor="let question of questionsDetails; let i = index"
+          class="question-wrapper"
+          (click)="openQuestionDetail(question)">
           
           <!-- Círculo -->
           <div 
             class="question-circle"
-            [class.correct]="status.isCorrect"
-            [class.incorrect]="!status.isCorrect">
-            {{ status.questionNumber }}
+            [class.correct]="question.correct"
+            [class.incorrect]="!question.correct">
+            {{ question.questionNumber }}
           </div>
         </div>
       </div>
@@ -80,6 +81,42 @@
       </ion-button>
     </div>
 
+  </div>
+
+  <!-- MODAL DE DETALLE DE PREGUNTA -->
+  <div class="detail-modal" *ngIf="showDetailModal" (click)="closeDetailModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()" *ngIf="selectedQuestion">
+      <div class="modal-header" [class.correct]="selectedQuestion.correct" [class.incorrect]="!selectedQuestion.correct">
+        <h3>Pregunta {{ selectedQuestion.questionNumber }}</h3>
+        <ion-icon name="close" (click)="closeDetailModal()"></ion-icon>
+      </div>
+
+      <div class="modal-body">
+        <div class="question-text">
+          <h4>Pregunta:</h4>
+          <p>{{ selectedQuestion.questionText }}</p>
+        </div>
+
+        <div class="answer-section your-answer">
+          <h4>Tu respuesta:</h4>
+          <p>{{ selectedQuestion.userAnswer }}</p>
+        </div>
+
+        <div class="answer-section expected-answer">
+          <h4>Respuesta esperada:</h4>
+          <p>{{ selectedQuestion.expectedAnswer }}</p>
+        </div>
+
+        <div class="explanation-section">
+          <h4>Explicación:</h4>
+          <p>{{ selectedQuestion.explanation }}</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="close-btn" (click)="closeDetailModal()">Cerrar</button>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Navigation -->

@@ -963,3 +963,173 @@
     filter: brightness(0) invert(1);
   }
 }
+
+// ========================================
+// RESPONSIVE - PANTALLAS PEQUEÑAS
+// ========================================
+@media (max-width: 380px) {
+  // Ajustar padding general
+  .scrollable-content {
+    padding: 0 12px 100px 12px;
+  }
+
+  // Tarjeta general más compacta
+  .general-card {
+    padding: 16px !important;
+
+    .general-header {
+      .general-left {
+        gap: 8px !important;
+
+        .general-emoji ion-icon {
+          font-size: 32px !important;
+        }
+
+        .general-info h3 {
+          font-size: 16px !important;
+        }
+      }
+
+      .general-right {
+        .general-percentage {
+          font-size: 24px !important;
+        }
+      }
+    }
+  }
+
+  // Logro actual más compacto
+  .current-achievement {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 12px !important;
+
+    .achievement-left {
+      flex-direction: column !important;
+      width: 100%;
+
+      .achievement-icon {
+        width: 48px !important;
+        height: 48px !important;
+
+        ion-icon {
+          font-size: 28px !important;
+        }
+      }
+
+      .achievement-info {
+        text-align: center;
+
+        .achievement-level {
+          font-size: 11px !important;
+        }
+
+        .achievement-name {
+          font-size: 16px !important;
+        }
+      }
+    }
+
+    .achievement-right {
+      width: 100%;
+      text-align: center !important;
+
+      .sessions-progress-inline {
+        .sessions-current {
+          font-size: 28px !important;
+        }
+
+        .sessions-total {
+          font-size: 18px !important;
+        }
+      }
+    }
+  }
+
+  // Círculos de sesiones más pequeños
+  .sessions-badges {
+    gap: 4px !important;
+
+    .session-badge {
+      width: 24px !important;
+      height: 24px !important;
+
+      ion-icon {
+        font-size: 24px !important;
+      }
+    }
+  }
+
+  // Mensaje motivacional más pequeño
+  .sessions-message-bottom {
+    font-size: 28px !important;
+  }
+
+  // Tarjetas de área más compactas
+  .area-card-duolingo {
+    padding: 16px !important;
+
+    .area-header-duo {
+      .area-left-duo {
+        gap: 8px !important;
+
+        .area-emoji {
+          font-size: 36px !important;
+          width: 48px !important;
+          height: 48px !important;
+
+          img {
+            width: 36px !important;
+            height: 36px !important;
+          }
+        }
+
+        .area-title-info h3 {
+          font-size: 16px !important;
+        }
+      }
+
+      .area-right-duo {
+        .porcentaje-area {
+          font-size: 24px !important;
+        }
+      }
+    }
+
+    // Temas más compactos
+    .tema-card-duolingo {
+      padding: 12px !important;
+
+      .tema-main {
+        .tema-left {
+          gap: 8px !important;
+
+          .tema-info-compact .tema-nombre {
+            font-size: 14px !important;
+          }
+        }
+
+        .tema-right {
+          .porcentaje-grande {
+            font-size: 18px !important;
+          }
+        }
+      }
+
+      // Subtemas más compactos
+      .subtema-item-duolingo {
+        padding: 10px !important;
+
+        .subtema-header-compact {
+          .subtema-nombre {
+            font-size: 13px !important;
+          }
+
+          .subtema-porcentaje {
+            font-size: 14px !important;
+          }
+        }
+      }
+    }
+  }
+}

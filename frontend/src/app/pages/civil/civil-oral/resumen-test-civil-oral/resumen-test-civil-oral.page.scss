@@ -330,4 +330,191 @@ ion-content.results-content {
       grid-template-columns: repeat(4, 1fr);
     }
   }
+
+  // MODAL DE DETALLE
+.detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-header {
+    padding: 20px;
+    border-bottom: 3px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &.correct {
+      border-bottom-color: #10b981;
+      background: #ecfdf5;
+    }
+
+    &.incorrect {
+      border-bottom-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    ion-icon {
+      font-size: 28px;
+      color: #6b7280;
+      cursor: pointer;
+
+      &:hover {
+        color: #1f2937;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 20px;
+
+    .question-text {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f9fafb;
+      border-radius: 12px;
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 16px;
+        color: #1f2937;
+        line-height: 1.5;
+      }
+    }
+
+    .answer-section {
+      margin-bottom: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      border-left: 4px solid;
+
+      &.your-answer {
+        background: #eff6ff;
+        border-left-color: #3b82f6;
+      }
+
+      &.expected-answer {
+        background: #f0fdf4;
+        border-left-color: #10b981;
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: #1f2937;
+        line-height: 1.6;
+      }
+    }
+
+    .explanation-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: #fef3c7;
+      border-radius: 12px;
+      border-left: 4px solid #f59e0b;
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #92400e;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: #78350f;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  .modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+
+    .close-btn {
+      width: 100%;
+      padding: 14px;
+      background: #FF6F00;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:active {
+        transform: scale(0.98);
+        background: #E65100;
+      }
+    }
+  }
+}
+
+// Hacer los círculos clickeables
+.questions-container {
+  .question-wrapper {
+    cursor: pointer;
+    transition: transform 0.2s;
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    .question-circle {
+      transition: all 0.2s;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
 }
