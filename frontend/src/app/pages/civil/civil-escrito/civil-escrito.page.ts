@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, LoadingController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -13,24 +13,112 @@ import { ApiService } from '../../../services/api.service';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
-export class CivilEscritoPage implements OnInit, OnDestroy {
+export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   
-  selectedQuantity: number = 1; // Valor por defecto cambiado a 1
+  selectedQuantity: number = 1;
+  selectedDifficulty: string = 'mixto';
+  selectedDifficultyLabel: string = 'Mixto (Todos)';
+
+  difficultyLevels = [
+    { value: 'basico', label: 'Básico' },
+    { value: 'intermedio', label: 'Intermedio' },
+    { value: 'avanzado', label: 'Avanzado' },
+    { value: 'mixto', label: 'Mixto (Todos)' }
+  ];
+
+  get infiniteLevels() {
+    return [...this.difficultyLevels, ...this.difficultyLevels, ...this.difficultyLevels];
+  }
+
+  @ViewChild('pickerWheel') pickerWheel?: ElementRef;
+  private scrollTimeout: any;
 
   constructor(
     private router: Router, 
-    private loadingController: LoadingController, 
+    private loadingController: LoadingController,
     private apiService: ApiService
   ) { }
 
   ngOnInit() {
   }
 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      const selectedIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
+      if (selectedIndex >= 0) {
+        this.scrollToOption(selectedIndex);
+      }
+    }, 100);
+  }
+
   ngOnDestroy() {
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+    }
   }
 
   goBack() {
     this.router.navigate(['/civil']);
+  }
+
+  selectDifficulty(level: any) {
+    this.selectedDifficulty = level.value;
+    this.selectedDifficultyLabel = level.label;
+  }
+
+  onPickerScroll() {
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+    }
+
+    this.scrollTimeout = setTimeout(() => {
+      this.snapToNearestOption();
+    }, 150);
+  }
+
+  snapToNearestOption() {
+    const wheel = this.pickerWheel?.nativeElement;
+    if (!wheel) return;
+
+    const options = wheel.querySelectorAll('.picker-option');
+    const wheelRect = wheel.getBoundingClientRect();
+    const wheelCenter = wheelRect.top + wheelRect.height / 2;
+
+    let closestOption: any = null;
+    let closestDistance = Infinity;
+
+    options.forEach((option: any) => {
+      const optionRect = option.getBoundingClientRect();
+      const optionCenter = optionRect.top + optionRect.height / 2;
+      const distance = Math.abs(wheelCenter - optionCenter);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestOption = option;
+      }
+    });
+
+    if (closestOption) {
+      const value = closestOption.getAttribute('data-value');
+      const level = this.difficultyLevels.find(l => l.value === value);
+      if (level) {
+        this.selectDifficulty(level);
+      }
+
+      closestOption.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  scrollToOption(index: number) {
+    const wheel = this.pickerWheel?.nativeElement;
+    if (!wheel) return;
+
+    const options = wheel.querySelectorAll('.picker-option');
+    if (options[index]) {
+      options[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const level = this.difficultyLevels[index];
+      this.selectDifficulty(level);
+    }
   }
 
   async startQuickPractice() {
@@ -53,10 +141,10 @@ export class CivilEscritoPage implements OnInit, OnDestroy {
       }
 
       const sessionData: any = {
-        studentId: currentUser.id,
-        difficulty: "intermedio",
+        studentId: Number(currentUser.id),
+        difficulty: this.selectedDifficulty,
         legalAreas: ["Derecho Civil"],
-        questionCount: Number(this.selectedQuantity),      
+        questionCount: Number(this.selectedQuantity)
       };
       
       console.log('📤 Enviando request:', sessionData);
