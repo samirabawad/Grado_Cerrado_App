@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
 
-interface QuestionStatus {
+interface QuestionDetail {
   questionNumber: number;
-  isCorrect: boolean;
+  questionText: string;
+  userAnswer: string;
+  expectedAnswer: string;
+  explanation: string;
+  correct: boolean;
 }
 
 @Component({
@@ -18,21 +22,23 @@ interface QuestionStatus {
 })
 export class ResumenTestCivilOralPage implements OnInit {
   
-  // Variables de resultados
   correctAnswers: number = 0;
   incorrectAnswers: number = 0;
   totalQuestions: number = 5;
   percentage: number = 0;
   
-  // Variables de nivel y motivación
   levelTitle: string = 'NIVEL PRINCIPIANTE';
   levelSubtitle: string = '¡Sigue practicando!';
   motivationalMessage: string = '¡Sigue practicando!';
   
-  // Estado de preguntas para los círculos
-  questionsStatus: QuestionStatus[] = [];
+  questionsDetails: QuestionDetail[] = [];
+  showDetailModal: boolean = false;
+  selectedQuestion: QuestionDetail | null = null;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private modalController: ModalController
+  ) { }
 
   ngOnInit() {
     this.loadResults();
@@ -57,21 +63,8 @@ export class ResumenTestCivilOralPage implements OnInit {
       this.totalQuestions = results.totalQuestions || 5;
       this.percentage = results.percentage || 0;
 
-      // Generar estado de preguntas para los círculos
       if (results.questionDetails && results.questionDetails.length > 0) {
-        this.questionsStatus = results.questionDetails.map((q: any) => ({
-          questionNumber: q.questionNumber,
-          isCorrect: q.correct
-        }));
-      } else {
-        // Método alternativo basado en correctas/incorrectas
-        this.questionsStatus = [];
-        for (let i = 1; i <= this.totalQuestions; i++) {
-          this.questionsStatus.push({
-            questionNumber: i,
-            isCorrect: i <= this.correctAnswers
-          });
-        }
+        this.questionsDetails = results.questionDetails;
       }
 
       this.calculateLevel();
@@ -110,6 +103,16 @@ export class ResumenTestCivilOralPage implements OnInit {
     } else {
       this.motivationalMessage = 'No te rindas, ¡inténtalo de nuevo!';
     }
+  }
+
+  openQuestionDetail(question: QuestionDetail) {
+    this.selectedQuestion = question;
+    this.showDetailModal = true;
+  }
+
+  closeDetailModal() {
+    this.showDetailModal = false;
+    this.selectedQuestion = null;
   }
 
   takeNewTest() {

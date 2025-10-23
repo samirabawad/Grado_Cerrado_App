@@ -80,6 +80,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   
   showEvaluation: boolean = false;
   evaluationResult: any = null;
+  isPlayingExplanation: boolean = false;
 
   constructor(
     private router: Router,
@@ -386,6 +387,77 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     
     this.isPlaying = false;
     this.cdr.detectChanges();
+  }
+
+  playExplanationAudio() {
+    if (!this.evaluationResult?.explanation) {
+      console.warn('⚠️ No hay explicación para reproducir');
+      return;
+    }
+
+    console.log('🔊 Reproduciendo explicación con voz');
+    
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
+      
+      const voices = window.speechSynthesis.getVoices();
+      
+      const preferredVoices = [
+        'Jorge',
+        'Monica',
+        'Juan',
+        'Paulina',
+        'Diego',
+        'Google español',
+        'es-ES',
+        'es-MX',
+        'es-AR'
+      ];
+      
+      let selectedVoice = null;
+      
+      for (const voiceName of preferredVoices) {
+        selectedVoice = voices.find(v => 
+          v.name.includes(voiceName) || v.lang.includes('es')
+        );
+        if (selectedVoice) break;
+      }
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        console.log('✅ Voz seleccionada:', selectedVoice.name);
+      }
+      
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      
+      this.isPlayingExplanation = true;
+      
+      utterance.onend = () => {
+        console.log('✅ Audio de explicación completado');
+        this.isPlayingExplanation = false;
+        this.cdr.detectChanges();
+      };
+      
+      utterance.onerror = (event) => {
+        console.error('❌ Error reproduciendo explicación:', event);
+        this.isPlayingExplanation = false;
+        this.cdr.detectChanges();
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  pauseExplanationAudio() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      this.isPlayingExplanation = false;
+      console.log('⏸️ Audio de explicación pausado');
+    }
   }
 
   startResponseTimer() {
