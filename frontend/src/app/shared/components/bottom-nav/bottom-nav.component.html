@@ -15,7 +15,10 @@
   </div>
   
   <div class="nav-item" (click)="goToNotifications()" [class.active]="isActive('/notifications')">
-    <ion-icon name="notifications"></ion-icon>
+    <div class="icon-container">
+      <ion-icon name="notifications"></ion-icon>
+      <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+    </div>
     <span class="nav-label">Notificaciones</span>
   </div>
   
@@ -24,5 +27,3 @@
     <span class="nav-label">Perfil</span>
   </div>
 </div>
-```
-
