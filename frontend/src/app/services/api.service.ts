@@ -73,7 +73,9 @@ export class ApiService {
     })
   };
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,
+    
+  ) {
     this.loadSessionFromStorage();
     console.log('ApiService inicializado con URL:', this.API_URL);
   }

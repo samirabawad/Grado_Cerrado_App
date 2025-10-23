@@ -44,6 +44,23 @@ export class HomePage implements OnInit {
     await this.pushService.initializePushNotifications(estudianteId);
   }
 
+  async checkNotificationStatus() {
+  const status = await this.pushService.checkPermissionStatus();
+  
+  let mensaje = `Estado: ${status.receive}\n`;
+  
+  if (status.receive === 'granted') {
+    mensaje += '✅ Notificaciones activadas';
+  } else if (status.receive === 'denied') {
+    mensaje += '❌ Notificaciones bloqueadas\nVe a Configuración para activarlas';
+  } else {
+    mensaje += '⏳ Notificaciones no solicitadas aún';
+  }
+  
+  alert(mensaje);
+}
+
+
   ionViewWillEnter() {
     this.loadUserData();
   }
