@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { ApiService } from '../../../services/api.service';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-bottom-nav',
@@ -10,49 +13,76 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [IonicModule, CommonModule]
 })
-export class BottomNavComponent implements OnInit {
+export class BottomNavComponent implements OnInit, OnDestroy {
 
-  constructor(private router: Router) { }
+  unreadCount: number = 0;
+  private subscription?: Subscription;
 
-  ngOnInit() {}
+  constructor(
+    private router: Router,
+    private apiService: ApiService
+  ) { }
 
-  // Verificar si la ruta actual está activa
+  ngOnInit() {
+    this.loadUnreadCount();
+    
+    // Solo actualizar cuando la navegación termine (no en cada evento)
+    this.subscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.loadUnreadCount();
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  async loadUnreadCount() {
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+      if (currentUser && currentUser.id) {
+        const response = await this.apiService.getNotifications(currentUser.id).toPromise();
+        
+        if (response && response.success) {
+          this.unreadCount = response.noLeidas || 0;
+        } else {
+          this.unreadCount = 0;
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando notificaciones:', error);
+      this.unreadCount = 0;
+    }
+  }
+
   isActive(route: string): boolean {
     return this.router.url.includes(route);
   }
 
-  // Navegar a Home
   goToHome() {
-    console.log('Navegando a Home...');
     this.router.navigate(['/home']);
   }
 
-  // Navegar a Dashboard (Estadísticas)
   goToStats() {
-    console.log('Navegando a Dashboard...');
     this.router.navigate(['/dashboard']);
   }
 
-  // Navegar a Racha
   goToRacha() {
-    console.log('Navegando a Racha...');
     this.router.navigate(['/racha']);
   }
 
-  // Abrir menú de agregar
   openAddMenu() {
     console.log('Abrir menú de agregar');
   }
 
-  // Navegar a Notificaciones
   goToNotifications() {
-    console.log('Navegando a Notificaciones...');
     this.router.navigate(['/notifications']);
   }
 
-  // Navegar a Perfil
   goToProfile() {
-    console.log('Navegando a Perfil...');
     this.router.navigate(['/profile']);
   }
 
