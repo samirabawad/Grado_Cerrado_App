@@ -11,13 +11,15 @@ interface Question {
   id: string;
   text: string;
   questionText: string;
-  type: number;
+  type: number | string; 
   category: string;
   legalArea: string;
   difficulty: number;
   correctAnswer: string;
   explanation: string;
+  options?: any[];
   userAnswer?: string;
+  isAnswered?: boolean;
   [key: string]: any;
 }
 
@@ -81,6 +83,8 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   showEvaluation: boolean = false;
   evaluationResult: any = null;
   isPlayingExplanation: boolean = false;
+  selectedOptionForCurrentQuestion: string | null = null;
+  showCorrectAnswer: boolean = false;
 
   constructor(
     private router: Router,
@@ -126,7 +130,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
 
   async loadQuestionsFromBackend() {
     try {
-      console.log('📥 Cargando preguntas desde el backend...');
+      console.log('🔥 Cargando preguntas desde el backend...');
       this.isLoading = true;
       
       const session = this.apiService.getCurrentSession();
@@ -158,7 +162,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
           this.currentQuestionNumber = 1;
           
           console.log('✅ Preguntas cargadas:', this.questions.length);
-          console.log('📝 Primera pregunta:', this.questions[0]);
+          console.log('🔍 Primera pregunta:', this.questions[0]);
           
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -218,7 +222,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   canGoToNext(): boolean {
-    return this.hasRecording && !!this.userAnswers[this.getCurrentQuestion()?.id || ''];
+    return this.hasAnsweredCurrentQuestion();
   }
 
   isLastQuestion(): boolean {
@@ -256,14 +260,16 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       id: q.id?.toString() || Math.random().toString(),
       text: q.texto_pregunta || q.questionText || q.text || '',
       questionText: q.texto_pregunta || q.questionText || q.text || '',
-      type: q.tipo || q.type || 3,
+      type: q.tipo || q.type || 1,
       category: q.tema || q.category || 'Derecho Civil',
       tema: q.tema || q.category || 'Derecho Civil',
       legalArea: q.legalArea || 'Derecho Civil',
       difficulty: q.nivel || q.difficulty || 2,
-      correctAnswer: q.respuesta_modelo || q.correctAnswer || '',
+      correctAnswer: q.respuesta_correcta || q.correctAnswer || '',
       explanation: q.explicacion || q.explanation || 'Sin explicación disponible',
-      userAnswer: ''
+      options: q.opciones || q.options || [],
+      userAnswer: '',
+      isAnswered: false
     }));
   }
 
@@ -274,212 +280,77 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('🔊 Reproduciendo pregunta con voz:', question.questionText);
-    
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       
-      const utterance = new SpeechSynthesisUtterance(question.questionText);
+      this.isPlaying = true;
+      this.audioCompleted = false;
+      this.cdr.detectChanges();
+
+      // Construir el texto completo: pregunta + alternativas
+      let fullText = question.questionText;
       
-      const voices = window.speechSynthesis.getVoices();
-      
-      const preferredVoices = [
-        'Jorge',
-        'Monica',
-        'Juan',
-        'Paulina',
-        'Diego',
-        'Google español',
-        'es-ES',
-        'es-MX',
-        'es-AR'
-      ];
-      
-      let selectedVoice = null;
-      
-      for (const voiceName of preferredVoices) {
-        selectedVoice = voices.find(v => 
-          v.name.includes(voiceName) || 
-          v.lang.includes('es')
-        );
-        if (selectedVoice) {
-          console.log('✅ Voz seleccionada:', selectedVoice.name);
-          break;
-        }
+      const options = this.getCurrentQuestionOptions();
+      if (options.length > 0) {
+        fullText += '. Las alternativas son: ';
+        options.forEach((option, index) => {
+          const letter = this.getOptionLetter(index);
+          fullText += `${letter}, ${option}. `;
+        });
       }
-      
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-        utterance.lang = selectedVoice.lang;
-      } else {
-        utterance.lang = 'es-ES';
-      }
-      
-      utterance.rate = 0.85;
-      utterance.pitch = 1.0;
+
+      const utterance = new SpeechSynthesisUtterance(fullText);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.95;
+      utterance.pitch = 1.1;
       utterance.volume = 1.0;
 
+      // Intentar seleccionar una voz femenina en español
+      const voices = window.speechSynthesis.getVoices();
+      const femaleSpanishVoice = voices.find(voice => 
+        voice.lang.includes('es') && voice.name.toLowerCase().includes('female')
+      ) || voices.find(voice => 
+        voice.lang.includes('es') && voice.name.toLowerCase().includes('monica')
+      ) || voices.find(voice => 
+        voice.lang.includes('es') && voice.name.toLowerCase().includes('paulina')
+      ) || voices.find(voice => 
+        voice.lang.includes('es')
+      );
+
+      if (femaleSpanishVoice) {
+        utterance.voice = femaleSpanishVoice;
+      }
+
       utterance.onstart = () => {
+        console.log('🔊 Iniciando reproducción de audio');
         this.isPlaying = true;
-        this.audioCompleted = false;
-        this.audioProgress = 'Reproduciendo...';
         this.cdr.detectChanges();
       };
 
       utterance.onend = () => {
+        console.log('✅ Audio completado');
         this.isPlaying = false;
         this.audioCompleted = true;
-        this.audioProgress = 'Completado';
-        
-        this.questionReadyTime = Date.now();
-        this.startResponseTimer();
-        
-        console.log('⏱️ INTERROGATORIO INICIADO');
         this.cdr.detectChanges();
       };
 
-      utterance.onerror = (error) => {
-        console.error('❌ Error reproduciendo voz:', error);
+      utterance.onerror = (event) => {
+        console.error('❌ Error en síntesis de voz:', event);
         this.isPlaying = false;
-        this.audioCompleted = true;
-        this.audioProgress = 'Error';
         this.cdr.detectChanges();
       };
 
-      if (voices.length === 0) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          const newVoices = window.speechSynthesis.getVoices();
-          const spanishVoice = newVoices.find(v => v.lang.includes('es'));
-          if (spanishVoice) {
-            utterance.voice = spanishVoice;
-            utterance.lang = spanishVoice.lang;
-          }
-          window.speechSynthesis.speak(utterance);
-        };
-      } else {
-        window.speechSynthesis.speak(utterance);
-      }
-      
+      window.speechSynthesis.speak(utterance);
     } else {
-      console.warn('⚠️ speechSynthesis no disponible, usando fallback');
-      this.isPlaying = true;
-      
-      setTimeout(() => {
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.audioProgress = 'Completado';
-        
-        this.questionReadyTime = Date.now();
-        this.startResponseTimer();
-        
-        console.log('⏱️ INTERROGATORIO INICIADO (fallback)');
-        this.cdr.detectChanges();
-      }, 3000);
+      console.error('❌ speechSynthesis no disponible');
     }
   }
 
   pauseAudio() {
-    console.log('⏸️ Pausando audio');
-    
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && this.isPlaying) {
       window.speechSynthesis.cancel();
-    }
-    
-    this.isPlaying = false;
-    this.cdr.detectChanges();
-  }
-
-  playExplanationAudio() {
-    if (!this.evaluationResult?.explanation) {
-      console.warn('⚠️ No hay explicación para reproducir');
-      return;
-    }
-
-    console.log('🔊 Reproduciendo explicación con voz');
-    
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-      
-      const voices = window.speechSynthesis.getVoices();
-      
-      const preferredVoices = [
-        'Jorge',
-        'Monica',
-        'Juan',
-        'Paulina',
-        'Diego',
-        'Google español',
-        'es-ES',
-        'es-MX',
-        'es-AR'
-      ];
-      
-      let selectedVoice = null;
-      
-      for (const voiceName of preferredVoices) {
-        selectedVoice = voices.find(v => 
-          v.name.includes(voiceName) || v.lang.includes('es')
-        );
-        if (selectedVoice) break;
-      }
-      
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-        console.log('✅ Voz seleccionada:', selectedVoice.name);
-      }
-      
-      utterance.lang = 'es-ES';
-      utterance.rate = 0.9;
-      utterance.pitch = 1.0;
-      
-      this.isPlayingExplanation = true;
-      
-      utterance.onend = () => {
-        console.log('✅ Audio de explicación completado');
-        this.isPlayingExplanation = false;
-        this.cdr.detectChanges();
-      };
-      
-      utterance.onerror = (event) => {
-        console.error('❌ Error reproduciendo explicación:', event);
-        this.isPlayingExplanation = false;
-        this.cdr.detectChanges();
-      };
-      
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-
-  pauseExplanationAudio() {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      this.isPlayingExplanation = false;
-      console.log('⏸️ Audio de explicación pausado');
-    }
-  }
-
-  startResponseTimer() {
-    if (this.responseTimer) {
-      clearInterval(this.responseTimer);
-    }
-    
-    this.responseTimer = setInterval(() => {
-      if (this.questionReadyTime > 0) {
-        const elapsed = Math.floor((Date.now() - this.questionReadyTime) / 1000);
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
-        this.elapsedResponseTime = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        this.cdr.detectChanges();
-      }
-    }, 1000);
-  }
-
-  stopResponseTimer() {
-    if (this.responseTimer) {
-      clearInterval(this.responseTimer);
-      this.responseTimer = null;
+      this.isPlaying = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -490,253 +361,177 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   getAudioStatus(): string {
-    if (this.isPlaying) return 'Reproduciendo...';
-    if (this.audioCompleted) return 'Pregunta escuchada';
+    if (this.isPlaying) return 'Reproduciendo pregunta...';
+    if (this.audioCompleted) return 'Audio completado';
     return 'Escuchar pregunta';
   }
 
-  toggleRecording() {
+  async toggleRecording() {
     if (this.isRecording) {
-      this.stopRecording();
+      await this.audioService.stopRecording();
     } else {
-      this.startRecording();
+      this.audioService.clearRecording();
+      await this.audioService.startRecording();
+      this.startResponseTimer();
     }
   }
 
-   startRecording() {
-  console.log('🎤 Iniciando grabación de respuesta');
-  
-  // ✅ DETENER LA VOZ DE LA PREGUNTA ANTES DE GRABAR
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    this.isPlaying = false;
-    this.audioCompleted = true;
-    this.audioProgress = 'Completado';
-  }
-  
-  if (this.responseStartTime === 0 && this.questionReadyTime > 0) {
-    this.responseStartTime = Date.now();
-    const thinkingTime = Math.round((this.responseStartTime - this.questionReadyTime) / 1000);
-    console.log(`💭 Tiempo de pensamiento: ${thinkingTime} segundos`);
-  }
-  
-  this.audioService.startRecording();
-  this.cdr.detectChanges();
-}
-
-  stopRecording() {
-    console.log('⏹️ Deteniendo grabación');
-    this.audioService.stopRecording();
+  getRecordingIcon(): string {
+    if (this.isRecording) return 'stop-circle';
+    if (this.hasRecording) return 'checkmark-circle';
+    return 'mic';
   }
 
-  restartRecording() {
-    console.log('🔄 Reiniciando grabación');
-    this.audioService.clearRecording();
-    this.recordingTime = '00:00';
-    this.hasRecording = false;
-    this.currentTranscription = '';
-    
-    setTimeout(() => {
-      this.startRecording();
-    }, 300);
+  getRecordingStatus(): string {
+    if (this.isRecording) return 'Grabando...';
+    if (this.hasRecording) return 'Grabación completada';
+    return 'Mantén presionado para grabar';
   }
 
-  replayRecording() {
-    if (!this.audioUrl) {
-      console.warn('⚠️ No hay audio para reproducir');
-      return;
-    }
-    
-    console.log('▶️ Reproduciendo grabación');
-    
+  async replayRecording() {
+    if (!this.audioUrl) return;
+
     if (this.isPlayingRecording && this.recordingAudio) {
       this.recordingAudio.pause();
       this.isPlayingRecording = false;
       this.cdr.detectChanges();
       return;
     }
-    
-    if (!this.recordingAudio || this.recordingAudio.src !== this.audioUrl) {
-      this.recordingAudio = new Audio(this.audioUrl);
-      
-      this.recordingAudio.onended = () => {
-        this.isPlayingRecording = false;
-        this.cdr.detectChanges();
-      };
-      
-      this.recordingAudio.onerror = (error) => {
-        this.isPlayingRecording = false;
-        console.error('❌ Error al reproducir:', error);
-        this.cdr.detectChanges();
-      };
+
+    if (this.recordingAudio) {
+      this.recordingAudio.pause();
+      this.recordingAudio = null;
     }
-    
-    this.recordingAudio.play()
-      .then(() => {
-        this.isPlayingRecording = true;
-        this.cdr.detectChanges();
-      })
-      .catch(error => {
-        console.error('❌ Error al reproducir audio:', error);
-        this.isPlayingRecording = false;
-        this.cdr.detectChanges();
-      });
+
+    this.recordingAudio = new Audio(this.audioUrl);
+    this.isPlayingRecording = true;
+
+    this.recordingAudio.onended = () => {
+      this.isPlayingRecording = false;
+      this.cdr.detectChanges();
+    };
+
+    this.recordingAudio.onerror = (error) => {
+      console.error('Error reproduciendo grabación:', error);
+      this.isPlayingRecording = false;
+      this.cdr.detectChanges();
+    };
+
+    try {
+      await this.recordingAudio.play();
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Error al reproducir:', error);
+      this.isPlayingRecording = false;
+      this.cdr.detectChanges();
+    }
   }
 
-  getRecordingIcon(): string {
-    return this.isRecording ? 'stop-circle' : 'mic-circle';
-  }
-
-  getRecordingStatus(): string {
-    if (this.isRecording) return 'Grabando... Habla ahora';
-    if (this.hasRecording) return 'Grabación completada';
-    return 'Toca para grabar tu respuesta';
-  }
-  
   getReplayButtonText(): string {
     return this.isPlayingRecording ? 'Pausar' : 'Reproducir';
   }
 
-  private async convertToWav(blob: Blob): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = async (e: any) => {
-        try {
-          const audioContext = new AudioContext();
-          const arrayBuffer = e.target.result;
-          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-          
-          const wavBuffer = this.audioBufferToWav(audioBuffer);
-          const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
-          
-          resolve(wavBlob);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsArrayBuffer(blob);
-    });
+  async restartRecording() {
+    this.audioService.clearRecording();
+    this.stopResponseTimer();
+    this.cdr.detectChanges();
   }
 
-  private audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
-    const length = buffer.length * buffer.numberOfChannels * 2 + 44;
-    const arrayBuffer = new ArrayBuffer(length);
-    const view = new DataView(arrayBuffer);
-    let pos = 0;
+  startResponseTimer() {
+    this.responseStartTime = Date.now();
+    this.elapsedResponseTime = '00:00';
+    
+    this.responseTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - this.responseStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      this.elapsedResponseTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      this.cdr.detectChanges();
+    }, 1000);
+  }
 
-    const setUint16 = (data: number) => {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    };
-    const setUint32 = (data: number) => {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    };
-
-    setUint32(0x46464952);
-    setUint32(length - 8);
-    setUint32(0x45564157);
-    setUint32(0x20746d66);
-    setUint32(16);
-    setUint16(1);
-    setUint16(buffer.numberOfChannels);
-    setUint32(buffer.sampleRate);
-    setUint32(buffer.sampleRate * 2 * buffer.numberOfChannels);
-    setUint16(buffer.numberOfChannels * 2);
-    setUint16(16);
-    setUint32(0x61746164);
-    setUint32(length - pos - 4);
-
-    const channels: Float32Array[] = [];
-    for (let i = 0; i < buffer.numberOfChannels; i++) {
-      channels.push(buffer.getChannelData(i));
+  stopResponseTimer() {
+    if (this.responseTimer) {
+      clearInterval(this.responseTimer);
+      this.responseTimer = null;
     }
+  }
 
-    let offset = 0;
-    while (pos < length) {
-      for (let i = 0; i < buffer.numberOfChannels; i++) {
-        let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-        sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-        view.setInt16(pos, sample, true);
-        pos += 2;
-      }
-      offset++;
+  playExplanationAudio() {
+    if (!this.evaluationResult?.explanation) return;
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.9;
+
+      utterance.onstart = () => {
+        this.isPlayingExplanation = true;
+        this.cdr.detectChanges();
+      };
+
+      utterance.onend = () => {
+        this.isPlayingExplanation = false;
+        this.cdr.detectChanges();
+      };
+
+      window.speechSynthesis.speak(utterance);
     }
+  }
 
-    return arrayBuffer;
+  pauseExplanationAudio() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      this.isPlayingExplanation = false;
+      this.cdr.detectChanges();
+    }
   }
 
   async submitVoiceAnswer() {
-    if (!this.hasRecording || !this.audioBlob) {
+    if (!this.audioBlob) {
       const alert = await this.alertController.create({
-        header: 'Sin grabación',
-        message: 'Por favor, graba tu respuesta antes de enviar.',
+        header: 'Sin audio',
+        message: 'No hay audio grabado para transcribir.',
         buttons: ['OK']
       });
       await alert.present();
       return;
     }
-    
-    const question = this.getCurrentQuestion();
-    if (!question) return;
 
     const loading = await this.loadingController.create({
-      message: 'Procesando tu respuesta...',
+      message: 'Transcribiendo tu respuesta...',
       spinner: 'crescent'
     });
     
     await loading.present();
 
     try {
-      console.log('📱 Plataforma:', navigator.userAgent);
-      console.log('🎤 Audio original:', {
-        type: this.audioBlob.type,
-        size: this.audioBlob.size
-      });
-
-      console.log('🔄 Convirtiendo audio a WAV...');
-      const wavBlob = await this.convertToWav(this.audioBlob);
-      console.log('✅ Audio convertido a WAV:', {
-        type: wavBlob.type,
-        size: wavBlob.size
-      });
-
-      const formData = new FormData();
-      formData.append('audioFile', wavBlob, 'recording.wav');
-      formData.append('testId', this.testId.toString());
-      formData.append('preguntaGeneradaId', question.id);
-      formData.append('numeroOrden', this.currentQuestionNumber.toString());
+      const audioFile = new File([this.audioBlob], 'recording.webm', { type: this.audioBlob.type });
       
-      console.log('📤 Enviando FormData al backend');
-
       try {
-        const transcriptionResponse = await this.apiService.transcribeAudioDirect(formData).toPromise();
-        
-        if (transcriptionResponse && transcriptionResponse.transcription) {
-          this.currentTranscription = transcriptionResponse.transcription;
-          console.log('✅ Transcripción recibida:', this.currentTranscription);
+        const transcriptionResponse = await this.apiService.transcribeAudio(audioFile as any).toPromise();        
+        await loading.dismiss();
+
+        if (transcriptionResponse && transcriptionResponse.success && transcriptionResponse.data) {
+          const transcription = transcriptionResponse.data.text || transcriptionResponse.data;
           
-          this.userAnswers[question.id] = this.currentTranscription;
+          console.log('✅ Transcripción recibida:', transcription);
           
-          const correctionConfig = this.getCorrectionConfig();
+          this.currentTranscription = transcription;
           
-          if (correctionConfig.immediate) {
-            await loading.dismiss();
-            await this.evaluateAnswer(question, this.currentTranscription);
-          } else {
-            await loading.dismiss();
-            const alert = await this.alertController.create({
-              header: '✅ Respuesta Guardada',
-              message: 'Tu respuesta ha sido guardada. Se evaluará al final del test.',
-              buttons: ['OK']
-            });
-            await alert.present();
+          const question = this.getCurrentQuestion();
+          if (question) {
+            question.userAnswer = transcription;
+            this.userAnswers[question.id] = transcription;
+            
+            await this.evaluateAnswer(question, transcription);
           }
+          
         } else {
-          await loading.dismiss();
           const alert = await this.alertController.create({
-            header: 'Error',
+            header: 'Error de transcripción',
             message: 'No se pudo transcribir el audio. Por favor, intenta de nuevo.',
             buttons: ['OK']
           });
@@ -871,6 +666,8 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     this.currentTranscription = '';
     this.showEvaluation = false;
     this.evaluationResult = null;
+    this.showCorrectAnswer = false;
+    this.selectedOptionForCurrentQuestion = null;
     
     if (this.currentAudio) {
       this.currentAudio.pause();
@@ -1008,5 +805,176 @@ async completeTest() {
       }]
     });
     await alert.present();
+  }
+
+  getCurrentQuestionOptions(): string[] {
+    const question = this.getCurrentQuestion();
+    
+    if (!question) {
+      return [];
+    }
+
+    // Verdadero/Falso
+    if (question.type == 2 || question.type == '2') {
+      return ['Verdadero', 'Falso'];
+    }
+
+    // Selección múltiple
+    if (Array.isArray(question.options) && question.options.length > 0) {
+      const firstOption = question.options[0];
+      
+      if (typeof firstOption === 'object') {
+        if ('text' in firstOption && firstOption.text) {
+          return question.options.map((opt: any) => opt.text);
+        }
+        if ('Text' in firstOption && firstOption.Text) {
+          return question.options.map((opt: any) => opt.Text);
+        }
+      }
+      
+      if (typeof firstOption === 'string') {
+        return question.options;
+      }
+    }
+
+    return [];
+  }
+
+  getOptionLetter(index: number): string {
+    return String.fromCharCode(65 + index);
+  }
+
+  isOptionSelected(option: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !question.userAnswer) return false;
+
+    // Verdadero/Falso
+    if (question.type === 2 || question.type === '2') {
+      if (question.userAnswer === 'V' && option === 'Verdadero') return true;
+      if (question.userAnswer === 'F' && option === 'Falso') return true;
+      return false;
+    }
+
+    // Selección múltiple
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.userAnswer === letter;
+    }
+
+    return false;
+  }
+
+  isOptionCorrect(option: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !this.showCorrectAnswer) return false;
+
+    // Verdadero/Falso
+    if (question.type === 2 || question.type === '2') {
+      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
+      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
+                                  correctAnswerNorm === 'v' || 
+                                  correctAnswerNorm === 'verdadero';
+      
+      if (option === 'Verdadero' && isVerdaderoCorrect) return true;
+      if (option === 'Falso' && !isVerdaderoCorrect) return true;
+      return false;
+    }
+
+    // Selección múltiple
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.correctAnswer.toUpperCase() === letter;
+    }
+
+    return false;
+  }
+
+  isOptionIncorrect(option: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !this.showCorrectAnswer || !question.userAnswer) return false;
+
+    return this.isOptionSelected(option) && !this.isOptionCorrect(option);
+  }
+
+  hasAnsweredCurrentQuestion(): boolean {
+    const question = this.getCurrentQuestion();
+    return question?.isAnswered === true;
+  }
+
+  shouldShowOptionIcon(option: string): boolean {
+    return this.showCorrectAnswer && (this.isOptionCorrect(option) || this.isOptionIncorrect(option));
+  }
+
+  getOptionIcon(option: string): string {
+    if (this.isOptionCorrect(option)) return 'checkmark-circle';
+    if (this.isOptionIncorrect(option)) return 'close-circle';
+    return '';
+  }
+
+  getOptionIconColor(option: string): string {
+    if (this.isOptionCorrect(option)) return '#4CAF50';
+    if (this.isOptionIncorrect(option)) return '#F44336';
+    return '';
+  }
+
+  async selectAnswer(optionText: string) {
+    if (this.hasAnsweredCurrentQuestion()) {
+      return;
+    }
+    
+    const question = this.getCurrentQuestion();
+    if (!question) return;
+
+    let normalizedAnswer: string;
+    
+    // Verdadero/Falso
+    if (question.type === 2 || question.type === '2') {
+      normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
+    } else {
+      // Selección múltiple
+      const options = this.getCurrentQuestionOptions();
+      const optionIndex = options.indexOf(optionText);
+      
+      if (optionIndex !== -1) {
+        normalizedAnswer = String.fromCharCode(65 + optionIndex);
+      } else {
+        return;
+      }
+    }
+    
+    question.userAnswer = normalizedAnswer;
+    question.isAnswered = true;
+    this.userAnswers[question.id] = normalizedAnswer;
+    
+    // Mostrar si es correcto o incorrecto
+    const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+    
+    this.evaluationResult = {
+      isCorrect: isCorrect,
+      userAnswer: optionText,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation
+    };
+
+    this.questionEvaluations[question.id] = {
+      isCorrect: isCorrect,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation
+    };
+    
+    this.showCorrectAnswer = true;
+    this.showEvaluation = true;
+    this.cdr.detectChanges();
+  }
+
+  compareAnswers(userAnswer: string, correctAnswer: string): boolean {
+    const userNorm = userAnswer.toUpperCase().trim();
+    const correctNorm = correctAnswer.toUpperCase().trim();
+    
+    return userNorm === correctNorm;
   }
 }
