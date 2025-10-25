@@ -4,7 +4,6 @@ import { LoadingController, AlertController, IonicModule } from '@ionic/angular'
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
-import { PushNotificationService } from 'src/app/services/push-notification.service';
 
 @Component({
   selector: 'app-registro',
@@ -15,7 +14,6 @@ import { PushNotificationService } from 'src/app/services/push-notification.serv
 })
 export class RegistroPage implements OnInit {
 
-  // Campos del formulario según tu base de datos
   nombre: string = '';
   segundoNombre: string = '';
   apellidoPaterno: string = '';
@@ -24,27 +22,22 @@ export class RegistroPage implements OnInit {
   contrasena: string = '';
   confirmarContrasena: string = '';
   
-  // Estados del formulario
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   isLoading: boolean = false;
   
-  // Validaciones
   emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   
   constructor(
     private router: Router,
     private loadingController: LoadingController,
     private alertController: AlertController,
-    private apiService: ApiService,
-    private pushService: PushNotificationService  // 👈 AGREGAR
-
+    private apiService: ApiService
   ) { }
 
   ngOnInit() {
   }
 
-  // Validaciones
   isNombreValid(): boolean {
     return this.nombre.trim().length > 0;
   }
@@ -68,7 +61,6 @@ export class RegistroPage implements OnInit {
            this.isPasswordMatchValid();
   }
 
-  // Toggle para mostrar/ocultar contraseñas
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
@@ -77,7 +69,6 @@ export class RegistroPage implements OnInit {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-   // Método principal de registro
   async registrarUsuario() {
     if (!this.isFormValid()) {
       await this.showAlert('Error de validación', 'Por favor, completa correctamente todos los campos obligatorios.');
@@ -101,35 +92,16 @@ export class RegistroPage implements OnInit {
     };
 
     try {
-      // LLAMADA REAL AL BACKEND
       const response = await this.apiService.registerUser(registerData).toPromise();
       
       console.log('✅ Usuario registrado exitosamente:', response);
       
       if (response.success) {
-        // Guardar datos del usuario en localStorage
         localStorage.setItem('currentUser', JSON.stringify(response.user));
-        
-        // 🎉 NUEVO: Inicializar notificaciones push
-        try {
-          console.log('🔔 Inicializando notificaciones para usuario recién registrado...');
-          await this.pushService.initializePushNotifications(response.user.id);
-          console.log('✅ Notificaciones inicializadas');
-          
-          // 🎉 NUEVO: Enviar notificación de bienvenida
-          console.log('🎉 Enviando notificación de bienvenida...');
-          await this.pushService.sendWelcomeNotification(response.user.id);
-          console.log('✅ Notificación de bienvenida enviada');
-          
-        } catch (notifError) {
-          console.warn('⚠️ Error con notificaciones (no crítico):', notifError);
-          // No bloqueamos el registro si falla la notificación
-        }
         
         await loading.dismiss();
         this.isLoading = false;
         
-        // Navegar a felicitaciones
         this.router.navigate(['/felicidades']);
         
       } else {
@@ -156,7 +128,6 @@ export class RegistroPage implements OnInit {
     }
   }
 
-  // Construir nombre completo
   private buildNombreCompleto(): string {
     const partes = [
       this.nombre.trim(),
@@ -168,7 +139,6 @@ export class RegistroPage implements OnInit {
     return partes.join(' ');
   }
 
-  // Mostrar alertas generales
   private async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header,
@@ -179,12 +149,10 @@ export class RegistroPage implements OnInit {
     await alert.present();
   }
 
-  // Volver atrás
   goBack() {
     this.router.navigate(['/welcome2']);
   }
 
-  // Navegar a iniciar sesión
   irAIniciarSesion() {
     this.router.navigate(['/login']);
   }
