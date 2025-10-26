@@ -49,8 +49,10 @@ export class AudioService {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
+          noiseSuppression: false,
+          autoGainControl: true,
+          sampleRate: 44100,
+          channelCount: 1
         } 
       });
 

@@ -55,8 +55,7 @@
         [class.selected]="isOptionSelected(option)"        
         [class.correct]="isOptionCorrect(option)"
         [class.incorrect]="isOptionIncorrect(option)"
-        [class.disabled]="hasAnsweredCurrentQuestion()"
-        (click)="selectAnswer(option)">
+        [class.disabled]="hasAnsweredCurrentQuestion()">
         
         <div class="option-letter">{{ getOptionLetter(i) }}</div>
         <div class="option-text">{{ option }}</div>
