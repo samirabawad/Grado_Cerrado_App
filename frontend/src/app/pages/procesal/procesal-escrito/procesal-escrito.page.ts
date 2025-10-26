@@ -140,9 +140,11 @@ export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
+      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
+
       const sessionData: any = {
         studentId: Number(currentUser.id),
-        difficulty: this.selectedDifficulty,
+        difficulty: difficultyToSend,
         legalAreas: ["Derecho Procesal"],
         questionCount: Number(this.selectedQuantity)
       };
