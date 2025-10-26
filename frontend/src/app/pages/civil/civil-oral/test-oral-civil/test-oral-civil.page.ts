@@ -11,13 +11,15 @@ interface Question {
   id: string;
   text: string;
   questionText: string;
-  type: number;
+  type: number | string;
   category: string;
   legalArea: string;
   difficulty: number;
   correctAnswer: string;
   explanation: string;
+  options?: any[];
   userAnswer?: string;
+  isAnswered?: boolean;
   [key: string]: any;
 }
 
@@ -81,6 +83,8 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   showEvaluation: boolean = false;
   evaluationResult: any = null;
   isPlayingExplanation: boolean = false;
+  selectedOptionForCurrentQuestion: string | null = null;
+  showCorrectAnswer: boolean = false;
 
   constructor(
     private router: Router,
@@ -126,7 +130,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
 
   async loadQuestionsFromBackend() {
     try {
-      console.log('📥 Cargando preguntas desde el backend...');
+      console.log('🔥 Cargando preguntas desde el backend...');
       this.isLoading = true;
       
       const session = this.apiService.getCurrentSession();
@@ -158,7 +162,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
           this.currentQuestionNumber = 1;
           
           console.log('✅ Preguntas cargadas:', this.questions.length);
-          console.log('📝 Primera pregunta:', this.questions[0]);
+          console.log('🔍 Primera pregunta:', this.questions[0]);
           
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -218,7 +222,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   canGoToNext(): boolean {
-    return this.hasRecording && !!this.userAnswers[this.getCurrentQuestion()?.id || ''];
+    return this.hasAnsweredCurrentQuestion();
   }
 
   isLastQuestion(): boolean {
@@ -256,14 +260,16 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       id: q.id?.toString() || Math.random().toString(),
       text: q.texto_pregunta || q.questionText || q.text || '',
       questionText: q.texto_pregunta || q.questionText || q.text || '',
-      type: q.tipo || q.type || 3,
+      type: q.tipo || q.type || 1,
       category: q.tema || q.category || 'Derecho Civil',
       tema: q.tema || q.category || 'Derecho Civil',
       legalArea: q.legalArea || 'Derecho Civil',
       difficulty: q.nivel || q.difficulty || 2,
-      correctAnswer: q.respuesta_modelo || q.correctAnswer || '',
+      correctAnswer: q.respuesta_correcta || q.correctAnswer || '',
       explanation: q.explicacion || q.explanation || 'Sin explicación disponible',
-      userAnswer: ''
+      options: q.opciones || q.options || [],
+      userAnswer: '',
+      isAnswered: false
     }));
   }
 
@@ -274,212 +280,100 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('🔊 Reproduciendo pregunta con voz:', question.questionText);
-    
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       
-      const utterance = new SpeechSynthesisUtterance(question.questionText);
+      this.isPlaying = true;
+      this.audioCompleted = false;
+      this.cdr.detectChanges();
+
+      let fullText = question.questionText;
       
-      const voices = window.speechSynthesis.getVoices();
-      
-      const preferredVoices = [
-        'Jorge',
-        'Monica',
-        'Juan',
-        'Paulina',
-        'Diego',
-        'Google español',
-        'es-ES',
-        'es-MX',
-        'es-AR'
-      ];
-      
-      let selectedVoice = null;
-      
-      for (const voiceName of preferredVoices) {
-        selectedVoice = voices.find(v => 
-          v.name.includes(voiceName) || 
-          v.lang.includes('es')
-        );
-        if (selectedVoice) {
-          console.log('✅ Voz seleccionada:', selectedVoice.name);
-          break;
-        }
+      const options = this.getCurrentQuestionOptions();
+      if (options.length > 0) {
+        fullText += '. Las alternativas son: ';
+        options.forEach((option, index) => {
+          const letter = this.getOptionLetter(index);
+          fullText += `${letter}, ${option}. `;
+        });
       }
-      
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-        utterance.lang = selectedVoice.lang;
-      } else {
-        utterance.lang = 'es-ES';
-      }
-      
-      utterance.rate = 0.85;
-      utterance.pitch = 1.0;
+
+      const utterance = new SpeechSynthesisUtterance(fullText);
+      utterance.lang = 'es-CL';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.2;
       utterance.volume = 1.0;
 
       utterance.onstart = () => {
+        console.log('🔊 Iniciando reproducción de audio');
         this.isPlaying = true;
-        this.audioCompleted = false;
-        this.audioProgress = 'Reproduciendo...';
         this.cdr.detectChanges();
       };
 
       utterance.onend = () => {
+        console.log('✅ Audio completado');
         this.isPlaying = false;
         this.audioCompleted = true;
-        this.audioProgress = 'Completado';
-        
-        this.questionReadyTime = Date.now();
-        this.startResponseTimer();
-        
-        console.log('⏱️ INTERROGATORIO INICIADO');
         this.cdr.detectChanges();
       };
 
-      utterance.onerror = (error) => {
-        console.error('❌ Error reproduciendo voz:', error);
+      utterance.onerror = (event) => {
+        console.error('❌ Error en síntesis de voz:', event);
         this.isPlaying = false;
-        this.audioCompleted = true;
-        this.audioProgress = 'Error';
         this.cdr.detectChanges();
       };
 
-      if (voices.length === 0) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          const newVoices = window.speechSynthesis.getVoices();
-          const spanishVoice = newVoices.find(v => v.lang.includes('es'));
-          if (spanishVoice) {
-            utterance.voice = spanishVoice;
-            utterance.lang = spanishVoice.lang;
-          }
-          window.speechSynthesis.speak(utterance);
-        };
-      } else {
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        console.log('🔊 Voces disponibles:', voices.map(v => `${v.name} (${v.lang})`));
+        
+        let selectedVoice = voices.find(voice => 
+          voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
+        );
+        
+        if (!selectedVoice) {
+          selectedVoice = voices.find(voice => 
+            voice.lang.includes('es') && (
+              voice.name.toLowerCase().includes('female') ||
+              voice.name.toLowerCase().includes('femenina') ||
+              voice.name.toLowerCase().includes('mónica') ||
+              voice.name.toLowerCase().includes('monica') ||
+              voice.name.toLowerCase().includes('paulina') ||
+              voice.name.toLowerCase().includes('lucia') ||
+              voice.name.toLowerCase().includes('paloma')
+            )
+          );
+        }
+        
+        if (!selectedVoice) {
+          selectedVoice = voices.find(voice => voice.lang.includes('es'));
+        }
+        
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+          console.log('✅ Voz seleccionada:', selectedVoice.name);
+        } else {
+          console.warn('⚠️ No se encontró voz en español, usando voz por defecto');
+        }
+        
         window.speechSynthesis.speak(utterance);
+      };
+
+      if (window.speechSynthesis.getVoices().length > 0) {
+        loadVoices();
+      } else {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
       }
-      
     } else {
-      console.warn('⚠️ speechSynthesis no disponible, usando fallback');
-      this.isPlaying = true;
-      
-      setTimeout(() => {
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.audioProgress = 'Completado';
-        
-        this.questionReadyTime = Date.now();
-        this.startResponseTimer();
-        
-        console.log('⏱️ INTERROGATORIO INICIADO (fallback)');
-        this.cdr.detectChanges();
-      }, 3000);
+      console.error('❌ speechSynthesis no disponible');
     }
   }
 
   pauseAudio() {
-    console.log('⏸️ Pausando audio');
-    
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && this.isPlaying) {
       window.speechSynthesis.cancel();
-    }
-    
-    this.isPlaying = false;
-    this.cdr.detectChanges();
-  }
-
-  playExplanationAudio() {
-    if (!this.evaluationResult?.explanation) {
-      console.warn('⚠️ No hay explicación para reproducir');
-      return;
-    }
-
-    console.log('🔊 Reproduciendo explicación con voz');
-    
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-      
-      const voices = window.speechSynthesis.getVoices();
-      
-      const preferredVoices = [
-        'Jorge',
-        'Monica',
-        'Juan',
-        'Paulina',
-        'Diego',
-        'Google español',
-        'es-ES',
-        'es-MX',
-        'es-AR'
-      ];
-      
-      let selectedVoice = null;
-      
-      for (const voiceName of preferredVoices) {
-        selectedVoice = voices.find(v => 
-          v.name.includes(voiceName) || v.lang.includes('es')
-        );
-        if (selectedVoice) break;
-      }
-      
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-        console.log('✅ Voz seleccionada:', selectedVoice.name);
-      }
-      
-      utterance.lang = 'es-ES';
-      utterance.rate = 0.9;
-      utterance.pitch = 1.0;
-      
-      this.isPlayingExplanation = true;
-      
-      utterance.onend = () => {
-        console.log('✅ Audio de explicación completado');
-        this.isPlayingExplanation = false;
-        this.cdr.detectChanges();
-      };
-      
-      utterance.onerror = (event) => {
-        console.error('❌ Error reproduciendo explicación:', event);
-        this.isPlayingExplanation = false;
-        this.cdr.detectChanges();
-      };
-      
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-
-  pauseExplanationAudio() {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      this.isPlayingExplanation = false;
-      console.log('⏸️ Audio de explicación pausado');
-    }
-  }
-
-  startResponseTimer() {
-    if (this.responseTimer) {
-      clearInterval(this.responseTimer);
-    }
-    
-    this.responseTimer = setInterval(() => {
-      if (this.questionReadyTime > 0) {
-        const elapsed = Math.floor((Date.now() - this.questionReadyTime) / 1000);
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
-        this.elapsedResponseTime = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        this.cdr.detectChanges();
-      }
-    }, 1000);
-  }
-
-  stopResponseTimer() {
-    if (this.responseTimer) {
-      clearInterval(this.responseTimer);
-      this.responseTimer = null;
+      this.isPlaying = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -490,196 +384,195 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   getAudioStatus(): string {
-    if (this.isPlaying) return 'Reproduciendo...';
-    if (this.audioCompleted) return 'Pregunta escuchada';
+    if (this.isPlaying) return 'Reproduciendo pregunta...';
+    if (this.audioCompleted) return 'Audio completado';
     return 'Escuchar pregunta';
   }
 
-  toggleRecording() {
+  async toggleRecording() {
     if (this.isRecording) {
-      this.stopRecording();
+      await this.audioService.stopRecording();
     } else {
-      this.startRecording();
+      this.audioService.clearRecording();
+      await this.audioService.startRecording();
+      this.startResponseTimer();
     }
   }
 
-   startRecording() {
-  console.log('🎤 Iniciando grabación de respuesta');
-  
-  // ✅ DETENER LA VOZ DE LA PREGUNTA ANTES DE GRABAR
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    this.isPlaying = false;
-    this.audioCompleted = true;
-    this.audioProgress = 'Completado';
-  }
-  
-  if (this.responseStartTime === 0 && this.questionReadyTime > 0) {
-    this.responseStartTime = Date.now();
-    const thinkingTime = Math.round((this.responseStartTime - this.questionReadyTime) / 1000);
-    console.log(`💭 Tiempo de pensamiento: ${thinkingTime} segundos`);
-  }
-  
-  this.audioService.startRecording();
-  this.cdr.detectChanges();
-}
-
-  stopRecording() {
-    console.log('⏹️ Deteniendo grabación');
-    this.audioService.stopRecording();
+  getRecordingIcon(): string {
+    if (this.isRecording) return 'stop-circle';
+    if (this.hasRecording) return 'checkmark-circle';
+    return 'mic';
   }
 
-  restartRecording() {
-    console.log('🔄 Reiniciando grabación');
-    this.audioService.clearRecording();
-    this.recordingTime = '00:00';
-    this.hasRecording = false;
-    this.currentTranscription = '';
-    
-    setTimeout(() => {
-      this.startRecording();
-    }, 300);
+  getRecordingStatus(): string {
+    if (this.isRecording) return 'Grabando...';
+    if (this.hasRecording) return 'Grabación completada';
+    return 'Mantén presionado para grabar';
   }
 
-  replayRecording() {
-    if (!this.audioUrl) {
+async replayRecording() {
+    if (!this.audioBlob) {
       console.warn('⚠️ No hay audio para reproducir');
       return;
     }
-    
-    console.log('▶️ Reproduciendo grabación');
-    
+
     if (this.isPlayingRecording && this.recordingAudio) {
       this.recordingAudio.pause();
+      this.recordingAudio.currentTime = 0;
       this.isPlayingRecording = false;
       this.cdr.detectChanges();
       return;
     }
-    
-    if (!this.recordingAudio || this.recordingAudio.src !== this.audioUrl) {
-      this.recordingAudio = new Audio(this.audioUrl);
-      
-      this.recordingAudio.onended = () => {
-        this.isPlayingRecording = false;
-        this.cdr.detectChanges();
-      };
-      
-      this.recordingAudio.onerror = (error) => {
-        this.isPlayingRecording = false;
-        console.error('❌ Error al reproducir:', error);
-        this.cdr.detectChanges();
-      };
+
+    if (this.recordingAudio) {
+      this.recordingAudio.pause();
+      this.recordingAudio = null;
     }
-    
-    this.recordingAudio.play()
-      .then(() => {
+
+    try {
+      // Convertir blob a base64 para evitar problemas con CSP
+      const reader = new FileReader();
+      reader.readAsDataURL(this.audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        
+        this.recordingAudio = new Audio(base64data);
         this.isPlayingRecording = true;
         this.cdr.detectChanges();
-      })
-      .catch(error => {
-        console.error('❌ Error al reproducir audio:', error);
-        this.isPlayingRecording = false;
-        this.cdr.detectChanges();
-      });
+
+        this.recordingAudio.onended = () => {
+          this.isPlayingRecording = false;
+          this.cdr.detectChanges();
+        };
+
+        this.recordingAudio.onerror = (error) => {
+          console.error('❌ Error reproduciendo grabación:', error);
+          this.isPlayingRecording = false;
+          this.cdr.detectChanges();
+        };
+
+        await this.recordingAudio.play();
+        console.log('▶️ Reproduciendo grabación');
+      };
+    } catch (error) {
+      console.error('❌ Error al reproducir:', error);
+      this.isPlayingRecording = false;
+      this.cdr.detectChanges();
+    }
   }
 
-  getRecordingIcon(): string {
-    return this.isRecording ? 'stop-circle' : 'mic-circle';
-  }
-
-  getRecordingStatus(): string {
-    if (this.isRecording) return 'Grabando... Habla ahora';
-    if (this.hasRecording) return 'Grabación completada';
-    return 'Toca para grabar tu respuesta';
-  }
-  
   getReplayButtonText(): string {
     return this.isPlayingRecording ? 'Pausar' : 'Reproducir';
   }
 
-  private async convertToWav(blob: Blob): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = async (e: any) => {
-        try {
-          const audioContext = new AudioContext();
-          const arrayBuffer = e.target.result;
-          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-          
-          const wavBuffer = this.audioBufferToWav(audioBuffer);
-          const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
-          
-          resolve(wavBlob);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsArrayBuffer(blob);
-    });
+  async restartRecording() {
+    this.audioService.clearRecording();
+    this.stopResponseTimer();
+    this.cdr.detectChanges();
   }
 
-  private audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
-    const length = buffer.length * buffer.numberOfChannels * 2 + 44;
-    const arrayBuffer = new ArrayBuffer(length);
-    const view = new DataView(arrayBuffer);
-    let pos = 0;
+  startResponseTimer() {
+    this.responseStartTime = Date.now();
+    this.elapsedResponseTime = '00:00';
+    
+    this.responseTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - this.responseStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      this.elapsedResponseTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      this.cdr.detectChanges();
+    }, 1000);
+  }
 
-    const setUint16 = (data: number) => {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    };
-    const setUint32 = (data: number) => {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    };
-
-    setUint32(0x46464952);
-    setUint32(length - 8);
-    setUint32(0x45564157);
-    setUint32(0x20746d66);
-    setUint32(16);
-    setUint16(1);
-    setUint16(buffer.numberOfChannels);
-    setUint32(buffer.sampleRate);
-    setUint32(buffer.sampleRate * 2 * buffer.numberOfChannels);
-    setUint16(buffer.numberOfChannels * 2);
-    setUint16(16);
-    setUint32(0x61746164);
-    setUint32(length - pos - 4);
-
-    const channels: Float32Array[] = [];
-    for (let i = 0; i < buffer.numberOfChannels; i++) {
-      channels.push(buffer.getChannelData(i));
+  stopResponseTimer() {
+    if (this.responseTimer) {
+      clearInterval(this.responseTimer);
+      this.responseTimer = null;
     }
+  }
 
-    let offset = 0;
-    while (pos < length) {
-      for (let i = 0; i < buffer.numberOfChannels; i++) {
-        let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-        sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-        view.setInt16(pos, sample, true);
-        pos += 2;
+  playExplanationAudio() {
+      if (!this.evaluationResult?.explanation) return;
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
+        utterance.lang = 'es-CL';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.2;
+        utterance.volume = 1.0;
+
+        utterance.onstart = () => {
+          this.isPlayingExplanation = true;
+          this.cdr.detectChanges();
+        };
+
+        utterance.onend = () => {
+          this.isPlayingExplanation = false;
+          this.cdr.detectChanges();
+        };
+
+        const loadVoices = () => {
+          const voices = window.speechSynthesis.getVoices();
+          
+          let selectedVoice = voices.find(voice => 
+            voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
+          );
+          
+          if (!selectedVoice) {
+            selectedVoice = voices.find(voice => 
+              voice.lang.includes('es') && (
+                voice.name.toLowerCase().includes('female') ||
+                voice.name.toLowerCase().includes('femenina') ||
+                voice.name.toLowerCase().includes('mónica') ||
+                voice.name.toLowerCase().includes('monica') ||
+                voice.name.toLowerCase().includes('paulina') ||
+                voice.name.toLowerCase().includes('lucia') ||
+                voice.name.toLowerCase().includes('paloma')
+              )
+            );
+          }
+          
+          if (!selectedVoice) {
+            selectedVoice = voices.find(voice => voice.lang.includes('es'));
+          }
+          
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+          }
+          
+          window.speechSynthesis.speak(utterance);
+        };
+
+        if (window.speechSynthesis.getVoices().length > 0) {
+          loadVoices();
+        } else {
+          window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
       }
-      offset++;
     }
 
-    return arrayBuffer;
+  pauseExplanationAudio() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      this.isPlayingExplanation = false;
+      this.cdr.detectChanges();
+    }
   }
 
   async submitVoiceAnswer() {
-    if (!this.hasRecording || !this.audioBlob) {
+    if (!this.audioBlob) {
       const alert = await this.alertController.create({
-        header: 'Sin grabación',
-        message: 'Por favor, graba tu respuesta antes de enviar.',
+        header: 'Sin audio',
+        message: 'No hay audio grabado para transcribir.',
         buttons: ['OK']
       });
       await alert.present();
       return;
     }
-    
-    const question = this.getCurrentQuestion();
-    if (!question) return;
 
     const loading = await this.loadingController.create({
       message: 'Procesando tu respuesta...',
@@ -689,86 +582,269 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      console.log('📱 Plataforma:', navigator.userAgent);
-      console.log('🎤 Audio original:', {
-        type: this.audioBlob.type,
-        size: this.audioBlob.size
-      });
-
-      console.log('🔄 Convirtiendo audio a WAV...');
-      const wavBlob = await this.convertToWav(this.audioBlob);
-      console.log('✅ Audio convertido a WAV:', {
-        type: wavBlob.type,
-        size: wavBlob.size
-      });
-
-      const formData = new FormData();
-      formData.append('audioFile', wavBlob, 'recording.wav');
-      formData.append('testId', this.testId.toString());
-      formData.append('preguntaGeneradaId', question.id);
-      formData.append('numeroOrden', this.currentQuestionNumber.toString());
+      console.log('🎤 Audio original:', this.audioBlob.type, this.audioBlob.size, 'bytes');
       
-      console.log('📤 Enviando FormData al backend');
-
+      const wavBlob = await this.convertToWav(this.audioBlob);
+      console.log('🔄 Audio convertido a WAV:', wavBlob.size, 'bytes');
+      
+      const formData = new FormData();
+      const audioFile = new File([wavBlob], 'recording.wav', { type: 'audio/wav' });
+      formData.append('audioFile', audioFile);
+      
+      console.log('📤 Enviando audio WAV al backend');
+      
       try {
         const transcriptionResponse = await this.apiService.transcribeAudioDirect(formData).toPromise();
         
-        if (transcriptionResponse && transcriptionResponse.transcription) {
-          this.currentTranscription = transcriptionResponse.transcription;
-          console.log('✅ Transcripción recibida:', this.currentTranscription);
+        await loading.dismiss();
+
+        if (transcriptionResponse && transcriptionResponse.success) {
+          const transcription = transcriptionResponse.transcription || transcriptionResponse.data?.text || '';
           
-          this.userAnswers[question.id] = this.currentTranscription;
+          console.log('✅ Transcripción recibida:', transcription);
           
-          const correctionConfig = this.getCorrectionConfig();
-          
-          if (correctionConfig.immediate) {
-            await loading.dismiss();
-            await this.evaluateAnswer(question, this.currentTranscription);
-          } else {
-            await loading.dismiss();
+          if (!transcription || transcription.trim() === '') {
             const alert = await this.alertController.create({
-              header: '✅ Respuesta Guardada',
-              message: 'Tu respuesta ha sido guardada. Se evaluará al final del test.',
+              header: 'No te escuché',
+              message: 'Asegúrate de:\n• Hablar cerca del micrófono\n• Hablar más fuerte y claro\n• Mantener presionado mientras hablas',
+              buttons: ['OK']
+            });
+            await alert.present();
+            
+            // Limpiar el audio para poder grabar de nuevo
+            this.audioService.clearRecording();
+            this.cdr.detectChanges();
+            return;
+          }
+          
+          this.currentTranscription = transcription;
+          
+          const detectedOption = this.detectOptionFromTranscription(transcription);
+          
+          if (detectedOption) {
+            await this.selectAnswer(detectedOption);
+          } else {
+            const alert = await this.alertController.create({
+              header: 'No entendí tu respuesta',
+              message: `Dijiste: "${transcription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
               buttons: ['OK']
             });
             await alert.present();
           }
+          
         } else {
           await loading.dismiss();
           const alert = await this.alertController.create({
             header: 'Error',
-            message: 'No se pudo transcribir el audio. Por favor, intenta de nuevo.',
+            message: 'No se pudo transcribir el audio. Intenta de nuevo.',
             buttons: ['OK']
           });
           await alert.present();
         }
-      } catch (error: any) {
+
+
+} catch (error: any) {
         console.error('❌ Error transcribiendo:', error);
         await loading.dismiss();
-        
-        let errorMessage = 'Hubo un error al procesar tu respuesta.';
-        if (error?.error?.message) {
-          errorMessage = error.error.message;
+        // Solo mostrar error si realmente falló la transcripción
+        if (!this.showEvaluation) {
+          const alert = await this.alertController.create({
+            header: 'Error',
+            message: 'Hubo un error al procesar tu respuesta.',
+            buttons: ['OK']
+          });
+          await alert.present();
         }
-        
-        const alert = await this.alertController.create({
-          header: 'Error de Transcripción',
-          message: errorMessage,
-          buttons: ['OK']
-        });
-        await alert.present();
       }
       
-    } catch (error) {
-      console.error('❌ Error convirtiendo audio:', error);
+} catch (error) {
+      console.error('❌ Error preparando audio:', error);
       await loading.dismiss();
-      const alert = await this.alertController.create({
-        header: 'Error',
-        message: 'No se pudo convertir el audio. Intenta grabar de nuevo.',
-        buttons: ['OK']
-      });
-      await alert.present();
+      // No mostrar alert porque ya se mostró uno más específico antes
     }
+  }
+
+  private async convertToWav(audioBlob: Blob): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
+        sampleRate: 16000
+      });
+      const fileReader = new FileReader();
+
+      fileReader.onload = async (e) => {
+        try {
+          const arrayBuffer = e.target?.result as ArrayBuffer;
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          
+          const wavBlob = this.audioBufferToWav(audioBuffer);
+          resolve(wavBlob);
+        } catch (error) {
+          console.error('Error decodificando audio:', error);
+          reject(error);
+        }
+      };
+
+      fileReader.onerror = () => reject(new Error('Error leyendo el archivo'));
+      fileReader.readAsArrayBuffer(audioBlob);
+    });
+  }
+
+  private audioBufferToWav(audioBuffer: AudioBuffer): Blob {
+    const numChannels = 1;
+    const sampleRate = 16000;
+    const format = 1;
+    const bitDepth = 16;
+
+    const bytesPerSample = bitDepth / 8;
+    const blockAlign = numChannels * bytesPerSample;
+
+    const samples = audioBuffer.getChannelData(0);
+    const newLength = Math.floor(samples.length * (sampleRate / audioBuffer.sampleRate));
+    const resampledData = new Float32Array(newLength);
+    
+    for (let i = 0; i < newLength; i++) {
+      const index = i * (samples.length / newLength);
+      resampledData[i] = samples[Math.floor(index)];
+    }
+
+    const dataLength = resampledData.length * bytesPerSample;
+    const buffer = new ArrayBuffer(44 + dataLength);
+    const view = new DataView(buffer);
+
+    this.writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + dataLength, true);
+    this.writeString(view, 8, 'WAVE');
+    this.writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true);
+    this.writeString(view, 36, 'data');
+    view.setUint32(40, dataLength, true);
+
+    let offset = 44;
+    for (let i = 0; i < resampledData.length; i++) {
+      const sample = Math.max(-1, Math.min(1, resampledData[i]));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      offset += 2;
+    }
+
+    return new Blob([view], { type: 'audio/wav' });
+  }
+
+  private writeString(view: DataView, offset: number, string: string): void {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
+
+detectOptionFromTranscription(transcription: string): string | null {
+    // Limpiar el texto: quitar puntuación y convertir a minúsculas
+    const text = transcription
+      .toLowerCase()
+      .replace(/[.,;:!?¿¡]/g, ' ')  // Reemplazar puntuación con espacios
+      .replace(/\s+/g, ' ')          // Normalizar espacios múltiples
+      .trim();
+    
+    const question = this.getCurrentQuestion();
+    
+    if (!question) return null;
+
+    console.log('🔍 Texto limpio para detectar:', text);
+
+    // Verdadero/Falso
+    if (question.type == 2 || question.type == '2') {
+      // Buscar "verdadero" en cualquier parte del texto
+      if (text.includes('verdadero') || text.includes('true') || text.includes('sí') || text.includes('si')) {
+        console.log('✅ Detectado: Verdadero');
+        return 'Verdadero';
+      }
+      // Buscar "falso" en cualquier parte del texto
+      if (text.includes('falso') || text.includes('false')) {
+        console.log('✅ Detectado: Falso');
+        return 'Falso';
+      }
+      
+      // Buscar solo letra V o F
+      const words = text.split(' ').filter(w => w.length > 0);
+      for (const word of words) {
+        if (word === 'v' || word === 've') {
+          console.log('✅ Detectado: Verdadero (por letra V)');
+          return 'Verdadero';
+        }
+        if (word === 'f' || word === 'efe') {
+          console.log('✅ Detectado: Falso (por letra F)');
+          return 'Falso';
+        }
+      }
+    }
+
+    const options = this.getCurrentQuestionOptions();
+    const words = text.split(' ').filter(w => w.length > 0);
+    
+    // Buscar letra sola en las primeras 3 palabras
+    for (let i = 0; i < Math.min(3, words.length); i++) {
+      const word = words[i];
+      
+      if (word === 'a' || word === 'la' || word === 'letra') {
+        if (i + 1 < words.length && words[i + 1] === 'a' || word === 'a') {
+          console.log('✅ Detectado: Opción A');
+          return options[0];
+        }
+      }
+      if (word === 'b' || (word === 'la' && i + 1 < words.length && words[i + 1] === 'b')) {
+        console.log('✅ Detectado: Opción B');
+        return options[1];
+      }
+      if (word === 'c' || (word === 'la' && i + 1 < words.length && words[i + 1] === 'c')) {
+        console.log('✅ Detectado: Opción C');
+        return options[2];
+      }
+      if (word === 'd' || (word === 'la' && i + 1 < words.length && words[i + 1] === 'd')) {
+        console.log('✅ Detectado: Opción D');
+        return options[3];
+      }
+    }
+
+    // Buscar menciones explícitas
+    if (text.includes('letra a') || text.includes('opcion a') || text.includes('alternativa a')) {
+      console.log('✅ Detectado: Opción A');
+      return options[0];
+    }
+    if (text.includes('letra b') || text.includes('opcion b') || text.includes('alternativa b')) {
+      console.log('✅ Detectado: Opción B');
+      return options[1];
+    }
+    if (text.includes('letra c') || text.includes('opcion c') || text.includes('alternativa c')) {
+      console.log('✅ Detectado: Opción C');
+      return options[2];
+    }
+    if (text.includes('letra d') || text.includes('opcion d') || text.includes('alternativa d')) {
+      console.log('✅ Detectado: Opción D');
+      return options[3];
+    }
+
+    // Buscar coincidencias con el contenido de las opciones
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i];
+      const optionWords = option.toLowerCase()
+        .replace(/[.,;:!?¿¡]/g, ' ')
+        .split(' ')
+        .filter((w: string) => w.length > 4);
+      
+      const matches = optionWords.filter((word: string) => text.includes(word));
+      
+      if (matches.length >= 3) {
+        console.log(`✅ Detectado por contenido: Opción ${String.fromCharCode(65 + i)}`);
+        return option;
+      }
+    }
+
+    console.warn('❌ No se detectó ninguna opción en:', text);
+    return null;
   }
 
   getCorrectionConfig(): any {
@@ -781,66 +857,6 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       console.error('Error leyendo correctionConfig:', error);
     }
     return { immediate: true };
-  }
-
-  async evaluateAnswer(question: Question, transcription: string) {
-    const loading = await this.loadingController.create({
-      message: 'Evaluando tu respuesta...',
-      spinner: 'crescent'
-    });
-    
-    await loading.present();
-
-    try {
-      const evaluationData = {
-        testId: this.testId,
-        preguntaGeneradaId: parseInt(question.id),
-        numeroOrden: this.currentQuestionNumber,
-        transcription: transcription
-      };
-
-      console.log('📊 Datos de evaluación:', evaluationData);
-
-      const response = await this.apiService.evaluateOralAnswer(evaluationData).toPromise();
-      
-      console.log('✅ Respuesta completa del backend:', response);
-
-      await loading.dismiss();
-
-      if (response && response.success) {
-        const data = response.data || response;
-        
-        this.evaluationResult = {
-          isCorrect: data.isCorrect || false,
-          userAnswer: transcription,
-          correctAnswer: data.correctAnswer || question.correctAnswer,
-          explanation: data.explanation || data.explicacion || question.explanation
-        };
-
-        this.questionEvaluations[question.id] = {
-          isCorrect: this.evaluationResult.isCorrect,
-          correctAnswer: this.evaluationResult.correctAnswer,
-          explanation: this.evaluationResult.explanation
-        };
-        
-        this.showEvaluation = true;
-        this.cdr.detectChanges();
-      }
-      
-    } catch (error: any) {
-      console.error('❌ Error evaluando respuesta:', error);
-      await loading.dismiss();
-      
-      this.evaluationResult = {
-        isCorrect: false,
-        userAnswer: transcription,
-        correctAnswer: question.correctAnswer,
-        explanation: question.explanation
-      };
-      
-      this.showEvaluation = true;
-      this.cdr.detectChanges();
-    }
   }
 
   nextQuestion() {
@@ -871,6 +887,8 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     this.currentTranscription = '';
     this.showEvaluation = false;
     this.evaluationResult = null;
+    this.showCorrectAnswer = false;
+    this.selectedOptionForCurrentQuestion = null;
     
     if (this.currentAudio) {
       this.currentAudio.pause();
@@ -905,82 +923,80 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     }, 300);
   }
 
-async completeTest() {
-  console.log('🏁 Completando test oral');
-  
-  const loading = await this.loadingController.create({
-    message: 'Finalizando test...',
-    spinner: 'crescent'
-  });
-  
-  await loading.present();
-  
-  try {
-    let correctCount = 0;
-    let incorrectCount = 0;
-    const questionDetails: any[] = [];
+  async completeTest() {
+    console.log('🏁 Completando test oral');
     
-    // Recorrer todas las preguntas y obtener sus evaluaciones
-    this.questions.forEach((q, index) => {
-      const questionId = q.id;
-      const evaluation = this.questionEvaluations[questionId];
+    const loading = await this.loadingController.create({
+      message: 'Finalizando test...',
+      spinner: 'crescent'
+    });
+    
+    await loading.present();
+    
+    try {
+      let correctCount = 0;
+      let incorrectCount = 0;
+      const questionDetails: any[] = [];
       
-      if (evaluation && evaluation.isCorrect !== undefined) {
-        if (evaluation.isCorrect) {
-          correctCount++;
+      this.questions.forEach((q, index) => {
+        const questionId = q.id;
+        const evaluation = this.questionEvaluations[questionId];
+        
+        if (evaluation && evaluation.isCorrect !== undefined) {
+          if (evaluation.isCorrect) {
+            correctCount++;
+          } else {
+            incorrectCount++;
+          }
+          
+          questionDetails.push({
+            questionNumber: index + 1,
+            questionText: q.questionText,
+            correct: evaluation.isCorrect
+          });
         } else {
           incorrectCount++;
+          questionDetails.push({
+            questionNumber: index + 1,
+            questionText: q.questionText,
+            correct: false
+          });
         }
-        
-        questionDetails.push({
-          questionNumber: index + 1,
-          questionText: q.questionText,
-          correct: evaluation.isCorrect
-        });
-      } else {
-        // Si no hay evaluación, contar como incorrecta
-        incorrectCount++;
-        questionDetails.push({
-          questionNumber: index + 1,
-          questionText: q.questionText,
-          correct: false
-        });
-      }
-    });
-    
-    const totalAnswered = correctCount + incorrectCount;
-    const percentage = totalAnswered > 0 
-      ? Math.round((correctCount / this.totalQuestions) * 100) 
-      : 0;
-    
-    const results = {
-      correctAnswers: correctCount,
-      incorrectAnswers: incorrectCount,
-      totalQuestions: this.totalQuestions,
-      percentage: percentage,
-      timeUsedFormatted: '0:00 min',
-      questionDetails: questionDetails
-    };
-    
-    localStorage.setItem('current_oral_test_results', JSON.stringify(results));
-    console.log('✅ Resultados guardados:', results);
-    
-    await loading.dismiss();
-    
-    await this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
-    
-  } catch (error) {
-    console.error('❌ Error completando test:', error);
-    await loading.dismiss();
-    
-    const alert = await this.alertController.create({
-      header: 'Error',
-      message: 'Hubo un error al finalizar el test',
-      buttons: ['OK']
-    });
-    await alert.present();
+      });
+      
+      const totalAnswered = correctCount + incorrectCount;
+      const percentage = totalAnswered > 0 
+        ? Math.round((correctCount / this.totalQuestions) * 100) 
+        : 0;
+      
+      const results = {
+        correctAnswers: correctCount,
+        incorrectAnswers: incorrectCount,
+        totalQuestions: this.totalQuestions,
+        percentage: percentage,
+        timeUsedFormatted: '0:00 min',
+        questionDetails: questionDetails
+      };
+      
+      localStorage.setItem('current_oral_test_results', JSON.stringify(results));
+      console.log('✅ Resultados guardados:', results);
+      
+      await loading.dismiss();
+      
+      await this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
+      
+    } catch (error) {
+      console.error('❌ Error completando test:', error);
+      await loading.dismiss();
+      
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'Hubo un error al finalizar el test',
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
   }
-}
 
   async showUnsupportedAlert() {
     const alert = await this.alertController.create({
@@ -1008,5 +1024,171 @@ async completeTest() {
       }]
     });
     await alert.present();
+  }
+
+  getCurrentQuestionOptions(): string[] {
+    const question = this.getCurrentQuestion();
+    
+    if (!question) {
+      return [];
+    }
+
+    if (question.type == 2 || question.type == '2') {
+      return ['Verdadero', 'Falso'];
+    }
+
+    if (Array.isArray(question.options) && question.options.length > 0) {
+      const firstOption = question.options[0];
+      
+      if (typeof firstOption === 'object') {
+        if ('text' in firstOption && firstOption.text) {
+          return question.options.map((opt: any) => opt.text);
+        }
+        if ('Text' in firstOption && firstOption.Text) {
+          return question.options.map((opt: any) => opt.Text);
+        }
+      }
+      
+      if (typeof firstOption === 'string') {
+        return question.options;
+      }
+    }
+
+    return [];
+  }
+
+  getOptionLetter(index: number): string {
+    return String.fromCharCode(65 + index);
+  }
+
+  isOptionSelected(option: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !question.userAnswer) return false;
+
+    if (question.type == 2 || question.type == '2') {
+      if (question.userAnswer === 'V' && option === 'Verdadero') return true;
+      if (question.userAnswer === 'F' && option === 'Falso') return true;
+      return false;
+    }
+
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.userAnswer === letter;
+    }
+
+    return false;
+  }
+
+  isOptionCorrect(option: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !this.showCorrectAnswer) return false;
+
+    if (question.type == 2 || question.type == '2') {
+      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
+      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
+                                  correctAnswerNorm === 'v' || 
+                                  correctAnswerNorm === 'verdadero';
+      
+      if (option === 'Verdadero' && isVerdaderoCorrect) return true;
+      if (option === 'Falso' && !isVerdaderoCorrect) return true;
+      return false;
+    }
+
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.correctAnswer.toUpperCase() === letter;
+    }
+
+    return false;
+  }
+
+  isOptionIncorrect(option: string): boolean {
+    const question = this.getCurrentQuestion();
+    if (!question || !this.showCorrectAnswer || !question.userAnswer) return false;
+
+    return this.isOptionSelected(option) && !this.isOptionCorrect(option);
+  }
+
+  hasAnsweredCurrentQuestion(): boolean {
+    const question = this.getCurrentQuestion();
+    return question?.isAnswered === true;
+  }
+
+  shouldShowOptionIcon(option: string): boolean {
+    return this.showCorrectAnswer && (this.isOptionCorrect(option) || this.isOptionIncorrect(option));
+  }
+
+  getOptionIcon(option: string): string {
+    if (this.isOptionCorrect(option)) return 'checkmark-circle';
+    if (this.isOptionIncorrect(option)) return 'close-circle';
+    return '';
+  }
+
+  getOptionIconColor(option: string): string {
+    if (this.isOptionCorrect(option)) return '#4CAF50';
+    if (this.isOptionIncorrect(option)) return '#F44336';
+    return '';
+  }
+
+  async selectAnswer(optionText: string) {
+    if (this.hasAnsweredCurrentQuestion()) {
+      return;
+    }
+    
+    const question = this.getCurrentQuestion();
+    if (!question) return;
+
+    let normalizedAnswer: string;
+    
+    if (question.type == 2 || question.type == '2') {
+      normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
+    } else {
+      const options = this.getCurrentQuestionOptions();
+      const optionIndex = options.indexOf(optionText);
+      
+      if (optionIndex !== -1) {
+        normalizedAnswer = String.fromCharCode(65 + optionIndex);
+      } else {
+        return;
+      }
+    }
+    
+    question.userAnswer = normalizedAnswer;
+    question.isAnswered = true;
+    this.userAnswers[question.id] = normalizedAnswer;
+    
+    const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+    
+    this.evaluationResult = {
+      isCorrect: isCorrect,
+      userAnswer: optionText,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation
+    };
+
+    this.questionEvaluations[question.id] = {
+      isCorrect: isCorrect,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation
+    };
+    
+this.showCorrectAnswer = true;
+    this.showEvaluation = true;
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.playExplanationAudio();
+    }, 1000);
+  }
+
+  compareAnswers(userAnswer: string, correctAnswer: string): boolean {
+    const userNorm = userAnswer.toUpperCase().trim();
+    const correctNorm = correctAnswer.toUpperCase().trim();
+    
+    return userNorm === correctNorm;
   }
 }

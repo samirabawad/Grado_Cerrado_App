@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform } from '@ionic/angular';
-import { PushNotificationService } from './services/push-notification.service';
 
 @Component({
   selector: 'app-root',
@@ -10,25 +9,16 @@ import { PushNotificationService } from './services/push-notification.service';
   standalone: false,
 })
 export class AppComponent {
-  constructor(private router: Router,
-    private platform: Platform,
-    private pushService: PushNotificationService
+  constructor(
+    private router: Router,
+    private platform: Platform
   ) {
-        this.initializeApp();
+    this.initializeApp();
   }
+  
   async initializeApp() {
     await this.platform.ready();
-    
-    // Verificar sesión
     this.checkSession();
-    
-    // Si hay usuario logueado, inicializar notificaciones
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      const user = JSON.parse(currentUser);
-      console.log('👤 Usuario encontrado, inicializando notificaciones...');
-      await this.pushService.initializePushNotifications(user.id);
-    }
   }
 
   checkSession() {

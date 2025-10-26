@@ -61,8 +61,8 @@ export class ProcesalOralPage implements OnInit, OnDestroy {
       
       console.log('📤 Enviando request ORAL:', sessionData);
       
-      const sessionResponse = await this.apiService.startOralStudySession(sessionData).toPromise();
-      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
+
+    const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
       
       if (sessionResponse && sessionResponse.success) {
         console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);

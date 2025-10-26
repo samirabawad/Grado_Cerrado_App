@@ -4,9 +4,6 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
-import { PushNotificationService } from 'src/app/services/push-notification.service';
-import { AlertController } from '@ionic/angular';
-
 
 @Component({
   selector: 'app-home',
@@ -28,38 +25,13 @@ export class HomePage implements OnInit {
   isLoading: boolean = true;
 
   constructor(
-
     private router: Router,
-    private apiService: ApiService,
-    private pushService: PushNotificationService,
-    private alertController: AlertController
-) {}
+    private apiService: ApiService
+  ) {}
 
   async ngOnInit() {
     this.loadUserData();
-    // Obtener ID del estudiante (desde tu AuthService)
-    const estudianteId = 1; // O desde localStorage/AuthService
-    
-    // Inicializar notificaciones
-    await this.pushService.initializePushNotifications(estudianteId);
   }
-
-  async checkNotificationStatus() {
-  const status = await this.pushService.checkPermissionStatus();
-  
-  let mensaje = `Estado: ${status.receive}\n`;
-  
-  if (status.receive === 'granted') {
-    mensaje += '✅ Notificaciones activadas';
-  } else if (status.receive === 'denied') {
-    mensaje += '❌ Notificaciones bloqueadas\nVe a Configuración para activarlas';
-  } else {
-    mensaje += '⏳ Notificaciones no solicitadas aún';
-  }
-  
-  alert(mensaje);
-}
-
 
   ionViewWillEnter() {
     this.loadUserData();
@@ -151,11 +123,34 @@ export class HomePage implements OnInit {
   }
 
   goToRacha() {
-  this.router.navigate(['/racha']);
-}
+    this.router.navigate(['/racha']);
+  }
 
-goToFullHistory() {
-  this.router.navigate(['/historial']);
-}
+  goToFullHistory() {
+    this.router.navigate(['/historial']);
+  }
 
+  navigateToCivil() {
+    this.router.navigate(['/civil']);
+  }
+
+  navigateToProcesal() {
+    this.router.navigate(['/procesal']);
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/dashboard']);
+  }
+
+  navigateToRacha() {
+    this.router.navigate(['/racha']);
+  }
+
+  navigateToLogros() {
+    this.router.navigate(['/logros']);
+  }
+
+  navigateToHistorial() {
+    this.router.navigate(['/historial']);
+  }
 }
