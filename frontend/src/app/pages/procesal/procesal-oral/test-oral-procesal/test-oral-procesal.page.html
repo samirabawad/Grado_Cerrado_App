@@ -69,11 +69,9 @@
       </div>
     </div>
 
-    <!-- Sección de grabación -->
     <div class="recording-section">
-      <div class="recording-controls">
+      <div class="recording-controls-inline">
         
-        <!-- Botón de grabación principal -->
         <div class="recording-button-container">
           <div 
             class="recording-button" 
@@ -94,18 +92,13 @@
           </div>
         </div>
 
-        <!-- Controles: Reproducir y Reiniciar -->
-        <div class="recording-actions" *ngIf="hasRecording">
+        <div class="replay-button-container" *ngIf="hasRecording">
           <button class="action-button replay" (click)="replayRecording()">
             <ion-icon [name]="isPlayingRecording ? 'pause' : 'play'"></ion-icon>
             <span>{{ getReplayButtonText() }}</span>
           </button>
-          
-          <button class="action-button restart" (click)="restartRecording()">
-            <ion-icon name="refresh"></ion-icon>
-            <span>Reiniciar</span>
-          </button>
         </div>
+        
       </div>
     </div>
 

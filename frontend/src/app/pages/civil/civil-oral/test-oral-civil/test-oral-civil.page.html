@@ -69,11 +69,11 @@
       </div>
     </div>
 
-    <!-- Sección de grabación -->
+    <!-- Sección de grabación con micrófono a la izquierda y reproducir a la derecha -->
     <div class="recording-section">
-      <div class="recording-controls">
+      <div class="recording-controls-inline">
         
-        <!-- Botón de grabación principal -->
+        <!-- Botón de grabación (izquierda) -->
         <div class="recording-button-container">
           <div 
             class="recording-button" 
@@ -94,21 +94,18 @@
           </div>
         </div>
 
-        <!-- Controles: Reproducir y Reiniciar -->
-        <div class="recording-actions" *ngIf="hasRecording">
+        <!-- Botón de reproducir (derecha) -->
+        <div class="replay-button-container" *ngIf="hasRecording">
           <button class="action-button replay" (click)="replayRecording()">
             <ion-icon [name]="isPlayingRecording ? 'pause' : 'play'"></ion-icon>
             <span>{{ getReplayButtonText() }}</span>
           </button>
-          
-          <button class="action-button restart" (click)="restartRecording()">
-            <ion-icon name="refresh"></ion-icon>
-            <span>Reiniciar</span>
-          </button>
         </div>
+        
       </div>
     </div>
 
+    
 <!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
     <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
       <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
