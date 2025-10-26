@@ -1,306 +1,473 @@
-:host,
-ion-content.procesal-content {
-  --ion-background-color: #f9fafb !important;
-  --background: #f9fafb !important;
-  background: #f9fafb !important;
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
+.results-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-.results-header {
+ion-content.results-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// HEADER
+// ========================================
+.dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  background: white;
-  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
+  height: 60px;
+  background: #8E24AA;
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-  .close-icon {
-    font-size: 28px;
-    color: #6b7280;
+  .back-icon {
+    font-size: 24px;
+    color: white;
     cursor: pointer;
+    margin-right: 12px;
   }
 
-  h1 {
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #1f2937;
   }
 }
 
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
 .content-area {
-  padding: calc(env(safe-area-inset-top) + 80px) 20px 100px;
+  margin-top: 80px;
+  padding: 20px 16px 100px 16px;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  min-height: calc(100vh - 100px);
 }
 
-.score-card {
-  background: white;
-  border-radius: 20px;
-  padding: 32px 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+// ========================================
+// MENSAJE MOTIVACIONAL
+// ========================================
+.motivational-section {
   text-align: center;
+  margin-bottom: 24px;
 
-  .score-circle {
-    position: relative;
-    width: 160px;
-    height: 160px;
-    margin: 0 auto 24px;
+  .message-small {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 8px 0;
+    font-weight: 400;
+  }
 
-    svg {
-      transform: rotate(-90deg);
+  .message-large {
+    font-size: 32px;
+    font-weight: 800;
+    color: #8E24AA;
+    margin: 0;
+    line-height: 1.2;
+  }
+}
 
-      .circle-bg {
-        fill: none;
-        stroke: #e5e7eb;
-        stroke-width: 8;
-      }
+// ========================================
+// NIVEL Y MAPACHE
+// ========================================
+.level-mapache-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-      .circle-progress {
-        fill: none;
-        stroke: #3b82f6;
-        stroke-width: 8;
-        stroke-linecap: round;
-        stroke-dasharray: 283;
-        transition: stroke-dashoffset 1s ease;
+  .level-info {
+    flex: 1;
+
+    .level-label {
+      font-size: 14px;
+      color: #8E24AA;
+      margin: 0 0 4px 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .level-message {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+    }
+  }
+
+  .mapache-container {
+    flex-shrink: 0;
+
+    .mapache-image {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+  }
+}
+
+// ========================================
+// STATS GRID
+// ========================================
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      ion-icon {
+        font-size: 28px;
       }
     }
 
-    .score-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
+    .stat-info {
+      display: flex;
+      flex-direction: column;
 
-      .percentage {
-        display: block;
-        font-size: 36px;
-        font-weight: 700;
-        color: #3b82f6;
+      .stat-number {
+        font-size: 32px;
+        font-weight: 800;
         line-height: 1;
       }
 
-      .label {
-        display: block;
-        font-size: 14px;
-        color: #6b7280;
+      .stat-label {
+        font-size: 13px;
+        font-weight: 600;
         margin-top: 4px;
       }
     }
+
+    &.correct {
+      .stat-icon {
+        background: rgba(76, 175, 80, 0.15);
+        ion-icon {
+          color: #4CAF50;
+        }
+      }
+      .stat-number {
+        color: #4CAF50;
+      }
+      .stat-label {
+        color: #2E7D32;
+      }
+    }
+
+    &.incorrect {
+      .stat-icon {
+        background: rgba(244, 67, 54, 0.15);
+        ion-icon {
+          color: #F44336;
+        }
+      }
+      .stat-number {
+        color: #F44336;
+      }
+      .stat-label {
+        color: #C62828;
+      }
+    }
+  }
+}
+
+// ========================================
+// QUESTIONS SECTION
+// ========================================
+.questions-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 16px 0;
   }
 
-  .score-details {
+  .questions-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+
+    .question-wrapper {
+      display: contents;
+
+      .question-circle {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        &:active {
+          transform: scale(0.95);
+        }
+
+        &.correct {
+          background: #4CAF50;
+          color: white;
+        }
+
+        &.incorrect {
+          background: #F44336;
+          color: white;
+        }
+
+        &.expanded {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transform: scale(1.05);
+        }
+      }
+
+      .question-dropdown {
+        grid-column: 1 / -1;
+        margin: 8px 0 12px 0;
+        animation: slideDown 0.3s ease-out;
+
+        .dropdown-content {
+          background: #f8f9fa;
+          border-radius: 12px;
+          padding: 16px;
+          border-left: 4px solid #8E24AA;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+          .question-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 16px 0;
+            line-height: 1.5;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ========================================
+// ALTERNATIVAS
+// ========================================
+.alternatives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.alternative-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+
+  &.alt-selected {
+    border-color: #8E24AA;
+    background: #f3e5f5;
+  }
+
+  &.alt-correct {
+    border-color: #4CAF50;
+    background: #f0fdf4;
+  }
+
+  &.alt-selected.alt-correct {
+    border-color: #4CAF50;
+    background: #dcfce7;
+  }
+
+  .alt-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 24px;
-    margin-bottom: 24px;
 
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 600;
+    ion-icon {
+      font-size: 22px;
 
-      &.correct {
-        color: #10b981;
+      &[name="checkmark-circle"] {
+        color: #4CAF50;
       }
 
-      &.incorrect {
-        color: #ef4444;
+      &[name="close-circle"] {
+        color: #F44336;
       }
 
-      ion-icon {
-        font-size: 24px;
+      &[name="ellipse-outline"] {
+        color: #9ca3af;
       }
     }
   }
 
-  .level-badge {
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
+  .alt-text {
+    flex: 1;
+    font-size: 14px;
+    color: #1f2937;
+    line-height: 1.5;
+  }
+}
 
-    h2 {
-      margin: 0 0 4px 0;
-      font-size: 18px;
-      font-weight: 700;
-      color: #3b82f6;
-    }
+// ========================================
+// EXPLANATION BOX
+// ========================================
+.explanation-box {
+  margin-top: 16px;
+  padding: 14px;
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
 
-    p {
-      margin: 0;
-      font-size: 14px;
-      color: #6b7280;
-    }
+  ion-icon {
+    font-size: 20px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
-  .motivational {
+  p {
     margin: 0;
-    font-size: 15px;
+    font-size: 13px;
+    line-height: 1.6;
     color: #374151;
   }
 }
 
-.actions-card {
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+// ========================================
+// ANIMACIÓN
+// ========================================
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ========================================
+// BOTONES DE ACCIÓN
+// ========================================
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 
   ion-button {
-    --border-radius: 12px;
-    height: 48px;
-    margin-bottom: 12px;
     font-weight: 600;
+    font-size: 15px;
+    height: 50px;
+    --border-radius: 12px;
     text-transform: none;
 
-    &:last-child {
-      margin-bottom: 0;
+    ion-icon {
+      font-size: 20px;
     }
+  }
 
-    &:not([fill="outline"]) {
-      --background: linear-gradient(135deg, #3b82f6, #60a5fa);
-      --background-activated: #2563eb;
-    }
+  .btn-reforzar {
+    --background: #8E24AA;
+    --background-activated: #7B1FA2;
+    --color: white;
+  }
 
-    &[fill="outline"] {
-      --border-color: #3b82f6;
-      --color: #3b82f6;
+  .btn-nuevo-test {
+    --background: #8E24AA;
+    --background-activated: #7B1FA2;
+    --color: white;
+  }
+
+  .btn-home {
+    --border-color: #8E24AA;
+    --color: #8E24AA;
+    
+    &:hover {
+      --background: rgba(142, 36, 170, 0.05);
     }
   }
 }
 
-.questions-review {
-  h3 {
-    margin: 0 0 16px 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #1f2937;
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 374px) {
+  .motivational-section {
+    .message-large {
+      font-size: 28px;
+    }
   }
 
-  .question-item {
-    background: white;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-
-    &.correct {
-      border-left: 4px solid #10b981;
-    }
-
-    &.incorrect {
-      border-left: 4px solid #ef4444;
-    }
-
-    .question-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-      cursor: pointer;
-
-      .question-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        ion-icon {
-          font-size: 24px;
-        }
-
-        .question-number {
-          font-size: 15px;
-          font-weight: 600;
-          color: #1f2937;
-        }
-      }
-
-      .expand-icon {
-        font-size: 20px;
-        color: #6b7280;
+  .level-mapache-row {
+    .mapache-container {
+      .mapache-image {
+        width: 60px;
+        height: 60px;
       }
     }
+  }
 
-    &.correct .question-header ion-icon {
-      color: #10b981;
-    }
-
-    &.incorrect .question-header ion-icon {
-      color: #ef4444;
-    }
-
-    .question-details {
-      padding: 0 16px 16px;
-      border-top: 1px solid #f3f4f6;
-
-      .question-text {
-        margin: 12px 0;
-        font-size: 15px;
-        color: #374151;
-        line-height: 1.5;
-      }
-
-      .answer-section {
-        margin: 16px 0;
-
-        .answer-item {
-          margin-bottom: 12px;
-          padding: 12px;
-          border-radius: 8px;
-          background: #f9fafb;
-
-          &.user-answer {
-            border-left: 3px solid #6b7280;
-          }
-
-          &.correct-answer {
-            background: #ecfdf5;
-            border-left: 3px solid #10b981;
-          }
-
-          strong {
-            display: block;
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 4px;
-          }
-
-          span {
-            font-size: 14px;
-            color: #1f2937;
-          }
-        }
-      }
-
-      .explanation {
-        margin-top: 16px;
-        padding: 12px;
-        background: #eff6ff;
-        border-radius: 8px;
-        border-left: 3px solid #3b82f6;
-
-        strong {
-          display: block;
-          font-size: 13px;
-          color: #3b82f6;
-          margin-bottom: 4px;
-        }
-
-        p {
-          margin: 0;
-          font-size: 14px;
-          color: #374151;
-          line-height: 1.5;
-        }
-      }
+  .questions-section {
+    .questions-container {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 }

@@ -1,295 +1,501 @@
-:host,
-ion-content.procesal-content {
-  --ion-background-color: #f9fafb !important;
-  --background: #f9fafb !important;
-  background: #f9fafb !important;
+// ========================================
+// CONFIGURACIÓN BÁSICA
+// ========================================
+.results-content {
+  --background: transparent;
+  background-image: url('/assets/image/fondo_blanco_app.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-.results-header {
+ion-content.results-content {
+  --overflow: auto;
+  height: 100%;
+}
+
+// ========================================
+// HEADER
+// ========================================
+.dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  background: white;
-  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
+  height: 60px;
+  background: #8E24AA;
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-  .close-icon {
-    font-size: 28px;
-    color: #6b7280;
+  .back-icon {
+    font-size: 24px;
+    color: white;
     cursor: pointer;
+    margin-right: 12px;
   }
 
-  h1 {
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #1f2937;
   }
 }
 
+// ========================================
+// CONTENIDO PRINCIPAL
+// ========================================
 .content-area {
-  padding: calc(env(safe-area-inset-top) + 80px) 20px 100px;
+  margin-top: 80px;
+  padding: 20px 16px 100px 16px;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  min-height: calc(100vh - 100px);
 }
 
-.score-card {
-  background: white;
-  border-radius: 20px;
-  padding: 32px 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+// ========================================
+// MENSAJE MOTIVACIONAL
+// ========================================
+.motivational-section {
   text-align: center;
+  margin-bottom: 24px;
 
-  .score-circle {
-    position: relative;
-    width: 160px;
-    height: 160px;
-    margin: 0 auto 24px;
+  .message-small {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 8px 0;
+    font-weight: 400;
+  }
 
-    svg {
-      transform: rotate(-90deg);
+  .message-large {
+    font-size: 32px;
+    font-weight: 800;
+    color: #8E24AA;
+    margin: 0;
+    line-height: 1.2;
+  }
+}
 
-      .circle-bg {
-        fill: none;
-        stroke: #e5e7eb;
-        stroke-width: 8;
-      }
+// ========================================
+// NIVEL Y MAPACHE
+// ========================================
+.level-mapache-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-      .circle-progress {
-        fill: none;
-        stroke: #3b82f6;
-        stroke-width: 8;
-        stroke-linecap: round;
-        stroke-dasharray: 283;
-        transition: stroke-dashoffset 1s ease;
+  .level-info {
+    flex: 1;
+
+    .level-label {
+      font-size: 14px;
+      color: #8E24AA;
+      margin: 0 0 4px 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .level-message {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+    }
+  }
+
+  .mapache-container {
+    flex-shrink: 0;
+
+    .mapache-image {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+  }
+}
+
+// ========================================
+// STATS GRID
+// ========================================
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      ion-icon {
+        font-size: 28px;
       }
     }
 
-    .score-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
+    .stat-info {
+      display: flex;
+      flex-direction: column;
 
-      .percentage {
-        display: block;
-        font-size: 36px;
-        font-weight: 700;
-        color: #3b82f6;
+      .stat-number {
+        font-size: 32px;
+        font-weight: 800;
         line-height: 1;
       }
 
-      .label {
-        display: block;
-        font-size: 14px;
-        color: #6b7280;
+      .stat-label {
+        font-size: 13px;
+        font-weight: 600;
         margin-top: 4px;
       }
     }
-  }
-
-  .score-details {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-bottom: 24px;
-
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 600;
-
-      &.correct {
-        color: #10b981;
-      }
-
-      &.incorrect {
-        color: #6b7280;
-      }
-
-      ion-icon {
-        font-size: 24px;
-      }
-    }
-  }
-
-  .level-badge {
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-
-    h2 {
-      margin: 0 0 4px 0;
-      font-size: 18px;
-      font-weight: 700;
-      color: #3b82f6;
-    }
-
-    p {
-      margin: 0;
-      font-size: 14px;
-      color: #6b7280;
-    }
-  }
-
-  .motivational {
-    margin: 0;
-    font-size: 15px;
-    color: #374151;
-  }
-}
-
-.actions-card {
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
-
-  ion-button {
-    --border-radius: 12px;
-    height: 48px;
-    font-weight: 600;
-    text-transform: none;
-    --background: linear-gradient(135deg, #3b82f6, #60a5fa);
-    --background-activated: #2563eb;
-  }
-}
-
-.questions-review {
-  h3 {
-    margin: 0 0 16px 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #1f2937;
-  }
-
-  .question-item {
-    background: white;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
     &.correct {
-      border-left: 4px solid #10b981;
+      .stat-icon {
+        background: rgba(76, 175, 80, 0.15);
+        ion-icon {
+          color: #4CAF50;
+        }
+      }
+      .stat-number {
+        color: #4CAF50;
+      }
+      .stat-label {
+        color: #2E7D32;
+      }
     }
 
     &.incorrect {
-      border-left: 4px solid #6b7280;
+      .stat-icon {
+        background: rgba(244, 67, 54, 0.15);
+        ion-icon {
+          color: #F44336;
+        }
+      }
+      .stat-number {
+        color: #F44336;
+      }
+      .stat-label {
+        color: #C62828;
+      }
     }
+  }
+}
 
-    .question-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
+// ========================================
+// QUESTIONS SECTION
+// ========================================
+.questions-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 16px 0;
+  }
+
+  .questions-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+
+    .question-wrapper {
+      display: contents;
       cursor: pointer;
 
-      .question-info {
+      .question-circle {
+        aspect-ratio: 1;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 12px;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-        ion-icon {
-          font-size: 24px;
+        &:active {
+          transform: scale(0.95);
         }
 
-        .question-number {
-          font-size: 15px;
-          font-weight: 600;
-          color: #1f2937;
+        &.correct {
+          background: #4CAF50;
+          color: white;
+        }
+
+        &.incorrect {
+          background: #F44336;
+          color: white;
+        }
+
+        &:hover {
+          transform: scale(1.1);
         }
       }
+    }
+  }
+}
 
-      .expand-icon {
-        font-size: 20px;
+// ========================================
+// BOTONES DE ACCIÓN
+// ========================================
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  ion-button {
+    font-weight: 600;
+    font-size: 15px;
+    height: 50px;
+    --border-radius: 12px;
+    text-transform: none;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+
+  .btn-nuevo-test {
+    --background: #8E24AA;
+    --background-activated: #7B1FA2;
+    --color: white;
+  }
+
+  .btn-home {
+    --border-color: #8E24AA;
+    --color: #8E24AA;
+    
+    &:hover {
+      --background: rgba(142, 36, 170, 0.05);
+    }
+  }
+}
+
+// ========================================
+// MODAL DE DETALLE
+// ========================================
+.detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    padding: 20px;
+    background: #8E24AA;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &.correct {
+      background: #4CAF50;
+    }
+
+    &.incorrect {
+      background: #F44336;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    ion-icon {
+      font-size: 28px;
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+
+    .question-text {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f3f4f6;
+      border-radius: 12px;
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
         color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
-    }
 
-    &.correct .question-header ion-icon {
-      color: #10b981;
-    }
-
-    &.incorrect .question-header ion-icon {
-      color: #6b7280;
-    }
-
-    .question-details {
-      padding: 0 16px 16px;
-      border-top: 1px solid #f3f4f6;
-
-      .question-text {
-        margin: 12px 0;
-        font-size: 15px;
-        color: #374151;
+      p {
+        margin: 0;
+        font-size: 16px;
+        color: #1f2937;
         line-height: 1.5;
       }
+    }
 
-      .answer-section {
-        margin: 16px 0;
+    .answer-section {
+      margin-bottom: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      border-left: 4px solid;
 
-        .answer-item {
-          margin-bottom: 12px;
-          padding: 12px;
-          border-radius: 8px;
-
-          &.user-answer {
-            background: #f9fafb;
-            border-left: 3px solid #6b7280;
-          }
-
-          &.model-answer {
-            background: #eff6ff;
-            border-left: 3px solid #3b82f6;
-          }
-
-          strong {
-            display: block;
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 4px;
-          }
-
-          span, p {
-            margin: 0;
-            font-size: 14px;
-            color: #1f2937;
-            line-height: 1.5;
-          }
-        }
-      }
-
-      .explanation {
-        margin-top: 16px;
-        padding: 12px;
+      &.your-answer {
         background: #eff6ff;
-        border-radius: 8px;
-        border-left: 3px solid #3b82f6;
-
-        strong {
-          display: block;
-          font-size: 13px;
-          color: #3b82f6;
-          margin-bottom: 4px;
-        }
-
-        p {
-          margin: 0;
-          font-size: 14px;
-          color: #374151;
-          line-height: 1.5;
-        }
+        border-left-color: #3b82f6;
       }
+
+      &.expected-answer {
+        background: #f0fdf4;
+        border-left-color: #10b981;
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: #1f2937;
+        line-height: 1.6;
+      }
+    }
+
+    .explanation-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: #fef3c7;
+      border-radius: 12px;
+      border-left: 4px solid #f59e0b;
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #92400e;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: #78350f;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  .modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+
+    .close-btn {
+      width: 100%;
+      padding: 14px;
+      background: #8E24AA;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:active {
+        transform: scale(0.98);
+        background: #7B1FA2;
+      }
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 374px) {
+  .motivational-section {
+    .message-large {
+      font-size: 28px;
+    }
+  }
+
+  .level-mapache-row {
+    .mapache-container {
+      .mapache-image {
+        width: 60px;
+        height: 60px;
+      }
+    }
+  }
+
+  .questions-section {
+    .questions-container {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 }

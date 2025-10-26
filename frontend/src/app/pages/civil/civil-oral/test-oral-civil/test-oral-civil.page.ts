@@ -327,10 +327,12 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
         const voices = window.speechSynthesis.getVoices();
         console.log('🔊 Voces disponibles:', voices.map(v => `${v.name} (${v.lang})`));
         
+        // Buscar específicamente la voz Catalina
         let selectedVoice = voices.find(voice => 
-          voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
+          voice.name.toLowerCase().includes('catalina')
         );
         
+        // Si no existe Catalina, buscar alternativas femeninas en español
         if (!selectedVoice) {
           selectedVoice = voices.find(voice => 
             voice.lang.includes('es') && (
@@ -338,22 +340,16 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
               voice.name.toLowerCase().includes('femenina') ||
               voice.name.toLowerCase().includes('mónica') ||
               voice.name.toLowerCase().includes('monica') ||
-              voice.name.toLowerCase().includes('paulina') ||
-              voice.name.toLowerCase().includes('lucia') ||
-              voice.name.toLowerCase().includes('paloma')
+              voice.name.toLowerCase().includes('paulina')
             )
           );
-        }
-        
-        if (!selectedVoice) {
-          selectedVoice = voices.find(voice => voice.lang.includes('es'));
         }
         
         if (selectedVoice) {
           utterance.voice = selectedVoice;
           console.log('✅ Voz seleccionada:', selectedVoice.name);
         } else {
-          console.warn('⚠️ No se encontró voz en español, usando voz por defecto');
+          console.warn('⚠️ No se encontró voz Catalina, usando voz por defecto');
         }
         
         window.speechSynthesis.speak(utterance);
@@ -393,6 +389,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     if (this.isRecording) {
       await this.audioService.stopRecording();
     } else {
+
       this.audioService.clearRecording();
       await this.audioService.startRecording();
       this.startResponseTimer();
@@ -465,12 +462,6 @@ async replayRecording() {
 
   getReplayButtonText(): string {
     return this.isPlayingRecording ? 'Pausar' : 'Reproducir';
-  }
-
-  async restartRecording() {
-    this.audioService.clearRecording();
-    this.stopResponseTimer();
-    this.cdr.detectChanges();
   }
 
   startResponseTimer() {
