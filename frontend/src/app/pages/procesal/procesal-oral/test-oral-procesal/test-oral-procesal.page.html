@@ -1,77 +1,198 @@
-<ion-content class="procesal-content">
-  <div class="test-header">
-    <div class="header-top">
-      <ion-icon name="close" class="close-icon" (click)="exitTest()"></ion-icon>
-      <div class="progress-info">
-        <span class="question-counter">{{ currentQuestionIndex + 1 }} / {{ questions.length }}</span>
-      </div>
-    </div>
-    <div class="progress-bar-container">
-      <div class="progress-bar" [style.width.%]="progress"></div>
-    </div>
+<ion-content class="test-content">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="confirmExit()"></ion-icon>
+    <h1 class="header-title">Derecho Procesal Oral</h1>
   </div>
 
-  <div class="question-container" *ngIf="currentQuestion">
-    <div class="question-card">
-      <div class="question-header">
-        <span class="question-label">Pregunta {{ currentQuestionIndex + 1 }}</span>
-        <span class="question-theme" *ngIf="currentQuestion.tema">{{ currentQuestion.tema }}</span>
-      </div>
-
-      <h2 class="question-text">{{ currentQuestion.text }}</h2>
-
-      <div class="recording-section">
-        <div class="recording-button" 
-             [class.recording]="isRecording"
-             (click)="toggleRecording()">
-          <ion-icon [name]="isRecording ? 'stop-circle' : 'mic'"></ion-icon>
-        </div>
-
-        <div class="recording-info">
-          <p class="recording-status" *ngIf="!isRecording && !currentQuestion.isAnswered">
-            Presiona el micrófono para responder
-          </p>
-          <p class="recording-status recording-active" *ngIf="isRecording">
-            Grabando... {{ formattedTime }}
-          </p>
-          <p class="recording-status completed" *ngIf="!isRecording && currentQuestion.isAnswered">
-            ✓ Respuesta grabada
-          </p>
-        </div>
-      </div>
-
-      <div class="model-answer" *ngIf="currentQuestion.modelAnswer && currentQuestion.isAnswered">
-        <h4>Respuesta Modelo:</h4>
-        <p>{{ currentQuestion.modelAnswer }}</p>
+  <!-- Contenido principal -->
+  <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
+    
+    <!-- Puntitos de progreso -->
+    <div class="progress-dots">
+      <div 
+        *ngFor="let q of questions; let i = index"
+        class="dot"
+        [class.completed]="i < (currentQuestionNumber - 1)"
+        [class.current]="i === (currentQuestionNumber - 1)">
       </div>
     </div>
 
+    <!-- Categoría -->
+    <div class="category-chip">
+      {{ getCurrentQuestion()?.category || 'Derecho Procesal' }}
+    </div>
+
+    <!-- Texto de la pregunta -->
+    <div class="question-text">
+      <p><strong>{{ getCurrentQuestion()?.questionText }}</strong></p>
+    </div>
+
+   <!-- Control de audio para escuchar pregunta -->
+    <div class="audio-section">
+      <div 
+        class="audio-player" 
+        [class.playing]="isPlaying"
+        [class.completed]="audioCompleted"
+        (click)="isPlaying ? pauseAudio() : playAudio()">
+        
+        <div class="audio-icon-container">
+          <ion-icon [name]="getAudioIcon()" class="audio-play-icon"></ion-icon>
+        </div>
+        
+        <div class="audio-text">
+          <span class="audio-status">{{ getAudioStatus() }}</span>
+          <span class="audio-duration">{{ audioProgress }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opciones de respuesta -->
+    <div class="options-container">
+      <div 
+        *ngFor="let option of getCurrentQuestionOptions(); let i = index"
+        class="option-button"
+        [class.selected]="isOptionSelected(option)"        
+        [class.correct]="isOptionCorrect(option)"
+        [class.incorrect]="isOptionIncorrect(option)"
+        [class.disabled]="hasAnsweredCurrentQuestion()">
+        
+        <div class="option-letter">{{ getOptionLetter(i) }}</div>
+        <div class="option-text">{{ option }}</div>
+
+        <ion-icon 
+          *ngIf="shouldShowOptionIcon(option)"
+          [name]="getOptionIcon(option)"
+          [style.color]="getOptionIconColor(option)"
+          class="option-icon">
+        </ion-icon>
+      </div>
+    </div>
+
+    <!-- Sección de grabación -->
+    <div class="recording-section">
+      <div class="recording-controls">
+        
+        <!-- Botón de grabación principal -->
+        <div class="recording-button-container">
+          <div 
+            class="recording-button" 
+            [class.recording]="isRecording"
+            [class.has-recording]="hasRecording"
+            (click)="toggleRecording()">
+            
+            <div class="recording-circle">
+              <ion-icon [name]="getRecordingIcon()" class="recording-icon"></ion-icon>
+            </div>
+            
+            <div class="recording-pulse" *ngIf="isRecording"></div>
+          </div>
+          
+          <div class="recording-text">
+            <span class="recording-status">{{ getRecordingStatus() }}</span>
+            <span class="recording-timer" *ngIf="isRecording || hasRecording">{{ recordingTime }}</span>
+          </div>
+        </div>
+
+        <!-- Controles: Reproducir y Reiniciar -->
+        <div class="recording-actions" *ngIf="hasRecording">
+          <button class="action-button replay" (click)="replayRecording()">
+            <ion-icon [name]="isPlayingRecording ? 'pause' : 'play'"></ion-icon>
+            <span>{{ getReplayButtonText() }}</span>
+          </button>
+          
+          <button class="action-button restart" (click)="restartRecording()">
+            <ion-icon name="refresh"></ion-icon>
+            <span>Reiniciar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+<!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
+    <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
+      <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
+        <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+        <span>{{ evaluationResult?.isCorrect ? '¡Correcto!' : 'Incorrecto' }}</span>
+      </div>
+
+      <div class="evaluation-body">
+        <div class="eval-section">
+          <div class="eval-label">Tu respuesta:</div>
+          <div class="eval-text">{{ evaluationResult?.userAnswer }}</div>
+        </div>
+
+        <div class="eval-section">
+          <button 
+            class="explanation-play-button" 
+            (click)="isPlayingExplanation ? pauseExplanationAudio() : playExplanationAudio()">
+            <ion-icon [name]="isPlayingExplanation ? 'pause-circle' : 'play-circle'"></ion-icon>
+            <span>{{ isPlayingExplanation ? 'Pausar explicación' : 'Reproducir explicación' }}</span>
+          </button>
+          <div class="eval-text explanation"><strong>Explicación:</strong> {{ evaluationResult?.explanation }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón para enviar respuesta -->
+    <div class="submit-section" *ngIf="hasRecording && !showEvaluation">
+      <button class="submit-voice-button" (click)="submitVoiceAnswer()">
+        <ion-icon name="send"></ion-icon>
+        <span>Enviar Respuesta</span>
+      </button>
+    </div>
+
+    <!-- Botones de navegación -->
     <div class="navigation-buttons">
       <ion-button 
+        *ngIf="currentQuestionNumber > 1"
         fill="outline" 
-        [disabled]="currentQuestionIndex === 0"
-        (click)="previousQuestion()">
+        (click)="previousQuestion()"
+        class="nav-btn">
         <ion-icon name="chevron-back" slot="start"></ion-icon>
         Anterior
       </ion-button>
 
       <ion-button 
-        *ngIf="currentQuestionIndex < questions.length - 1"
-        (click)="nextQuestion()">
+        *ngIf="currentQuestionNumber < totalQuestions"
+        (click)="nextQuestion()"
+        [disabled]="!canGoToNext()"
+        class="nav-btn primary">
         Siguiente
         <ion-icon name="chevron-forward" slot="end"></ion-icon>
       </ion-button>
 
       <ion-button 
-        *ngIf="currentQuestionIndex === questions.length - 1"
-        class="submit-button"
-        [disabled]="isSubmitting"
-        (click)="submitTest()">
-        <ion-icon name="checkmark-done" slot="start"></ion-icon>
+        *ngIf="currentQuestionNumber === totalQuestions"
+        (click)="nextQuestion()"
+        [disabled]="!canGoToNext()"
+        class="nav-btn finish">
         Finalizar Test
+        <ion-icon name="checkmark-circle" slot="end"></ion-icon>
       </ion-button>
     </div>
+
+    <!-- Botón para abandonar -->
+    <div class="exit-button-container">
+      <button class="exit-btn" (click)="confirmExit()">
+        <ion-icon name="exit-outline"></ion-icon>
+        Abandonar test
+      </button>
+    </div>
+
   </div>
 
-  <app-bottom-nav></app-bottom-nav>
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando preguntas orales...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-container" *ngIf="loadingError">
+    <ion-icon name="alert-circle" color="danger"></ion-icon>
+    <p>Error al cargar las preguntas</p>
+    <ion-button (click)="exitTest()">Volver</ion-button>
+  </div>
+
 </ion-content>

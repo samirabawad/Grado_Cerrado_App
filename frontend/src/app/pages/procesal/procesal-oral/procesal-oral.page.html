@@ -1,7 +1,7 @@
 <ion-content class="procesal-content">
   <div class="dashboard-header">
-    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
-    <h1 class="header-title">Modo Oral</h1>
+    <ion-icon name="chevron-back-outline" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Test Oral</h1>
   </div>
 
   <div class="content-area">
@@ -9,38 +9,64 @@
       <h2>¿Cuántas preguntas?</h2>
       
       <div class="quantity-selector">
-        <div class="quantity-option" 
-             [class.selected]="selectedQuantity === 1" 
-             (click)="selectedQuantity = 1">
+        <button 
+          class="quantity-option" 
+          [class.selected]="selectedQuantity === 1"
+          (click)="selectedQuantity = 1">
           <span class="number">1</span>
           <span class="label">Pregunta</span>
-        </div>
+        </button>
         
-        <div class="quantity-option" 
-             [class.selected]="selectedQuantity === 5" 
-             (click)="selectedQuantity = 5">
+        <button 
+          class="quantity-option" 
+          [class.selected]="selectedQuantity === 3"
+          (click)="selectedQuantity = 3">
+          <span class="number">3</span>
+          <span class="label">Preguntas</span>
+        </button>
+        
+        <button 
+          class="quantity-option" 
+          [class.selected]="selectedQuantity === 5"
+          (click)="selectedQuantity = 5">
           <span class="number">5</span>
           <span class="label">Preguntas</span>
-        </div>
+        </button>
         
-        <div class="quantity-option" 
-             [class.selected]="selectedQuantity === 10" 
-             (click)="selectedQuantity = 10">
-          <span class="number">10</span>
+        <button 
+          class="quantity-option" 
+          [class.selected]="selectedQuantity === 7"
+          (click)="selectedQuantity = 7">
+          <span class="number">7</span>
           <span class="label">Preguntas</span>
+        </button>
+      </div>
+
+      <h2>Nivel de dificultad</h2>
+      
+      <div class="inline-picker-container">
+        <div class="picker-wheel" #pickerWheel (scroll)="onPickerScroll()">
+          <div 
+            class="picker-option"
+            *ngFor="let level of infiniteLevels; let i = index"
+            [class.selected]="selectedDifficulty === level.value"
+            [attr.data-value]="level.value"
+            (click)="selectDifficulty(level)">
+            {{ level.label }}
+          </div>
         </div>
-        
-        <div class="quantity-option" 
-             [class.selected]="selectedQuantity === 20" 
-             (click)="selectedQuantity = 20">
-          <span class="number">20</span>
-          <span class="label">Preguntas</span>
+        <div class="picker-arrows">
+          <ion-icon name="chevron-up"></ion-icon>
+          <ion-icon name="chevron-down"></ion-icon>
         </div>
       </div>
 
-      <ion-button expand="block" class="start-button" (click)="startVoicePractice()">
-        <ion-icon name="mic" slot="start"></ion-icon>
-        Comenzar Test Oral
+      <ion-button 
+        expand="block" 
+        class="start-button"
+        (click)="startVoicePractice()">
+        <ion-icon name="mic-outline" slot="start"></ion-icon>
+        Empezar Test Oral
       </ion-button>
     </div>
   </div>
