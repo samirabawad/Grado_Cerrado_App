@@ -1,5 +1,5 @@
 :host,
-ion-content.procesal-content {
+ion-content.civil-content {
   --ion-background-color: #ffffff !important;
   --background: #ffffff !important;
   background: #ffffff !important;
@@ -11,7 +11,7 @@ ion-content.procesal-content {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: #2563eb;
+  background: #3b82f6;
   padding: max(env(safe-area-inset-top), 16px) 20px 16px;
   display: flex;
   align-items: center;
@@ -66,7 +66,7 @@ ion-content.procesal-content {
       transition: all 0.2s ease;
 
       &.selected {
-        background: #eff6ff;
+        background: #e6f0ff;
         border-color: #3b82f6;
 
         .number {
@@ -161,11 +161,11 @@ ion-content.procesal-content {
   }
 
   .start-button {
-    --background: #2563eb;
-    --background-activated: #1d4ed8;
+    --background: #3b82f6;
+    --background-activated: #2422c0;
     --border-radius: 16px;
     --color: #ffffff;
-    --box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    --box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
     height: 56px;
     font-size: 16px;
     font-weight: 600;
