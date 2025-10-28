@@ -74,12 +74,12 @@ export class ResumenTestProcesalPage implements OnInit {
       this.totalQuestions = results.totalQuestions || 0;
       this.percentage = results.percentage || 0;
 
-      if (results.results && Array.isArray(results.results)) {
-        this.questionResults = results.results.map((r: any) => ({
+      if (results.allQuestions && Array.isArray(results.allQuestions)) {
+        this.questionResults = results.allQuestions.map((r: any) => ({
           questionNumber: r.questionNumber,
           questionText: r.questionText,
-          userAnswer: this.formatAnswer(r.userAnswer),
-          correctAnswer: this.formatAnswer(r.correctAnswer),
+          userAnswer: r.userAnswer,
+          correctAnswer: r.correctAnswer,
           explanation: r.explanation || 'Sin explicación disponible',
           isCorrect: r.isCorrect,
           options: r.options || [],
@@ -165,12 +165,70 @@ export class ResumenTestProcesalPage implements OnInit {
   }
 
   getQuestionOptions(question: any): string[] {
-    if (question.type === 'true_false') {
+    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
       return ['Verdadero', 'Falso'];
     }
-    if (question.options && question.options.length > 0) {
-      return question.options.map((opt: any) => `${opt.option}: ${opt.text}`);
+    
+    if (Array.isArray(question.options) && question.options.length > 0) {
+      const firstOption = question.options[0];
+      
+      if (typeof firstOption === 'object') {
+        if ('text' in firstOption && firstOption.text) {
+          return question.options.map((opt: any) => opt.text);
+        }
+        if ('Text' in firstOption && firstOption.Text) {
+          return question.options.map((opt: any) => opt.Text);
+        }
+      }
+      
+      if (typeof firstOption === 'string') {
+        return question.options;
+      }
     }
+    
     return [];
+  }
+
+  isOptionSelected(question: any, option: string): boolean {
+    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+      if (question.userAnswer === 'V' && option === 'Verdadero') return true;
+      if (question.userAnswer === 'F' && option === 'Falso') return true;
+      return false;
+    }
+    
+    const options = this.getQuestionOptions(question);
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.userAnswer === letter;
+    }
+    
+    return false;
+  }
+
+  isOptionCorrect(question: any, option: string): boolean {
+    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
+      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
+                                  correctAnswerNorm === 'v' || 
+                                  correctAnswerNorm === 'verdadero';
+      
+      if (option === 'Verdadero' && isVerdaderoCorrect) return true;
+      if (option === 'Falso' && !isVerdaderoCorrect) return true;
+      return false;
+    }
+    
+    const options = this.getQuestionOptions(question);
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.correctAnswer.toUpperCase() === letter;
+    }
+    
+    return false;
+  }
+
+  getOptionLetter(index: number): string {
+    return String.fromCharCode(65 + index);
   }
 }
