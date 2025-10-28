@@ -47,7 +47,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   currentQuestionNumber: number = 1;
   totalQuestions: number = 5;
   userAnswers: { [key: string]: string } = {};
-  questionEvaluations: { [key: string]: { isCorrect: boolean, userAnswer: string, correctAnswer: string, explanation: string } } = {};
+  questionEvaluations: { [key: string]: { isCorrect: boolean, correctAnswer: string, explanation: string } } = {};
     
   isPlaying: boolean = false;
   audioCompleted: boolean = false;
@@ -105,11 +105,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
       return;
     }
     
-    const initialized = await this.audioService.initializeRecording();
-    if (!initialized) {
-      await this.showMicrophoneErrorAlert();
-      return;
-    }
+    await this.audioService.initializeRecording();
     
     this.recordingStateSubscription = this.audioService.recordingState$.subscribe(
       (state: AudioRecordingState) => {
@@ -162,7 +158,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
           this.currentQuestionNumber = 1;
           
           console.log('✅ Preguntas cargadas:', this.questions.length);
-          console.log('🔍 Primera pregunta:', this.questions[0]);
+          console.log('🔎 Primera pregunta:', this.questions[0]);
           
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -347,7 +343,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
           utterance.voice = selectedVoice;
           console.log('✅ Voz seleccionada:', selectedVoice.name);
         } else {
-          console.warn('⚠️ No se encontró voz Catalina, usando voz por defecto');
+          console.log('⚠️ Usando voz por defecto del sistema');
         }
         
         window.speechSynthesis.speak(utterance);
@@ -358,8 +354,6 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
       } else {
         window.speechSynthesis.onvoiceschanged = loadVoices;
       }
-    } else {
-      console.error('❌ speechSynthesis no disponible');
     }
   }
 
@@ -385,11 +379,32 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
 
   async toggleRecording() {
     if (this.isRecording) {
-      await this.audioService.stopRecording();
+      await this.stopRecording();
     } else {
+      await this.startRecording();
+    }
+  }
+
+  async startRecording() {
+    try {
       this.audioService.clearRecording();
+      
       await this.audioService.startRecording();
+      
+      console.log('🎤 Grabación iniciada');
       this.startResponseTimer();
+    } catch (error) {
+      console.error('❌ Error al iniciar grabación:', error);
+    }
+  }
+
+  async stopRecording() {
+    try {
+      await this.audioService.stopRecording();
+      this.stopResponseTimer();
+      console.log('⏹️ Grabación detenida');
+    } catch (error) {
+      console.error('❌ Error al detener grabación:', error);
     }
   }
 
@@ -405,9 +420,9 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     return 'Mantén presionado para grabar';
   }
 
-  async replayRecording() {
-    if (!this.audioUrl) {
-      console.warn('⚠️ No hay URL de audio para reproducir');
+async replayRecording() {
+    if (!this.audioBlob) {
+      console.warn('⚠️ No hay audio para reproducir');
       return;
     }
 
@@ -425,23 +440,30 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     }
 
     try {
-      this.recordingAudio = new Audio(this.audioUrl);
-      this.isPlayingRecording = true;
-      this.cdr.detectChanges();
-
-      this.recordingAudio.onended = () => {
-        this.isPlayingRecording = false;
+      const reader = new FileReader();
+      reader.readAsDataURL(this.audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        
+        this.recordingAudio = new Audio(base64data);
+        this.isPlayingRecording = true;
         this.cdr.detectChanges();
-      };
 
-      this.recordingAudio.onerror = (error) => {
-        console.error('❌ Error reproduciendo grabación:', error);
-        this.isPlayingRecording = false;
-        this.cdr.detectChanges();
-      };
+        this.recordingAudio.onended = () => {
+          this.isPlayingRecording = false;
+          this.cdr.detectChanges();
+        };
 
-      await this.recordingAudio.play();
-      console.log('▶️ Reproduciendo grabación');
+        this.recordingAudio.onerror = (error) => {
+          console.error('❌ Error reproduciendo grabación:', error);
+          this.isPlayingRecording = false;
+          this.cdr.detectChanges();
+        };
+
+        await this.recordingAudio.play();
+        console.log('▶️ Reproduciendo grabación');
+      };
     } catch (error) {
       console.error('❌ Error al reproducir:', error);
       this.isPlayingRecording = false;
@@ -474,31 +496,66 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   }
 
   playExplanationAudio() {
-    if (!this.evaluationResult?.explanation) return;
+      if (!this.evaluationResult?.explanation) return;
 
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-      utterance.lang = 'es-ES';
-      utterance.rate = 0.9;
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
+        utterance.lang = 'es-CL';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.2;
+        utterance.volume = 1.0;
 
-      utterance.onstart = () => {
-        this.isPlayingExplanation = true;
-        this.cdr.detectChanges();
-      };
+        utterance.onstart = () => {
+          this.isPlayingExplanation = true;
+          this.cdr.detectChanges();
+        };
 
-      utterance.onend = () => {
-        this.isPlayingExplanation = false;
-        this.cdr.detectChanges();
-      };
+        utterance.onend = () => {
+          this.isPlayingExplanation = false;
+          this.cdr.detectChanges();
+        };
 
-      window.speechSynthesis.speak(utterance);
-    }
+        utterance.onerror = () => {
+          this.isPlayingExplanation = false;
+          this.cdr.detectChanges();
+        };
+
+        const loadVoices = () => {
+          const voices = window.speechSynthesis.getVoices();
+          
+          let selectedVoice = voices.find(voice => 
+            voice.name.toLowerCase().includes('catalina')
+          );
+          
+          if (!selectedVoice) {
+            selectedVoice = voices.find(voice => 
+              voice.lang.includes('es') && (
+                voice.name.toLowerCase().includes('female') ||
+                voice.name.toLowerCase().includes('femenina') ||
+                voice.name.toLowerCase().includes('paulina')
+              )
+            );
+          }
+          
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+          }
+          
+          window.speechSynthesis.speak(utterance);
+        };
+
+        if (window.speechSynthesis.getVoices().length > 0) {
+          loadVoices();
+        } else {
+          window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+      }
   }
 
   pauseExplanationAudio() {
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && this.isPlayingExplanation) {
       window.speechSynthesis.cancel();
       this.isPlayingExplanation = false;
       this.cdr.detectChanges();
@@ -509,7 +566,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     if (!this.audioBlob) {
       const alert = await this.alertController.create({
         header: 'Sin audio',
-        message: 'No hay audio grabado para transcribir.',
+        message: 'Primero debes grabar tu respuesta.',
         buttons: ['OK']
       });
       await alert.present();
@@ -520,56 +577,46 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
       message: 'Procesando tu respuesta...',
       spinner: 'crescent'
     });
-    
+
     await loading.present();
 
     try {
-      console.log('🎤 Audio original:', this.audioBlob.type, this.audioBlob.size, 'bytes');
-      
+      console.log('🎤 Preparando audio para transcripción...');
+      console.log('📊 Tamaño del blob:', this.audioBlob.size, 'bytes');
+      console.log('🎵 Tipo de blob:', this.audioBlob.type);
+
       const wavBlob = await this.convertToWav(this.audioBlob);
-      console.log('🔄 Audio convertido a WAV:', wavBlob.size, 'bytes');
-      
+      console.log('✅ Audio convertido a WAV:', wavBlob.size, 'bytes');
+
       const formData = new FormData();
-      const audioFile = new File([wavBlob], 'recording.wav', { type: 'audio/wav' });
-      formData.append('audioFile', audioFile);
-      
+      formData.append('audioFile', wavBlob, 'recording.wav');
+
       console.log('📤 Enviando audio WAV al backend');
-      
+
       try {
         const transcriptionResponse = await this.apiService.transcribeAudioDirect(formData).toPromise();
         
-        await loading.dismiss();
+        console.log('📥 Transcripción recibida:', transcriptionResponse);
 
-        if (transcriptionResponse && transcriptionResponse.success) {
-          const transcription = transcriptionResponse.transcription || transcriptionResponse.data?.text || '';
-          
-          console.log('✅ Transcripción recibida:', transcription);
-          
-          if (!transcription || transcription.trim() === '') {
-            const alert = await this.alertController.create({
-              header: 'No entendí',
-              message: 'No pude escuchar claramente. Habla más fuerte y claro, cerca del micrófono.',
-              buttons: ['OK']
-            });
-            await alert.present();
-            return;
-          }
-          
-          this.currentTranscription = transcription;
-          
-          const detectedOption = this.detectOptionFromTranscription(transcription);
+        if (transcriptionResponse && transcriptionResponse.transcription) {
+          this.currentTranscription = transcriptionResponse.transcription;
+          console.log('✅ Texto transcrito:', this.currentTranscription);
+
+          const detectedOption = this.detectOptionFromTranscription(this.currentTranscription);
           
           if (detectedOption) {
+            console.log('✅ Opción detectada:', detectedOption);
             await this.selectAnswer(detectedOption);
+            await loading.dismiss();
           } else {
+            await loading.dismiss();
             const alert = await this.alertController.create({
               header: 'No entendí tu respuesta',
-              message: `Dijiste: "${transcription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
+              message: `Dijiste: "${this.currentTranscription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
               buttons: ['OK']
             });
             await alert.present();
           }
-          
         } else {
           await loading.dismiss();
           const alert = await this.alertController.create({
@@ -680,45 +727,99 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     }
   }
 
-  detectOptionFromTranscription(transcription: string): string | null {
-    const text = transcription.toLowerCase().trim();
+detectOptionFromTranscription(transcription: string): string | null {
+    const text = transcription
+      .toLowerCase()
+      .replace(/[.,;:!?¿¡]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
     const question = this.getCurrentQuestion();
     
     if (!question) return null;
 
+    console.log('🔍 Texto limpio para detectar:', text);
+
     if (question.type == 2 || question.type == '2') {
-      if (text.includes('verdadero') || text.includes('true') || text.includes('sí') || text.includes('si') || text === 'v') {
+      if (text.includes('verdadero') || text.includes('true') || text.includes('sí') || text.includes('si')) {
+        console.log('✅ Detectado: Verdadero');
         return 'Verdadero';
       }
-      if (text.includes('falso') || text.includes('false') || text.includes('no') || text === 'f') {
+      if (text.includes('falso') || text.includes('false')) {
+        console.log('✅ Detectado: Falso');
         return 'Falso';
+      }
+      
+      const words = text.split(' ').filter(w => w.length > 0);
+      for (const word of words) {
+        if (word === 'v' || word === 've') {
+          console.log('✅ Detectado: Verdadero (por letra V)');
+          return 'Verdadero';
+        }
+        if (word === 'f' || word === 'efe') {
+          console.log('✅ Detectado: Falso (por letra F)');
+          return 'Falso';
+        }
       }
     }
 
     const options = this.getCurrentQuestionOptions();
+    const words = text.split(' ').filter(w => w.length > 0);
     
-    if (text === 'a' || text.includes('letra a') || text.includes('opción a') || text.includes('opcion a') || text.includes('alternativa a')) {
+    for (let i = 0; i < Math.min(5, words.length); i++) {
+      const word = words[i];
+      
+      if (word === 'a'|| word === 'ah') {
+        console.log('✅ Detectado: Opción A');
+        return options[0];
+      }
+      if (word === 'b' || word === 'be') {
+        console.log('✅ Detectado: Opción B');
+        return options[1];
+      }
+      if (word === 'c' || word === 'ce') {
+        console.log('✅ Detectado: Opción C');
+        return options[2];
+      }
+      if (word === 'd' || word === 'de') {
+        console.log('✅ Detectado: Opción D');
+        return options[3];
+      }
+    }
+
+    if (text.includes('letra a') || text.includes('opcion a') || text.includes('alternativa a')) {
+      console.log('✅ Detectado: Opción A');
       return options[0];
     }
-    if (text === 'b' || text.includes('letra b') || text.includes('opción b') || text.includes('opcion b') || text.includes('alternativa b')) {
+    if (text.includes('letra b') || text.includes('opcion b') || text.includes('alternativa b')) {
+      console.log('✅ Detectado: Opción B');
       return options[1];
     }
-    if (text === 'c' || text.includes('letra c') || text.includes('opción c') || text.includes('opcion c') || text.includes('alternativa c')) {
+    if (text.includes('letra c') || text.includes('opcion c') || text.includes('alternativa c')) {
+      console.log('✅ Detectado: Opción C');
       return options[2];
     }
-    if (text === 'd' || text.includes('letra d') || text.includes('opción d') || text.includes('opcion d') || text.includes('alternativa d')) {
+    if (text.includes('letra d') || text.includes('opcion d') || text.includes('alternativa d')) {
+      console.log('✅ Detectado: Opción D');
       return options[3];
     }
 
-    for (const option of options) {
-      const optionWords = option.toLowerCase().split(' ').filter((w: string) => w.length > 3);
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i];
+      const optionWords = option.toLowerCase()
+        .replace(/[.,;:!?¿¡]/g, ' ')
+        .split(' ')
+        .filter((w: string) => w.length > 4);
+      
       const matches = optionWords.filter((word: string) => text.includes(word));
       
-      if (matches.length >= 2 || (optionWords.length <= 2 && matches.length >= 1)) {
+      if (matches.length >= 3) {
+        console.log(`✅ Detectado por contenido: Opción ${String.fromCharCode(65 + i)}`);
         return option;
       }
     }
 
+    console.warn('❌ No se detectó ninguna opción en:', text);
     return null;
   }
 
@@ -758,26 +859,26 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   resetQuestionState() {
     this.isPlaying = false;
     this.audioCompleted = false;
-    this.audioProgress = '00:02';
-    this.currentTranscription = '';
+    this.isRecording = false;
+    this.hasRecording = false;
     this.showEvaluation = false;
     this.evaluationResult = null;
     this.showCorrectAnswer = false;
-    this.selectedOptionForCurrentQuestion = null;
+    this.currentTranscription = '';
+    this.isPlayingExplanation = false;
+    
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     
     if (this.currentAudio) {
       this.currentAudio.pause();
       this.currentAudio = null;
     }
     
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    
     if (this.recordingAudio) {
       this.recordingAudio.pause();
       this.recordingAudio = null;
-      this.isPlayingRecording = false;
     }
     
     this.audioService.clearRecording();
@@ -827,19 +928,21 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
           questionDetails.push({
             questionNumber: index + 1,
             questionText: q.questionText,
-            userAnswer: evaluation.userAnswer || 'Sin respuesta',
-            expectedAnswer: evaluation.correctAnswer || 'Sin respuesta esperada',
-            explanation: evaluation.explanation || 'Sin explicación',
+            userAnswer: q.userAnswer || 'Sin respuesta',
+            expectedAnswer: evaluation.correctAnswer || q.correctAnswer || 'Sin respuesta esperada',
+            explanation: evaluation.explanation || q.explanation || 'Sin explicación disponible',
             correct: evaluation.isCorrect
           });
+
+
         } else {
           incorrectCount++;
-          questionDetails.push({
+      questionDetails.push({
             questionNumber: index + 1,
             questionText: q.questionText,
             userAnswer: 'Sin respuesta',
             expectedAnswer: q.correctAnswer || 'Sin respuesta esperada',
-            explanation: q.explanation || 'Sin explicación',
+            explanation: q.explanation || 'Sin explicación disponible',
             correct: false
           });
         }
@@ -1053,7 +1156,6 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
 
     this.questionEvaluations[question.id] = {
       isCorrect: isCorrect,
-      userAnswer: optionText,
       correctAnswer: question.correctAnswer,
       explanation: question.explanation
     };
@@ -1061,6 +1163,10 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     this.showCorrectAnswer = true;
     this.showEvaluation = true;
     this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.playExplanationAudio();
+    }, 1000);
   }
 
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
