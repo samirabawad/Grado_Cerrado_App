@@ -3,19 +3,20 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
-interface QuestionDetail {
+interface QuestionResult {
   questionNumber: number;
   questionText: string;
   userAnswer: string;
-  expectedAnswer: string;
+  correctAnswer: string;
   explanation: string;
-  correct: boolean;
+  isCorrect: boolean;
+  options?: string[];
 }
 
 @Component({
-  selector: 'app-resumen-test-procesal-oral',
+  selector: 'app-resumen-test-procesal',
   templateUrl: './resumen-test-procesal-oral.page.html',
   styleUrls: ['./resumen-test-procesal-oral.page.scss'],
   standalone: true,
@@ -23,15 +24,13 @@ interface QuestionDetail {
   animations: [
     trigger('slideDown', [
       transition(':enter', [
-        style({ height: '0', opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        animate('300ms ease-in', style({ height: '0', opacity: 0 }))
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
     ])
   ]
 })
+
 export class ResumenTestProcesalOralPage implements OnInit {
   
   correctAnswers: number = 0;
@@ -43,12 +42,12 @@ export class ResumenTestProcesalOralPage implements OnInit {
   levelSubtitle: string = '¡Sigue practicando!';
   motivationalMessage: string = '¡Sigue practicando!';
   
-  questionsDetails: QuestionDetail[] = [];
+  questionResults: QuestionResult[] = [];
+  incorrectQuestions: any[] = [];
+
   expandedQuestionIndex: number | null = null;
 
-  constructor(
-    private router: Router
-  ) { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
     this.loadResults();
@@ -56,25 +55,37 @@ export class ResumenTestProcesalOralPage implements OnInit {
 
   loadResults() {
     try {
-      const resultsString = localStorage.getItem('current_oral_test_results');
+      const resultsString = localStorage.getItem('current_test_results');
       
       if (!resultsString) {
         console.warn('No hay resultados guardados');
-        this.router.navigate(['/procesal/procesal-oral']);
+        this.router.navigate(['/procesal/procesal-escrito']);
         return;
       }
 
       const results = JSON.parse(resultsString);
       
-      console.log('📊 Resultados cargados:', results);
-
       this.correctAnswers = results.correctAnswers || 0;
       this.incorrectAnswers = results.incorrectAnswers || 0;
       this.totalQuestions = results.totalQuestions || 5;
       this.percentage = results.percentage || 0;
+      this.incorrectQuestions = results.incorrectQuestions || [];
 
-      if (results.questionDetails && results.questionDetails.length > 0) {
-        this.questionsDetails = results.questionDetails;
+      if (results.allQuestions && results.allQuestions.length > 0) {
+        this.questionResults = results.allQuestions;
+      } else {
+        this.questionResults = [];
+        for (let i = 0; i < this.totalQuestions; i++) {
+          const incorrectQuestion = this.incorrectQuestions.find(q => q.questionNumber === i + 1);
+          this.questionResults.push({
+            questionNumber: i + 1,
+            questionText: incorrectQuestion?.questionText || 'Pregunta respondida correctamente',
+            userAnswer: incorrectQuestion?.userAnswer || '',
+            correctAnswer: incorrectQuestion?.correctAnswer || '',
+            explanation: incorrectQuestion?.explanation || '',
+            isCorrect: !incorrectQuestion
+          });
+        }
       }
 
       this.calculateLevel();
@@ -82,7 +93,7 @@ export class ResumenTestProcesalOralPage implements OnInit {
 
     } catch (error) {
       console.error('Error cargando resultados:', error);
-      this.router.navigate(['/procesal/procesal-oral']);
+      this.router.navigate(['/procesal/procesal-escrito']);
     }
   }
 
@@ -123,13 +134,91 @@ export class ResumenTestProcesalOralPage implements OnInit {
     }
   }
 
+  reviewIncorrect() {
+    localStorage.setItem('questions_to_review', JSON.stringify(this.incorrectQuestions));
+    this.router.navigate(['/procesal/procesal-reforzar']);
+  }
+
   takeNewTest() {
-    localStorage.removeItem('current_oral_test_results');
-    this.router.navigate(['/procesal/procesal-oral']);
+    localStorage.removeItem('current_test_results');
+    this.router.navigate(['/procesal/procesal-escrito']);
   }
 
   goBack() {
-    localStorage.removeItem('current_oral_test_results');
-    this.router.navigate(['/procesal/procesal-oral']);
+    localStorage.removeItem('current_test_results');
+    this.router.navigate(['/procesal']);
+  }
+
+  goToHome() {
+    localStorage.removeItem('current_test_results');
+    this.router.navigate(['/dashboard']);
+  }
+
+  getQuestionOptions(question: any): string[] {
+    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+      return ['Verdadero', 'Falso'];
+    }
+    
+    if (Array.isArray(question.options) && question.options.length > 0) {
+      const firstOption = question.options[0];
+      
+      if (typeof firstOption === 'object') {
+        if ('text' in firstOption && firstOption.text) {
+          return question.options.map((opt: any) => opt.text);
+        }
+        if ('Text' in firstOption && firstOption.Text) {
+          return question.options.map((opt: any) => opt.Text);
+        }
+      }
+      
+      if (typeof firstOption === 'string') {
+        return question.options;
+      }
+    }
+    
+    return [];
+  }
+
+  isOptionSelected(question: any, option: string): boolean {
+    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+      if (question.userAnswer === 'V' && option === 'Verdadero') return true;
+      if (question.userAnswer === 'F' && option === 'Falso') return true;
+      return false;
+    }
+    
+    const options = this.getQuestionOptions(question);
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.userAnswer === letter;
+    }
+    
+    return false;
+  }
+
+  isOptionCorrect(question: any, option: string): boolean {
+    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
+      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
+                                  correctAnswerNorm === 'v' || 
+                                  correctAnswerNorm === 'verdadero';
+      
+      if (option === 'Verdadero' && isVerdaderoCorrect) return true;
+      if (option === 'Falso' && !isVerdaderoCorrect) return true;
+      return false;
+    }
+    
+    const options = this.getQuestionOptions(question);
+    const optionIndex = options.indexOf(option);
+    if (optionIndex !== -1) {
+      const letter = String.fromCharCode(65 + optionIndex);
+      return question.correctAnswer.toUpperCase() === letter;
+    }
+    
+    return false;
+  }
+
+  getOptionLetter(index: number): string {
+    return String.fromCharCode(65 + index);
   }
 }

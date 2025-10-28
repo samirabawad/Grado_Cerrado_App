@@ -764,42 +764,27 @@ detectOptionFromTranscription(transcription: string): string | null {
     }
 
     const options = this.getCurrentQuestionOptions();
-    const words = text.split(' ').filter(w => w.length > 0);
     
-    for (let i = 0; i < Math.min(5, words.length); i++) {
-      const word = words[i];
-      
-      if (word === 'a'|| word === 'ah') {
-        console.log('✅ Detectado: Opción A');
-        return options[0];
-      }
-      if (word === 'b' || word === 'be') {
-        console.log('✅ Detectado: Opción B');
-        return options[1];
-      }
-      if (word === 'c' || word === 'ce') {
-        console.log('✅ Detectado: Opción C');
-        return options[2];
-      }
-      if (word === 'd' || word === 'de') {
-        console.log('✅ Detectado: Opción D');
-        return options[3];
-      }
-    }
-
-    if (text.includes('letra a') || text.includes('opcion a') || text.includes('alternativa a')) {
+    // DETECCIÓN MEJORADA: Buscar "a", "ah", "b", "be", etc en TODA la transcripción
+    const cleanText = text.replace(/\s+/g, '');
+    
+    if (text.match(/\ba\b/) || text.match(/\bah\b/) || cleanText === 'a' || cleanText === 'ah' || 
+        text.includes('letra a') || text.includes('opcion a') || text.includes('alternativa a')) {
       console.log('✅ Detectado: Opción A');
       return options[0];
     }
-    if (text.includes('letra b') || text.includes('opcion b') || text.includes('alternativa b')) {
+    if (text.match(/\bb\b/) || text.match(/\bbe\b/) || cleanText === 'b' || cleanText === 'be' ||
+        text.includes('letra b') || text.includes('opcion b') || text.includes('alternativa b')) {
       console.log('✅ Detectado: Opción B');
       return options[1];
     }
-    if (text.includes('letra c') || text.includes('opcion c') || text.includes('alternativa c')) {
+    if (text.match(/\bc\b/) || text.match(/\bce\b/) || cleanText === 'c' || cleanText === 'ce' ||
+        text.includes('letra c') || text.includes('opcion c') || text.includes('alternativa c')) {
       console.log('✅ Detectado: Opción C');
       return options[2];
     }
-    if (text.includes('letra d') || text.includes('opcion d') || text.includes('alternativa d')) {
+    if (text.match(/\bd\b/) || text.match(/\bde\b/) || cleanText === 'd' || cleanText === 'de' ||
+        text.includes('letra d') || text.includes('opcion d') || text.includes('alternativa d')) {
       console.log('✅ Detectado: Opción D');
       return options[3];
     }
