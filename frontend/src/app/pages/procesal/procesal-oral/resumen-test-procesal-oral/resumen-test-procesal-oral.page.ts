@@ -5,14 +5,13 @@ import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
 import { trigger, transition, style, animate } from '@angular/animations';
 
-interface QuestionResult {
+interface QuestionDetail {
   questionNumber: number;
   questionText: string;
   userAnswer: string;
-  modelAnswer: string;
+  expectedAnswer: string;
   explanation: string;
-  isCorrect: boolean;
-  tema?: string;
+  correct: boolean;
 }
 
 @Component({
@@ -44,65 +43,56 @@ export class ResumenTestProcesalOralPage implements OnInit {
   levelSubtitle: string = '¡Sigue practicando!';
   motivationalMessage: string = '¡Sigue practicando!';
   
-  questionResults: QuestionResult[] = [];
-  
+  questionsDetails: QuestionDetail[] = [];
   expandedQuestionIndex: number | null = null;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.loadResults();
   }
 
   loadResults() {
-    const resultsData = localStorage.getItem('current_test_results');
-    
-    if (!resultsData) {
-      console.error('No hay resultados guardados');
-      this.router.navigate(['/procesal/procesal-oral']);
-      return;
-    }
-
     try {
-      const results = JSON.parse(resultsData);
+      const resultsString = localStorage.getItem('current_oral_test_results');
+      
+      if (!resultsString) {
+        console.warn('No hay resultados guardados');
+        this.router.navigate(['/procesal/procesal-oral']);
+        return;
+      }
+
+      const results = JSON.parse(resultsString);
+      
       console.log('📊 Resultados cargados:', results);
 
       this.correctAnswers = results.correctAnswers || 0;
       this.incorrectAnswers = results.incorrectAnswers || 0;
-      this.totalQuestions = results.totalQuestions || 0;
+      this.totalQuestions = results.totalQuestions || 5;
       this.percentage = results.percentage || 0;
 
-      if (results.results && Array.isArray(results.results)) {
-        this.questionResults = results.results.map((r: any) => ({
-          questionNumber: r.questionNumber,
-          questionText: r.questionText,
-          userAnswer: r.userAnswer || 'Sin respuesta',
-          modelAnswer: r.modelAnswer || 'Sin respuesta modelo',
-          explanation: r.explanation || 'Sin explicación disponible',
-          isCorrect: r.isCorrect,
-          tema: r.tema
-        }));
+      if (results.questionDetails && results.questionDetails.length > 0) {
+        this.questionsDetails = results.questionDetails;
       }
 
-      this.setLevel();
+      this.calculateLevel();
       this.setMotivationalMessage();
 
     } catch (error) {
-      console.error('Error al parsear resultados:', error);
+      console.error('Error cargando resultados:', error);
       this.router.navigate(['/procesal/procesal-oral']);
     }
   }
 
-  setLevel() {
-    if (this.percentage >= 90) {
-      this.levelTitle = 'NIVEL EXPERTO';
-      this.levelSubtitle = '¡Dominas el tema!';
-    } else if (this.percentage >= 70) {
+  calculateLevel() {
+    if (this.percentage >= 80) {
       this.levelTitle = 'NIVEL AVANZADO';
-      this.levelSubtitle = '¡Muy buen trabajo!';
-    } else if (this.percentage >= 50) {
+      this.levelSubtitle = '¡Excelente trabajo!';
+    } else if (this.percentage >= 60) {
       this.levelTitle = 'NIVEL INTERMEDIO';
-      this.levelSubtitle = 'Vas por buen camino';
+      this.levelSubtitle = '¡Muy bien!';
     } else {
       this.levelTitle = 'NIVEL PRINCIPIANTE';
       this.levelSubtitle = '¡Sigue practicando!';
@@ -134,17 +124,12 @@ export class ResumenTestProcesalOralPage implements OnInit {
   }
 
   takeNewTest() {
-    localStorage.removeItem('current_test_results');
+    localStorage.removeItem('current_oral_test_results');
     this.router.navigate(['/procesal/procesal-oral']);
   }
 
   goBack() {
-    localStorage.removeItem('current_test_results');
+    localStorage.removeItem('current_oral_test_results');
     this.router.navigate(['/procesal/procesal-oral']);
-  }
-
-  goToHome() {
-    localStorage.removeItem('current_test_results');
-    this.router.navigate(['/dashboard']);
   }
 }
