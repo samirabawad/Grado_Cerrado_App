@@ -769,7 +769,7 @@ detectOptionFromTranscription(transcription: string): string | null {
     for (let i = 0; i < Math.min(5, words.length); i++) {
       const word = words[i];
       
-      if (word === 'a') {
+      if (word === 'a'|| word === 'ah') {
         console.log('✅ Detectado: Opción A');
         return options[0];
       }
