@@ -417,10 +417,20 @@ async navigateMonth(direction: number) {
   }
 
   getBarHeight(value: number, type: 'civil' | 'procesal'): number {
-    const maxValue = this.getMaxValue();
-    if (maxValue === 0) return 0;
-    return (value / maxValue) * 100;
-  }
+  if (!value || value === 0) return 0;
+  
+  // Encuentra el valor máximo en todo el chartData
+  const maxValue = Math.max(
+    ...this.chartData.map(day => Math.max(day.civil, day.procesal))
+  );
+  
+  // Si no hay datos, retorna 0
+  if (maxValue === 0) return 0;
+  
+  // Calcula el porcentaje basado en el máximo
+  // Multiplicamos por 100 para obtener porcentaje
+  return (value / maxValue) * 100;
+}
 
   getDonutOffset(): number {
     const circumference = 219.8;

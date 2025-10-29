@@ -117,16 +117,16 @@
         </div>
       </div>
 
-      <!-- Navegación mensual (solo visible cuando está en modo mes) -->
-      <div class="month-navigation" *ngIf="selectedTimeFrame === 'month'">
-        <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
-          <ion-icon name="chevron-back"></ion-icon>
-        </button>
-        <span class="month-label">{{ currentMonthName }}</span>
-        <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
-          <ion-icon name="chevron-forward"></ion-icon>
-        </button>
-      </div>
+    <!-- Navegación mensual (siempre presente pero oculta cuando es semana) -->
+    <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'week'">
+      <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
+        <ion-icon name="chevron-back"></ion-icon>
+      </button>
+      <span class="month-label">{{ currentMonthName }}</span>
+      <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
+        <ion-icon name="chevron-forward"></ion-icon>
+      </button>
+    </div>
 
       <div class="chart-legend">
         <div class="legend-item">
