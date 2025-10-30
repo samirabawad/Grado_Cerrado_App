@@ -25,7 +25,7 @@ ion-content.results-content {
   left: 0;
   right: 0;
   height: 60px;
-  background: #8E24AA;
+  background: #3b82f6;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -76,7 +76,7 @@ ion-content.results-content {
   .message-large {
     font-size: 32px;
     font-weight: 800;
-    color: #8E24AA;
+    color: #3b82f6;
     margin: 0;
     line-height: 1.2;
   }
@@ -100,7 +100,7 @@ ion-content.results-content {
 
     .level-label {
       font-size: 14px;
-      color: #8E24AA;
+      color: #3b82f6;
       margin: 0 0 4px 0;
       font-weight: 600;
       text-transform: uppercase;
@@ -272,7 +272,7 @@ ion-content.results-content {
           background: #f8f9fa;
           border-radius: 12px;
           padding: 16px;
-          border-left: 4px solid #8E24AA;
+          border-left: 4px solid #3b82f6;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
           .question-text {
@@ -309,8 +309,8 @@ ion-content.results-content {
   transition: all 0.2s ease;
 
   &.alt-selected {
-    border-color: #8E24AA;
-    background: #f3e5f5;
+    border-color: #3b82f6;
+    background: #eff6ff;
   }
 
   &.alt-correct {
@@ -425,23 +425,23 @@ ion-content.results-content {
   }
 
   .btn-reforzar {
-    --background: #8E24AA;
-    --background-activated: #7B1FA2;
+    --background: #3b82f6;
+    --background-activated: #2563eb;
     --color: white;
   }
 
   .btn-nuevo-test {
-    --background: #8E24AA;
-    --background-activated: #7B1FA2;
+    --background: #3b82f6;
+    --background-activated: #2563eb;
     --color: white;
   }
 
   .btn-home {
-    --border-color: #8E24AA;
-    --color: #8E24AA;
+    --border-color: #3b82f6;
+    --color: #3b82f6;
     
     &:hover {
-      --background: rgba(142, 36, 170, 0.05);
+      --background: rgba(59, 130, 246, 0.05);
     }
   }
 }

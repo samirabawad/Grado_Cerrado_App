@@ -420,79 +420,87 @@
     }
   }
 
-  .month-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 0 10px;
+.month-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 0 10px;
+  min-height: 36px; // Altura mínima para reservar el espacio
+  transition: opacity 0.3s ease; // Transición suave
 
-    .nav-arrow {
-      background: transparent;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
+  &.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; // Evita que se pueda hacer clic cuando está oculto
+  }
+
+  .nav-arrow {
+    background: transparent;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    ion-icon {
+      font-size: 20px;
+      color: #64748b;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: #10b981;
+      background: #f0fdf4;
 
       ion-icon {
-        font-size: 20px;
-        color: #64748b;
-      }
-
-      &:hover:not(:disabled) {
-        border-color: #10b981;
-        background: #f0fdf4;
-
-        ion-icon {
-          color: #10b981;
-        }
-      }
-
-      &:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
+        color: #10b981;
       }
     }
 
-    .month-label {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1e293b;
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
     }
   }
 
-  .chart-legend {
+  .month-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+}
+
+.chart-legend {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px; // Cambia de 15px a 25px o más
+  justify-content: center;
+
+  .legend-item {
     display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #64748b;
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
 
-      .legend-color {
-        width: 12px;
-        height: 12px;
-        border-radius: 3px;
+      &.civil {
+        background: linear-gradient(180deg, #fb923c, #f97316);
+      }
 
-        &.civil {
-          background: linear-gradient(180deg, #fb923c, #f97316);
-        }
-
-        &.procesal {
-          background: linear-gradient(180deg, #60a5fa, #3b82f6);
-        }
+      &.procesal {
+        background: linear-gradient(180deg, #60a5fa, #3b82f6);
       }
     }
+  }
   }
 
   .chart-area {

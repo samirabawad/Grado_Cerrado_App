@@ -1,87 +1,148 @@
-<ion-content class="procesal-content">
-  <div class="results-header">
-    <ion-icon name="close" class="close-icon" (click)="goToHome()"></ion-icon>
-    <h1>Resultados</h1>
+<ion-content class="results-content">
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <h1 class="header-title">Derecho Procesal</h1>
   </div>
 
+  <!-- Contenido principal -->
   <div class="content-area">
-    <div class="score-card">
-      <div class="score-circle">
-        <svg viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="45" class="circle-bg"></circle>
-          <circle cx="50" cy="50" r="45" class="circle-progress" 
-                  [style.stroke-dashoffset]="283 - (283 * percentage / 100)"></circle>
-        </svg>
-        <div class="score-text">
-          <span class="percentage">{{ percentage }}%</span>
-          <span class="label">Completadas</span>
-        </div>
-      </div>
-
-      <div class="score-details">
-        <div class="detail-item correct">
-          <ion-icon name="checkmark-circle"></ion-icon>
-          <span>{{ correctAnswers }} Respondidas</span>
-        </div>
-        <div class="detail-item incorrect">
-          <ion-icon name="close-circle"></ion-icon>
-          <span>{{ incorrectAnswers }} Pendientes</span>
-        </div>
-      </div>
-
-      <div class="level-badge">
-        <h2>{{ levelTitle }}</h2>
-        <p>{{ levelSubtitle }}</p>
-      </div>
-
-      <p class="motivational">{{ motivationalMessage }}</p>
+    
+    <!-- MENSAJE MOTIVACIONAL -->
+    <div class="motivational-section">
+      <p class="message-small">{{ percentage >= 60 ? '¡Bien hecho!' : 'No te rindas' }}</p>
+      <h1 class="message-large">{{ motivationalMessage }}</h1>
     </div>
 
-    <div class="actions-card">
-      <ion-button expand="block" (click)="takeNewTest()">
-        <ion-icon name="refresh" slot="start"></ion-icon>
-        Nuevo Test Oral
+    <!-- NIVEL Y MAPACHE EN LA MISMA LÍNEA -->
+    <div class="level-mapache-row">
+      <div class="level-info">
+        <p class="level-label">{{ levelTitle }}</p>
+        <h2 class="level-message">{{ levelSubtitle }}</h2>
+      </div>
+      <div class="mapache-container">
+        <img src="assets/image/mok.png" alt="Mapache" class="mapache-image">
+      </div>
+    </div>
+
+    <!-- BLOQUES DE CORRECTAS E INCORRECTAS -->
+    <div class="stats-grid">
+      <div class="stat-item correct">
+        <div class="stat-icon">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ correctAnswers }}</span>
+          <span class="stat-label">Correctas</span>
+        </div>
+      </div>
+
+      <div class="stat-item incorrect">
+        <div class="stat-icon">
+          <ion-icon name="close-circle"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ incorrectAnswers }}</span>
+          <span class="stat-label">Incorrectas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
+    <div class="questions-section">
+      <h3 class="section-title">Resumen de preguntas</h3>
+      <div class="questions-container">
+        <div 
+          *ngFor="let question of questionResults; let i = index"
+          class="question-wrapper">
+          
+          <!-- Círculo -->
+          <div 
+            class="question-circle"
+            [class.correct]="question.isCorrect"
+            [class.incorrect]="!question.isCorrect"
+            [class.expanded]="expandedQuestionIndex === i"
+            (click)="toggleQuestion(i)">
+            {{ i + 1 }}
+          </div>
+          
+          <!-- Desplegable debajo del círculo -->
+          <div 
+            class="question-dropdown"
+            *ngIf="expandedQuestionIndex === i"
+            [@slideDown]>
+            <div class="dropdown-content">
+              <!-- TEXTO DE LA PREGUNTA -->
+              <p class="question-text">{{ question.questionText }}</p>
+              
+              <!-- ALTERNATIVAS -->
+              <div class="alternatives-list">
+                <div *ngFor="let option of getQuestionOptions(question); let optIndex = index"
+                     class="alternative-item"
+                     [class.alt-selected]="isOptionSelected(question, option)"
+                     [class.alt-correct]="isOptionCorrect(question, option)">
+                  
+                  <div class="alt-icon">
+                    <ion-icon *ngIf="isOptionCorrect(question, option)" 
+                              name="checkmark-circle"></ion-icon>
+                    <ion-icon *ngIf="!isOptionCorrect(question, option) && isOptionSelected(question, option)" 
+                              name="close-circle"></ion-icon>
+                    <ion-icon *ngIf="!isOptionCorrect(question, option) && !isOptionSelected(question, option)" 
+                              name="ellipse-outline"></ion-icon>
+                  </div>
+                  
+                  <div class="alt-text">
+                    {{ getOptionLetter(optIndex) }}. {{ option }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- EXPLICACIÓN -->
+              <div class="explanation-box" *ngIf="question.explanation">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                <p>{{ question.explanation }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="action-buttons">
+      <!-- Primera fila: Reforzar y Nuevo Test -->
+      <div class="buttons-row">
+        <ion-button 
+          expand="block" 
+          class="btn-reforzar"
+          (click)="reviewIncorrect()">
+          <ion-icon name="fitness-outline" slot="start"></ion-icon>
+          Reforzar
+        </ion-button>
+
+        <ion-button 
+          expand="block" 
+          class="btn-nuevo-test"
+          (click)="takeNewTest()">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Nuevo test
+        </ion-button>
+      </div>
+
+      <!-- Segunda fila: Volver al inicio -->
+      <ion-button 
+        expand="block" 
+        fill="outline"
+        class="btn-home"
+        (click)="goBack()">
+        <ion-icon name="home-outline" slot="start"></ion-icon>
+        Volver a Procesal
       </ion-button>
     </div>
 
-    <div class="questions-review" *ngIf="questionResults.length > 0">
-      <h3>Revisión de Preguntas</h3>
-      
-      <div class="question-item" *ngFor="let question of questionResults; let i = index"
-           [class.correct]="question.isCorrect"
-           [class.incorrect]="!question.isCorrect">
-        
-        <div class="question-header" (click)="toggleQuestion(i)">
-          <div class="question-info">
-            <ion-icon [name]="question.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-            <span class="question-number">Pregunta {{ question.questionNumber }}</span>
-          </div>
-          <ion-icon [name]="expandedQuestionIndex === i ? 'chevron-up' : 'chevron-down'" 
-                    class="expand-icon"></ion-icon>
-        </div>
-
-        <div class="question-details" *ngIf="expandedQuestionIndex === i" @slideDown>
-          <p class="question-text">{{ question.questionText }}</p>
-          
-          <div class="answer-section">
-            <div class="answer-item user-answer">
-              <strong>Tu respuesta:</strong>
-              <span>{{ question.userAnswer }}</span>
-            </div>
-            <div class="answer-item model-answer">
-              <strong>Respuesta modelo:</strong>
-              <p>{{ question.modelAnswer }}</p>
-            </div>
-          </div>
-
-          <div class="explanation" *ngIf="question.explanation">
-            <strong>Explicación:</strong>
-            <p>{{ question.explanation }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
+  <!-- Bottom Navigation Component -->
   <app-bottom-nav></app-bottom-nav>
+
 </ion-content>
