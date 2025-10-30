@@ -547,6 +547,26 @@ async navigateMonth(direction: number) {
     return names[level - 1] || 'Maestro Supremo';
   }
 
+  // ========================================
+// MÉTODO PARA GENERAR BADGES DINÁMICOS
+// ========================================
+  getSessionBadges(): { completed: boolean }[] {
+    const sessionsInMilestone = this.getSessionsInCurrentMilestone();
+    const badges: { completed: boolean }[] = [];
+    
+    // Siempre mostrar 10 círculos
+    const totalBadges = 10;
+    const testsPerBadge = 5; // Cada círculo representa 5 tests
+    
+    for (let i = 1; i <= totalBadges; i++) {
+      badges.push({
+        completed: sessionsInMilestone >= i * testsPerBadge
+      });
+    }
+    
+    return badges;
+  }
+
   // Obtener el ícono del logro actual
   getCurrentAchievementIcon(): string {
     const level = this.getCurrentAchievementLevel();
