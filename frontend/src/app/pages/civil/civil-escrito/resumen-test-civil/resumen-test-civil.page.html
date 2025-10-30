@@ -8,11 +8,11 @@
   <!-- Contenido principal -->
   <div class="content-area">
     
-    <!-- ✅ MENSAJE MOTIVACIONAL REDISEÑADO -->
-    <div class="motivational-section">
-      <p class="message-small">No te rindas</p>
-      <h1 class="message-large">¡Inténtalo de nuevo!</h1>
-    </div>
+<!-- ✅ MENSAJE MOTIVACIONAL DINÁMICO -->
+  <div class="motivational-section" [class.success]="percentage >= 70">
+    <p class="message-small">{{ getSmallMessage() }}</p>
+    <h1 class="message-large">{{ getLargeMessage() }}</h1>
+  </div>
 
     <!-- ✅ NIVEL Y MAPACHE EN LA MISMA LÍNEA -->
     <div class="level-mapache-row">
