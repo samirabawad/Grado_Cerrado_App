@@ -53,39 +53,36 @@ export class ResumenTestProcesalOralPage implements OnInit {
     this.loadResults();
   }
 
-  loadResults() {
+loadResults() {
     try {
-      const resultsString = localStorage.getItem('current_test_results');
+      const resultsString = localStorage.getItem('current_oral_test_results');
       
       if (!resultsString) {
         console.warn('No hay resultados guardados');
-        this.router.navigate(['/procesal/procesal-escrito']);
+        this.router.navigate(['/procesal/procesal-oral']);
         return;
       }
 
       const results = JSON.parse(resultsString);
       
+      console.log('📊 Resultados cargados:', results);
+
       this.correctAnswers = results.correctAnswers || 0;
       this.incorrectAnswers = results.incorrectAnswers || 0;
       this.totalQuestions = results.totalQuestions || 5;
       this.percentage = results.percentage || 0;
-      this.incorrectQuestions = results.incorrectQuestions || [];
 
-      if (results.allQuestions && results.allQuestions.length > 0) {
-        this.questionResults = results.allQuestions;
+      if (results.questionDetails && results.questionDetails.length > 0) {
+        this.questionResults = results.questionDetails.map((detail: any) => ({
+          questionNumber: detail.questionNumber,
+          questionText: detail.questionText,
+          userAnswer: detail.userAnswer,
+          correctAnswer: detail.expectedAnswer || detail.correctAnswer,
+          explanation: detail.explanation,
+          isCorrect: detail.correct
+        }));
       } else {
         this.questionResults = [];
-        for (let i = 0; i < this.totalQuestions; i++) {
-          const incorrectQuestion = this.incorrectQuestions.find(q => q.questionNumber === i + 1);
-          this.questionResults.push({
-            questionNumber: i + 1,
-            questionText: incorrectQuestion?.questionText || 'Pregunta respondida correctamente',
-            userAnswer: incorrectQuestion?.userAnswer || '',
-            correctAnswer: incorrectQuestion?.correctAnswer || '',
-            explanation: incorrectQuestion?.explanation || '',
-            isCorrect: !incorrectQuestion
-          });
-        }
       }
 
       this.calculateLevel();
@@ -93,7 +90,7 @@ export class ResumenTestProcesalOralPage implements OnInit {
 
     } catch (error) {
       console.error('Error cargando resultados:', error);
-      this.router.navigate(['/procesal/procesal-escrito']);
+      this.router.navigate(['/procesal/procesal-oral']);
     }
   }
 

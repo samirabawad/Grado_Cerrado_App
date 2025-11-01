@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 interface QuestionDetail {
   questionNumber: number;
@@ -18,7 +19,15 @@ interface QuestionDetail {
   templateUrl: './resumen-test-civil-oral.page.html',
   styleUrls: ['./resumen-test-civil-oral.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, BottomNavComponent]
+  imports: [IonicModule, CommonModule, BottomNavComponent],
+  animations: [
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
 export class ResumenTestCivilOralPage implements OnInit {
   
@@ -32,13 +41,9 @@ export class ResumenTestCivilOralPage implements OnInit {
   motivationalMessage: string = '¡Sigue practicando!';
   
   questionsDetails: QuestionDetail[] = [];
-  showDetailModal: boolean = false;
-  selectedQuestion: QuestionDetail | null = null;
+  expandedQuestionIndex: number | null = null;
 
-  constructor(
-    private router: Router,
-    private modalController: ModalController
-  ) { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
     this.loadResults();
@@ -105,52 +110,51 @@ export class ResumenTestCivilOralPage implements OnInit {
     }
   }
 
-  openQuestionDetail(question: QuestionDetail) {
-    this.selectedQuestion = question;
-    this.showDetailModal = true;
+  toggleQuestion(index: number) {
+    if (this.expandedQuestionIndex === index) {
+      this.expandedQuestionIndex = null;
+    } else {
+      this.expandedQuestionIndex = index;
+    }
   }
 
-  closeDetailModal() {
-    this.showDetailModal = false;
-    this.selectedQuestion = null;
+  getSmallMessage(): string {
+    if (this.percentage >= 90) {
+      return '¡Increíble!';
+    } else if (this.percentage >= 80) {
+      return '¡Excelente trabajo!';
+    } else if (this.percentage >= 70) {
+      return '¡Muy bien!';
+    } else if (this.percentage >= 60) {
+      return 'Buen intento';
+    } else if (this.percentage >= 40) {
+      return 'Sigue adelante';
+    } else {
+      return 'No te rindas';
+    }
   }
 
-  // ✅ MENSAJE SEGÚN RESULTADO
-
-// ✅ MENSAJE PEQUEÑO SEGÚN RESULTADO
-getSmallMessage(): string {
-  if (this.percentage >= 90) {
-    return '¡Increíble!';
-  } else if (this.percentage >= 80) {
-    return '¡Excelente trabajo!';
-  } else if (this.percentage >= 70) {
-    return '¡Muy bien!';
-  } else if (this.percentage >= 60) {
-    return 'Buen intento';
-  } else if (this.percentage >= 40) {
-    return 'Sigue adelante';
-  } else {
-    return 'No te rindas';
+  getLargeMessage(): string {
+    if (this.percentage >= 90) {
+      return '¡Dominas el tema!';
+    } else if (this.percentage >= 80) {
+      return '¡Vas por buen camino!';
+    } else if (this.percentage >= 70) {
+      return '¡Sigue así!';
+    } else if (this.percentage >= 60) {
+      return '¡Puedes mejorar!';
+    } else if (this.percentage >= 40) {
+      return '¡Sigue practicando!';
+    } else {
+      return '¡Inténtalo de nuevo!';
+    }
   }
-}
 
-// ✅ MENSAJE GRANDE SEGÚN RESULTADO
-getLargeMessage(): string {
-  if (this.percentage >= 90) {
-    return '¡Dominas el tema!';
-  } else if (this.percentage >= 80) {
-    return '¡Vas por buen camino!';
-  } else if (this.percentage >= 70) {
-    return '¡Sigue así!';
-  } else if (this.percentage >= 60) {
-    return '¡Puedes mejorar!';
-  } else if (this.percentage >= 40) {
-    return '¡Sigue practicando!';
-  } else {
-    return '¡Inténtalo de nuevo!';
+  reviewIncorrect() {
+    const incorrectQuestions = this.questionsDetails.filter(q => !q.correct);
+    localStorage.setItem('questions_to_review', JSON.stringify(incorrectQuestions));
+    this.router.navigate(['/civil/civil-reforzar']);
   }
-}
-
 
   takeNewTest() {
     localStorage.removeItem('current_oral_test_results');

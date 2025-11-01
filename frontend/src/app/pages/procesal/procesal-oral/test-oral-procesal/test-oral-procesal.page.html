@@ -18,9 +18,14 @@
       </div>
     </div>
 
-    <!-- Categoría -->
-    <div class="category-chip">
-      {{ getCurrentQuestion()?.category || 'Derecho Procesal' }}
+    <!-- Categoría y contador -->
+    <div class="category-row">
+      <div class="category-chip">
+        {{ getCurrentQuestion()?.category || 'Derecho Procesal' }}
+      </div>
+      <div class="question-counter">
+        {{ currentQuestionNumber }} de {{ totalQuestions }}
+      </div>
     </div>
 
     <!-- Texto de la pregunta -->

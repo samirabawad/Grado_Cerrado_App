@@ -48,21 +48,52 @@
       </div>
     </div>
 
-    <!-- CÍRCULOS DE PREGUNTAS - AHORA CON CLICK -->
+<!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
     <div class="questions-section">
       <h3 class="section-title">Resumen de preguntas</h3>
       <div class="questions-container">
         <div 
           *ngFor="let question of questionsDetails; let i = index"
-          class="question-wrapper"
-          (click)="openQuestionDetail(question)">
+          class="question-wrapper">
           
           <!-- Círculo -->
           <div 
             class="question-circle"
             [class.correct]="question.correct"
-            [class.incorrect]="!question.correct">
+            [class.incorrect]="!question.correct"
+            [class.expanded]="expandedQuestionIndex === i"
+            (click)="toggleQuestion(i)">
             {{ question.questionNumber }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Desplegable FUERA del loop -->
+      <div 
+        class="question-dropdown-global"
+        *ngIf="expandedQuestionIndex !== null"
+        [@slideDown]>
+        
+        <div class="dropdown-content">
+          <!-- TEXTO DE LA PREGUNTA -->
+          <p class="question-text">{{ questionsDetails[expandedQuestionIndex].questionText }}</p>
+          
+          <!-- TU RESPUESTA -->
+          <div class="answer-detail your-answer">
+            <p class="label">Tu respuesta:</p>
+            <p class="content">{{ questionsDetails[expandedQuestionIndex].userAnswer }}</p>
+          </div>
+
+          <!-- RESPUESTA ESPERADA -->
+          <div class="answer-detail expected-answer">
+            <p class="label">Respuesta esperada:</p>
+            <p class="content">{{ questionsDetails[expandedQuestionIndex].expectedAnswer }}</p>
+          </div>
+
+          <!-- EXPLICACIÓN -->
+          <div class="explanation-detail" *ngIf="questionsDetails[expandedQuestionIndex].explanation">
+            <p class="label">Explicación:</p>
+            <p class="content">{{ questionsDetails[expandedQuestionIndex].explanation }}</p>
           </div>
         </div>
       </div>
@@ -70,53 +101,36 @@
 
     <!-- BOTONES DE ACCIÓN -->
     <div class="action-buttons">
-      <ion-button expand="block" class="btn-nuevo-test" (click)="takeNewTest()">
-        <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        Hacer Nuevo Test Oral
-      </ion-button>
+      <!-- Primera fila: Reforzar y Nuevo Test -->
+      <div class="buttons-row">
+        <ion-button 
+          expand="block" 
+          class="btn-reforzar"
+          (click)="reviewIncorrect()">
+          <ion-icon name="fitness-outline" slot="start"></ion-icon>
+          Reforzar
+        </ion-button>
 
-      <ion-button expand="block" fill="outline" class="btn-home" (click)="goBack()">
+        <ion-button 
+          expand="block" 
+          class="btn-nuevo-test"
+          (click)="takeNewTest()">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Nuevo test
+        </ion-button>
+      </div>
+
+      <!-- Segunda fila: Volver al inicio -->
+      <ion-button 
+        expand="block" 
+        fill="outline"
+        class="btn-home"
+        (click)="goBack()">
         <ion-icon name="home-outline" slot="start"></ion-icon>
-        Volver al Inicio
+        Volver a Civil
       </ion-button>
     </div>
 
-  </div>
-
-  <!-- MODAL DE DETALLE DE PREGUNTA -->
-  <div class="detail-modal" *ngIf="showDetailModal" (click)="closeDetailModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()" *ngIf="selectedQuestion">
-      <div class="modal-header" [class.correct]="selectedQuestion.correct" [class.incorrect]="!selectedQuestion.correct">
-        <h3>Pregunta {{ selectedQuestion.questionNumber }}</h3>
-        <ion-icon name="close" (click)="closeDetailModal()"></ion-icon>
-      </div>
-
-      <div class="modal-body">
-        <div class="question-text">
-          <h4>Pregunta:</h4>
-          <p>{{ selectedQuestion.questionText }}</p>
-        </div>
-
-        <div class="answer-section your-answer">
-          <h4>Tu respuesta:</h4>
-          <p>{{ selectedQuestion.userAnswer }}</p>
-        </div>
-
-        <div class="answer-section expected-answer">
-          <h4>Respuesta esperada:</h4>
-          <p>{{ selectedQuestion.expectedAnswer }}</p>
-        </div>
-
-        <div class="explanation-section">
-          <h4>Explicación:</h4>
-          <p>{{ selectedQuestion.explanation }}</p>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="close-btn" (click)="closeDetailModal()">Cerrar</button>
-      </div>
-    </div>
   </div>
 
   <!-- Bottom Navigation -->
