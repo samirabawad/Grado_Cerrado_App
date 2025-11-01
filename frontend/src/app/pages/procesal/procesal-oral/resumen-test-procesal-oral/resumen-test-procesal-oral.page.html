@@ -74,32 +74,22 @@
               <!-- TEXTO DE LA PREGUNTA -->
               <p class="question-text">{{ question.questionText }}</p>
               
-              <!-- ALTERNATIVAS -->
-              <div class="alternatives-list">
-                <div *ngFor="let option of getQuestionOptions(question); let optIndex = index"
-                     class="alternative-item"
-                     [class.alt-selected]="isOptionSelected(question, option)"
-                     [class.alt-correct]="isOptionCorrect(question, option)">
-                  
-                  <div class="alt-icon">
-                    <ion-icon *ngIf="isOptionCorrect(question, option)" 
-                              name="checkmark-circle"></ion-icon>
-                    <ion-icon *ngIf="!isOptionCorrect(question, option) && isOptionSelected(question, option)" 
-                              name="close-circle"></ion-icon>
-                    <ion-icon *ngIf="!isOptionCorrect(question, option) && !isOptionSelected(question, option)" 
-                              name="ellipse-outline"></ion-icon>
-                  </div>
-                  
-                  <div class="alt-text">
-                    {{ getOptionLetter(optIndex) }}. {{ option }}
-                  </div>
-                </div>
+              <!-- TU RESPUESTA -->
+              <div class="answer-detail your-answer">
+                <p class="label">Tu respuesta:</p>
+                <p class="content">{{ question.userAnswer }}</p>
+              </div>
+
+              <!-- RESPUESTA ESPERADA -->
+              <div class="answer-detail expected-answer">
+                <p class="label">Respuesta esperada:</p>
+                <p class="content">{{ question.correctAnswer }}</p>
               </div>
 
               <!-- EXPLICACIÓN -->
-              <div class="explanation-box" *ngIf="question.explanation">
-                <ion-icon name="information-circle-outline"></ion-icon>
-                <p>{{ question.explanation }}</p>
+              <div class="explanation-detail" *ngIf="question.explanation">
+                <p class="label">Explicación:</p>
+                <p class="content">{{ question.explanation }}</p>
               </div>
             </div>
           </div>

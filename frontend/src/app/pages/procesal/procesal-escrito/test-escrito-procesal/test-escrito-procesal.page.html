@@ -18,9 +18,14 @@
       </div>
     </div>
 
-    <!-- ✅ CATEGORÍA REAL DE LA BD -->
-    <div class="category-chip">
-      {{ getCurrentQuestionCategory() }}
+    <!-- Categoría y contador -->
+    <div class="category-row">
+      <div class="category-chip">
+        {{ getCurrentQuestionCategory() }}
+      </div>
+      <div class="question-counter">
+        {{ currentQuestionNumber }} de {{ totalQuestions }}
+      </div>
     </div>
 
     <!-- Texto de la pregunta -->

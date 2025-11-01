@@ -593,49 +593,68 @@ async replayRecording() {
 
       console.log('📤 Enviando audio WAV al backend');
 
-      try {
+try {
         const transcriptionResponse = await this.apiService.transcribeAudioDirect(formData).toPromise();
         
-        console.log('📥 Transcripción recibida:', transcriptionResponse);
+        console.log('📥 Respuesta del backend:', transcriptionResponse);
+        
+        await loading.dismiss();
 
-        if (transcriptionResponse && transcriptionResponse.transcription) {
-          this.currentTranscription = transcriptionResponse.transcription;
-          console.log('✅ Texto transcrito:', this.currentTranscription);
-
-          const detectedOption = this.detectOptionFromTranscription(this.currentTranscription);
+        // Intentar extraer transcripción de múltiples lugares
+        let transcription = '';
+        
+        if (transcriptionResponse) {
+          transcription = transcriptionResponse.transcription || 
+                         transcriptionResponse.data?.transcription ||
+                         transcriptionResponse.data?.text || 
+                         transcriptionResponse.text ||
+                         '';
+        }
+        
+        console.log('✅ Transcripción extraída:', transcription);
+        
+        if (!transcription || transcription.trim() === '') {
+          console.error('❌ Transcripción vacía. Respuesta completa:', JSON.stringify(transcriptionResponse));
           
-          if (detectedOption) {
-            console.log('✅ Opción detectada:', detectedOption);
-            await this.selectAnswer(detectedOption);
-            await loading.dismiss();
-          } else {
-            await loading.dismiss();
-            const alert = await this.alertController.create({
-              header: 'No entendí tu respuesta',
-              message: `Dijiste: "${this.currentTranscription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
-              buttons: ['OK']
-            });
-            await alert.present();
-          }
-        } else {
-          await loading.dismiss();
           const alert = await this.alertController.create({
-            header: 'Error',
-            message: 'No se pudo transcribir el audio. Intenta de nuevo.',
+            header: 'No te escuché',
+            message: 'El sistema no pudo transcribir tu audio. Asegúrate de:\n• Hablar más fuerte y claro\n• Estar en un lugar silencioso\n• Mantener presionado mientras hablas',
+            buttons: ['OK']
+          });
+          await alert.present();
+          
+          this.audioService.clearRecording();
+          this.cdr.detectChanges();
+          return;
+        }
+        
+        this.currentTranscription = transcription;
+        
+        const detectedOption = this.detectOptionFromTranscription(transcription);
+        
+        if (detectedOption) {
+          await this.selectAnswer(detectedOption);
+        } else {
+          const alert = await this.alertController.create({
+            header: 'No entendí tu respuesta',
+            message: `Dijiste: "${transcription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
             buttons: ['OK']
           });
           await alert.present();
         }
+
       } catch (error: any) {
         console.error('❌ Error transcribiendo:', error);
         await loading.dismiss();
         
-        const alert = await this.alertController.create({
-          header: 'Error',
-          message: 'Hubo un error al procesar tu respuesta.',
-          buttons: ['OK']
-        });
-        await alert.present();
+        if (!this.showEvaluation) {
+          const alert = await this.alertController.create({
+            header: 'Error',
+            message: 'Hubo un error al procesar tu respuesta. Intenta de nuevo.',
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
       }
       
     } catch (error) {
@@ -730,34 +749,49 @@ async replayRecording() {
 detectOptionFromTranscription(transcription: string): string | null {
     const text = transcription
       .toLowerCase()
-      .replace(/[.,;:!?¿¡]/g, ' ')
-      .replace(/\s+/g, ' ')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .trim();
     
     const question = this.getCurrentQuestion();
-    
     if (!question) return null;
 
-    console.log('🔍 Texto limpio para detectar:', text);
+    console.log('🔍 Analizando transcripción:', text);
 
+    // Para Verdadero/Falso
     if (question.type == 2 || question.type == '2') {
-      if (text.includes('verdadero') || text.includes('true') || text.includes('sí') || text.includes('si')) {
+      // Buscar "verdadero" o sinónimos
+      if (/verdadero|true|correcto|afirmativo|si(?![a-z])|exacto/i.test(text)) {
         console.log('✅ Detectado: Verdadero');
         return 'Verdadero';
       }
-      if (text.includes('falso') || text.includes('false')) {
+      
+      // Buscar "falso" o sinónimos
+      if (/falso|false|incorrecto|negativo|no(?![a-z])/i.test(text)) {
         console.log('✅ Detectado: Falso');
         return 'Falso';
       }
-      
-      const words = text.split(' ').filter(w => w.length > 0);
+
+      // Buscar letra A o variantes (para Verdadero)
+      if (/\bah\b|\ba\b|\bla a\b|\bletra a\b|\bopcion a\b|\balternativa a\b/i.test(text)) {
+        console.log('✅ Detectado: Verdadero (por letra A)');
+        return 'Verdadero';
+      }
+
+      // Buscar letra B o variantes (para Falso)  
+      if (/\bbe\b|\bb\b|\bla b\b|\bletra b\b|\bopcion b\b|\balternativa b\b/i.test(text)) {
+        console.log('✅ Detectado: Falso (por letra B)');
+        return 'Falso';
+      }
+
+      // Buscar solo V o F aisladas
+      const words = text.split(/\s+/);
       for (const word of words) {
-        if (word === 'v' || word === 've') {
-          console.log('✅ Detectado: Verdadero (por letra V)');
+        if (/^v[e]?$/i.test(word)) {
+          console.log('✅ Detectado: Verdadero (letra V)');
           return 'Verdadero';
         }
-        if (word === 'f' || word === 'efe') {
-          console.log('✅ Detectado: Falso (por letra F)');
+        if (/^f[e]?$/i.test(word)) {
+          console.log('✅ Detectado: Falso (letra F)');
           return 'Falso';
         }
       }
@@ -765,41 +799,67 @@ detectOptionFromTranscription(transcription: string): string | null {
 
     const options = this.getCurrentQuestionOptions();
     
-    // DETECCIÓN MEJORADA: Buscar "a", "ah", "b", "be", etc en TODA la transcripción
-    const cleanText = text.replace(/\s+/g, '');
-    
-    if (text.match(/\ba\b/) || text.match(/\bah\b/) || cleanText === 'a' || cleanText === 'ah' || 
-        text.includes('letra a') || text.includes('opcion a') || text.includes('alternativa a')) {
-      console.log('✅ Detectado: Opción A');
-      return options[0];
-    }
-    if (text.match(/\bb\b/) || text.match(/\bbe\b/) || cleanText === 'b' || cleanText === 'be' ||
-        text.includes('letra b') || text.includes('opcion b') || text.includes('alternativa b')) {
-      console.log('✅ Detectado: Opción B');
-      return options[1];
-    }
-    if (text.match(/\bc\b/) || text.match(/\bce\b/) || cleanText === 'c' || cleanText === 'ce' ||
-        text.includes('letra c') || text.includes('opcion c') || text.includes('alternativa c')) {
-      console.log('✅ Detectado: Opción C');
-      return options[2];
-    }
-    if (text.match(/\bd\b/) || text.match(/\bde\b/) || cleanText === 'd' || cleanText === 'de' ||
-        text.includes('letra d') || text.includes('opcion d') || text.includes('alternativa d')) {
-      console.log('✅ Detectado: Opción D');
-      return options[3];
+    // Detectar letras A, B, C, D con más flexibilidad
+    const letterDetection = [
+      { patterns: [/\bah\b/, /\ba\b/, /\bla a\b/, /\bletra a\b/, /\bopcion a\b/, /\balternativa a\b/], index: 0 },
+      { patterns: [/\bbe\b/, /\bb\b/, /\bla b\b/, /\bletra b\b/, /\bopcion b\b/, /\balternativa b\b/], index: 1 },
+      { patterns: [/\bce\b/, /\bc\b/, /\bla c\b/, /\bletra c\b/, /\bopcion c\b/, /\balternativa c\b/], index: 2 },
+      { patterns: [/\bde\b/, /\bd\b/, /\bla d\b/, /\bletra d\b/, /\bopcion d\b/, /\balternativa d\b/], index: 3 }
+    ];
+
+    for (const detection of letterDetection) {
+      if (detection.index >= options.length) continue;
+      
+      for (const pattern of detection.patterns) {
+        if (pattern.test(text)) {
+          console.log(`✅ Detectado: Opción ${String.fromCharCode(65 + detection.index)}`);
+          return options[detection.index];
+        }
+      }
     }
 
+    // Si la transcripción es muy corta (1-3 palabras), intentar detectar letra al final
+    const words = text.split(/\s+/).filter(w => w.length > 0);
+    if (words.length <= 3) {
+      const lastWord = words[words.length - 1];
+      
+      if (/^ah?$/i.test(lastWord) && options.length > 0) {
+        console.log('✅ Detectado: Opción A (al final)');
+        return options[0];
+      }
+      if (/^be?$/i.test(lastWord) && options.length > 1) {
+        console.log('✅ Detectado: Opción B (al final)');
+        return options[1];
+      }
+      if (/^ce?$/i.test(lastWord) && options.length > 2) {
+        console.log('✅ Detectado: Opción C (al final)');
+        return options[2];
+      }
+      if (/^de?$/i.test(lastWord) && options.length > 3) {
+        console.log('✅ Detectado: Opción D (al final)');
+        return options[3];
+      }
+    }
+
+    // Buscar por contenido de la opción
     for (let i = 0; i < options.length; i++) {
       const option = options[i];
-      const optionWords = option.toLowerCase()
+      const optionWords = option
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[.,;:!?¿¡]/g, ' ')
-        .split(' ')
-        .filter((w: string) => w.length > 4);
+        .split(/\s+/)
+        .filter((w: string) => w.length > 3);
       
-      const matches = optionWords.filter((word: string) => text.includes(word));
+      let matches = 0;
+      for (const word of optionWords) {
+        if (text.includes(word)) {
+          matches++;
+        }
+      }
       
-      if (matches.length >= 3) {
-        console.log(`✅ Detectado por contenido: Opción ${String.fromCharCode(65 + i)}`);
+      if (matches >= 2 || (optionWords.length > 0 && matches / optionWords.length > 0.5)) {
+        console.log(`✅ Detectado por contenido: Opción ${String.fromCharCode(65 + i)} (${matches} coincidencias)`);
         return option;
       }
     }
@@ -884,8 +944,8 @@ detectOptionFromTranscription(transcription: string): string | null {
     }, 300);
   }
 
-  async completeTest() {
-    console.log('🏁 Completando test oral');
+async completeTest() {
+    console.log('🏁 Completando test oral civil');
     
     const loading = await this.loadingController.create({
       message: 'Finalizando test...',
@@ -913,20 +973,19 @@ detectOptionFromTranscription(transcription: string): string | null {
           questionDetails.push({
             questionNumber: index + 1,
             questionText: q.questionText,
-            userAnswer: q.userAnswer || 'Sin respuesta',
-            expectedAnswer: evaluation.correctAnswer || q.correctAnswer || 'Sin respuesta esperada',
+            userAnswer: this.userAnswers[questionId] || 'Sin respuesta',
+            expectedAnswer: evaluation.correctAnswer || q.correctAnswer,
             explanation: evaluation.explanation || q.explanation || 'Sin explicación disponible',
             correct: evaluation.isCorrect
           });
 
-
         } else {
           incorrectCount++;
-      questionDetails.push({
+          questionDetails.push({
             questionNumber: index + 1,
             questionText: q.questionText,
-            userAnswer: 'Sin respuesta',
-            expectedAnswer: q.correctAnswer || 'Sin respuesta esperada',
+            userAnswer: this.userAnswers[questionId] || 'Sin respuesta',
+            expectedAnswer: q.correctAnswer,
             explanation: q.explanation || 'Sin explicación disponible',
             correct: false
           });
@@ -948,11 +1007,27 @@ detectOptionFromTranscription(transcription: string): string | null {
       };
       
       localStorage.setItem('current_oral_test_results', JSON.stringify(results));
-      console.log('✅ Resultados guardados:', results);
+      console.log('✅ Resultados guardados en localStorage');
+      
+      // CRÍTICO: Finalizar test en el backend
+      console.log('📊 testId antes de finalizar:', this.testId);
+      
+      if (this.testId && this.testId > 0) {
+        try {
+          console.log('📡 Llamando finishTest con testId:', this.testId);
+          const finishResponse = await this.apiService.finishTest(this.testId).toPromise();
+          console.log('✅ Test oral CIVIL finalizado en backend:', finishResponse);
+        } catch (backendError) {
+          console.error('❌ Error finalizando test oral en backend:', backendError);
+          console.error('❌ Detalles del error:', JSON.stringify(backendError, null, 2));
+        }
+      } else {
+        console.error('⚠️ NO SE PUEDE FINALIZAR: testId es', this.testId);
+        console.error('⚠️ El test NO se guardará en la base de datos');
+      }
       
       await loading.dismiss();
-      
-      await this.router.navigate(['/procesal/procesal-oral/resumen-test-procesal-oral']);
+      await this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
       
     } catch (error) {
       console.error('❌ Error completando test:', error);

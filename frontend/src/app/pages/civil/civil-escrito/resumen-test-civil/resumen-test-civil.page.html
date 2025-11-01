@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <!-- ✅ CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
+  <!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
     <div class="questions-section">
       <h3 class="section-title">Resumen de preguntas</h3>
       <div class="questions-container">
@@ -65,44 +65,104 @@
             (click)="toggleQuestion(i)">
             {{ i + 1 }}
           </div>
-          
-          <!-- Desplegable debajo del círculo -->
-          <div 
-            class="question-dropdown"
-            *ngIf="expandedQuestionIndex === i"
-            [@slideDown]>
-            <div class="dropdown-content">
-              <!-- TEXTO DE LA PREGUNTA -->
-              <p class="question-text">{{ question.questionText }}</p>
-              
-              <!-- ✅ ALTERNATIVAS -->
-              <div class="alternatives-list">
-                <div *ngFor="let option of getQuestionOptions(question); let optIndex = index"
-                     class="alternative-item"
-                     [class.alt-selected]="isOptionSelected(question, option)"
-                     [class.alt-correct]="isOptionCorrect(question, option)">
-                  
-                  <div class="alt-icon">
-                    <ion-icon *ngIf="isOptionCorrect(question, option)" 
-                              name="checkmark-circle"></ion-icon>
-                    <ion-icon *ngIf="!isOptionCorrect(question, option) && isOptionSelected(question, option)" 
-                              name="close-circle"></ion-icon>
-                    <ion-icon *ngIf="!isOptionCorrect(question, option) && !isOptionSelected(question, option)" 
-                              name="ellipse-outline"></ion-icon>
-                  </div>
-                  
-                  <div class="alt-text">
-                    {{ getOptionLetter(optIndex) }}. {{ option }}
-                  </div>
-                </div>
-              </div>
+        </div>
+      </div>
 
-              <!-- ✅ EXPLICACIÓN -->
-              <div class="explanation-box" *ngIf="question.explanation">
-                <ion-icon name="information-circle-outline"></ion-icon>
-                <p>{{ question.explanation }}</p>
+      <!-- Desplegable FUERA del loop -->
+      <div 
+        class="question-dropdown-global"
+        *ngIf="expandedQuestionIndex !== null"
+        [@slideDown]>
+        
+        <div class="dropdown-content">
+          <!-- TEXTO DE LA PREGUNTA -->
+          <p class="question-text">{{ questionResults[expandedQuestionIndex].questionText }}</p>
+          
+          <!-- ALTERNATIVAS -->
+          <div class="alternatives-list">
+            <div *ngFor="let option of getQuestionOptions(questionResults[expandedQuestionIndex]); let optIndex = index"
+                 class="alternative-item"
+                 [class.alt-selected]="isOptionSelected(questionResults[expandedQuestionIndex], option)"
+                 [class.alt-correct]="isOptionCorrect(questionResults[expandedQuestionIndex], option)">
+              
+              <div class="alt-icon">
+                <ion-icon *ngIf="isOptionCorrect(questionResults[expandedQuestionIndex], option)" 
+                          name="checkmark-circle"></ion-icon>
+                <ion-icon *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && isOptionSelected(questionResults[expandedQuestionIndex], option)" 
+                          name="close-circle"></ion-icon>
+                <ion-icon *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && !isOptionSelected(questionResults[expandedQuestionIndex], option)" 
+                          name="ellipse-outline"></ion-icon>
+              </div>
+              
+              <div class="alt-text">
+                {{ getOptionLetter(optIndex) }}. {{ option }}
               </div>
             </div>
+          </div>
+
+          <!-- EXPLICACIÓN -->
+          <div class="explanation-detail" *ngIf="questionResults[expandedQuestionIndex].explanation">
+            <p class="label">Explicación:</p>
+            <p class="content">{{ questionResults[expandedQuestionIndex].explanation }}</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
+    <div class="questions-section">
+      <h3 class="section-title">Resumen de preguntas</h3>
+      <div class="questions-container">
+        <div 
+          *ngFor="let question of questionResults; let i = index"
+          class="question-wrapper">
+          
+          <!-- Círculo -->
+          <div 
+            class="question-circle"
+            [class.correct]="question.isCorrect"
+            [class.incorrect]="!question.isCorrect"
+            [class.expanded]="expandedQuestionIndex === i"
+            (click)="toggleQuestion(i)">
+            {{ i + 1 }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Desplegable FUERA del loop -->
+      <div 
+        class="question-dropdown-global"
+        *ngIf="expandedQuestionIndex !== null"
+        [@slideDown]>
+        
+        <div class="dropdown-content">
+          <!-- TEXTO DE LA PREGUNTA -->
+          <p class="question-text">{{ questionResults[expandedQuestionIndex].questionText }}</p>
+          
+          <!-- ALTERNATIVAS -->
+          <div class="alternatives-list">
+            <div *ngFor="let option of getQuestionOptions(questionResults[expandedQuestionIndex]); let optIndex = index"
+                 class="alternative-item"
+                 [class.alt-selected]="isOptionSelected(questionResults[expandedQuestionIndex], option)"
+                 [class.alt-correct]="isOptionCorrect(questionResults[expandedQuestionIndex], option)">
+              
+              <div class="alt-icon">
+                <ion-icon *ngIf="isOptionCorrect(questionResults[expandedQuestionIndex], option)" 
+                          name="checkmark-circle"></ion-icon>
+                <ion-icon *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && isOptionSelected(questionResults[expandedQuestionIndex], option)" 
+                          name="close-circle"></ion-icon>
+                <ion-icon *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && !isOptionSelected(questionResults[expandedQuestionIndex], option)" 
+                          name="ellipse-outline"></ion-icon>
+              </div>
+              
+              <div class="alt-text">
+                {{ getOptionLetter(optIndex) }}. {{ option }}
+              </div>
+            </div>
+          </div>
+
+          <!-- EXPLICACIÓN -->
+          <div class="explanation-detail" *ngIf="questionResults[expandedQuestionIndex].explanation">
+            <p class="label">Explicación:</p>
+            <p class="content">{{ questionResults[expandedQuestionIndex].explanation }}</p>
           </div>
         </div>
       </div>

@@ -45,6 +45,7 @@ ion-content.test-content {
     font-weight: 600;
     margin: 0;
   }
+  
 }
 
 // ========================================
@@ -92,19 +93,30 @@ ion-content.test-content {
 }
 
 // ========================================
-// CHIP DE CATEGORÍA
+// CHIP DE CATEGORÍA Y CONTADOR
 // ========================================
+.category-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .category-chip {
   display: inline-block;
   background: rgba(255, 111, 0, 0.1);
   border: 1px solid rgba(255, 111, 0, 0.3);
   border-radius: 20px;
   padding: 8px 16px;
-  margin-bottom: 20px;
   font-size: 14px;
   font-weight: 600;
   color: #FF6F00;
-  text-align: center;
+}
+
+.question-counter {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
 }
 
 // ========================================

@@ -295,6 +295,61 @@ ion-content.results-content {
             margin: 0 0 16px 0;
             line-height: 1.5;
           }
+          .answer-detail {
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid;
+
+            &.your-answer {
+              background: #eff6ff;
+              border-left-color: #3b82f6;
+            }
+
+            &.expected-answer {
+              background: #f0fdf4;
+              border-left-color: #10b981;
+            }
+
+            .label {
+              font-size: 13px;
+              font-weight: 600;
+              color: #374151;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin: 0 0 8px 0;
+            }
+
+            .content {
+              font-size: 15px;
+              color: #1f2937;
+              line-height: 1.6;
+              margin: 0;
+            }
+          }
+
+          .explanation-detail {
+            padding: 12px;
+            background: #fef3c7;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+
+            .label {
+              font-size: 13px;
+              font-weight: 600;
+              color: #92400e;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin: 0 0 8px 0;
+            }
+
+            .content {
+              font-size: 15px;
+              color: #78350f;
+              line-height: 1.6;
+              margin: 0;
+            }
+          }
         }
       }
     }

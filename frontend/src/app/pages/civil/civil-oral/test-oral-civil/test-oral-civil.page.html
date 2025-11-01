@@ -4,6 +4,7 @@
     <ion-icon name="chevron-back" class="back-icon" (click)="confirmExit()"></ion-icon>
     <h1 class="header-title">Derecho Civil Oral</h1>
   </div>
+  
 
   <!-- Contenido principal -->
   <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
@@ -18,11 +19,15 @@
       </div>
     </div>
 
-    <!-- Categoría -->
-    <div class="category-chip">
-      {{ getCurrentQuestion()?.category || 'Derecho Civil' }}
+ <!-- Categoría y contador -->
+    <div class="category-row">
+      <div class="category-chip">
+        {{ getCurrentQuestion()?.category || 'Derecho Civil' }}
+      </div>
+      <div class="question-counter">
+        {{ currentQuestionNumber }} de {{ totalQuestions }}
+      </div>
     </div>
-
     <!-- Texto de la pregunta -->
     <div class="question-text">
       <p><strong>{{ getCurrentQuestion()?.questionText }}</strong></p>
