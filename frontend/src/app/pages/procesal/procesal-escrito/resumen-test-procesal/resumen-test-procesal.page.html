@@ -8,10 +8,10 @@
   <!-- Contenido principal -->
   <div class="content-area">
     
-    <!-- MENSAJE MOTIVACIONAL -->
-    <div class="motivational-section">
-      <p class="message-small">{{ percentage >= 50 ? '¡Buen trabajo!' : 'No te rindas' }}</p>
-      <h1 class="message-large">{{ motivationalMessage }}</h1>
+<!-- ✅ MENSAJE MOTIVACIONAL DINÁMICO -->
+    <div class="motivational-section" [class.success]="percentage >= 70">
+      <p class="message-small">{{ getSmallMessage() }}</p>
+      <h1 class="message-large">{{ getLargeMessage() }}</h1>
     </div>
 
     <!-- NIVEL Y MAPACHE EN LA MISMA LÍNEA -->

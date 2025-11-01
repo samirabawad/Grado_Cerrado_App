@@ -231,4 +231,41 @@ export class ResumenTestProcesalPage implements OnInit {
   getOptionLetter(index: number): string {
     return String.fromCharCode(65 + index);
   }
+
+    // ✅ MENSAJE SEGÚN RESULTADO
+
+// ✅ MENSAJE PEQUEÑO SEGÚN RESULTADO
+getSmallMessage(): string {
+  if (this.percentage >= 90) {
+    return '¡Increíble!';
+  } else if (this.percentage >= 80) {
+    return '¡Excelente trabajo!';
+  } else if (this.percentage >= 70) {
+    return '¡Muy bien!';
+  } else if (this.percentage >= 60) {
+    return 'Buen intento';
+  } else if (this.percentage >= 40) {
+    return 'Sigue adelante';
+  } else {
+    return 'No te rindas';
+  }
+}
+
+// ✅ MENSAJE GRANDE SEGÚN RESULTADO
+getLargeMessage(): string {
+  if (this.percentage >= 90) {
+    return '¡Dominas el tema!';
+  } else if (this.percentage >= 80) {
+    return '¡Vas por buen camino!';
+  } else if (this.percentage >= 70) {
+    return '¡Sigue así!';
+  } else if (this.percentage >= 60) {
+    return '¡Puedes mejorar!';
+  } else if (this.percentage >= 40) {
+    return '¡Sigue practicando!';
+  } else {
+    return '¡Inténtalo de nuevo!';
+  }
+}
+
 }
