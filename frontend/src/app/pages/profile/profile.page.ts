@@ -2,7 +2,7 @@
 
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController, LoadingController  } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
@@ -100,7 +100,8 @@ export class ProfilePage implements OnInit, AfterViewInit {
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {
@@ -132,7 +133,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
       const studentId = currentUser.id;
       
       this.user.id = studentId;
-      this.user.nombre = currentUser.name || 'Usuario';
+      this.user.nombre = currentUser.nombreCompleto || 'Usuario';
       this.user.email = currentUser.email || 'usuario@example.com';
 
       await this.loadDashboardStats(studentId);
@@ -436,23 +437,184 @@ export class ProfilePage implements OnInit, AfterViewInit {
     });
   }
 
-  async editName() {
-    const alert = await this.alertController.create({
-      header: 'Editar Nombre',
-      message: 'Función en desarrollo.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
+async editName() {
+  // Primero necesitamos obtener los datos actuales del usuario
+  const currentUser = this.apiService.getCurrentUser();
+  
+  const alert = await this.alertController.create({
+    header: 'Editar Nombre',
+    inputs: [
+      {
+        name: 'nombre',
+        type: 'text',
+        placeholder: 'Nombre *',
+        value: currentUser?.nombre || '',
+        attributes: {
+          maxlength: 50
+        }
+      },
+      {
+        name: 'segundoNombre',
+        type: 'text',
+        placeholder: 'Segundo Nombre (opcional)',
+        value: currentUser?.segundoNombre || '',
+        attributes: {
+          maxlength: 50
+        }
+      },
+      {
+        name: 'apellidoPaterno',
+        type: 'text',
+        placeholder: 'Apellido Paterno',
+        value: currentUser?.apellidoPaterno || '',
+        attributes: {
+          maxlength: 50
+        }
+      },
+      {
+        name: 'apellidoMaterno',
+        type: 'text',
+        placeholder: 'Apellido Materno',
+        value: currentUser?.apellidoMaterno || '',
+        attributes: {
+          maxlength: 50
+        }
+      }
+    ],
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        cssClass: 'secondary'
+      },
+      {
+        text: 'Guardar',
+        handler: async (data) => {
+          // Validación básica
+          if (!data.nombre || data.nombre.trim().length < 2) {
+            await this.showToast('⚠️ El nombre debe tener al menos 2 caracteres', 'warning');
+            return false; // No cerrar el alert
+          }
 
-  async editEmail() {
-    const alert = await this.alertController.create({
-      header: 'Editar Email',
-      message: 'Función en desarrollo.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
+          // Crear el objeto con solo los campos a actualizar
+          const updateData: any = {
+            nombre: data.nombre.trim()
+          };
+
+          // Solo incluir campos opcionales si tienen valor
+          if (data.segundoNombre !== undefined) {
+            updateData.segundoNombre = data.segundoNombre.trim() || null;
+          }
+          if (data.apellidoPaterno !== undefined) {
+            updateData.apellidoPaterno = data.apellidoPaterno.trim() || null;
+          }
+          if (data.apellidoMaterno !== undefined) {
+            updateData.apellidoMaterno = data.apellidoMaterno.trim() || null;
+          }
+
+          // Llamar a la función de actualización
+          await this.updateProfileData(updateData);
+          return true; // Cerrar el alert
+        }
+      }
+    ]
+  });
+  
+
+  await alert.present();
+}
+
+async editEmail() {
+  const currentUser = this.apiService.getCurrentUser();
+  
+  const alert = await this.alertController.create({
+    header: 'Editar Email',
+    message: 'Ingresa tu nuevo correo electrónico',
+    inputs: [
+      {
+        name: 'email',
+        type: 'email',
+        placeholder: 'nuevo@email.com',
+        value: currentUser?.email || '',
+        attributes: {
+          maxlength: 100,
+          autocomplete: 'email'
+        }
+      },
+      {
+        name: 'confirmEmail',
+        type: 'email',
+        placeholder: 'Confirmar email',
+        attributes: {
+          maxlength: 100,
+          autocomplete: 'email'
+        }
+      }
+    ],
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        cssClass: 'secondary'
+      },
+      {
+        text: 'Guardar',
+        handler: async (data) => {
+          // Validación de formato de email
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          
+          if (!data.email || !data.email.trim()) {
+            await this.showToast('⚠️ Debes ingresar un email', 'warning');
+            return false;
+          }
+
+          if (!emailRegex.test(data.email.trim())) {
+            await this.showToast('⚠️ Formato de email inválido', 'warning');
+            return false;
+          }
+
+          // Validación de confirmación
+          if (data.email.trim() !== data.confirmEmail.trim()) {
+            await this.showToast('⚠️ Los emails no coinciden', 'warning');
+            return false;
+          }
+
+          // Verificar si el email es diferente al actual
+          if (data.email.trim().toLowerCase() === currentUser?.email?.toLowerCase()) {
+            await this.showToast('ℹ️ El email es el mismo que el actual', 'warning');
+            return true;
+          }
+
+          // Mostrar confirmación final SIN HTML
+          const confirmAlert = await this.alertController.create({
+            header: '⚠️ Confirmación',
+            message: `¿Estás seguro de cambiar tu email a:\n\n${data.email.trim()}\n\nNota: Es posible que necesites verificar el nuevo email.`,
+            buttons: [
+              {
+                text: 'Cancelar',
+                role: 'cancel'
+              },
+              {
+                text: 'Confirmar',
+                handler: async () => {
+                  const updateData = {
+                    email: data.email.trim().toLowerCase()
+                  };
+                  await this.updateProfileData(updateData);
+                }
+              }
+            ]
+          });
+
+          await confirmAlert.present();
+          return true;
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastController.create({
@@ -518,6 +680,67 @@ export class ProfilePage implements OnInit, AfterViewInit {
     }
     console.log('✅ Configuración de corrección cargada:', this.correctionConfig);
   }
+
+// Función auxiliar para actualizar los datos del perfil
+async updateProfileData(data: any) {
+  const loading = await this.loadingController.create({
+    message: 'Actualizando perfil...',
+    spinner: 'crescent'
+  });
+  await loading.present();
+
+  try {
+    console.log('📤 Datos enviados al backend:', data);
+    const response = await this.apiService.updateProfile(this.user.id, data).toPromise();
+    console.log('📥 Respuesta del backend:', response);
+    
+    if (response && response.success && response.user) {
+      // ✅ El backend devuelve TODOS los datos actualizados, incluyendo nombreCompleto
+      const currentUser = this.apiService.getCurrentUser();
+      
+      if (currentUser) {
+        // ✅ Actualizar con los datos del backend
+        const updatedUser = {
+          ...currentUser,
+          ...response.user  // Esto incluye: nombre, segundoNombre, apellidoPaterno, apellidoMaterno, nombreCompleto, etc.
+        };
+
+        // ✅ GUARDAR en localStorage
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        console.log('💾 Usuario actualizado en localStorage:', updatedUser);
+
+        // ✅ Actualizar la vista local
+        this.user.nombre = response.user.nombreCompleto;
+        this.user.nombreCompleto = response.user.nombreCompleto;
+        this.user.email = response.user.email;
+        
+        await this.showToast('✅ Nombre actualizado exitosamente', 'success');
+      }
+    } else {
+      const errorMsg = response?.message || 'Error al actualizar el perfil';
+      await this.showToast(`❌ ${errorMsg}`, 'danger');
+    }
+  } catch (error: any) {
+    console.error('❌ Error actualizando perfil:', error);
+    
+    let errorMessage = 'Error al actualizar el perfil';
+    
+    if (error.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error.status === 0) {
+      errorMessage = 'No hay conexión con el servidor';
+    } else if (error.status === 401) {
+      errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente';
+      await this.router.navigate(['/login']);
+    } else if (error.status === 400) {
+      errorMessage = 'Datos inválidos';
+    }
+    
+    await this.showToast(`❌ ${errorMessage}`, 'danger');
+  } finally {
+    await loading.dismiss();
+  }
+}
 
   async onCorrectionModeChange() {
     try {

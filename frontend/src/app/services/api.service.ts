@@ -34,6 +34,15 @@ export interface StudyFrequencyConfig {
   horaRecordatorio: string;
 }
 
+// Interfaces
+export interface UpdateProfileData {
+  nombre?: string;
+  segundoNombre?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  email?: string;
+}
+
 export interface StudyFrequencyResponse {
   success: boolean;
   data: {
@@ -84,16 +93,16 @@ export class ApiService {
   // AUTENTICACIÓN
   // ========================================
 
-  registerUser(userData: { nombre:string, segundoNombre:string, apellidoPaterno: string, apellidoMaterno: string,nombreCompleto: string, email: string, password: string }): Observable<any> {
+  registerUser(userData: { nombre:string, segundoNombre:string, apellidoPaterno: string, apellidoMaterno: string, email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/Auth/register`;
     
-    if (!userData.nombreCompleto || !userData.email || !userData.password) {
+    if (!userData.nombre || !userData.apellidoMaterno ||!userData.apellidoPaterno || !userData.email || !userData.password) {
       console.error('Datos incompletos para registro:', userData);
       throw new Error('Faltan datos requeridos: name, email y password');
     }
     
     console.log('Enviando registro a:', url, { 
-      name: userData.nombreCompleto, 
+      name: userData.nombre +' '+userData.apellidoPaterno+' '+ userData.apellidoMaterno, 
       email: userData.email, 
       password: '***'
     });
@@ -121,6 +130,13 @@ export class ApiService {
         })
       );
   }
+
+    // Actualizar datos del perfil (PATCH)
+  updateProfile(studentId: number, profileData: Partial<UpdateProfileData>): Observable<any> {
+    const url = `${this.API_URL}/Auth/update/${studentId}`;
+    return this.http.patch(url, profileData, this.httpOptions);
+  }
+
 
   loginUser(loginData: { email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/Auth/login`;  // ✅ CORRECTO: 'Auth' con mayúscula

@@ -83,14 +83,12 @@ export class RegistroPage implements OnInit {
     await loading.present();
     this.isLoading = true;
 
-    const nombreCompleto = this.buildNombreCompleto();
 
     const registerData = {
       nombre: this.nombre,
       segundoNombre: this.segundoNombre,
       apellidoMaterno: this.apellidoMaterno,
       apellidoPaterno: this.apellidoPaterno,
-      nombreCompleto: nombreCompleto,
       email: this.correoElectronico.toLowerCase().trim(),
       password: this.contrasena
     };
@@ -130,17 +128,6 @@ export class RegistroPage implements OnInit {
       
       await this.showAlert('Error en el registro', errorMessage);
     }
-  }
-
-  private buildNombreCompleto(): string {
-    const partes = [
-      this.nombre.trim(),
-      this.segundoNombre.trim(),
-      this.apellidoPaterno.trim(),
-      this.apellidoMaterno.trim()
-    ].filter(parte => parte.length > 0);
-
-    return partes.join(' ');
   }
 
   private async showAlert(header: string, message: string) {
