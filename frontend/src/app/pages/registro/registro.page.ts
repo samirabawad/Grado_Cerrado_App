@@ -86,7 +86,11 @@ export class RegistroPage implements OnInit {
     const nombreCompleto = this.buildNombreCompleto();
 
     const registerData = {
-      name: nombreCompleto,
+      nombre: this.nombre,
+      segundoNombre: this.segundoNombre,
+      apellidoMaterno: this.apellidoMaterno,
+      apellidoPaterno: this.apellidoPaterno,
+      nombreCompleto: nombreCompleto,
       email: this.correoElectronico.toLowerCase().trim(),
       password: this.contrasena
     };

@@ -2,12 +2,9 @@
 // CONFIGURACIÓN BÁSICA
 // ========================================
 .results-content {
-  --background: transparent;
-  background-image: url('/assets/image/fondo_blanco_app.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
+  --background: #ffffff;
+  background-color: #ffffff;
+  background-image: none;
   min-height: 100vh;
 }
 
@@ -62,11 +59,10 @@ ion-content.results-content {
 // ========================================
 // MENSAJE MOTIVACIONAL
 // ========================================
-
 .motivational-section {
   text-align: center;
   padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   border-radius: 16px;
   transition: all 0.3s ease;
@@ -94,57 +90,13 @@ ion-content.results-content {
 }
 
 // ========================================
-// NIVEL Y MAPACHE
-// ========================================
-.level-mapache-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-  .level-info {
-    flex: 1;
-
-    .level-label {
-      font-size: 14px;
-      color: #FF6F00;
-      margin: 0 0 4px 0;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .level-message {
-      font-size: 20px;
-      font-weight: 700;
-      color: #333;
-      margin: 0;
-    }
-  }
-
-  .mapache-container {
-    flex-shrink: 0;
-
-    .mapache-image {
-      width: 80px;
-      height: 80px;
-      object-fit: contain;
-    }
-  }
-}
-
-// ========================================
 // STATS GRID
 // ========================================
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 
   .stat-item {
     display: flex;
@@ -234,7 +186,7 @@ ion-content.results-content {
     margin: 0 0 16px 0;
   }
 
-.questions-container {
+  .questions-container {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -413,18 +365,11 @@ ion-content.results-content {
     }
   }
 
-  .level-mapache-row {
-    .mapache-container {
-      .mapache-image {
-        width: 60px;
-        height: 60px;
-      }
-    }
-  }
-
   .questions-section {
     .questions-container {
-      grid-template-columns: repeat(4, 1fr);
+      .question-wrapper {
+        flex: 0 0 calc(25% - 10px);
+      }
     }
   }
 }

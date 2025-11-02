@@ -8,24 +8,13 @@
   <!-- Contenido principal -->
   <div class="content-area">
     
-<!-- ✅ MENSAJE MOTIVACIONAL DINÁMICO -->
+    <!-- MENSAJE MOTIVACIONAL DINÁMICO -->
     <div class="motivational-section" [class.success]="percentage >= 70">
       <p class="message-small">{{ getSmallMessage() }}</p>
       <h1 class="message-large">{{ getLargeMessage() }}</h1>
     </div>
 
-    <!-- NIVEL Y MAPACHE EN LA MISMA LÍNEA -->
-    <div class="level-mapache-row">
-      <div class="level-info">
-        <p class="level-label">{{ levelTitle }}</p>
-        <h2 class="level-message">{{ levelSubtitle }}</h2>
-      </div>
-      <div class="mapache-container">
-        <img src="assets/image/mok.png" alt="Mapache" class="mapache-image">
-      </div>
-    </div>
-
-    <!-- SOLO BLOQUES DE CORRECTAS E INCORRECTAS -->
+    <!-- BLOQUES DE CORRECTAS E INCORRECTAS -->
     <div class="stats-grid">
       <div class="stat-item correct">
         <div class="stat-icon">
@@ -48,7 +37,7 @@
       </div>
     </div>
 
-<!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
+    <!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
     <div class="questions-section">
       <h3 class="section-title">Resumen de preguntas</h3>
       <div class="questions-container">

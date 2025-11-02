@@ -36,8 +36,6 @@ export class ResumenTestCivilOralPage implements OnInit {
   totalQuestions: number = 5;
   percentage: number = 0;
   
-  levelTitle: string = 'NIVEL PRINCIPIANTE';
-  levelSubtitle: string = '¡Sigue practicando!';
   motivationalMessage: string = '¡Sigue practicando!';
   
   questionsDetails: QuestionDetail[] = [];
@@ -72,25 +70,11 @@ export class ResumenTestCivilOralPage implements OnInit {
         this.questionsDetails = results.questionDetails;
       }
 
-      this.calculateLevel();
       this.setMotivationalMessage();
 
     } catch (error) {
       console.error('Error cargando resultados:', error);
       this.router.navigate(['/civil/civil-oral']);
-    }
-  }
-
-  calculateLevel() {
-    if (this.percentage >= 80) {
-      this.levelTitle = 'NIVEL AVANZADO';
-      this.levelSubtitle = '¡Excelente trabajo!';
-    } else if (this.percentage >= 60) {
-      this.levelTitle = 'NIVEL INTERMEDIO';
-      this.levelSubtitle = '¡Muy bien!';
-    } else {
-      this.levelTitle = 'NIVEL PRINCIPIANTE';
-      this.levelSubtitle = '¡Sigue practicando!';
     }
   }
 

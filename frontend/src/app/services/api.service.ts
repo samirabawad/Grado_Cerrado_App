@@ -84,16 +84,16 @@ export class ApiService {
   // AUTENTICACIÓN
   // ========================================
 
-  registerUser(userData: { name: string, email: string, password: string }): Observable<any> {
+  registerUser(userData: { nombre:string, segundoNombre:string, apellidoPaterno: string, apellidoMaterno: string,nombreCompleto: string, email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/Auth/register`;
     
-    if (!userData.name || !userData.email || !userData.password) {
+    if (!userData.nombreCompleto || !userData.email || !userData.password) {
       console.error('Datos incompletos para registro:', userData);
       throw new Error('Faltan datos requeridos: name, email y password');
     }
     
     console.log('Enviando registro a:', url, { 
-      name: userData.name, 
+      name: userData.nombreCompleto, 
       email: userData.email, 
       password: '***'
     });
@@ -320,7 +320,10 @@ export class ApiService {
     return this.currentSession$.value;
   }
 
-  setCurrentSession(session: any): void {
+setCurrentSession(session: any): void {
+    if (session && !session.responseMethod && session.data?.responseMethod) {
+      session.responseMethod = session.data.responseMethod;
+    }
     this.currentSession$.next(session);
     this.saveSessionToStorage(session);
   }

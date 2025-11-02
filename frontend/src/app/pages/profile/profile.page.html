@@ -322,7 +322,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
       <span style="display: flex; align-items: center; gap: 12px;">
         <ion-icon name="settings" style="font-size: 24px;"></ion-icon>
-        Corrección Test
+        Corrección Test Escrito
       </span>
       <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
     </div>
@@ -338,11 +338,11 @@
     <ion-card class="settings-card">
       <ion-card-content>
         
-        <!-- TÍTULO Y TOGGLE EN LA MISMA LÍNEA -->
+    <!-- TÍTULO Y TOGGLE EN LA MISMA LÍNEA -->
         <div class="correction-header">
           <div class="correction-title">
             <ion-icon name="checkmark-done"></ion-icon>
-            <span>Modo de Corrección en Tests</span>
+            <span>Modo de Corrección en Tests Escritos</span>
           </div>
           <ion-toggle 
             [(ngModel)]="correctionConfig.immediate" 
@@ -357,7 +357,7 @@
             <ion-icon name="flash"></ion-icon>
             <div>
               <strong>Modo Activo: Corrección Inmediata</strong>
-              <p>Verás la respuesta correcta y la explicación justo después de responder cada pregunta.</p>
+              <p>Verás la respuesta correcta y la explicación justo después de responder cada pregunta en tests escritos. Los tests orales siempre muestran la explicación.</p>
             </div>
           </ion-note>
         </div>
@@ -368,7 +368,7 @@
             <ion-icon name="document-text"></ion-icon>
             <div>
               <strong>Modo Activo: Corrección al Final</strong>
-              <p>Responderás todas las preguntas primero. Las correcciones y explicaciones se mostrarán al finalizar el test.</p>
+              <p>Responderás todas las preguntas primero en tests escritos. Las correcciones y explicaciones se mostrarán al finalizar el test. Los tests orales siempre muestran la explicación.</p>
             </div>
           </ion-note>
         </div>
