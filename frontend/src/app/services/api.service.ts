@@ -320,7 +320,10 @@ export class ApiService {
     return this.currentSession$.value;
   }
 
-  setCurrentSession(session: any): void {
+setCurrentSession(session: any): void {
+    if (session && !session.responseMethod && session.data?.responseMethod) {
+      session.responseMethod = session.data.responseMethod;
+    }
     this.currentSession$.next(session);
     this.saveSessionToStorage(session);
   }
