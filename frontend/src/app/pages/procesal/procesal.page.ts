@@ -151,7 +151,7 @@ export class ProcesalPage implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/home']);
   }
 
   goToDashboard() {

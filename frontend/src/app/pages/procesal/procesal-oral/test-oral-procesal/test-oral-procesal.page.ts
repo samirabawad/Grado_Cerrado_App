@@ -1027,8 +1027,7 @@ async completeTest() {
       }
       
       await loading.dismiss();
-      await this.router.navigate(['/civil/civil-oral/resumen-test-civil-oral']);
-      
+      await this.router.navigate(['/procesal/procesal-oral/resumen-test-procesal-oral']);
     } catch (error) {
       console.error('❌ Error completando test:', error);
       await loading.dismiss();
