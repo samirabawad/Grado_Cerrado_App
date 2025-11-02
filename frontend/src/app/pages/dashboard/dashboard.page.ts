@@ -46,149 +46,156 @@ export class DashboardPage implements OnInit {
   ngOnInit() {
     this.loadDashboardData();
   }
-
-  async loadDashboardData() {
-    this.isLoading = true;
+async loadDashboardData() {
+  this.isLoading = true;
+  
+  try {
+    const currentUser = this.apiService.getCurrentUser();
     
+    if (!currentUser || !currentUser.id) {
+      console.error('No hay usuario logueado');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const studentId = currentUser.id;
+    const fullName = currentUser.nombre || 'Estudiante';
+    this.userName = fullName.split(' ')[0];
+    
+    console.log('Cargando dashboard para estudiante:', studentId);
+
     try {
-      const currentUser = this.apiService.getCurrentUser();
-      
-      if (!currentUser || !currentUser.id) {
-        console.error('No hay usuario logueado');
-        this.router.navigate(['/login']);
-        return;
+      const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
+      if (statsResponse && statsResponse.success) {
+        const stats = statsResponse.data;
+        this.totalSessions = stats.totalTests || 0;
+        this.totalQuestions = stats.totalQuestions || 0;
+        this.totalCorrectAnswers = stats.correctAnswers || 0;
+        this.overallSuccessRate = Math.round(stats.successRate || 0);
+        this.userStreak = stats.streak || 0;
+        
+        console.log('Estadísticas cargadas:', stats);
       }
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
 
-      const studentId = currentUser.id;
-      const fullName = currentUser.name || 'Estudiante';
-      this.userName = fullName.split(' ')[0];
-      
-      console.log('Cargando dashboard para estudiante:', studentId);
+    try {
+      const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();        
+      if (areaResponse && areaResponse.success) {
+        console.log('Datos jerárquicos:', areaResponse.data);
+        
+        this.areaStats = [];
+        const areasNoGenerales: any[] = [];
+        
+        areaResponse.data.forEach((item: any) => {
+          if (item.type === 'area') {
+            const temasConNuevoCalculo = item.temas.map((tema: any) => {
+              // ✅ Mapear subtemas (solo para expandir si es necesario)
+              const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => ({
+                subtemaId: subtema.subtemaId,
+                subtemaNombre: subtema.subtemaNombre,
+                totalPreguntas: subtema.totalPreguntas,
+                preguntasPracticadas: subtema.preguntasPracticadas,
+                preguntasCorrectas: subtema.preguntasCorrectas,
+                // ✅ Porcentaje del subtema: correctas/practicadas
+                porcentajeAcierto: subtema.preguntasPracticadas > 0 
+                  ? Math.round((subtema.preguntasCorrectas / subtema.preguntasPracticadas) * 100)
+                  : 0
+              }));
 
-      try {
-        const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
-        if (statsResponse && statsResponse.success) {
-          const stats = statsResponse.data;
-          this.totalSessions = stats.totalTests || 0;
-          this.totalQuestions = stats.totalQuestions || 0;
-          this.totalCorrectAnswers = stats.correctAnswers || 0;
-          this.overallSuccessRate = Math.round(stats.successRate || 0);
-          this.userStreak = stats.streak || 0;
-          
-          console.log('Estadísticas cargadas:', stats);
-        }
-      } catch (error) {
-        console.error('Error cargando estadísticas:', error);
-      }
-
-      try {
-        const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();        
-        if (areaResponse && areaResponse.success) {
-          console.log('Datos jerárquicos:', areaResponse.data);
-          
-          this.areaStats = [];
-          
-          // PRIMERO procesamos las áreas (Civil y Procesal)
-          const areasNoGenerales: any[] = [];
-          
-          areaResponse.data.forEach((item: any) => {
-            if (item.type === 'area') {
-              const temasConNuevoCalculo = item.temas.map((tema: any) => {
-                const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => ({
-                  subtemaId: subtema.subtemaId,
-                  subtemaNombre: subtema.subtemaNombre,
-                  totalPreguntas: subtema.totalPreguntas,
-                  preguntasCorrectas: subtema.preguntasCorrectas,
-                  porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema)                }));
-
-                const porcentajeTema = this.calculateTemaSuccessRate(subtemasConPorcentaje);
-
-                return {
-                  temaId: tema.temaId,
-                  temaNombre: tema.temaNombre,
-                  totalPreguntas: tema.totalPreguntas,
-                  preguntasCorrectas: tema.preguntasCorrectas,
-                  porcentajeAcierto: porcentajeTema,
-                  subtemas: subtemasConPorcentaje
-                };
-              });
-
-              const totalCorrectas = temasConNuevoCalculo.reduce((sum: number, tema: any) => 
-                sum + tema.preguntasCorrectas, 0);
-              const totalPreguntas = temasConNuevoCalculo.reduce((sum: number, tema: any) => 
-                sum + tema.totalPreguntas, 0);
-              const porcentajeArea = temasConNuevoCalculo.length > 0 
-                ? Math.round(temasConNuevoCalculo.reduce((sum: number, tema: any) => 
-                    sum + tema.porcentajeAcierto, 0) / temasConNuevoCalculo.length)
+              // ✅ CALCULAR PORCENTAJE DEL TEMA DIRECTAMENTE
+              const porcentajeTema = tema.preguntasPracticadas > 0 
+                ? Math.round((tema.preguntasCorrectas / tema.preguntasPracticadas) * 100)
                 : 0;
-              
-              areasNoGenerales.push({
-                area: item.area,
-                sessions: 0,
-                totalQuestions: totalPreguntas,
-                correctAnswers: totalCorrectas,
-                successRate: porcentajeArea,
-                isGeneral: false,
-                colorBarra: item.area === 'Derecho Civil' ? 'naranja' : 'azul',
-                temas: temasConNuevoCalculo
-              });
-            }
-          });
 
-          if (!areasNoGenerales.find(a => a.area === 'Derecho Procesal')) {
-            const temasProcesalBase = this.getDefaultProcesalTemas();
+              return {
+                temaId: tema.temaId,
+                temaNombre: tema.temaNombre,
+                totalPreguntas: tema.totalPreguntas,
+                preguntasPracticadas: tema.preguntasPracticadas,
+                preguntasCorrectas: tema.preguntasCorrectas,
+                porcentajeAcierto: porcentajeTema,  // ✅ Directo, no promedio
+                subtemas: subtemasConPorcentaje
+              };
+            });
+
+            // ✅ CALCULAR PORCENTAJE DEL ÁREA DIRECTAMENTE
+            const totalPracticadas = temasConNuevoCalculo.reduce((sum: number, tema: any) => 
+              sum + tema.preguntasPracticadas, 0);
+            const totalCorrectas = temasConNuevoCalculo.reduce((sum: number, tema: any) => 
+              sum + tema.preguntasCorrectas, 0);
+            
+            // ✅ Porcentaje del área: total correctas / total practicadas
+            const porcentajeArea = totalPracticadas > 0
+              ? Math.round((totalCorrectas / totalPracticadas) * 100)
+              : 0;
+            
             areasNoGenerales.push({
-              area: 'Derecho Procesal',
+              area: item.area,
               sessions: 0,
-              totalQuestions: 0,
-              correctAnswers: 0,
-              successRate: 0,
+              totalQuestions: totalPracticadas,  // ✅ Total practicadas
+              correctAnswers: totalCorrectas,
+              successRate: porcentajeArea,  // ✅ Directo, no promedio
               isGeneral: false,
-              colorBarra: 'azul',
-              temas: temasProcesalBase
+              colorBarra: item.area === 'Derecho Civil' ? 'naranja' : 'azul',
+              temas: temasConNuevoCalculo
             });
           }
+        });
 
-          // AHORA calculamos el "General" como promedio de Civil y Procesal
-          const civilArea = areasNoGenerales.find(a => a.area === 'Derecho Civil');
-          const procesalArea = areasNoGenerales.find(a => a.area === 'Derecho Procesal');
-          
-          const promedioGeneral = civilArea && procesalArea 
-            ? Math.round((civilArea.successRate + procesalArea.successRate) / 2)
-            : 0;
-
-          // Agregar el área General CON EL PROMEDIO CALCULADO
-          this.areaStats.push({
-            area: 'General',
-            sessions: 0,
-            totalQuestions: 0,
-            correctAnswers: 0,
-            successRate: promedioGeneral,
-            isGeneral: true,
-            colorBarra: 'verde',
-            temas: []
-          });
-
-          // Agregar las áreas no generales
-          this.areaStats = [...this.areaStats, ...areasNoGenerales];
-          
-          console.log('Estadísticas procesadas:', this.areaStats);
+        // ✅ CALCULAR GENERAL solo si hay datos reales
+        const civilArea = areasNoGenerales.find(a => a.area === 'Derecho Civil');
+        const procesalArea = areasNoGenerales.find(a => a.area === 'Derecho Procesal');
+        
+        // Validar que ambas áreas tengan preguntas antes de calcular promedio
+        const civilTienePreguntas = civilArea && civilArea.totalQuestions > 0;
+        const procesalTienePreguntas = procesalArea && procesalArea.totalQuestions > 0;
+        
+        let promedioGeneral = 0;
+        
+        if (civilTienePreguntas && procesalTienePreguntas) {
+          // Ambas tienen datos: promedio de ambas
+          promedioGeneral = Math.round((civilArea.successRate + procesalArea.successRate) / 2);
+        } else if (civilTienePreguntas) {
+          // Solo Civil tiene datos
+          promedioGeneral = civilArea.successRate;
+        } else if (procesalTienePreguntas) {
+          // Solo Procesal tiene datos
+          promedioGeneral = procesalArea.successRate;
         }
-      } catch (error) {
-        console.error('Error cargando estadísticas por área:', error);
+        // Si ninguna tiene datos, queda en 0
+
+        this.areaStats.push({
+          area: 'General',
+          sessions: 0,
+          totalQuestions: 0,
+          correctAnswers: 0,
+          successRate: promedioGeneral,
+          isGeneral: true,
+          colorBarra: 'verde',
+          temas: []
+        });
+
+        this.areaStats = [...this.areaStats, ...areasNoGenerales];
+        
+        console.log('Estadísticas procesadas:', this.areaStats);
       }
-
-      await this.generateChartData();
-
-      this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
-      this.currentSessionGoal = this.calculateSessionGoal(this.totalSessions);
-
     } catch (error) {
-      console.error('Error general en loadDashboardData:', error);
-    } finally {
-      this.isLoading = false;
+      console.error('Error cargando estadísticas por área:', error);
     }
+
+    await this.generateChartData();
+
+    this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
+    this.currentSessionGoal = this.calculateSessionGoal(this.totalSessions);
+
+  } catch (error) {
+    console.error('Error general en loadDashboardData:', error);
+  } finally {
+    this.isLoading = false;
   }
+}
 
   getDefaultProcesalTemas(): any[] {
     const temasBase = [
@@ -237,34 +244,47 @@ export class DashboardPage implements OnInit {
     }));
   }
 
-  calculateAreaSuccessRate(temas: any[]): number {
-    if (!temas || temas.length === 0) return 0;
-    
-    const totalPorcentaje = temas.reduce((sum: number, tema: any) => {
-      return sum + tema.porcentajeAcierto;
-    }, 0);
-    
-    return Math.round(totalPorcentaje / temas.length);
-  }
+calculateAreaSuccessRate(temas: any[]): number {
+  if (!temas || temas.length === 0) return 0;
+  
+  // ✅ Filtrar solo temas que tengan preguntas
+  const temasConPreguntas = temas.filter(t => t.totalPreguntas > 0);
+  
+  if (temasConPreguntas.length === 0) return 0;
+  
+  const totalPorcentaje = temasConPreguntas.reduce((sum: number, tema: any) => {
+    return sum + tema.porcentajeAcierto;
+  }, 0);
+  
+  return Math.round(totalPorcentaje / temasConPreguntas.length);
+}
 
-  calculateTemaSuccessRate(subtemas: any[]): number {
-    if (!subtemas || subtemas.length === 0) return 0;
-    
-    const totalPorcentaje = subtemas.reduce((sum: number, subtema: any) => {
-      return sum + subtema.porcentajeAcierto;
-    }, 0);
-    
-    return Math.round(totalPorcentaje / subtemas.length);
-  }
+calculateTemaSuccessRate(subtemas: any[]): number {
+  if (!subtemas || subtemas.length === 0) return 0;
+  
+  // ✅ Filtrar solo subtemas que tengan preguntas
+  const subtemasConPreguntas = subtemas.filter(s => s.totalPreguntas > 0);
+  
+  if (subtemasConPreguntas.length === 0) return 0;
+  
+  const totalPorcentaje = subtemasConPreguntas.reduce((sum: number, subtema: any) => {
+    return sum + subtema.porcentajeAcierto;
+  }, 0);
+  
+  return Math.round(totalPorcentaje / subtemasConPreguntas.length);
+}
 
-  calculateSubtemaSuccessRate(subtema: any): number {
-    if (subtema.porcentajeAcierto !== undefined) {
-      return Math.round(subtema.porcentajeAcierto);
-    }
-    
-    if (subtema.totalPreguntas === 0) return 0;
-    return Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100);
+calculateSubtemaSuccessRate(subtema: any): number {
+  // ✅ Si no hay preguntas, retornar 0
+  if (!subtema.totalPreguntas || subtema.totalPreguntas === 0) return 0;
+  
+  if (subtema.porcentajeAcierto !== undefined) {
+    return Math.round(subtema.porcentajeAcierto);
   }
+  
+  return Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100);
+}
+
 
   toggleGeneralExpansion() {
     this.isGeneralExpanded = !this.isGeneralExpanded;
@@ -664,4 +684,83 @@ async navigateMonth(direction: number) {
     
     return '¡Sigue así!';
   }
+
+
+
+  // ========================================
+// SISTEMA DE CONFIANZA PARA MÉTRICAS
+// ========================================
+
+MIN_QUESTIONS_FOR_PERCENTAGE = 10;
+MIN_QUESTIONS_FOR_CONFIDENT = 30;
+
+getTemaConfidenceLevel(practicadas: number): 'locked' | 'learning' | 'practicing' | 'proficient' {
+  if (practicadas < 5) return 'locked';
+  if (practicadas < 10) return 'learning';
+  if (practicadas < 30) return 'practicing';
+  return 'proficient';
+}
+
+shouldShowPercentage(practicadas: number): boolean {
+  return practicadas >= this.MIN_QUESTIONS_FOR_PERCENTAGE;
+}
+
+getConfidenceMessage(tema: any): string {
+  const practicadas = tema.preguntasPracticadas || tema.totalPreguntas || 0;
+  const porcentaje = tema.porcentajeAcierto || 0;
+  const level = this.getTemaConfidenceLevel(practicadas);
+  
+  switch(level) {
+    case 'locked':
+      const remaining = 5 - practicadas;
+      return `Practica ${remaining} ${remaining === 1 ? 'vez' : 'veces'} más para desbloquear`;
+    
+    case 'learning':
+      const toUnlock = 10 - practicadas;
+      return `${toUnlock} ${toUnlock === 1 ? 'pregunta' : 'preguntas'} más para ver tu nivel`;
+    
+    case 'practicing':
+      return `Practicando - ${this.getQualitativeLevel(porcentaje)}`;
+    
+    case 'proficient':
+      return this.getMotivationalMessage(porcentaje);
+  }
+}
+
+getQualitativeLevel(percentage: number): string {
+  if (percentage >= 80) return 'Excelente';
+  if (percentage >= 60) return 'Bien';
+  if (percentage >= 40) return 'Regular';
+  return 'Necesita refuerzo';
+}
+
+getMotivationalMessage(porcentaje: number): string {
+  if (porcentaje >= 80) return '🏆 Excelente dominio del tema';
+  if (porcentaje >= 60) return '✅ Buen dominio del tema';
+  if (porcentaje >= 40) return '📚 Sigue practicando';
+  return '💪 Necesitas repasar este tema';
+}
+
+getConfidenceBadge(practicadas: number): { text: string, icon: string, color: string } | null {
+  if (practicadas < 5) {
+    return { text: 'Bloqueado', icon: 'lock-closed', color: 'medium' };
+  }
+  if (practicadas < 10) {
+    return { text: 'Aprendiendo', icon: 'book-outline', color: 'primary' };
+  }
+  if (practicadas < 30) {
+    return { text: 'Practicando', icon: 'create-outline', color: 'warning' };
+  }
+  return null; // No mostrar badge si hay suficientes datos
+}
+
+getConfidenceIcon(practicadas: number): string {
+  const level = this.getTemaConfidenceLevel(practicadas);
+  switch(level) {
+    case 'locked': return 'lock-closed';
+    case 'learning': return 'book-outline';
+    case 'practicing': return 'create-outline';
+    case 'proficient': return 'checkmark-circle';
+  }
+}
 }
