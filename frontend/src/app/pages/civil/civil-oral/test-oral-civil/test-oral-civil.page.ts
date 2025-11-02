@@ -412,7 +412,8 @@ async loadQuestionsFromBackend() {
     if (this.isRecording) {
       await this.audioService.stopRecording();
     } else {
-
+      this.stopAllAudio();
+      
       this.audioService.clearRecording();
       await this.audioService.startRecording();
       this.startResponseTimer();
@@ -575,6 +576,18 @@ async replayRecording() {
       this.isPlayingExplanation = false;
       this.cdr.detectChanges();
     }
+  }
+
+  stopAllAudio() {
+    // Detener síntesis de voz (pregunta o explicación)
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
+    // Actualizar estados
+    this.isPlaying = false;
+    this.isPlayingExplanation = false;
+    this.cdr.detectChanges();
   }
 
   async submitVoiceAnswer() {
@@ -896,6 +909,9 @@ detectOptionFromTranscription(transcription: string): string | null {
       return;
     }
     
+    // Detener cualquier audio antes de avanzar
+    this.stopAllAudio();
+    
     if (this.isLastQuestion()) {
       this.completeTest();
     } else {
@@ -906,6 +922,9 @@ detectOptionFromTranscription(transcription: string): string | null {
 
   previousQuestion() {
     if (this.currentQuestionNumber > 1) {
+      // Detener cualquier audio antes de retroceder
+      this.stopAllAudio();
+      
       this.currentQuestionNumber--;
       this.resetQuestionState();
     }

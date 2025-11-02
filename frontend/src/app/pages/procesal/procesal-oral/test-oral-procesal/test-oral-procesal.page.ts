@@ -387,6 +387,8 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
 
   async startRecording() {
     try {
+      this.stopAllAudio();
+      
       this.audioService.clearRecording();
       
       await this.audioService.startRecording();
@@ -560,6 +562,18 @@ async replayRecording() {
       this.isPlayingExplanation = false;
       this.cdr.detectChanges();
     }
+  }
+
+  stopAllAudio() {
+    // Detener síntesis de voz (pregunta o explicación)
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
+    // Actualizar estados
+    this.isPlaying = false;
+    this.isPlayingExplanation = false;
+    this.cdr.detectChanges();
   }
 
   async submitVoiceAnswer() {
@@ -880,11 +894,13 @@ detectOptionFromTranscription(transcription: string): string | null {
     return { immediate: true };
   }
 
-  nextQuestion() {
+nextQuestion() {
     if (!this.canGoToNext()) {
       console.warn('⚠️ No se puede avanzar sin respuesta guardada');
       return;
     }
+    
+    this.stopAllAudio();
     
     if (this.isLastQuestion()) {
       this.completeTest();
@@ -896,6 +912,8 @@ detectOptionFromTranscription(transcription: string): string | null {
 
   previousQuestion() {
     if (this.currentQuestionNumber > 1) {
+      this.stopAllAudio();
+      
       this.currentQuestionNumber--;
       this.resetQuestionState();
     }
