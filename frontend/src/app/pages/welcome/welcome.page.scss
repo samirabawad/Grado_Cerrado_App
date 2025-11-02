@@ -29,24 +29,6 @@
   object-fit: contain;
 }
 
-// Mapache de extremo a extremo
-  .mascot-container {
-    position: absolute;
-    bottom: 0px;
-    left: 0;
-    right: 0;
-    width: 100vw;
-    z-index: 0;
-    display: flex;
-    justify-content: center;
-  
-  .mascot-image {
-    width: 100vw !important;
-    height: 300px !important;
-    object-fit: cover;
-    object-position: center bottom;
-  }
-}
 
 // Responsive
 @media (max-width: 480px) {
