@@ -1133,13 +1133,21 @@ async completeTest() {
           
           questionDetails.push({
             questionNumber: index + 1,
-            correct: evaluation.isCorrect
+            correct: evaluation.isCorrect,
+            questionText: q.questionText || q.text || '',
+            userAnswer: q.userAnswer || '',
+            expectedAnswer: evaluation.correctAnswer || q.correctAnswer || '',
+            explanation: evaluation.explanation || q.explanation || ''
           });
         } else {
           incorrectCount++;
           questionDetails.push({
             questionNumber: index + 1,
-            correct: false
+            correct: false,
+            questionText: q.questionText || q.text || '',
+            userAnswer: '',
+            expectedAnswer: q.correctAnswer || '',
+            explanation: q.explanation || ''
           });
         }
       });
@@ -1159,7 +1167,6 @@ async completeTest() {
       
       console.log('📊 Resultados calculados:', results);
       
-      // EXACTAMENTE IGUAL QUE TEST-ESCRITO-CIVIL
       const currentSession = this.apiService.getCurrentSession();
       if (currentSession && currentSession.testId) {
         try {
