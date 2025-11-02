@@ -61,6 +61,28 @@
         </div>
       </div>
 
+      <h2>Método de respuesta</h2>
+      
+      <div class="response-method-selector">
+        <button 
+          class="method-option" 
+          [class.selected]="responseMethod === 'voice'"
+          (click)="responseMethod = 'voice'">
+          <ion-icon name="mic-outline"></ion-icon>
+          <span class="method-label">Por Voz</span>
+          <span class="method-description">Responde hablando</span>
+        </button>
+        
+        <button 
+          class="method-option" 
+          [class.selected]="responseMethod === 'selection'"
+          (click)="responseMethod = 'selection'">
+          <ion-icon name="hand-left-outline"></ion-icon>
+          <span class="method-label">Por Selección</span>
+          <span class="method-description">Toca la respuesta</span>
+        </button>
+      </div>
+
       <ion-button 
         expand="block" 
         class="start-button"

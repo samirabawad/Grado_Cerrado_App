@@ -160,7 +160,6 @@ export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
       if (sessionResponse && sessionResponse.success) {
         console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
         
-        // ⚠️ CRÍTICO: Agregar responseMethod ANTES de guardar la sesión
         sessionResponse.responseMethod = this.responseMethod;
         
         this.apiService.setCurrentSession(sessionResponse);

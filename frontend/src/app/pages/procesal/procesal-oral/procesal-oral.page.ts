@@ -18,6 +18,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
+  responseMethod: 'voice' | 'selection' = 'voice';
 
   difficultyLevels = [
     { value: 'basico', label: 'Básico' },
@@ -140,22 +141,28 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
+      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
 
       const sessionData: any = {
         studentId: Number(currentUser.id),
         difficulty: difficultyToSend,
         legalAreas: ["Derecho Procesal"],
-        questionCount: Number(this.selectedQuantity)
+        questionCount: Number(this.selectedQuantity),
+        responseMethod: this.responseMethod
       };
       
       console.log('📤 Enviando request ORAL:', sessionData);
       
       const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
+      
       console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
       
       if (sessionResponse && sessionResponse.success) {
         console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
+        
+        // ⚠️ CRÍTICO: Agregar responseMethod ANTES de guardar la sesión
+        sessionResponse.responseMethod = this.responseMethod;
+        
         this.apiService.setCurrentSession(sessionResponse);
         await this.router.navigate(['/procesal/procesal-oral/test-oral-procesal']);
         await loading.dismiss();
