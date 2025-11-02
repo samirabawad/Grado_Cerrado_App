@@ -42,6 +42,36 @@
         </button>
       </div>
 
+      <h2>Método de respuesta</h2>
+      
+      <div class="response-method-selector">
+        <button 
+          class="method-option" 
+          [class.selected]="responseMethod === 'voice'"
+          (click)="responseMethod = 'voice'">
+          <ion-icon name="mic-outline"></ion-icon>
+          <span>Por voz</span>
+        </button>
+        
+        <button 
+          class="method-option" 
+          [class.selected]="responseMethod === 'selection'"
+          (click)="responseMethod = 'selection'">
+          <ion-icon name="list-outline"></ion-icon>
+          <span>Por selección</span>
+        </button>
+      </div>
+
+      <div class="method-explanation" *ngIf="responseMethod === 'voice'">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <p>Escucha la pregunta y responde hablando. El sistema transcribirá tu respuesta automáticamente.</p>
+      </div>
+
+      <div class="method-explanation" *ngIf="responseMethod === 'selection'">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <p>Escucha la pregunta y selecciona la alternativa correcta haciendo clic en ella.</p>
+      </div>
+
       <h2>Nivel de dificultad</h2>
       
       <div class="inline-picker-container">
@@ -59,28 +89,6 @@
           <ion-icon name="chevron-up"></ion-icon>
           <ion-icon name="chevron-down"></ion-icon>
         </div>
-      </div>
-
-      <h2>Método de respuesta</h2>
-      
-      <div class="response-method-selector">
-        <button 
-          class="method-option" 
-          [class.selected]="responseMethod === 'voice'"
-          (click)="responseMethod = 'voice'">
-          <ion-icon name="mic-outline"></ion-icon>
-          <span class="method-label">Por Voz</span>
-          <span class="method-description">Responde hablando</span>
-        </button>
-        
-        <button 
-          class="method-option" 
-          [class.selected]="responseMethod === 'selection'"
-          (click)="responseMethod = 'selection'">
-          <ion-icon name="hand-left-outline"></ion-icon>
-          <span class="method-label">Por Selección</span>
-          <span class="method-description">Toca la respuesta</span>
-        </button>
       </div>
 
       <ion-button 
