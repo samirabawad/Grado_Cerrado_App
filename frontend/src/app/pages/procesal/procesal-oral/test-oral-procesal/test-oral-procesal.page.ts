@@ -1223,7 +1223,7 @@ nextQuestion() {
     return '';
   }
 
-  async selectAnswer(optionText: string) {
+async selectAnswer(optionText: string) {
     if (this.hasAnsweredCurrentQuestion()) {
       return;
     }
@@ -1265,6 +1265,9 @@ nextQuestion() {
       explanation: question.explanation
     };
     
+    // 🆕 GUARDAR LA RESPUESTA EN EL BACKEND
+    await this.saveAnswerToBackend(question, normalizedAnswer, isCorrect);
+    
     this.showCorrectAnswer = true;
     this.showEvaluation = true;
     this.cdr.detectChanges();
@@ -1272,6 +1275,42 @@ nextQuestion() {
     setTimeout(() => {
       this.playExplanationAudio();
     }, 1000);
+  }
+
+  async saveAnswerToBackend(question: any, answer: string, isCorrect: boolean) {
+    try {
+      const currentSession = this.apiService.getCurrentSession();
+      if (!currentSession || !currentSession.testId) {
+        console.warn('⚠️ No hay testId para guardar respuesta');
+        return;
+      }
+
+      const responseTime = this.questionResponseTime || 30;
+      
+      const hours = Math.floor(responseTime / 3600);
+      const minutes = Math.floor((responseTime % 3600) / 60);
+      const seconds = responseTime % 60;
+      const timeSpanString = `PT${hours}H${minutes}M${seconds}S`;
+      
+      const answerData = {
+        testId: currentSession.testId,
+        preguntaId: parseInt(question.id),
+        userAnswer: answer,
+        correctAnswer: question.correctAnswer,
+        explanation: question.explanation || '',
+        timeSpent: timeSpanString,
+        numeroOrden: this.currentQuestionNumber,
+        isCorrect: isCorrect
+      };
+      
+      console.log('📤 Guardando respuesta oral en BD:', answerData);
+      
+      await this.apiService.submitAnswer(answerData).toPromise();
+      console.log('✅ Respuesta oral guardada correctamente');
+      
+    } catch (error) {
+      console.error('❌ Error guardando respuesta oral:', error);
+    }
   }
 
   async selectOptionByClick(optionText: string) {

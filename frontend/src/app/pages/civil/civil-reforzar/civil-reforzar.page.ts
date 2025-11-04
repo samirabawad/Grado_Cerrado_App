@@ -169,9 +169,19 @@ async loadData() {
 
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
-    this.selectedSubtemaId = topic.subtemaId;
-    this.scopeType = 'subtema';
+    
+    this.selectedTemaId = topic.temaId;
+    this.scopeType = 'tema';
     this.showThemeSelector = true;
+    this.expandedTema = topic.temaId;
+    this.expandedSections['testSection'] = true;
+    
+    setTimeout(() => {
+      const testSection = document.querySelector('.test-section');
+      if (testSection) {
+        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   toggleTemaExpansion(temaId: number) {

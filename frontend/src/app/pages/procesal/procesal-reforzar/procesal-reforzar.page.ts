@@ -101,28 +101,27 @@ export class ProcesalReforzarPage implements OnInit {
         this.weakTopics = [];
       }
 
-      // Cargar sesiones recientes SOLO DE PROCESAL
+      // Cargar sesiones recientes
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
         console.log('📦 Respuesta RAW del backend:', sessionsResponse);
         
         if (sessionsResponse && sessionsResponse.success) {
-          // Filtrar SOLO sesiones de Derecho Procesal
+          // Mapear todas las sesiones (sin filtrar por ahora porque todas son "General")
           this.recentSessions = (sessionsResponse.data || [])
-            .filter((s: any) => s.area && s.area.toLowerCase().includes('procesal'))
             .slice(0, 5) // Tomar solo las 5 más recientes
             .map((s: any) => ({
               id: s.id,
               testId: s.id,
               date: s.date,
-              area: s.area,
+              area: s.area || 'General',
               durationSeconds: s.duration || 0,
               totalQuestions: s.questions || 0,
               correctAnswers: s.correct || 0,
               successRate: s.successRate || 0
             }));
           
-          console.log('✅ Sesiones de PROCESAL mapeadas:', this.recentSessions);
+          console.log('✅ Sesiones mapeadas:', this.recentSessions);
         }
       } catch (error) {
         console.error('Error cargando sesiones recientes:', error);
@@ -232,9 +231,19 @@ export class ProcesalReforzarPage implements OnInit {
 
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
-    this.selectedSubtemaId = topic.subtemaId;
-    this.scopeType = 'subtema';
+    
+    this.selectedTemaId = topic.temaId;
+    this.scopeType = 'tema';
     this.showThemeSelector = true;
+    this.expandedTema = topic.temaId;
+    this.expandedSections['testSection'] = true;
+    
+    setTimeout(() => {
+      const testSection = document.querySelector('.test-section');
+      if (testSection) {
+        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   toggleTemaExpansion(temaId: number) {
