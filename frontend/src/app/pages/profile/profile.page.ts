@@ -113,40 +113,41 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
   
 
-  // ============================================
-  // CARGAR TODOS LOS DATOS
-  // ============================================
-  async loadAllUserData() {
-    this.isLoading = true;
+// ============================================
+// CARGAR TODOS LOS DATOS
+// ============================================
+async loadAllUserData() {
+  this.isLoading = true;
 
-    try {
-      const currentUser = this.apiService.getCurrentUser();
-      
-      if (!currentUser || !currentUser.id) {
-        console.warn('No hay usuario logueado');
-        this.isLoading = false;
-        await this.router.navigate(['/login']);
-        return;
-      }
-
-      const studentId = currentUser.id;
-      
-      this.user.id = studentId;
-      this.user.nombre = currentUser.name || 'Usuario';
-      this.user.email = currentUser.email || 'usuario@example.com';
-
-      await this.loadDashboardStats(studentId);
-      this.loadSettings();
-      this.loadStudyFrequency();
-      this.loadAdaptiveConfig();
-
-    } catch (error) {
-      console.error('Error cargando datos del usuario:', error);
-      await this.showToast('Error al cargar los datos del perfil', 'danger');
-    } finally {
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    
+    if (!currentUser || !currentUser.id) {
+      console.warn('No hay usuario logueado');
       this.isLoading = false;
+      await this.router.navigate(['/login']);
+      return;
     }
+
+    const studentId = currentUser.id;
+    
+    this.user.id = studentId;
+    this.user.nombre = currentUser.name || 'Usuario';
+    this.user.email = currentUser.email || 'usuario@example.com';
+    this.user.fecha_registro = currentUser.fechaRegistro ? new Date(currentUser.fechaRegistro) : new Date();
+
+    await this.loadDashboardStats(studentId);
+    this.loadSettings();
+    this.loadStudyFrequency();
+    this.loadAdaptiveConfig();
+
+  } catch (error) {
+    console.error('Error cargando datos del usuario:', error);
+    await this.showToast('Error al cargar los datos del perfil', 'danger');
+  } finally {
+    this.isLoading = false;
   }
+}
 
   // ============================================
   // CARGAR ESTADÍSTICAS DEL DASHBOARD

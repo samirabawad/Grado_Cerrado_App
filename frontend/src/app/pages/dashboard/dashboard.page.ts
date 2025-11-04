@@ -47,6 +47,10 @@ export class DashboardPage implements OnInit {
     this.loadDashboardData();
   }
 
+  ionViewWillEnter() {
+    this.loadDashboardData();
+  }
+
   async loadDashboardData() {
     this.isLoading = true;
     
