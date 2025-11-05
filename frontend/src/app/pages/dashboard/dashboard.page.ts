@@ -19,6 +19,7 @@ export class DashboardPage implements OnInit {
   userName: string = 'Estudiante';
   userLevel: string = 'Intermedio';
   userStreak: number = 0;
+  currentWeekLabel: string = '';
 
   totalSessions: number = 0;
   totalQuestions: number = 0;
@@ -29,6 +30,7 @@ export class DashboardPage implements OnInit {
 
   chartData: any[] = [];
   areaStats: any[] = [];
+  
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -43,8 +45,9 @@ export class DashboardPage implements OnInit {
     private apiService: ApiService
   ) { }
 
-  ngOnInit() {
-    this.loadDashboardData();
+  async ngOnInit() {
+    this.updateWeekLabel(); 
+    await this.loadDashboardData();
   }
 
   ionViewWillEnter() {
@@ -343,11 +346,11 @@ export class DashboardPage implements OnInit {
 async changeTimeFrame(timeFrame: string) {
   this.selectedTimeFrame = timeFrame;
   if (timeFrame === 'month') {
-    // Determinar semestre actual (0 = Ene-Jun, 1 = Jul-Dic)
-    const currentMonth = new Date().getMonth() + 1; // 1-12
+    const currentMonth = new Date().getMonth() + 1;
     this.currentSemester = currentMonth <= 6 ? 0 : 1;
     await this.loadMonthlyData();
   } else {
+    this.updateWeekLabel();
     await this.generateChartData();
   }
 }
@@ -377,6 +380,31 @@ updateMonthName() {
   this.currentMonthName = this.currentSemester === 0 
     ? `Enero - Junio ${year}` 
     : `Julio - Diciembre ${year}`;
+}
+
+updateWeekLabel() {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  
+  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  
+  const mondayDay = monday.getDate();
+  const sundayDay = sunday.getDate();
+  const mondayMonth = months[monday.getMonth()];
+  const sundayMonth = months[sunday.getMonth()];
+  const year = sunday.getFullYear();
+  
+  if (monday.getMonth() === sunday.getMonth()) {
+    this.currentWeekLabel = `Semana del ${mondayDay} al ${sundayDay} de ${sundayMonth} ${year}`;
+  } else {
+    this.currentWeekLabel = `Semana del ${mondayDay} de ${mondayMonth} al ${sundayDay} de ${sundayMonth} ${year}`;
+  }
 }
 
 async navigateMonth(direction: number) {

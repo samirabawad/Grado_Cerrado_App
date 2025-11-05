@@ -125,7 +125,7 @@
         </div>
       </div>
 
-    <!-- Navegación mensual (siempre presente pero oculta cuando es semana) -->
+    <!-- Navegación mensual (solo visible en vista mensual) -->
     <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'week'">
       <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
         <ion-icon name="chevron-back"></ion-icon>
@@ -134,6 +134,11 @@
       <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
         <ion-icon name="chevron-forward"></ion-icon>
       </button>
+    </div>
+
+    <!-- Navegación semanal (solo visible en vista semanal) -->
+    <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'month'">
+      <span class="month-label">{{ currentWeekLabel }}</span>
     </div>
 
       <div class="chart-legend">
