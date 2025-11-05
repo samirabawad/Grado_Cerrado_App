@@ -562,16 +562,16 @@
 .days-selector {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 6px;
   margin-top: 16px;
 
   .day-btn {
-    aspect-ratio: 1;
+    min-height: 60px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 8px 4px;
+    padding: 10px 2px;
     border: 2px solid #e5e7eb;
     border-radius: 12px;
     background: white;
@@ -579,15 +579,21 @@
     transition: all 0.3s ease;
 
     .day-letter {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       color: #64748b;
+      line-height: 1;
     }
 
     .day-name {
-      font-size: 10px;
+      font-size: 9px;
       color: #94a3b8;
-      margin-top: 2px;
+      margin-top: 4px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
 
     &:hover {
