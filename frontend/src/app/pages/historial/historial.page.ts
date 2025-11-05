@@ -87,11 +87,18 @@ export class HistorialPage implements OnInit {
       grouped.get(dateKey)!.push(session);
     });
 
-    this.groupedSessions = Array.from(grouped.entries()).map(([date, sessions]) => ({
-      date,
-      sessions,
-      expanded: false  // Todas cerradas por defecto
-    }));
+    // Ordenar por fecha (más reciente primero)
+    this.groupedSessions = Array.from(grouped.entries())
+      .sort((a, b) => {
+        const dateA = a[1][0].date;
+        const dateB = b[1][0].date;
+        return dateB.getTime() - dateA.getTime();
+      })
+      .map(([date, sessions]) => ({
+        date,
+        sessions,
+        expanded: false
+      }));
   }
 
   toggleGroup(group: any) {
@@ -99,18 +106,19 @@ export class HistorialPage implements OnInit {
   }
 
   getDateKey(date: Date): string {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    
     const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (this.isSameDay(date, today)) return 'Hoy';
-    if (this.isSameDay(date, yesterday)) return 'Ayer';
-
-    return date.toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long' 
-    });
+    const isCurrentYear = date.getFullYear() === today.getFullYear();
+    
+    if (isCurrentYear) {
+      return months[date.getMonth()];
+    } else {
+      return `${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
   }
 
   isSameDay(date1: Date, date2: Date): boolean {
