@@ -1189,7 +1189,7 @@ nextQuestion() {
     const optionIndex = options.indexOf(option);
     if (optionIndex !== -1) {
       const letter = String.fromCharCode(65 + optionIndex);
-      return question.correctAnswer.toUpperCase() === letter;
+      return question.correctAnswer.toUpperCase().trim() === letter;
     }
 
     return false;

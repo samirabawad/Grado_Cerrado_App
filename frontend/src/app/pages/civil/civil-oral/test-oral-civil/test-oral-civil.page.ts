@@ -1398,7 +1398,7 @@ async selectAnswer(optionText: string) {
       console.error('❌ Error guardando respuesta oral:', error);
     }
   }
-  
+
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
     const userNorm = userAnswer.toUpperCase().trim();
     const correctNorm = correctAnswer.toUpperCase().trim();
