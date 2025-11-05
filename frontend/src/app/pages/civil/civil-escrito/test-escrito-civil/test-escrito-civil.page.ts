@@ -549,10 +549,15 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     
     const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
     const isSelected = question.userAnswer === optionLetter;
-    
+
+    // Primero verificar si es la opción seleccionada
+    if (isSelected) {
+      return isCorrect ? 'correct' : 'incorrect';
+    }
+
+    // Si no está seleccionada, mostrar si es la correcta
     if (isCorrect) return 'correct';
-    if (isSelected && !isCorrect) return 'incorrect';
-    
+
     return 'default';
   }
 
