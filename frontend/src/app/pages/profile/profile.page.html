@@ -71,6 +71,77 @@
         </div>
       </div>
     </div>
+<!-- CONTRASEÑA -->
+<div class="section">
+  <h2 class="section-title" (click)="toggleSection('password')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+    <span style="display: flex; align-items: center; gap: 12px;">
+      <ion-icon name="lock-closed" style="font-size: 24px;"></ion-icon>
+      Contraseña
+    </span>
+    <ion-icon [name]="isSectionExpanded('password') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+  </h2>
+
+  <div *ngIf="isSectionExpanded('password')">
+    <ion-card class="settings-card">
+      <ion-card-content>
+
+        <div class="setting-item">
+          <div class="setting-info" style="flex-direction: column; align-items: flex-start;">
+            <div class="setting-label">
+              <ion-icon name="key-outline"></ion-icon>
+              Contraseña actual
+            </div>
+            <ion-input
+              [(ngModel)]="passwordForm.currentPassword"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••">
+            </ion-input>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info" style="flex-direction: column; align-items: flex-start;">
+            <div class="setting-label">
+              <ion-icon name="lock-open-outline"></ion-icon>
+              Nueva contraseña
+            </div>
+            <ion-input
+              [(ngModel)]="passwordForm.newPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="mínimo 6 caracteres">
+            </ion-input>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info" style="flex-direction: column; align-items: flex-start;">
+            <div class="setting-label">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              Confirmar nueva contraseña
+            </div>
+            <ion-input
+              [(ngModel)]="passwordForm.confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="repite la contraseña">
+            </ion-input>
+          </div>
+        </div>
+
+        <button
+          class="save-button"
+          [disabled]="isChangingPassword || !isPasswordFormValid()"
+          (click)="onChangePassword()">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          {{ isChangingPassword ? 'Guardando...' : 'Cambiar Contraseña' }}
+        </button>
+
+      </ion-card-content>
+    </ion-card>
+  </div>
+</div>
 
     <!-- MODO ADAPTATIVO -->
     <div class="section">

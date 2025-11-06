@@ -207,6 +207,39 @@ export class ApiService {
         })
       );
   }
+  // Cambiar contraseña
+  changePassword(userId: number, passwords: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<any> {
+
+    const url = `${this.API_URL}/Auth/change-password/${userId}`;
+
+    
+    console.log('Cambiando contraseña para usuario:', userId);
+    
+    return this.http.put<any>(url, passwords, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Contraseña actualizada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error cambiando contraseña:', error);
+          
+          let errorMessage = 'Error al cambiar la contraseña';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
 
   logout(): void {
     localStorage.removeItem('currentUser');

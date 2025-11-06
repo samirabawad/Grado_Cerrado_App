@@ -78,15 +78,34 @@ export class ProfilePage implements OnInit, AfterViewInit {
   expandedSections: { [key: string]: boolean } = {
     personalInfo: false,
     adaptiveMode: false,
-    frequency: false, // ✅ CERRADA por defecto
-    weeklyGoal: false, // ✅ Subsección
-    preferredDays: false, // ✅ Subsección
-    reminders: false, // ✅ Subsección
+    frequency: false, 
+    weeklyGoal: false, 
+    preferredDays: false,
+    reminders: false, 
     progress: false,
+    password: false,   
     configuration: false
   };
 
+
   hasUnsavedChanges: boolean = false;
+
+    // ============================================
+  // CONTRASEÑA – FORM
+  // ============================================
+  passwordForm = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
+
+  isChangingPassword: boolean = false;
+
+  isPasswordFormValid(): boolean {
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm;
+    return !!currentPassword && !!newPassword && newPassword.length >= 6 && newPassword === confirmPassword;
+  }
+
 
   // ============================================
   // MODO ADAPTATIVO
@@ -644,10 +663,56 @@ async editEmail() {
         }
       ]
     });
-    
+
 
     await alert.present();
   }
+
+    // ============================================
+  // CONTRASEÑA – ACCIONES
+  // ============================================
+  async onChangePassword() {
+    if (this.isChangingPassword || !this.isPasswordFormValid()) {
+      return;
+    }
+
+    this.isChangingPassword = true;
+
+    try {
+      const userId = this.user?.id;
+      if (!userId) {
+        await this.showToast('❌ Sesión inválida. Inicia sesión nuevamente.', 'danger');
+        this.isChangingPassword = false;
+        return;
+      }
+
+      const payload = {
+        currentPassword: this.passwordForm.currentPassword,
+        newPassword: this.passwordForm.newPassword,
+        confirmPassword: this.passwordForm.confirmPassword
+      };
+
+      const resp = await this.apiService.changePassword(userId, payload).toPromise();
+
+      if (resp && resp.success) {
+        await this.showToast('✅ Contraseña actualizada', 'success');
+        // Limpia el form
+        this.passwordForm.currentPassword = '';
+        this.passwordForm.newPassword = '';
+        this.passwordForm.confirmPassword = '';
+        // (Opcional) Cerrar sección:
+        // this.expandedSections['password'] = false;
+      } else {
+        await this.showToast('❌ No se pudo actualizar la contraseña', 'danger');
+      }
+    } catch (error: any) {
+      const msg = error?.friendlyMessage || error?.error?.message || 'Error al cambiar la contraseña';
+      await this.showToast(`❌ ${msg}`, 'danger');
+    } finally {
+      this.isChangingPassword = false;
+    }
+  }
+
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastController.create({
