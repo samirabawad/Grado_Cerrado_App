@@ -237,6 +237,37 @@ export class ApiService {
           
           throw { ...error, friendlyMessage: errorMessage };
         })
+);
+  }
+
+  // Eliminar cuenta
+  deleteAccount(userId: number, password: string): Observable<any> {
+    const url = `${this.API_URL}/auth/delete-account/${userId}`;
+    
+    console.log('Eliminando cuenta para usuario:', userId);
+    
+    return this.http.delete<any>(url, {
+      ...this.httpOptions,
+      body: { password }
+    })
+      .pipe(
+        map((response: any) => {
+          console.log('Cuenta eliminada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error eliminando cuenta:', error);
+          
+          let errorMessage = 'Error al eliminar la cuenta';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
       );
   }
 
