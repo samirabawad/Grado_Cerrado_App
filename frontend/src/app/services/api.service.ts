@@ -156,7 +156,32 @@ export class ApiService {
       );
   }
 
-  updateUserProfile(userId: number, updates: { name?: string, email?: string }): Observable<any> {
+// Obtener información completa del usuario actual
+  getCurrentUserComplete(userId: number): Observable<any> {
+    const url = `${this.API_URL}/auth/current-user/${userId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Usuario completo obtenido:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo usuario completo:', error);
+          throw error;
+        })
+      );
+  }
+
+
+// Actualizar perfil del usuario
+  updateUserProfile(userId: number, updates: {
+    nombre?: string;
+    segundoNombre?: string;
+    apellidoPaterno?: string;
+    apellidoMaterno?: string;
+    email?: string;
+  }): Observable<any> {
     const url = `${this.API_URL}/auth/update-profile/${userId}`;
     
     console.log('Actualizando perfil:', updates);
@@ -171,6 +196,38 @@ export class ApiService {
           console.error('Error actualizando perfil:', error);
           
           let errorMessage = 'Error al actualizar el perfil';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
+// Cambiar contraseña
+  changePassword(userId: number, passwords: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<any> {
+    const url = `${this.API_URL}/auth/change-password/${userId}`;
+    
+    console.log('Cambiando contraseña para usuario:', userId);
+    
+    return this.http.put<any>(url, passwords, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Contraseña actualizada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error cambiando contraseña:', error);
+          
+          let errorMessage = 'Error al cambiar la contraseña';
           
           if (error.status === 400 && error.error?.message) {
             errorMessage = error.error.message;

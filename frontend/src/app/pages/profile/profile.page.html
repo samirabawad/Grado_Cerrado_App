@@ -42,7 +42,7 @@
             <ion-icon name="person"></ion-icon>
             <div class="info-text">
               <span class="info-label">Nombre Completo</span>
-              <span class="info-value">{{ user.nombre }}</span>
+              <span class="info-value">{{ user.nombreCompleto }}</span>
             </div>
             <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
@@ -71,6 +71,31 @@
         </div>
       </div>
     </div>
+
+<!-- SEGURIDAD -->
+    <div class="section">
+      <h2 class="section-title" (click)="toggleSection('security')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span style="display: flex; align-items: center; gap: 12px;">
+          <ion-icon name="lock-closed" style="font-size: 24px;"></ion-icon>
+          Seguridad
+        </span>
+        <ion-icon [name]="isSectionExpanded('security') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </h2>
+      
+      <div *ngIf="isSectionExpanded('security')">
+        <div class="info-card">
+          <div class="info-item editable" (click)="changePassword()">
+            <ion-icon name="key"></ion-icon>
+            <div class="info-text">
+              <span class="info-label">Contraseña</span>
+              <span class="info-value">••••••••</span>
+            </div>
+            <ion-icon name="create" class="edit-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- MODO ADAPTATIVO -->
     <div class="section">
