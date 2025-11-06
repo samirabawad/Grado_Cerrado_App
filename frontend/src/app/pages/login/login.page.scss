@@ -1,200 +1,278 @@
+// ============================================
+// CONTENEDOR PRINCIPAL
+// ============================================
 .login-content {
-  --background: #f8f9fa;
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 24px 32px 24px;
+  overflow-y: auto;
+}
+
+// ============================================
+// LOGO SECTION
+// ============================================
+.logo-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
   
-  .login-container {
-    padding: 0;
-    padding-top: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .header-section {
-    position: relative;
-    height: 200px;
-    margin-bottom: 50px;
-    overflow: visible;
-
-    .background-image {
-      position: absolute;
-      top: 0;                     
-      left: 50%;                  
-      transform: translateX(-50%);
-      width: 100vw;              
-      height: auto;               
-      z-index: 1;
-
-      .superior-gris {
-        width: 100%;
-        height: auto;             
-        object-fit: contain;      
-      }
-    }
-
-
-    .back-button {
-      position: absolute;
-      left: 20px;
-      top: 20px;
-      color: #666;
-      --color: #666;
-      z-index: 3;
-      background: rgba(255, 255, 255, 0);
-      --background: rgba(255, 255, 255, 0);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-    }
-
-    .mapache-container {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-
-      .mapache-image {
-        width: 120px;
-        height: 120px;
-        object-fit: contain;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-      }
-    }
-  }
-
-  // Form Container (similar a registro)
-  .form-container {
-    flex: 1;
-    max-width: 400px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 20px;
-
-    .form-field {
-      margin-bottom: 20px;
-
-      .field-label {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        color: #000 !important;
-        margin-bottom: 8px;
-      }
-
-      .custom-input {
-        --background: #fff;
-        --border-radius: 12px;
-        --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        --padding: 16px;
-        border: 1px solid #e0e0e0;
-        border-radius: 12px;
-
-        &.error {
-          border-color: #ff4444;
-        }
-
-        ion-input {
-          --padding-start: 0;
-          --padding-end: 0;
-          font-size: 16px;
-          --color: #333 !important;
-
-          &.error {
-            --color: #ff4444;
-          }
-        }
-
-        .input-icon {
-          color: #666;
-          margin-right: 12px;
-          font-size: 20px;
-        }
-
-        .password-toggle {
-          color: #666;
-          cursor: pointer;
-          font-size: 20px;
-          
-          &:hover {
-            color: #333;
-          }
-        }
-      }
-
-      .error-message {
-        font-size: 12px;
-        color: #ff4444;
-        margin-top: 4px;
-        margin-left: 4px;
-      }
-    }
-  }
-
-  // Botón de login
-  .login-btn {
-  --background: #10b981;
-  --background-activated: #059669;
-  --border-radius: 12px;
-  --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  height: 50px;
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 16px;
-  margin: 24px 0 16px 0;
-  text-transform: none;
-
-  &:disabled {
-    --background: #cccccc;
-    --box-shadow: none;
-  }
-
-  ion-spinner {
-    margin-right: 8px;
+  .main-logo {
+    width: 180px;
+    height: auto;
+    object-fit: contain;
   }
 }
 
-  // Link de registro
-  .register-link {
-    text-align: center;
-    font-size: 14px;
-    color: #666;
-    margin: 16px 0;
+// ============================================
+// CONTENT SECTION
+// ============================================
+.content-section {
+  background: white;
+  border-radius: 24px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
 
-    .link-text {
-      color: #10b981;
-      font-weight: 600;
-      text-decoration: none;
+.main-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.main-description {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+  text-align: center;
+}
+
+// ============================================
+// FORM CONTENT
+// ============================================
+.form-content {
+  margin-bottom: 24px;
+}
+
+.form-field {
+  margin-bottom: 16px;
+
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+  }
+
+  .custom-input {
+    --background: #f8fafc;
+    --border-radius: 16px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --placeholder-color: #94a3b8;
+    --color: #1e293b;
+    font-size: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: #10b981;
+      --background: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+
+    ion-icon {
+      color: #64748b;
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    .password-toggle {
+      color: #64748b;
+      font-size: 20px;
       cursor: pointer;
-
-      &:hover {
-        text-decoration: underline;
+      margin-left: 8px;
+      
+      &:active {
+        color: #10b981;
       }
+    }
+  }
+
+  .error-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+}
+
+// ============================================
+// FORGOT PASSWORD LINK
+// ============================================
+.forgot-password-link {
+  text-align: right;
+  margin-bottom: 8px;
+  
+  .link-text {
+    font-size: 13px;
+    color: #10b981;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    
+    &:active {
+      color: #059669;
     }
   }
 }
 
-// Responsive design
-@media (max-width: 480px) {
-  .login-content {
-    .login-container {
-      padding: 0;
-    }
+// ============================================
+// BUTTONS
+// ============================================
+.button-container {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+  margin-top: 24px;
+}
 
-    .form-container {
-      padding: 0 16px;
-
-      .form-field {
-        margin-bottom: 16px;
-
-        .custom-input {
-          --padding: 14px;
-        }
-      }
-    }
-
-    .login-btn {
-      height: 48px;
-      font-size: 15px;
+.action-button {
+  flex: 1;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+  &.secondary {
+    background: #f1f5f9;
+    color: #64748b;
+    
+    &:active {
+      background: #e2e8f0;
+      transform: scale(0.98);
     }
   }
+  
+  &.primary {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    
+    &:active:not(:disabled) {
+      background: #059669;
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    }
+
+    &:disabled {
+      background: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    ion-spinner {
+      width: 20px;
+      height: 20px;
+      --color: white;
+    }
+  }
+}
+
+// ============================================
+// REGISTER LINK
+// ============================================
+.register-link {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  
+  .link-text {
+    color: #10b981;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    
+    &:active {
+      color: #059669;
+    }
+  }
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+@media (max-width: 480px) {
+  .logo-section .main-logo {
+    width: 160px;
+  }
+  
+  .content-section {
+    padding: 28px 20px;
+  }
+  
+  .main-title {
+    font-size: 24px;
+  }
+  
+  .main-description {
+    font-size: 14px;
+  }
+
+  .button-container {
+    flex-direction: column;
+    
+    .action-button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-height: 700px) {
+  .login-container {
+    padding: 24px 24px 20px 24px;
+  }
+  
+  .logo-section {
+    margin-bottom: 20px;
+  }
+
+  .content-section {
+    padding: 24px 20px;
+  }
+}
+
+// ============================================
+// SCROLL BEHAVIOR
+// ============================================
+.login-content {
+  --overflow: auto;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
 }
