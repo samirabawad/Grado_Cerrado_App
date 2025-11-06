@@ -58,16 +58,8 @@ export class ProcesalReforzarPage implements OnInit {
   }
 
   getMainRecommendation() {
-    // Solo devolver recomendación si hay datos REALES de procesal
     if (this.weakTopics.length === 0) return null;
-    
-    // Verificar que el tema débil sea realmente de procesal
-    const firstTopic = this.weakTopics[0];
-    if (!firstTopic.area || !firstTopic.area.toLowerCase().includes('procesal')) {
-      return null;
-    }
-    
-    return firstTopic;
+    return this.weakTopics[0];
   }
 
   async loadData() {
@@ -84,13 +76,12 @@ export class ProcesalReforzarPage implements OnInit {
 
       const studentId = currentUser.id;
 
-      // Cargar temas débiles SOLO DE PROCESAL
+// Cargar temas débiles SOLO DE PROCESAL
       try {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
           // Filtrar SOLO temas de Derecho Procesal
           this.weakTopics = (weakResponse.data || []).filter((topic: any) => {
-            // Verificar que el área sea Derecho Procesal
             return topic.area && topic.area.toLowerCase().includes('procesal');
           });
           
