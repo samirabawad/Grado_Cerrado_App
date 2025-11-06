@@ -46,6 +46,16 @@ export interface StudyFrequencyResponse {
   };
 }
 
+// Interfaces
+export interface UpdateProfileData {
+  nombre?: string;
+  segundoNombre?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  email?: string;
+}
+
+
 export interface CumplimientoResponse {
   success: boolean;
   data: {
@@ -186,6 +196,12 @@ export class ApiService {
   logout(): void {
     localStorage.removeItem('currentUser');
     this.clearCurrentSession();
+  }
+
+    // Actualizar datos del perfil (PATCH)
+  updateProfile(studentId: number, profileData: Partial<UpdateProfileData>): Observable<any> {
+    const url = `${this.API_URL}/Auth/update/${studentId}`;
+    return this.http.patch(url, profileData, this.httpOptions);
   }
 
   getCurrentUser(): any {

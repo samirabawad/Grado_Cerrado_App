@@ -51,7 +51,7 @@ export class HomePage implements OnInit {
       }
 
       const studentId = currentUser.id;
-      this.userName = currentUser.name || 'Estudiante';
+      this.userName = currentUser.nombreCompleto || currentUser.nombre || 'Estudiante';
 
       console.log('Cargando estadísticas para:', studentId, this.userName);
 
