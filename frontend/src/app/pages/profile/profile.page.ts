@@ -131,10 +131,21 @@ async loadAllUserData() {
 
     const studentId = currentUser.id;
     
-    this.user.id = studentId;
-    this.user.nombre = currentUser.name || 'Usuario';
-    this.user.email = currentUser.email || 'usuario@example.com';
-    this.user.fecha_registro = currentUser.fechaRegistro ? new Date(currentUser.fechaRegistro) : new Date();
+    // Obtener información completa del usuario desde el backend
+    const userResponse = await this.apiService.getCurrentUserComplete(studentId).toPromise();
+    
+    if (userResponse && userResponse.success) {
+      const userData = userResponse.data;
+      
+      this.user.id = userData.id;
+      this.user.nombre = userData.nombre || 'Usuario';
+      this.user.nombreCompleto = userData.nombreCompleto || userData.nombre || 'Usuario';
+      this.user.email = userData.email || 'usuario@example.com';
+      this.user.fecha_registro = userData.fechaRegistro ? new Date(userData.fechaRegistro) : new Date();
+      this.user.last_profile_update = userData.fechaModificacion;
+      
+      console.log('Usuario cargado:', this.user);
+    }
 
     await this.loadDashboardStats(studentId);
     this.loadSettings();
@@ -437,21 +448,204 @@ async loadAllUserData() {
     });
   }
 
-  async editName() {
-    const alert = await this.alertController.create({
-      header: 'Editar Nombre',
-      message: 'Función en desarrollo.',
-      buttons: ['OK']
-    });
-    await alert.present();
+async editName() {
+    // Primero obtener los datos completos del usuario
+    try {
+      const userResponse = await this.apiService.getCurrentUserComplete(this.user.id).toPromise();
+      
+      let currentData = {
+        nombre: this.user.nombre,
+        segundoNombre: '',
+        apellidoPaterno: '',
+        apellidoMaterno: ''
+      };
+
+      if (userResponse && userResponse.success) {
+        currentData = {
+          nombre: userResponse.data.nombre || '',
+          segundoNombre: userResponse.data.segundoNombre || '',
+          apellidoPaterno: userResponse.data.apellidoPaterno || '',
+          apellidoMaterno: userResponse.data.apellidoMaterno || ''
+        };
+      }
+
+      const alert = await this.alertController.create({
+        header: 'Editar Nombre',
+inputs: [
+          {
+            name: 'nombre',
+            type: 'text',
+            placeholder: 'Nombre *',
+            value: currentData.nombre,
+            attributes: {
+              required: true
+            }
+          },
+          {
+            name: 'segundoNombre',
+            type: 'text',
+            placeholder: 'Segundo nombre (opcional)',
+            value: currentData.segundoNombre
+          },
+          {
+            name: 'apellidoPaterno',
+            type: 'text',
+            placeholder: 'Apellido paterno *',
+            value: currentData.apellidoPaterno,
+            attributes: {
+              required: true
+            }
+          },
+          {
+            name: 'apellidoMaterno',
+            type: 'text',
+            placeholder: 'Apellido materno (opcional)',
+            value: currentData.apellidoMaterno
+          }
+        ],
+        buttons: [
+          {
+            text: 'Cancelar',
+            role: 'cancel'
+          },
+          {
+            text: 'Guardar',
+          handler: async (data) => {
+              // Validar campos obligatorios
+              if (!data.nombre || data.nombre.trim() === '') {
+                await this.showToast('El nombre es obligatorio', 'danger');
+                return false;
+              }
+
+              if (!data.apellidoPaterno || data.apellidoPaterno.trim() === '') {
+                await this.showToast('El apellido paterno es obligatorio', 'danger');
+                return false;
+              }
+
+              try {
+                const updates = {
+                  nombre: data.nombre.trim(),
+                  apellidoPaterno: data.apellidoPaterno.trim(),
+                  segundoNombre: data.segundoNombre?.trim() || null,
+                  apellidoMaterno: data.apellidoMaterno?.trim() || null
+                };
+
+                const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
+
+                if (response && response.success) {
+                  this.user.nombre = response.data.nombre;
+                  this.user.nombreCompleto = response.data.nombreCompleto;
+                  this.user.last_profile_update = response.data.fechaModificacion;
+
+                  // Actualizar el localStorage para que se refleje en home
+                  const currentUser = this.apiService.getCurrentUser();
+                  if (currentUser) {
+                    currentUser.name = response.data.nombre;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                  }
+
+                  await this.showToast('Perfil actualizado exitosamente', 'success');
+                }
+              } catch (error: any) {
+                console.error('Error actualizando nombre:', error);
+                await this.showToast(error.friendlyMessage || 'Error al actualizar el perfil', 'danger');
+              }
+
+              return true;
+            }
+          }
+        ]
+      });
+
+      await alert.present();
+    } catch (error) {
+      console.error('Error cargando datos del usuario:', error);
+      await this.showToast('Error al cargar los datos', 'danger');
+    }
   }
 
-  async editEmail() {
+async editEmail() {
     const alert = await this.alertController.create({
       header: 'Editar Email',
-      message: 'Función en desarrollo.',
-      buttons: ['OK']
+      message: 'Ingresa un email válido con dominio real (ejemplo: @gmail.com, @outlook.com)',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'nuevo@email.com',
+          value: this.user.email,
+          attributes: {
+            required: true,
+            autocomplete: 'email'
+          }
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Guardar',
+          handler: async (data) => {
+            // Validar que el email no esté vacío
+            if (!data.email || data.email.trim() === '') {
+              await this.showToast('El email es obligatorio', 'danger');
+              return false;
+            }
+
+            const emailTrimmed = data.email.trim().toLowerCase();
+
+            // Validar formato básico de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailTrimmed)) {
+              await this.showToast('Formato de email inválido', 'danger');
+              return false;
+            }
+
+            // Validar que tenga un dominio conocido (opcional pero recomendado)
+            const dominiosValidos = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'live.com', 'msn.com'];
+            const dominio = emailTrimmed.split('@')[1];
+            
+            if (!dominiosValidos.includes(dominio)) {
+              const confirmar = confirm(`El dominio "${dominio}" no es común. ¿Estás seguro que es correcto?`);
+              if (!confirmar) {
+                return false;
+              }
+            }
+
+            try {
+              const updates = {
+                email: emailTrimmed
+              };
+
+              const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
+
+              if (response && response.success) {
+                this.user.email = response.data.email;
+                this.user.last_profile_update = response.data.fechaModificacion;
+
+                // Actualizar el localStorage para que se refleje en home
+                const currentUser = this.apiService.getCurrentUser();
+                if (currentUser) {
+                  currentUser.email = response.data.email;
+                  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+
+                await this.showToast('Email actualizado exitosamente', 'success');
+              }
+            } catch (error: any) {
+              console.error('Error actualizando email:', error);
+              await this.showToast(error.friendlyMessage || 'Error al actualizar el email', 'danger');
+            }
+
+            return true;
+          }
+        }
+      ]
     });
+    
+
     await alert.present();
   }
 

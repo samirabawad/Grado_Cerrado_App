@@ -156,7 +156,32 @@ export class ApiService {
       );
   }
 
-  updateUserProfile(userId: number, updates: { name?: string, email?: string }): Observable<any> {
+// Obtener información completa del usuario actual
+  getCurrentUserComplete(userId: number): Observable<any> {
+    const url = `${this.API_URL}/auth/current-user/${userId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Usuario completo obtenido:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo usuario completo:', error);
+          throw error;
+        })
+      );
+  }
+
+
+// Actualizar perfil del usuario
+  updateUserProfile(userId: number, updates: {
+    nombre?: string;
+    segundoNombre?: string;
+    apellidoPaterno?: string;
+    apellidoMaterno?: string;
+    email?: string;
+  }): Observable<any> {
     const url = `${this.API_URL}/auth/update-profile/${userId}`;
     
     console.log('Actualizando perfil:', updates);
