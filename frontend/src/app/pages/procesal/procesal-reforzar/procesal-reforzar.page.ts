@@ -92,27 +92,28 @@ export class ProcesalReforzarPage implements OnInit {
         this.weakTopics = [];
       }
 
-      // Cargar sesiones recientes
+// Cargar sesiones recientes SOLO DE PROCESAL
       try {
-        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
+        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 50).toPromise();
         console.log('📦 Respuesta RAW del backend:', sessionsResponse);
         
         if (sessionsResponse && sessionsResponse.success) {
-          // Mapear todas las sesiones (sin filtrar por ahora porque todas son "General")
+          // Filtrar SOLO sesiones de Derecho Procesal y tomar las 5 más recientes
           this.recentSessions = (sessionsResponse.data || [])
-            .slice(0, 5) // Tomar solo las 5 más recientes
+            .filter((s: any) => s.area && s.area.toLowerCase().includes('procesal'))
+            .slice(0, 5)
             .map((s: any) => ({
-              id: s.id,
-              testId: s.id,
+              id: s.testId,
+              testId: s.testId,
               date: s.date,
-              area: s.area || 'General',
-              durationSeconds: s.duration || 0,
-              totalQuestions: s.questions || 0,
-              correctAnswers: s.correct || 0,
+              area: s.area,
+              durationSeconds: s.durationSeconds || 0,
+              totalQuestions: s.totalQuestions || 0,
+              correctAnswers: s.correctAnswers || 0,
               successRate: s.successRate || 0
             }));
           
-          console.log('✅ Sesiones mapeadas:', this.recentSessions);
+          console.log('✅ Sesiones de PROCESAL mapeadas:', this.recentSessions);
         }
       } catch (error) {
         console.error('Error cargando sesiones recientes:', error);
