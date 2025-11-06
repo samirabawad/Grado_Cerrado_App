@@ -240,6 +240,62 @@ export class ApiService {
       );
   }
 
+  // Solicitar recuperación de contraseña
+  requestPasswordReset(email: string): Observable<any> {
+    const url = `${this.API_URL}/auth/request-password-reset`;
+    
+    console.log('Solicitando recuperación de contraseña para:', email);
+    
+    return this.http.post<any>(url, { email }, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Solicitud de recuperación enviada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error solicitando recuperación:', error);
+          
+          let errorMessage = 'Error al solicitar recuperación de contraseña';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
+  // Resetear contraseña con token
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    const url = `${this.API_URL}/auth/reset-password`;
+    
+    console.log('Reseteando contraseña con token');
+    
+    return this.http.post<any>(url, { token, newPassword }, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Contraseña reseteada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error reseteando contraseña:', error);
+          
+          let errorMessage = 'Error al resetear la contraseña';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
   logout(): void {
     localStorage.removeItem('currentUser');
     this.clearCurrentSession();

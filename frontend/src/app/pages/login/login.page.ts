@@ -133,4 +133,146 @@ async iniciarSesion() {
   irARegistro() {
     this.router.navigate(['/registro']);
   }
+  // Recuperar contraseña
+// Recuperar contraseña
+  async forgotPassword() {
+    const alert = await this.alertController.create({
+      header: 'Recuperar Contraseña',
+      message: 'Ingresa tu email y te enviaremos un código de recuperación',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'tu@email.com'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Enviar',
+          handler: async (data) => {
+            if (!data.email || !data.email.includes('@')) {
+              await this.showAlert('Email inválido', 'Por favor ingresa un email válido');
+              return false;
+            }
+
+            const loading = await this.loadingController.create({
+              message: 'Enviando código...',
+              spinner: 'circles'
+            });
+            
+            await loading.present();
+
+            try {
+              const response = await this.apiService.requestPasswordReset(data.email).toPromise();
+              
+              await loading.dismiss();
+              
+              if (response && response.success) {
+                // Mostrar segundo alert para ingresar token y nueva contraseña
+                await this.resetPasswordWithToken(response.token || '');
+              }
+            } catch (error: any) {
+              await loading.dismiss();
+              await this.showAlert('Error', error.friendlyMessage || 'Error al enviar el código');
+            }
+
+            return true;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  // Resetear contraseña con token
+  async resetPasswordWithToken(token: string) {
+    const alert = await this.alertController.create({
+      header: 'Nueva Contraseña',
+      message: token ? `Tu código de recuperación: ${token}\n\nIngresa tu nueva contraseña:` : 'Ingresa el código de recuperación y tu nueva contraseña:',
+      inputs: token ? [
+        {
+          name: 'newPassword',
+          type: 'password',
+          placeholder: 'Nueva contraseña (mínimo 6 caracteres)'
+        },
+        {
+          name: 'confirmPassword',
+          type: 'password',
+          placeholder: 'Confirmar nueva contraseña'
+        }
+      ] : [
+        {
+          name: 'token',
+          type: 'text',
+          placeholder: 'Código de recuperación'
+        },
+        {
+          name: 'newPassword',
+          type: 'password',
+          placeholder: 'Nueva contraseña (mínimo 6 caracteres)'
+        },
+        {
+          name: 'confirmPassword',
+          type: 'password',
+          placeholder: 'Confirmar nueva contraseña'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Cambiar Contraseña',
+          handler: async (data) => {
+            const resetToken = token || data.token;
+            
+            if (!resetToken) {
+              await this.showAlert('Error', 'El código de recuperación es obligatorio');
+              return false;
+            }
+
+            if (!data.newPassword || data.newPassword.length < 6) {
+              await this.showAlert('Error', 'La contraseña debe tener al menos 6 caracteres');
+              return false;
+            }
+
+            if (data.newPassword !== data.confirmPassword) {
+              await this.showAlert('Error', 'Las contraseñas no coinciden');
+              return false;
+            }
+
+            const loading = await this.loadingController.create({
+              message: 'Actualizando contraseña...',
+              spinner: 'circles'
+            });
+            
+            await loading.present();
+
+            try {
+              const response = await this.apiService.resetPassword(resetToken, data.newPassword).toPromise();
+              
+              await loading.dismiss();
+              
+              if (response && response.success) {
+                await this.showAlert('Contraseña actualizada', 'Tu contraseña ha sido actualizada exitosamente. Ahora puedes iniciar sesión.');
+              }
+            } catch (error: any) {
+              await loading.dismiss();
+              await this.showAlert('Error', error.friendlyMessage || 'Error al actualizar la contraseña');
+            }
+
+            return true;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
 }
