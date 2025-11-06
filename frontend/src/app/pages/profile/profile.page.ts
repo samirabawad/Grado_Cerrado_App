@@ -76,16 +76,16 @@ export class ProfilePage implements OnInit, AfterViewInit {
   // SECCIONES EXPANDIBLES
   // ============================================
   expandedSections: { [key: string]: boolean } = {
-    personalInfo: false,
-    adaptiveMode: false,
-    frequency: false, 
-    weeklyGoal: false, 
-    preferredDays: false,
-    reminders: false, 
-    progress: false,
-    password: false,   
-    configuration: false
-  };
+      personalInfo: false,
+      security: false,
+      adaptiveMode: false,
+      frequency: false,
+      weeklyGoal: false,
+      preferredDays: false,
+      reminders: false,
+      progress: false,
+      configuration: false
+    };
 
 
   hasUnsavedChanges: boolean = false;
@@ -668,50 +668,93 @@ async editEmail() {
     await alert.present();
   }
 
-    // ============================================
-  // CONTRASEÑA – ACCIONES
-  // ============================================
-  async onChangePassword() {
-    if (this.isChangingPassword || !this.isPasswordFormValid()) {
-      return;
-    }
+async changePassword() {
+    const alert = await this.alertController.create({
+      header: 'Cambiar Contraseña',
+      message: 'Ingresa tu contraseña actual y la nueva contraseña',
+      inputs: [
+        {
+          name: 'currentPassword',
+          type: 'password',
+          placeholder: 'Contraseña actual',
+          attributes: {
+            required: true,
+            autocomplete: 'current-password'
+          }
+        },
+        {
+          name: 'newPassword',
+          type: 'password',
+          placeholder: 'Nueva contraseña (mínimo 6 caracteres)',
+          attributes: {
+            required: true,
+            autocomplete: 'new-password',
+            minlength: 6
+          }
+        },
+        {
+          name: 'confirmPassword',
+          type: 'password',
+          placeholder: 'Confirmar nueva contraseña',
+          attributes: {
+            required: true,
+            autocomplete: 'new-password'
+          }
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Cambiar',
+          handler: async (data) => {
+            // Validar que todos los campos estén completos
+            if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
+              await this.showToast('Todos los campos son obligatorios', 'danger');
+              return false;
+            }
 
-    this.isChangingPassword = true;
+            // Validar longitud mínima
+            if (data.newPassword.length < 6) {
+              await this.showToast('La nueva contraseña debe tener al menos 6 caracteres', 'danger');
+              return false;
+            }
 
-    try {
-      const userId = this.user?.id;
-      if (!userId) {
-        await this.showToast('❌ Sesión inválida. Inicia sesión nuevamente.', 'danger');
-        this.isChangingPassword = false;
-        return;
-      }
+            // Validar que las contraseñas coincidan
+            if (data.newPassword !== data.confirmPassword) {
+              await this.showToast('Las contraseñas no coinciden', 'danger');
+              return false;
+            }
 
-      const payload = {
-        currentPassword: this.passwordForm.currentPassword,
-        newPassword: this.passwordForm.newPassword,
-        confirmPassword: this.passwordForm.confirmPassword
-      };
+            try {
+              const passwords = {
+                currentPassword: data.currentPassword,
+                newPassword: data.newPassword,
+                confirmPassword: data.confirmPassword
+              };
 
-      const resp = await this.apiService.changePassword(userId, payload).toPromise();
+              const response = await this.apiService.changePassword(this.user.id, passwords).toPromise();
 
-      if (resp && resp.success) {
-        await this.showToast('✅ Contraseña actualizada', 'success');
-        // Limpia el form
-        this.passwordForm.currentPassword = '';
-        this.passwordForm.newPassword = '';
-        this.passwordForm.confirmPassword = '';
-        // (Opcional) Cerrar sección:
-        // this.expandedSections['password'] = false;
-      } else {
-        await this.showToast('❌ No se pudo actualizar la contraseña', 'danger');
-      }
-    } catch (error: any) {
-      const msg = error?.friendlyMessage || error?.error?.message || 'Error al cambiar la contraseña';
-      await this.showToast(`❌ ${msg}`, 'danger');
-    } finally {
-      this.isChangingPassword = false;
-    }
+              if (response && response.success) {
+                await this.showToast('Contraseña actualizada exitosamente', 'success');
+              }
+            } catch (error: any) {
+              console.error('Error cambiando contraseña:', error);
+              await this.showToast(error.friendlyMessage || 'Error al cambiar la contraseña', 'danger');
+            }
+
+            return true;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
+
+
 
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {

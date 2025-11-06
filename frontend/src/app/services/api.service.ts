@@ -207,15 +207,14 @@ export class ApiService {
         })
       );
   }
-  // Cambiar contraseña
+
+// Cambiar contraseña
   changePassword(userId: number, passwords: {
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
   }): Observable<any> {
-
-    const url = `${this.API_URL}/Auth/change-password/${userId}`;
-
+    const url = `${this.API_URL}/auth/change-password/${userId}`;
     
     console.log('Cambiando contraseña para usuario:', userId);
     
