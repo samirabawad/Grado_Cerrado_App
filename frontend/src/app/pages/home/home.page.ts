@@ -37,7 +37,7 @@ export class HomePage implements OnInit {
     this.loadUserData();
   }
 
-  async loadUserData() {
+async loadUserData() {
     this.isLoading = true;
 
     try {
@@ -51,7 +51,19 @@ export class HomePage implements OnInit {
       }
 
       const studentId = currentUser.id;
-      this.userName = currentUser.nombre || 'Estudiante';
+
+      // Obtener datos actualizados del backend
+      try {
+        const userResponse = await this.apiService.getCurrentUserComplete(studentId).toPromise();
+        if (userResponse && userResponse.success) {
+          this.userName = userResponse.data.nombre || 'Estudiante';
+        } else {
+          this.userName = currentUser.name || 'Estudiante';
+        }
+      } catch (error) {
+        console.error('Error obteniendo usuario completo:', error);
+        this.userName = currentUser.name || 'Estudiante';
+      }
 
       console.log('Cargando estadísticas para:', studentId, this.userName);
 

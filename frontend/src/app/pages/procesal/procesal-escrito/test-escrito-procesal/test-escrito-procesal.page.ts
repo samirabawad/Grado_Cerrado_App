@@ -5,6 +5,7 @@ import { IonicModule, AlertController, LoadingController } from '@ionic/angular'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../services/api.service';
+
 interface Question {
   id: string;
   text: string;
@@ -17,6 +18,8 @@ interface Question {
   correctAnswer: string;
   explanation: string;
   userAnswer?: string;
+  wasAnswered?: boolean;
+  wasCorrect?: boolean;
   options?: any[];
   [key: string]: any;
 }
@@ -237,6 +240,25 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     return [];
   }
 
+  // ✅ NUEVO MÉTODO: Obtener la letra (Id) de una opción por su texto
+  getOptionLetterByText(optionText: string): string | null {
+    const question = this.getCurrentQuestion();
+    if (!question || !Array.isArray(question.options)) return null;
+
+    const option = question.options.find((opt: any) => {
+      if (typeof opt === 'object') {
+        return (opt.text === optionText || opt.Text === optionText);
+      }
+      return opt === optionText;
+    });
+
+    if (option && typeof option === 'object' && ('Id' in option || 'id' in option)) {
+      return (option.Id || option.id || '').toString().toUpperCase();
+    }
+
+    return null;
+  }
+
   isTrueFalseQuestion(): boolean {
     const question = this.getCurrentQuestion();
     return question?.type === 'verdadero_falso' || question?.type === 2 || question?.type === '2';
@@ -254,17 +276,36 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     let normalizedAnswer: string;
     
     if (this.isTrueFalseQuestion()) {
-      normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
-    } else {
-      const options = this.getCurrentQuestionOptions();
-      const optionIndex = options.indexOf(optionText);
+      // ✅ Para V/F también usar la letra del backend
+      const letterFromBackend = this.getOptionLetterByText(optionText);
       
-      if (optionIndex !== -1) {
-        normalizedAnswer = String.fromCharCode(65 + optionIndex);
+      if (letterFromBackend) {
+        normalizedAnswer = letterFromBackend;
+        console.log(`✅ V/F seleccionado: Letra ${normalizedAnswer} = "${optionText}"`);
+      } else {
+        // Fallback tradicional
+        normalizedAnswer = optionText === 'Verdadero' ? 'A' : 'B';
+        console.log(`⚠️ V/F usando fallback: Letra ${normalizedAnswer}`);
+      }
+    } else {
+      // ✅ NUEVO: Usar la letra (Id) que viene del backend
+      const letterFromBackend = this.getOptionLetterByText(optionText);
+      
+      if (letterFromBackend) {
+        normalizedAnswer = letterFromBackend;
         console.log(`✅ Opción seleccionada: Letra ${normalizedAnswer} = "${optionText}"`);
       } else {
-        console.error('❌ No se encontró la opción en el array');
-        return;
+        // Fallback al método anterior si no se encuentra la letra
+        const options = this.getCurrentQuestionOptions();
+        const optionIndex = options.indexOf(optionText);
+        
+        if (optionIndex !== -1) {
+          normalizedAnswer = String.fromCharCode(65 + optionIndex);
+          console.log(`⚠️ Usando índice como fallback: Letra ${normalizedAnswer} = "${optionText}"`);
+        } else {
+          console.error('❌ No se encontró la opción en el array');
+          return;
+        }
       }
     }
     
@@ -274,11 +315,18 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     
     const correctionConfig = localStorage.getItem('correctionConfig');
     const showImmediateCorrection = correctionConfig 
-      ? JSON.parse(correctionConfig).immediate 
+      ? JSON.parse(correctionConfig).showImmediateCorrection 
       : true;
     
-    if (showImmediateCorrection && !isCorrect) {
-      await this.showExplanationAlert(question.explanation);
+    if (showImmediateCorrection) {
+      question.wasAnswered = true;
+      question.wasCorrect = isCorrect;
+      
+      console.log(`${isCorrect ? '✅' : '❌'} Respuesta ${isCorrect ? 'correcta' : 'incorrecta'}`);
+      console.log(`Usuario respondió: ${normalizedAnswer}, Correcta: ${question.correctAnswer}`);
+    } else {
+      question.wasAnswered = true;
+      question.wasCorrect = undefined;
     }
     
     await this.sendAnswerToBackend(question, normalizedAnswer);
@@ -312,10 +360,10 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
         const buttons = alertElement.shadowRoot?.querySelectorAll('.alert-button');
 
         if (wrapper) {
-          wrapper.style.background = 'linear-gradient(135deg, rgba(255, 111, 0, 0.95) 0%, rgba(251, 146, 60, 0.95) 100%)';
+          wrapper.style.background = 'linear-gradient(135deg, rgba(33, 150, 243, 0.95) 0%, rgba(30, 136, 229, 0.95) 100%)';
           wrapper.style.backdropFilter = 'blur(10px)';
           wrapper.style.borderRadius = '20px';
-          wrapper.style.boxShadow = '0 8px 32px rgba(255, 111, 0, 0.5)';
+          wrapper.style.boxShadow = '0 8px 32px rgba(33, 150, 243, 0.5)';
           wrapper.style.border = '2px solid rgba(255, 255, 255, 0.2)';
           wrapper.style.maxWidth = '90%';
         }
@@ -353,7 +401,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
         buttons?.forEach((button) => {
           const btn = button as HTMLElement;
           btn.style.background = 'white';
-          btn.style.color = '#FF6F00';
+          btn.style.color = '#2196F3';
           btn.style.borderRadius = '12px';
           btn.style.fontWeight = '700';
           btn.style.fontSize = '16px';
@@ -365,7 +413,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
           const inner = btn.querySelector('.alert-button-inner') as HTMLElement;
           if (inner) {
-            inner.style.color = '#FF6F00';
+            inner.style.color = '#2196F3';
             inner.style.fontWeight = '700';
           }
         });
@@ -471,11 +519,25 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     if (!question || !question.userAnswer) return false;
     
     if (this.isTrueFalseQuestion()) {
+      // ✅ CORREGIDO: Usar la letra del backend también para V/F
+      const letterFromBackend = this.getOptionLetterByText(optionText);
+      if (letterFromBackend) {
+        return question.userAnswer === letterFromBackend;
+      }
+      
+      // Fallback tradicional
       if (question.userAnswer === 'V' && optionText === 'Verdadero') return true;
       if (question.userAnswer === 'F' && optionText === 'Falso') return true;
       return false;
     }
     
+    // ✅ CORREGIDO: Usar la letra del backend en lugar del índice
+    const letterFromBackend = this.getOptionLetterByText(optionText);
+    if (letterFromBackend) {
+      return question.userAnswer === letterFromBackend;
+    }
+    
+    // Fallback al método anterior
     const options = this.getCurrentQuestionOptions();
     const optionIndex = options.indexOf(optionText);
     if (optionIndex !== -1) {
@@ -517,40 +579,36 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     }
 
     if (this.isTrueFalseQuestion()) {
-      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
-      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
-                                 correctAnswerNorm === 'v' || 
-                                 correctAnswerNorm === 'verdadero';
+      // ✅ CORREGIDO: Usar la letra del backend para V/F
+      const letterFromBackend = this.getOptionLetterByText(optionText);
+      if (!letterFromBackend) return 'default';
       
-      const optionIsVerdadero = optionText === 'Verdadero';
-      const optionIsFalso = optionText === 'Falso';
+      const isCorrect = this.compareAnswers(letterFromBackend, question.correctAnswer);
+      const isSelected = question.userAnswer === letterFromBackend;
       
-      if ((optionIsVerdadero && isVerdaderoCorrect) || (optionIsFalso && !isVerdaderoCorrect)) {
-        return 'correct';
+      if (isSelected) {
+        return isCorrect ? 'correct' : 'incorrect';
       }
       
-      if (question.userAnswer === 'V' && optionIsVerdadero && !isVerdaderoCorrect) {
-        return 'incorrect';
-      }
-      if (question.userAnswer === 'F' && optionIsFalso && isVerdaderoCorrect) {
-        return 'incorrect';
-      }
+      if (isCorrect) return 'correct';
       
       return 'default';
     }
 
-    const options = this.getCurrentQuestionOptions();
-    const optionIndex = options.indexOf(optionText);
-    
-    if (optionIndex === -1) return 'default';
-    
-    const optionLetter = String.fromCharCode(65 + optionIndex);
+    // ✅ CORREGIDO: Usar la letra del backend
+    const letterFromBackend = this.getOptionLetterByText(optionText);
+    if (!letterFromBackend) return 'default';
+
+    const optionLetter = letterFromBackend;
     
     const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
     const isSelected = question.userAnswer === optionLetter;
     
+    if (isSelected) {
+      return isCorrect ? 'correct' : 'incorrect';
+    }
+    
     if (isCorrect) return 'correct';
-    if (isSelected && !isCorrect) return 'incorrect';
     
     return 'default';
   }

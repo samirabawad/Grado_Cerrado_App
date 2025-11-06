@@ -122,6 +122,30 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+
+  scrollDifficultyUp() {
+    const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      this.scrollToOption(newIndex);
+    } else {
+      // Si está en el primero, ir al último
+      this.scrollToOption(this.difficultyLevels.length - 1);
+    }
+  }
+
+  scrollDifficultyDown() {
+    const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
+    if (currentIndex < this.difficultyLevels.length - 1) {
+      const newIndex = currentIndex + 1;
+      this.scrollToOption(newIndex);
+    } else {
+      // Si está en el último, ir al primero
+      this.scrollToOption(0);
+    }
+  }
+
+  
   async startVoicePractice() {
     const loading = await this.loadingController.create({
       message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',

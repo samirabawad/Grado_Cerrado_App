@@ -58,16 +58,8 @@ export class ProcesalReforzarPage implements OnInit {
   }
 
   getMainRecommendation() {
-    // Solo devolver recomendación si hay datos REALES de procesal
     if (this.weakTopics.length === 0) return null;
-    
-    // Verificar que el tema débil sea realmente de procesal
-    const firstTopic = this.weakTopics[0];
-    if (!firstTopic.area || !firstTopic.area.toLowerCase().includes('procesal')) {
-      return null;
-    }
-    
-    return firstTopic;
+    return this.weakTopics[0];
   }
 
   async loadData() {
@@ -84,13 +76,12 @@ export class ProcesalReforzarPage implements OnInit {
 
       const studentId = currentUser.id;
 
-      // Cargar temas débiles SOLO DE PROCESAL
+// Cargar temas débiles SOLO DE PROCESAL
       try {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
           // Filtrar SOLO temas de Derecho Procesal
           this.weakTopics = (weakResponse.data || []).filter((topic: any) => {
-            // Verificar que el área sea Derecho Procesal
             return topic.area && topic.area.toLowerCase().includes('procesal');
           });
           
@@ -101,24 +92,24 @@ export class ProcesalReforzarPage implements OnInit {
         this.weakTopics = [];
       }
 
-      // Cargar sesiones recientes SOLO DE PROCESAL
+// Cargar sesiones recientes SOLO DE PROCESAL
       try {
-        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
+        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 50).toPromise();
         console.log('📦 Respuesta RAW del backend:', sessionsResponse);
         
         if (sessionsResponse && sessionsResponse.success) {
-          // Filtrar SOLO sesiones de Derecho Procesal
+          // Filtrar SOLO sesiones de Derecho Procesal y tomar las 5 más recientes
           this.recentSessions = (sessionsResponse.data || [])
             .filter((s: any) => s.area && s.area.toLowerCase().includes('procesal'))
-            .slice(0, 5) // Tomar solo las 5 más recientes
+            .slice(0, 5)
             .map((s: any) => ({
-              id: s.id,
-              testId: s.id,
+              id: s.testId,
+              testId: s.testId,
               date: s.date,
               area: s.area,
-              durationSeconds: s.duration || 0,
-              totalQuestions: s.questions || 0,
-              correctAnswers: s.correct || 0,
+              durationSeconds: s.durationSeconds || 0,
+              totalQuestions: s.totalQuestions || 0,
+              correctAnswers: s.correctAnswers || 0,
               successRate: s.successRate || 0
             }));
           
@@ -232,9 +223,19 @@ export class ProcesalReforzarPage implements OnInit {
 
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
-    this.selectedSubtemaId = topic.subtemaId;
-    this.scopeType = 'subtema';
+    
+    this.selectedTemaId = topic.temaId;
+    this.scopeType = 'tema';
     this.showThemeSelector = true;
+    this.expandedTema = topic.temaId;
+    this.expandedSections['testSection'] = true;
+    
+    setTimeout(() => {
+      const testSection = document.querySelector('.test-section');
+      if (testSection) {
+        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   toggleTemaExpansion(temaId: number) {
@@ -295,7 +296,8 @@ export class ProcesalReforzarPage implements OnInit {
         studentId: currentUser.id,
         difficulty: "intermedio",
         legalAreas: ["Derecho Procesal"],
-        numberOfQuestions: this.selectedQuantity
+        numberOfQuestions: this.selectedQuantity,
+        allowRepeatedQuestions: true
       };
 
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {

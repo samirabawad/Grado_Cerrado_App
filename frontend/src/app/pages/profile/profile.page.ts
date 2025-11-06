@@ -2,7 +2,7 @@
 
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, AlertController, ToastController, LoadingController  } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
@@ -76,17 +76,36 @@ export class ProfilePage implements OnInit, AfterViewInit {
   // SECCIONES EXPANDIBLES
   // ============================================
   expandedSections: { [key: string]: boolean } = {
-    personalInfo: false,
-    adaptiveMode: false,
-    frequency: false, // ✅ CERRADA por defecto
-    weeklyGoal: false, // ✅ Subsección
-    preferredDays: false, // ✅ Subsección
-    reminders: false, // ✅ Subsección
-    progress: false,
-    configuration: false
-  };
+      personalInfo: false,
+      security: false,
+      adaptiveMode: false,
+      frequency: false,
+      weeklyGoal: false,
+      preferredDays: false,
+      reminders: false,
+      progress: false,
+      configuration: false
+    };
+
 
   hasUnsavedChanges: boolean = false;
+
+    // ============================================
+  // CONTRASEÑA – FORM
+  // ============================================
+  passwordForm = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
+
+  isChangingPassword: boolean = false;
+
+  isPasswordFormValid(): boolean {
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm;
+    return !!currentPassword && !!newPassword && newPassword.length >= 6 && newPassword === confirmPassword;
+  }
+
 
   // ============================================
   // MODO ADAPTATIVO
@@ -100,8 +119,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
-    private apiService: ApiService,
-    private loadingController: LoadingController
+    private apiService: ApiService
   ) {}
 
   ngOnInit() {
@@ -114,40 +132,52 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
   
 
-  // ============================================
-  // CARGAR TODOS LOS DATOS
-  // ============================================
-  async loadAllUserData() {
-    this.isLoading = true;
+// ============================================
+// CARGAR TODOS LOS DATOS
+// ============================================
+async loadAllUserData() {
+  this.isLoading = true;
 
-    try {
-      const currentUser = this.apiService.getCurrentUser();
-      
-      if (!currentUser || !currentUser.id) {
-        console.warn('No hay usuario logueado');
-        this.isLoading = false;
-        await this.router.navigate(['/login']);
-        return;
-      }
-
-      const studentId = currentUser.id;
-      
-      this.user.id = studentId;
-      this.user.nombre = currentUser.nombreCompleto || 'Usuario';
-      this.user.email = currentUser.email || 'usuario@example.com';
-
-      await this.loadDashboardStats(studentId);
-      this.loadSettings();
-      this.loadStudyFrequency();
-      this.loadAdaptiveConfig();
-
-    } catch (error) {
-      console.error('Error cargando datos del usuario:', error);
-      await this.showToast('Error al cargar los datos del perfil', 'danger');
-    } finally {
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    
+    if (!currentUser || !currentUser.id) {
+      console.warn('No hay usuario logueado');
       this.isLoading = false;
+      await this.router.navigate(['/login']);
+      return;
     }
+
+    const studentId = currentUser.id;
+    
+    // Obtener información completa del usuario desde el backend
+    const userResponse = await this.apiService.getCurrentUserComplete(studentId).toPromise();
+    
+    if (userResponse && userResponse.success) {
+      const userData = userResponse.data;
+      
+      this.user.id = userData.id;
+      this.user.nombre = userData.nombre || 'Usuario';
+      this.user.nombreCompleto = userData.nombreCompleto || userData.nombre || 'Usuario';
+      this.user.email = userData.email || 'usuario@example.com';
+      this.user.fecha_registro = userData.fechaRegistro ? new Date(userData.fechaRegistro) : new Date();
+      this.user.last_profile_update = userData.fechaModificacion;
+      
+      console.log('Usuario cargado:', this.user);
+    }
+
+    await this.loadDashboardStats(studentId);
+    this.loadSettings();
+    this.loadStudyFrequency();
+    this.loadAdaptiveConfig();
+
+  } catch (error) {
+    console.error('Error cargando datos del usuario:', error);
+    await this.showToast('Error al cargar los datos del perfil', 'danger');
+  } finally {
+    this.isLoading = false;
   }
+}
 
   // ============================================
   // CARGAR ESTADÍSTICAS DEL DASHBOARD
@@ -438,183 +468,294 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
 async editName() {
-  // Primero necesitamos obtener los datos actuales del usuario
-  const currentUser = this.apiService.getCurrentUser();
-  
-  const alert = await this.alertController.create({
-    header: 'Editar Nombre',
-    inputs: [
-      {
-        name: 'nombre',
-        type: 'text',
-        placeholder: 'Nombre *',
-        value: currentUser?.nombre || '',
-        attributes: {
-          maxlength: 50
-        }
-      },
-      {
-        name: 'segundoNombre',
-        type: 'text',
-        placeholder: 'Segundo Nombre (opcional)',
-        value: currentUser?.segundoNombre || '',
-        attributes: {
-          maxlength: 50
-        }
-      },
-      {
-        name: 'apellidoPaterno',
-        type: 'text',
-        placeholder: 'Apellido Paterno',
-        value: currentUser?.apellidoPaterno || '',
-        attributes: {
-          maxlength: 50
-        }
-      },
-      {
-        name: 'apellidoMaterno',
-        type: 'text',
-        placeholder: 'Apellido Materno',
-        value: currentUser?.apellidoMaterno || '',
-        attributes: {
-          maxlength: 50
-        }
+    // Primero obtener los datos completos del usuario
+    try {
+      const userResponse = await this.apiService.getCurrentUserComplete(this.user.id).toPromise();
+      
+      let currentData = {
+        nombre: this.user.nombre,
+        segundoNombre: '',
+        apellidoPaterno: '',
+        apellidoMaterno: ''
+      };
+
+      if (userResponse && userResponse.success) {
+        currentData = {
+          nombre: userResponse.data.nombre || '',
+          segundoNombre: userResponse.data.segundoNombre || '',
+          apellidoPaterno: userResponse.data.apellidoPaterno || '',
+          apellidoMaterno: userResponse.data.apellidoMaterno || ''
+        };
       }
-    ],
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel',
-        cssClass: 'secondary'
-      },
-      {
-        text: 'Guardar',
-        handler: async (data) => {
-          // Validación básica
-          if (!data.nombre || data.nombre.trim().length < 2) {
-            await this.showToast('⚠️ El nombre debe tener al menos 2 caracteres', 'warning');
-            return false; // No cerrar el alert
-          }
 
-          // Crear el objeto con solo los campos a actualizar
-          const updateData: any = {
-            nombre: data.nombre.trim()
-          };
-
-          // Solo incluir campos opcionales si tienen valor
-          if (data.segundoNombre !== undefined) {
-            updateData.segundoNombre = data.segundoNombre.trim() || null;
+      const alert = await this.alertController.create({
+        header: 'Editar Nombre',
+inputs: [
+          {
+            name: 'nombre',
+            type: 'text',
+            placeholder: 'Nombre *',
+            value: currentData.nombre,
+            attributes: {
+              required: true
+            }
+          },
+          {
+            name: 'segundoNombre',
+            type: 'text',
+            placeholder: 'Segundo nombre (opcional)',
+            value: currentData.segundoNombre
+          },
+          {
+            name: 'apellidoPaterno',
+            type: 'text',
+            placeholder: 'Apellido paterno *',
+            value: currentData.apellidoPaterno,
+            attributes: {
+              required: true
+            }
+          },
+          {
+            name: 'apellidoMaterno',
+            type: 'text',
+            placeholder: 'Apellido materno (opcional)',
+            value: currentData.apellidoMaterno
           }
-          if (data.apellidoPaterno !== undefined) {
-            updateData.apellidoPaterno = data.apellidoPaterno.trim() || null;
-          }
-          if (data.apellidoMaterno !== undefined) {
-            updateData.apellidoMaterno = data.apellidoMaterno.trim() || null;
-          }
+        ],
+        buttons: [
+          {
+            text: 'Cancelar',
+            role: 'cancel'
+          },
+          {
+            text: 'Guardar',
+          handler: async (data) => {
+              // Validar campos obligatorios
+              if (!data.nombre || data.nombre.trim() === '') {
+                await this.showToast('El nombre es obligatorio', 'danger');
+                return false;
+              }
 
-          // Llamar a la función de actualización
-          await this.updateProfileData(updateData);
-          return true; // Cerrar el alert
-        }
-      }
-    ]
-  });
-  
+              if (!data.apellidoPaterno || data.apellidoPaterno.trim() === '') {
+                await this.showToast('El apellido paterno es obligatorio', 'danger');
+                return false;
+              }
 
-  await alert.present();
-}
+              try {
+                const updates = {
+                  nombre: data.nombre.trim(),
+                  apellidoPaterno: data.apellidoPaterno.trim(),
+                  segundoNombre: data.segundoNombre?.trim() || null,
+                  apellidoMaterno: data.apellidoMaterno?.trim() || null
+                };
+
+                const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
+
+                if (response && response.success) {
+                  this.user.nombre = response.data.nombre;
+                  this.user.nombreCompleto = response.data.nombreCompleto;
+                  this.user.last_profile_update = response.data.fechaModificacion;
+
+                  // Actualizar el localStorage para que se refleje en home
+                  const currentUser = this.apiService.getCurrentUser();
+                  if (currentUser) {
+                    currentUser.name = response.data.nombre;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                  }
+
+                  await this.showToast('Perfil actualizado exitosamente', 'success');
+                }
+              } catch (error: any) {
+                console.error('Error actualizando nombre:', error);
+                await this.showToast(error.friendlyMessage || 'Error al actualizar el perfil', 'danger');
+              }
+
+              return true;
+            }
+          }
+        ]
+      });
+
+      await alert.present();
+    } catch (error) {
+      console.error('Error cargando datos del usuario:', error);
+      await this.showToast('Error al cargar los datos', 'danger');
+    }
+  }
 
 async editEmail() {
-  const currentUser = this.apiService.getCurrentUser();
-  
-  const alert = await this.alertController.create({
-    header: 'Editar Email',
-    message: 'Ingresa tu nuevo correo electrónico',
-    inputs: [
-      {
-        name: 'email',
-        type: 'email',
-        placeholder: 'nuevo@email.com',
-        value: currentUser?.email || '',
-        attributes: {
-          maxlength: 100,
-          autocomplete: 'email'
+    const alert = await this.alertController.create({
+      header: 'Editar Email',
+      message: 'Ingresa un email válido con dominio real (ejemplo: @gmail.com, @outlook.com)',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'nuevo@email.com',
+          value: this.user.email,
+          attributes: {
+            required: true,
+            autocomplete: 'email'
+          }
         }
-      },
-      {
-        name: 'confirmEmail',
-        type: 'email',
-        placeholder: 'Confirmar email',
-        attributes: {
-          maxlength: 100,
-          autocomplete: 'email'
-        }
-      }
-    ],
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel',
-        cssClass: 'secondary'
-      },
-      {
-        text: 'Guardar',
-        handler: async (data) => {
-          // Validación de formato de email
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          
-          if (!data.email || !data.email.trim()) {
-            await this.showToast('⚠️ Debes ingresar un email', 'warning');
-            return false;
-          }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Guardar',
+          handler: async (data) => {
+            // Validar que el email no esté vacío
+            if (!data.email || data.email.trim() === '') {
+              await this.showToast('El email es obligatorio', 'danger');
+              return false;
+            }
 
-          if (!emailRegex.test(data.email.trim())) {
-            await this.showToast('⚠️ Formato de email inválido', 'warning');
-            return false;
-          }
+            const emailTrimmed = data.email.trim().toLowerCase();
 
-          // Validación de confirmación
-          if (data.email.trim() !== data.confirmEmail.trim()) {
-            await this.showToast('⚠️ Los emails no coinciden', 'warning');
-            return false;
-          }
+            // Validar formato básico de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailTrimmed)) {
+              await this.showToast('Formato de email inválido', 'danger');
+              return false;
+            }
 
-          // Verificar si el email es diferente al actual
-          if (data.email.trim().toLowerCase() === currentUser?.email?.toLowerCase()) {
-            await this.showToast('ℹ️ El email es el mismo que el actual', 'warning');
+            // Validar que tenga un dominio conocido (opcional pero recomendado)
+            const dominiosValidos = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'live.com', 'msn.com'];
+            const dominio = emailTrimmed.split('@')[1];
+            
+            if (!dominiosValidos.includes(dominio)) {
+              const confirmar = confirm(`El dominio "${dominio}" no es común. ¿Estás seguro que es correcto?`);
+              if (!confirmar) {
+                return false;
+              }
+            }
+
+            try {
+              const updates = {
+                email: emailTrimmed
+              };
+
+              const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
+
+              if (response && response.success) {
+                this.user.email = response.data.email;
+                this.user.last_profile_update = response.data.fechaModificacion;
+
+                // Actualizar el localStorage para que se refleje en home
+                const currentUser = this.apiService.getCurrentUser();
+                if (currentUser) {
+                  currentUser.email = response.data.email;
+                  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+
+                await this.showToast('Email actualizado exitosamente', 'success');
+              }
+            } catch (error: any) {
+              console.error('Error actualizando email:', error);
+              await this.showToast(error.friendlyMessage || 'Error al actualizar el email', 'danger');
+            }
+
             return true;
           }
-
-          // Mostrar confirmación final SIN HTML
-          const confirmAlert = await this.alertController.create({
-            header: '⚠️ Confirmación',
-            message: `¿Estás seguro de cambiar tu email a:\n\n${data.email.trim()}\n\nNota: Es posible que necesites verificar el nuevo email.`,
-            buttons: [
-              {
-                text: 'Cancelar',
-                role: 'cancel'
-              },
-              {
-                text: 'Confirmar',
-                handler: async () => {
-                  const updateData = {
-                    email: data.email.trim().toLowerCase()
-                  };
-                  await this.updateProfileData(updateData);
-                }
-              }
-            ]
-          });
-
-          await confirmAlert.present();
-          return true;
         }
-      }
-    ]
-  });
+      ]
+    });
 
-  await alert.present();
-}
+
+    await alert.present();
+  }
+
+async changePassword() {
+    const alert = await this.alertController.create({
+      header: 'Cambiar Contraseña',
+      message: 'Ingresa tu contraseña actual y la nueva contraseña',
+      inputs: [
+        {
+          name: 'currentPassword',
+          type: 'password',
+          placeholder: 'Contraseña actual',
+          attributes: {
+            required: true,
+            autocomplete: 'current-password'
+          }
+        },
+        {
+          name: 'newPassword',
+          type: 'password',
+          placeholder: 'Nueva contraseña (mínimo 6 caracteres)',
+          attributes: {
+            required: true,
+            autocomplete: 'new-password',
+            minlength: 6
+          }
+        },
+        {
+          name: 'confirmPassword',
+          type: 'password',
+          placeholder: 'Confirmar nueva contraseña',
+          attributes: {
+            required: true,
+            autocomplete: 'new-password'
+          }
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Cambiar',
+          handler: async (data) => {
+            // Validar que todos los campos estén completos
+            if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
+              await this.showToast('Todos los campos son obligatorios', 'danger');
+              return false;
+            }
+
+            // Validar longitud mínima
+            if (data.newPassword.length < 6) {
+              await this.showToast('La nueva contraseña debe tener al menos 6 caracteres', 'danger');
+              return false;
+            }
+
+            // Validar que las contraseñas coincidan
+            if (data.newPassword !== data.confirmPassword) {
+              await this.showToast('Las contraseñas no coinciden', 'danger');
+              return false;
+            }
+
+            try {
+              const passwords = {
+                currentPassword: data.currentPassword,
+                newPassword: data.newPassword,
+                confirmPassword: data.confirmPassword
+              };
+
+              const response = await this.apiService.changePassword(this.user.id, passwords).toPromise();
+
+              if (response && response.success) {
+                await this.showToast('Contraseña actualizada exitosamente', 'success');
+              }
+            } catch (error: any) {
+              console.error('Error cambiando contraseña:', error);
+              await this.showToast(error.friendlyMessage || 'Error al cambiar la contraseña', 'danger');
+            }
+
+            return true;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+
+
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastController.create({
@@ -680,67 +821,6 @@ async editEmail() {
     }
     console.log('✅ Configuración de corrección cargada:', this.correctionConfig);
   }
-
-// Función auxiliar para actualizar los datos del perfil
-async updateProfileData(data: any) {
-  const loading = await this.loadingController.create({
-    message: 'Actualizando perfil...',
-    spinner: 'crescent'
-  });
-  await loading.present();
-
-  try {
-    console.log('📤 Datos enviados al backend:', data);
-    const response = await this.apiService.updateProfile(this.user.id, data).toPromise();
-    console.log('📥 Respuesta del backend:', response);
-    
-    if (response && response.success && response.user) {
-      // ✅ El backend devuelve TODOS los datos actualizados, incluyendo nombreCompleto
-      const currentUser = this.apiService.getCurrentUser();
-      
-      if (currentUser) {
-        // ✅ Actualizar con los datos del backend
-        const updatedUser = {
-          ...currentUser,
-          ...response.user  // Esto incluye: nombre, segundoNombre, apellidoPaterno, apellidoMaterno, nombreCompleto, etc.
-        };
-
-        // ✅ GUARDAR en localStorage
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        console.log('💾 Usuario actualizado en localStorage:', updatedUser);
-
-        // ✅ Actualizar la vista local
-        this.user.nombre = response.user.nombreCompleto;
-        this.user.nombreCompleto = response.user.nombreCompleto;
-        this.user.email = response.user.email;
-        
-        await this.showToast('✅ Nombre actualizado exitosamente', 'success');
-      }
-    } else {
-      const errorMsg = response?.message || 'Error al actualizar el perfil';
-      await this.showToast(`❌ ${errorMsg}`, 'danger');
-    }
-  } catch (error: any) {
-    console.error('❌ Error actualizando perfil:', error);
-    
-    let errorMessage = 'Error al actualizar el perfil';
-    
-    if (error.error?.message) {
-      errorMessage = error.error.message;
-    } else if (error.status === 0) {
-      errorMessage = 'No hay conexión con el servidor';
-    } else if (error.status === 401) {
-      errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente';
-      await this.router.navigate(['/login']);
-    } else if (error.status === 400) {
-      errorMessage = 'Datos inválidos';
-    }
-    
-    await this.showToast(`❌ ${errorMessage}`, 'danger');
-  } finally {
-    await loading.dismiss();
-  }
-}
 
   async onCorrectionModeChange() {
     try {

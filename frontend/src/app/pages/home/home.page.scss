@@ -40,17 +40,21 @@
 // ========================================
 .scrollable-content {
   margin-top: 60px;
-  padding: 0 0 100px 0;
+  padding: 0 20px 100px 20px;
   background: #f8f9fa;
   min-height: calc(100vh - 60px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 // ========================================
 // 🔥 TARJETA DE RACHA PRINCIPAL
 // ========================================
 .streak-main-section {
-  padding: 0 20px;
+  padding: 0;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .streak-main-card {
@@ -61,6 +65,8 @@
   border-bottom: 4px solid #10b981;
   cursor: pointer;
   transition: transform 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 
   &:active {
     transform: scale(0.98);
@@ -97,7 +103,6 @@
       }
     }
   }
-
 }
 
 // ========================================
@@ -107,8 +112,10 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding: 0 20px;
+  padding: 0;
   margin-bottom: 24px;
+  width: 100%;
+  box-sizing: border-box;
 
   .stat-box {
     background: white;
@@ -143,8 +150,10 @@
 // CONTINÚA AVANZANDO
 // ========================================
 .continue-section {
-  padding: 0 20px;
+  padding: 0;
   margin-bottom: 24px;
+  width: 100%;
+  box-sizing: border-box;
 
   .section-title {
     margin: 0 0 16px 0;
@@ -158,6 +167,8 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 
   .area-card {
     background: white;
@@ -168,6 +179,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
+    box-sizing: border-box;
 
     &:hover {
       transform: translateY(-4px);
@@ -200,113 +212,71 @@
 
     &.civil {
       border-bottom: 4px solid #f97316;
+
+      .area-icon {
+        background: #f97316;
+      }
     }
 
     &.procesal {
       border-bottom: 4px solid #3b82f6;
-    }
-  }
-}
-
-// ========================================
-// BANNER
-// ========================================
-.banner-section {
-  padding: 0 20px;
-  margin-bottom: 0px;
-
-  .banner-image {
-    width: 100%;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-}
-
-// ========================================
-// RESPONSIVE
-// ========================================
-@media (max-width: 768px) {
-  .scrollable-content {
-    padding: 20px 12px 100px 12px;
-  }
-
-  .area-cards {
-    gap: 12px;
-
-    .area-card {
-      padding: 20px 12px;
 
       .area-icon {
-        font-size: 40px;
-      }
-
-      h3 {
-        font-size: 14px;
+        background: #3b82f6;
       }
     }
   }
+}
 
-  // Colores específicos por área en home
-  .area-card.civil .area-icon {
-    background: #f97316;
-  }
+// ========================================
+// BOTÓN HISTORIAL COMPLETO
+// ========================================
+.history-button-section {
+  padding: 0;
+  margin: 20px 0;
+  width: 100%;
+  box-sizing: border-box;
 
-  .area-card.procesal .area-icon {
-    background: #3b82f6;
-  }// Colores específicos por área en home
-  .area-card.civil .area-icon {
-    background: #f97316;
-  }
+  .history-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 4px solid #10b981;
+    width: 100%;
+    box-sizing: border-box;
 
-  .area-card.procesal .area-icon {
-    background: #3b82f6;
-  }
-  // ========================================
-  // BOTÓN HISTORIAL COMPLETO
-  // ========================================
-  .history-button-section {
-    padding: 0 20px;
-    margin: 20px 0;
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
 
-    .history-card {
-      background: white;
-      border-radius: 16px;
-      padding: 24px 16px;
+    .history-icon {
+      width: 56px;
+      height: 56px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border-bottom: 4px solid #10b981;
-
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      border-radius: 50%;
+      background: #10b981;
+      
+      ion-icon {
+        font-size: 32px;
+        color: white;
       }
+    }
 
-      .history-icon {
-        width: 56px;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: #10b981;
-        
-        ion-icon {
-          font-size: 32px;
-          color: white;
-        }
-      }
-
-      h3 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 700;
-        color: #1f2937;
-      }
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2937;
     }
   }
 }

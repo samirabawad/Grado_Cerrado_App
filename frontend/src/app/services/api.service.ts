@@ -24,6 +24,7 @@ export interface SubmitAnswerResponse {
   respuestaId: number;
   explanation: string;
   correctAnswer: string;
+  feedback?: string;        // ← ¡FALTA ESTE CAMPO!
 }
 
 export interface StudyFrequencyConfig {
@@ -32,15 +33,6 @@ export interface StudyFrequencyConfig {
   diasPreferidos: number[];
   recordatorioActivo: boolean;
   horaRecordatorio: string;
-}
-
-// Interfaces
-export interface UpdateProfileData {
-  nombre?: string;
-  segundoNombre?: string;
-  apellidoPaterno?: string;
-  apellidoMaterno?: string;
-  email?: string;
 }
 
 export interface StudyFrequencyResponse {
@@ -93,16 +85,16 @@ export class ApiService {
   // AUTENTICACIÓN
   // ========================================
 
-  registerUser(userData: { nombre:string, segundoNombre:string, apellidoPaterno: string, apellidoMaterno: string, email: string, password: string }): Observable<any> {
+  registerUser(userData: { name: string, email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/Auth/register`;
     
-    if (!userData.nombre || !userData.apellidoMaterno ||!userData.apellidoPaterno || !userData.email || !userData.password) {
+    if (!userData.name || !userData.email || !userData.password) {
       console.error('Datos incompletos para registro:', userData);
       throw new Error('Faltan datos requeridos: name, email y password');
     }
     
     console.log('Enviando registro a:', url, { 
-      name: userData.nombre +' '+userData.apellidoPaterno+' '+ userData.apellidoMaterno, 
+      name: userData.name, 
       email: userData.email, 
       password: '***'
     });
@@ -130,13 +122,6 @@ export class ApiService {
         })
       );
   }
-
-    // Actualizar datos del perfil (PATCH)
-  updateProfile(studentId: number, profileData: Partial<UpdateProfileData>): Observable<any> {
-    const url = `${this.API_URL}/Auth/update/${studentId}`;
-    return this.http.patch(url, profileData, this.httpOptions);
-  }
-
 
   loginUser(loginData: { email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/Auth/login`;  // ✅ CORRECTO: 'Auth' con mayúscula
@@ -171,8 +156,51 @@ export class ApiService {
         })
       );
   }
+private normalizeAnswer(answer: string): string {
+  if (!answer) return '';
+  
+  const normalized = answer.toLowerCase().trim();
+  
+  // Si es Verdadero/Falso → convertir a true/false
+  if (['verdadero', 'v', 'sí', 'si'].includes(normalized)) {
+    return 'true';
+  }
+  
+  if (['falso', 'f', 'no'].includes(normalized)) {
+    return 'false';
+  }
+  
+  // Si ya es true/false o es una opción (A,B,C), dejar como está
+  return normalized;
+}
 
-  updateUserProfile(userId: number, updates: { name?: string, email?: string }): Observable<any> {
+
+// Obtener información completa del usuario actual
+  getCurrentUserComplete(userId: number): Observable<any> {
+    const url = `${this.API_URL}/auth/current-user/${userId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Usuario completo obtenido:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo usuario completo:', error);
+          throw error;
+        })
+      );
+  }
+
+
+// Actualizar perfil del usuario
+  updateUserProfile(userId: number, updates: {
+    nombre?: string;
+    segundoNombre?: string;
+    apellidoPaterno?: string;
+    apellidoMaterno?: string;
+    email?: string;
+  }): Observable<any> {
     const url = `${this.API_URL}/auth/update-profile/${userId}`;
     
     console.log('Actualizando perfil:', updates);
@@ -187,6 +215,38 @@ export class ApiService {
           console.error('Error actualizando perfil:', error);
           
           let errorMessage = 'Error al actualizar el perfil';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
+// Cambiar contraseña
+  changePassword(userId: number, passwords: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<any> {
+    const url = `${this.API_URL}/auth/change-password/${userId}`;
+    
+    console.log('Cambiando contraseña para usuario:', userId);
+    
+    return this.http.put<any>(url, passwords, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Contraseña actualizada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error cambiando contraseña:', error);
+          
+          let errorMessage = 'Error al cambiar la contraseña';
           
           if (error.status === 400 && error.error?.message) {
             errorMessage = error.error.message;
@@ -229,6 +289,7 @@ export class ApiService {
     questionCount?: number;
     numberOfQuestions?: number;
     adaptiveMode?: boolean;
+    allowRepeatedQuestions?: boolean;
     TemaId?: number;
     SubtemaId?: number;
   }): Observable<any> {
@@ -261,7 +322,8 @@ export class ApiService {
       difficulty: config.difficulty || "basico",
       legalAreas: config.legalAreas || [],
       questionCount: config.numberOfQuestions || config.questionCount || 5,
-      adaptiveMode: adaptiveEnabled
+      adaptiveMode: adaptiveEnabled,
+      allowRepeatedQuestions: config.allowRepeatedQuestions || false
     };
 
   
@@ -383,32 +445,68 @@ setCurrentSession(session: any): void {
   // RESPUESTAS
   // ========================================
 
-  submitAnswer(answerData: SubmitAnswerRequest): Observable<SubmitAnswerResponse> {
-    const url = `${this.API_URL}/Study/submit-answer`;
-    
-    console.log('📤 Enviando respuesta al backend:', answerData);
-    
-    return this.http.post<SubmitAnswerResponse>(url, answerData, this.httpOptions)
-      .pipe(
-        map((response: SubmitAnswerResponse) => {
-          console.log('✅ Respuesta guardada:', response);
-          return response;
-        }),
-        catchError((error: any) => {
-          console.error('❌ Error enviando respuesta:', error);
-          
-          let errorMessage = 'Error al guardar la respuesta';
-          
-          if (error.status === 0) {
-            errorMessage = 'No se puede conectar al servidor';
-          } else if (error.error?.message) {
-            errorMessage = error.error.message;
-          }
-          
-          throw { ...error, friendlyMessage: errorMessage };
-        })
-      );
-  }
+submitAnswer(answerData: SubmitAnswerRequest): Observable<SubmitAnswerResponse> {
+  const url = `${this.API_URL}/Study/submit-answer`;
+  
+  console.log('╔════════════════════════════════════════════════════════════╗');
+  console.log('║  📥 DATOS ORIGINALES RECIBIDOS                             ║');
+  console.log('╚════════════════════════════════════════════════════════════╝');
+  console.log(JSON.stringify(answerData, null, 2));
+  
+  // ✅ NORMALIZAR antes de enviar
+  const normalizedData = {
+    ...answerData,
+    userAnswer: this.normalizeAnswer(answerData.userAnswer || ''),
+    correctAnswer: this.normalizeAnswer(answerData.correctAnswer || '')
+  };
+  
+  console.log('╔════════════════════════════════════════════════════════════╗');
+  console.log('║  📤 DATOS NORMALIZADOS QUE SE VAN A ENVIAR                 ║');
+  console.log('╚════════════════════════════════════════════════════════════╝');
+  console.log(JSON.stringify(normalizedData, null, 2));
+  
+  console.log('╔════════════════════════════════════════════════════════════╗');
+  console.log('║  🔍 COMPARACIÓN CAMPO POR CAMPO                            ║');
+  console.log('╚════════════════════════════════════════════════════════════╝');
+  console.log('testId:', answerData.testId, '→', normalizedData.testId);
+  console.log('preguntaId:', answerData.preguntaId, '→', normalizedData.preguntaId);
+  console.log('userAnswer:', answerData.userAnswer, '→', normalizedData.userAnswer);
+  console.log('correctAnswer:', answerData.correctAnswer, '→', normalizedData.correctAnswer);
+  console.log('isCorrect:', answerData.isCorrect, '→', normalizedData.isCorrect);
+  
+  // ✅ CRÍTICO: Verificar que estamos enviando normalizedData, NO answerData
+  console.log('╔════════════════════════════════════════════════════════════╗');
+  console.log('║  🚀 ENVIANDO AL BACKEND...                                 ║');
+  console.log('╚════════════════════════════════════════════════════════════╝');
+  
+  return this.http.post<SubmitAnswerResponse>(url, normalizedData, this.httpOptions)
+    .pipe(
+      map((response: SubmitAnswerResponse) => {
+        console.log('╔════════════════════════════════════════════════════════════╗');
+        console.log('║  ✅ RESPUESTA DEL BACKEND                                  ║');
+        console.log('╚════════════════════════════════════════════════════════════╝');
+        console.log(JSON.stringify(response, null, 2));
+        console.log('isCorrect:', response.isCorrect);
+        console.log('correctAnswer:', response.correctAnswer);
+        console.log('feedback:', response.feedback);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error enviando respuesta:', error);
+        
+        let errorMessage = 'Error al guardar la respuesta';
+        
+        if (error.status === 0) {
+          errorMessage = 'No se puede conectar al servidor';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        throw { ...error, friendlyMessage: errorMessage };
+      })
+    );
+}
+
 
   evaluateOralAnswer(evaluationData: {
     testId: number;
