@@ -60,7 +60,7 @@ export class DetalleTestPage implements OnInit {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/civil/civil-reforzar']);
+goBack() {
+    this.router.navigate(['/historial']);
   }
 }
