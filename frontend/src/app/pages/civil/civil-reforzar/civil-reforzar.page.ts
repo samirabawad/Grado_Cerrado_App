@@ -88,24 +88,28 @@ async loadData() {
       this.weakTopics = [];
     }
 
-    // Cargar sesiones recientes
+ // Cargar sesiones recientes SOLO DE CIVIL
     try {
-      const sessionsResponse = await this.apiService.getRecentSessions(studentId, 5).toPromise();
+      const sessionsResponse = await this.apiService.getRecentSessions(studentId, 50).toPromise();
       console.log('📦 Respuesta RAW del backend:', sessionsResponse);
       
       if (sessionsResponse && sessionsResponse.success) {
-        this.recentSessions = (sessionsResponse.data || []).map((s: any) => ({
-          id: s.id,
-          testId: s.id,
-          date: s.date,
-          area: s.area,
-          durationSeconds: s.duration || 0,
-          totalQuestions: s.questions || 0,
-          correctAnswers: s.correct || 0,
-          successRate: s.successRate || 0
-        }));
+        // Filtrar SOLO sesiones de Derecho Civil y tomar las 5 más recientes
+        this.recentSessions = (sessionsResponse.data || [])
+          .filter((s: any) => s.area && s.area.toLowerCase().includes('civil'))
+          .slice(0, 5)
+          .map((s: any) => ({
+            id: s.testId,
+            testId: s.testId,
+            date: s.date,
+            area: s.area,
+            durationSeconds: s.durationSeconds || 0,
+            totalQuestions: s.totalQuestions || 0,
+            correctAnswers: s.correctAnswers || 0,
+            successRate: s.successRate || 0
+          }));
         
-        console.log('✅ TODAS las sesiones mapeadas:', this.recentSessions);
+        console.log('✅ Sesiones de CIVIL mapeadas:', this.recentSessions);
       }
     } catch (error) {
       console.error('Error cargando sesiones recientes:', error);
@@ -242,7 +246,8 @@ async loadData() {
         studentId: currentUser.id,
         difficulty: "intermedio",
         legalAreas: ["Derecho Civil"],
-        numberOfQuestions: this.selectedQuantity
+        numberOfQuestions: this.selectedQuantity,
+        allowRepeatedQuestions: true
       };
 
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {

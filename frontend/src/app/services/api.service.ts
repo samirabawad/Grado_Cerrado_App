@@ -229,6 +229,7 @@ export class ApiService {
     questionCount?: number;
     numberOfQuestions?: number;
     adaptiveMode?: boolean;
+    allowRepeatedQuestions?: boolean;
     TemaId?: number;
     SubtemaId?: number;
   }): Observable<any> {
@@ -261,7 +262,8 @@ export class ApiService {
       difficulty: config.difficulty || "basico",
       legalAreas: config.legalAreas || [],
       questionCount: config.numberOfQuestions || config.questionCount || 5,
-      adaptiveMode: adaptiveEnabled
+      adaptiveMode: adaptiveEnabled,
+      allowRepeatedQuestions: config.allowRepeatedQuestions || false
     };
 
   

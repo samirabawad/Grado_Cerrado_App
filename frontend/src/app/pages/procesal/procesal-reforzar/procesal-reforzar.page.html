@@ -8,8 +8,8 @@
   <!-- Contenido principal -->
   <div class="content-area">
 
-<!-- ========================================
-         BANNER - MENSAJE CUANDO NO HAY DATOS
+    <!-- ========================================
+         RECOMENDACIÓN DE ESTUDIO (BANNER SIEMPRE VISIBLE)
          ======================================== -->
     <div class="recommendation-banner" *ngIf="!isLoading && getMainRecommendation()">
       <div class="banner-icon">
@@ -25,13 +25,6 @@
       <button class="banner-btn" (click)="selectWeakTopic(getMainRecommendation())">
         <ion-icon name="play-circle-outline"></ion-icon>
       </button>
-    </div>
-
-    <!-- Mensaje cuando no hay datos -->
-    <div class="empty-state-banner" *ngIf="!isLoading && !getMainRecommendation() && weakTopics.length === 0">
-      <ion-icon name="document-text-outline"></ion-icon>
-      <h3>Comienza tu estudio en Procesal</h3>
-      <p>Realiza tests para ver tus estadísticas y recomendaciones aquí</p>
     </div>
 
     <!-- ========================================
