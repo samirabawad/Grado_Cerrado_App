@@ -296,7 +296,8 @@ export class ProcesalReforzarPage implements OnInit {
         studentId: currentUser.id,
         difficulty: "intermedio",
         legalAreas: ["Derecho Procesal"],
-        numberOfQuestions: this.selectedQuantity
+        numberOfQuestions: this.selectedQuantity,
+        allowRepeatedQuestions: true
       };
 
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {

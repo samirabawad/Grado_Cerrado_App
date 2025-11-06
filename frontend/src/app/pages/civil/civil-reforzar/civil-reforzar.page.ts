@@ -246,7 +246,8 @@ async loadData() {
         studentId: currentUser.id,
         difficulty: "intermedio",
         legalAreas: ["Derecho Civil"],
-        numberOfQuestions: this.selectedQuantity
+        numberOfQuestions: this.selectedQuantity,
+        allowRepeatedQuestions: true
       };
 
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
