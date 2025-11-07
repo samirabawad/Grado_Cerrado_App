@@ -2,12 +2,9 @@
 // CONFIGURACIÓN BÁSICA
 // ========================================
 .results-content {
-  --background: transparent;
-  background-image: url('/assets/image/fondo_blanco_app.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
+  --background: #ffffff;
+  background-color: #ffffff;
+  background-image: none;
   min-height: 100vh;
 }
 
@@ -64,65 +61,31 @@ ion-content.results-content {
 // ========================================
 .motivational-section {
   text-align: center;
-  margin-bottom: 24px;
+  padding: 20px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+
+  &.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
 
   .message-small {
-    font-size: 16px;
-    color: #666;
     margin: 0 0 8px 0;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   .message-large {
-    font-size: 32px;
-    font-weight: 800;
-    color: #FF6F00;
     margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
     line-height: 1.2;
-  }
-}
-
-// ========================================
-// NIVEL Y MAPACHE
-// ========================================
-.level-mapache-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-  .level-info {
-    flex: 1;
-
-    .level-label {
-      font-size: 14px;
-      color: #FF6F00;
-      margin: 0 0 4px 0;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .level-message {
-      font-size: 20px;
-      font-weight: 700;
-      color: #333;
-      margin: 0;
-    }
-  }
-
-  .mapache-container {
-    flex-shrink: 0;
-
-    .mapache-image {
-      width: 80px;
-      height: 80px;
-      object-fit: contain;
-    }
   }
 }
 
@@ -133,7 +96,7 @@ ion-content.results-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 
   .stat-item {
     display: flex;
@@ -224,41 +187,121 @@ ion-content.results-content {
   }
 
   .questions-container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
+    margin-bottom: 16px;
 
     .question-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex: 0 0 calc(20% - 10px);
+
+      .question-circle {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+        &.correct {
+          background: #4CAF50;
+          color: white;
+        }
+
+        &.incorrect {
+          background: #F44336;
+          color: white;
+        }
+
+        &.expanded {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transform: scale(1.05);
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
     }
+  }
 
-    .question-circle {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  .question-dropdown-global {
+    width: 100%;
+    margin-top: 12px;
 
-      &.correct {
-        background: #4CAF50;
-        color: white;
+    .dropdown-content {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 16px;
+      border-left: 4px solid #F44336;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+      .question-text {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 16px 0;
+        line-height: 1.5;
       }
 
-      &.incorrect {
-        background: #F44336;
-        color: white;
+      .answer-detail {
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 4px solid;
+
+        &.your-answer {
+          background: #eff6ff;
+          border-left-color: #3b82f6;
+        }
+
+        &.expected-answer {
+          background: #f0fdf4;
+          border-left-color: #10b981;
+        }
+
+        .label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 8px 0;
+        }
+
+        .content {
+          font-size: 14px;
+          color: #1f2937;
+          margin: 0;
+          line-height: 1.5;
+        }
       }
 
-      &:active {
-        transform: scale(0.95);
+      .explanation-detail {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 12px;
+        border-radius: 8px;
+
+        .label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 8px 0;
+        }
+
+        .content {
+          font-size: 14px;
+          color: #1f2937;
+          margin: 0;
+          line-height: 1.5;
+        }
       }
     }
   }
@@ -290,6 +333,12 @@ ion-content.results-content {
     }
   }
 
+  .btn-reforzar {
+    --background: #FF6F00;
+    --background-activated: #FF6F00;
+    --color: white;
+  }
+
   .btn-nuevo-test {
     --background: #FF6F00;
     --background-activated: #E65100;
@@ -312,209 +361,15 @@ ion-content.results-content {
 @media (max-width: 374px) {
   .motivational-section {
     .message-large {
-      font-size: 28px;
-    }
-  }
-
-  .level-mapache-row {
-    .mapache-container {
-      .mapache-image {
-        width: 60px;
-        height: 60px;
-      }
+      font-size: 24px;
     }
   }
 
   .questions-section {
     .questions-container {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  // MODAL DE DETALLE
-.detail-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  padding: 20px;
-
-  .modal-content {
-    background: white;
-    border-radius: 20px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-
-  .modal-header {
-    padding: 20px;
-    border-bottom: 3px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    &.correct {
-      border-bottom-color: #10b981;
-      background: #ecfdf5;
-    }
-
-    &.incorrect {
-      border-bottom-color: #ef4444;
-      background: #fef2f2;
-    }
-
-    h3 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
-      color: #1f2937;
-    }
-
-    ion-icon {
-      font-size: 28px;
-      color: #6b7280;
-      cursor: pointer;
-
-      &:hover {
-        color: #1f2937;
+      .question-wrapper {
+        flex: 0 0 calc(25% - 10px);
       }
     }
   }
-
-  .modal-body {
-    padding: 20px;
-
-    .question-text {
-      margin-bottom: 20px;
-      padding: 16px;
-      background: #f9fafb;
-      border-radius: 12px;
-
-      h4 {
-        margin: 0 0 8px 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      p {
-        margin: 0;
-        font-size: 16px;
-        color: #1f2937;
-        line-height: 1.5;
-      }
-    }
-
-    .answer-section {
-      margin-bottom: 16px;
-      padding: 16px;
-      border-radius: 12px;
-      border-left: 4px solid;
-
-      &.your-answer {
-        background: #eff6ff;
-        border-left-color: #3b82f6;
-      }
-
-      &.expected-answer {
-        background: #f0fdf4;
-        border-left-color: #10b981;
-      }
-
-      h4 {
-        margin: 0 0 8px 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #374151;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      p {
-        margin: 0;
-        font-size: 15px;
-        color: #1f2937;
-        line-height: 1.6;
-      }
-    }
-
-    .explanation-section {
-      margin-top: 20px;
-      padding: 16px;
-      background: #fef3c7;
-      border-radius: 12px;
-      border-left: 4px solid #f59e0b;
-
-      h4 {
-        margin: 0 0 8px 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #92400e;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      p {
-        margin: 0;
-        font-size: 15px;
-        color: #78350f;
-        line-height: 1.6;
-      }
-    }
-  }
-
-  .modal-footer {
-    padding: 16px 20px;
-    border-top: 1px solid #e5e7eb;
-
-    .close-btn {
-      width: 100%;
-      padding: 14px;
-      background: #FF6F00;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-
-      &:active {
-        transform: scale(0.98);
-        background: #E65100;
-      }
-    }
-  }
-}
-
-// Hacer los círculos clickeables
-.questions-container {
-  .question-wrapper {
-    cursor: pointer;
-    transition: transform 0.2s;
-
-    &:active {
-      transform: scale(0.95);
-    }
-
-    .question-circle {
-      transition: all 0.2s;
-
-      &:hover {
-        transform: scale(1.1);
-      }
-    }
-  }
-}
 }

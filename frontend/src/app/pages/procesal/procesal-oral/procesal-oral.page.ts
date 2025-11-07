@@ -18,6 +18,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
+  responseMethod: 'voice' | 'selection' = 'voice';
 
   difficultyLevels = [
     { value: 'basico', label: 'Básico' },
@@ -121,6 +122,30 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+
+  scrollDifficultyUp() {
+    const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      this.scrollToOption(newIndex);
+    } else {
+      // Si está en el primero, ir al último
+      this.scrollToOption(this.difficultyLevels.length - 1);
+    }
+  }
+
+  scrollDifficultyDown() {
+    const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
+    if (currentIndex < this.difficultyLevels.length - 1) {
+      const newIndex = currentIndex + 1;
+      this.scrollToOption(newIndex);
+    } else {
+      // Si está en el último, ir al primero
+      this.scrollToOption(0);
+    }
+  }
+
+  
   async startVoicePractice() {
     const loading = await this.loadingController.create({
       message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
@@ -140,19 +165,28 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
+      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
+
       const sessionData: any = {
         studentId: Number(currentUser.id),
-        difficulty: this.selectedDifficulty,
+        difficulty: difficultyToSend,
         legalAreas: ["Derecho Procesal"],
-        questionCount: Number(this.selectedQuantity)
+        questionCount: Number(this.selectedQuantity),
+        responseMethod: this.responseMethod
       };
       
       console.log('📤 Enviando request ORAL:', sessionData);
       
-    const sessionResponse = await this.apiService.startOralStudySession(sessionData).toPromise();       console.log('🔥 Respuesta del servidor ORAL:', sessionResponse);
+      const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
+      
+      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
       
       if (sessionResponse && sessionResponse.success) {
         console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
+        
+        // ⚠️ CRÍTICO: Agregar responseMethod ANTES de guardar la sesión
+        sessionResponse.responseMethod = this.responseMethod;
+        
         this.apiService.setCurrentSession(sessionResponse);
         await this.router.navigate(['/procesal/procesal-oral/test-oral-procesal']);
         await loading.dismiss();

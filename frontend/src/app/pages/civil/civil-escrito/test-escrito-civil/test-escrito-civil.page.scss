@@ -2,15 +2,11 @@
 // CONFIGURACIÓN BÁSICA
 // ========================================
 .test-content {
-  --background: transparent;
-  background-image: url('/assets/image/fondo_blanco_app.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
+  --background: #ffffff;
+  background-color: #ffffff;
+  background-image: none;
   min-height: 100vh;
 }
-
 ion-content.test-content {
   --overflow: auto;
   height: 100%;
@@ -55,7 +51,7 @@ ion-content.test-content {
   padding: 20px 16px 100px 16px;
   position: relative;
   z-index: 2;
-  background: transparent;
+  background: #f8fafc;
   min-height: calc(100vh - 100px);
 }
 
@@ -91,20 +87,52 @@ ion-content.test-content {
   }
 }
 
-// ========================================
-// ✅ CHIP DE CATEGORÍA
-// ========================================
+// CHIP DE CATEGORÍA Y CONTADOR
+.category-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .category-chip {
   display: inline-block;
   background: rgba(255, 111, 0, 0.1);
   border: 1px solid rgba(255, 111, 0, 0.3);
   border-radius: 20px;
   padding: 8px 16px;
-  margin-bottom: 20px;
   font-size: 14px;
   font-weight: 600;
   color: #FF6F00;
-  text-align: center;
+}
+
+.question-counter {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+}// CHIP DE CATEGORÍA Y CONTADOR
+.category-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.category-chip {
+  display: inline-block;
+  background: rgba(255, 111, 0, 0.1);
+  border: 1px solid rgba(255, 111, 0, 0.3);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FF6F00;
+}
+
+.question-counter {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
 }
 
 // ========================================

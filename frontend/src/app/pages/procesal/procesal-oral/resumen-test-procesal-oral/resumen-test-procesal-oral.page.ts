@@ -3,16 +3,15 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
-interface QuestionResult {
+interface QuestionDetail {
   questionNumber: number;
   questionText: string;
   userAnswer: string;
-  modelAnswer: string;
+  expectedAnswer: string;
   explanation: string;
-  isCorrect: boolean;
-  tema?: string;
+  correct: boolean;
 }
 
 @Component({
@@ -24,11 +23,8 @@ interface QuestionResult {
   animations: [
     trigger('slideDown', [
       transition(':enter', [
-        style({ height: '0', opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        animate('300ms ease-in', style({ height: '0', opacity: 0 }))
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
     ])
   ]
@@ -40,12 +36,9 @@ export class ResumenTestProcesalOralPage implements OnInit {
   totalQuestions: number = 5;
   percentage: number = 0;
   
-  levelTitle: string = 'NIVEL PRINCIPIANTE';
-  levelSubtitle: string = '¡Sigue practicando!';
   motivationalMessage: string = '¡Sigue practicando!';
   
-  questionResults: QuestionResult[] = [];
-  
+  questionsDetails: QuestionDetail[] = [];
   expandedQuestionIndex: number | null = null;
 
   constructor(private router: Router) { }
@@ -55,57 +48,33 @@ export class ResumenTestProcesalOralPage implements OnInit {
   }
 
   loadResults() {
-    const resultsData = localStorage.getItem('current_test_results');
-    
-    if (!resultsData) {
-      console.error('No hay resultados guardados');
-      this.router.navigate(['/procesal/procesal-oral']);
-      return;
-    }
-
     try {
-      const results = JSON.parse(resultsData);
+      const resultsString = localStorage.getItem('current_oral_test_results');
+      
+      if (!resultsString) {
+        console.warn('No hay resultados guardados');
+        this.router.navigate(['/procesal/procesal-oral']);
+        return;
+      }
+
+      const results = JSON.parse(resultsString);
+      
       console.log('📊 Resultados cargados:', results);
 
       this.correctAnswers = results.correctAnswers || 0;
       this.incorrectAnswers = results.incorrectAnswers || 0;
-      this.totalQuestions = results.totalQuestions || 0;
+      this.totalQuestions = results.totalQuestions || 5;
       this.percentage = results.percentage || 0;
 
-      if (results.results && Array.isArray(results.results)) {
-        this.questionResults = results.results.map((r: any) => ({
-          questionNumber: r.questionNumber,
-          questionText: r.questionText,
-          userAnswer: r.userAnswer || 'Sin respuesta',
-          modelAnswer: r.modelAnswer || 'Sin respuesta modelo',
-          explanation: r.explanation || 'Sin explicación disponible',
-          isCorrect: r.isCorrect,
-          tema: r.tema
-        }));
+      if (results.questionDetails && results.questionDetails.length > 0) {
+        this.questionsDetails = results.questionDetails;
       }
 
-      this.setLevel();
       this.setMotivationalMessage();
 
     } catch (error) {
-      console.error('Error al parsear resultados:', error);
+      console.error('Error cargando resultados:', error);
       this.router.navigate(['/procesal/procesal-oral']);
-    }
-  }
-
-  setLevel() {
-    if (this.percentage >= 90) {
-      this.levelTitle = 'NIVEL EXPERTO';
-      this.levelSubtitle = '¡Dominas el tema!';
-    } else if (this.percentage >= 70) {
-      this.levelTitle = 'NIVEL AVANZADO';
-      this.levelSubtitle = '¡Muy buen trabajo!';
-    } else if (this.percentage >= 50) {
-      this.levelTitle = 'NIVEL INTERMEDIO';
-      this.levelSubtitle = 'Vas por buen camino';
-    } else {
-      this.levelTitle = 'NIVEL PRINCIPIANTE';
-      this.levelSubtitle = '¡Sigue practicando!';
     }
   }
 
@@ -133,18 +102,51 @@ export class ResumenTestProcesalOralPage implements OnInit {
     }
   }
 
+  getSmallMessage(): string {
+    if (this.percentage >= 90) {
+      return '¡Increíble!';
+    } else if (this.percentage >= 80) {
+      return '¡Excelente trabajo!';
+    } else if (this.percentage >= 70) {
+      return '¡Muy bien!';
+    } else if (this.percentage >= 60) {
+      return 'Buen intento';
+    } else if (this.percentage >= 40) {
+      return 'Sigue adelante';
+    } else {
+      return 'No te rindas';
+    }
+  }
+
+  getLargeMessage(): string {
+    if (this.percentage >= 90) {
+      return '¡Dominas el tema!';
+    } else if (this.percentage >= 80) {
+      return '¡Vas por buen camino!';
+    } else if (this.percentage >= 70) {
+      return '¡Sigue así!';
+    } else if (this.percentage >= 60) {
+      return '¡Puedes mejorar!';
+    } else if (this.percentage >= 40) {
+      return '¡Sigue practicando!';
+    } else {
+      return '¡Inténtalo de nuevo!';
+    }
+  }
+
+  reviewIncorrect() {
+    const incorrectQuestions = this.questionsDetails.filter(q => !q.correct);
+    localStorage.setItem('questions_to_review', JSON.stringify(incorrectQuestions));
+    this.router.navigate(['/procesal/procesal-reforzar']);
+  }
+
   takeNewTest() {
-    localStorage.removeItem('current_test_results');
+    localStorage.removeItem('current_oral_test_results');
     this.router.navigate(['/procesal/procesal-oral']);
   }
 
   goBack() {
-    localStorage.removeItem('current_test_results');
-    this.router.navigate(['/procesal/procesal-oral']);
-  }
-
-  goToHome() {
-    localStorage.removeItem('current_test_results');
-    this.router.navigate(['/dashboard']);
+    localStorage.removeItem('current_oral_test_results');
+    this.router.navigate(['/procesal']);
   }
 }

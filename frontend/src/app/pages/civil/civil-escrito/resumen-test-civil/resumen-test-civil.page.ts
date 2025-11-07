@@ -42,9 +42,7 @@ export class ResumenTestCivilPage implements OnInit {
   totalQuestions: number = 5;
   percentage: number = 0;
   
-  // Variables de nivel y motivación
-  levelTitle: string = 'NIVEL PRINCIPIANTE';
-  levelSubtitle: string = '¡Sigue practicando!';
+  // Variables de motivación
   motivationalMessage: string = '¡Sigue practicando!';
   
   // Resultados detallados de preguntas
@@ -101,7 +99,6 @@ export class ResumenTestCivilPage implements OnInit {
       }
     }
 
-    this.calculateLevel();
     this.setMotivationalMessage();
 
   } catch (error) {
@@ -109,19 +106,6 @@ export class ResumenTestCivilPage implements OnInit {
     this.router.navigate(['/civil/civil-escrito']);
   }
 }
-
-  calculateLevel() {
-    if (this.percentage >= 80) {
-      this.levelTitle = 'NIVEL AVANZADO';
-      this.levelSubtitle = '¡Excelente trabajo!';
-    } else if (this.percentage >= 60) {
-      this.levelTitle = 'NIVEL INTERMEDIO';
-      this.levelSubtitle = '¡Muy bien!';
-    } else {
-      this.levelTitle = 'NIVEL PRINCIPIANTE';
-      this.levelSubtitle = '¡Sigue practicando!';
-    }
-  }
 
   // ✅ MENSAJE MOTIVACIONAL SEGÚN PORCENTAJE
   setMotivationalMessage() {
@@ -204,6 +188,40 @@ getQuestionOptions(question: any): string[] {
   }
   
   return [];
+}
+
+// ✅ MENSAJE PEQUEÑO SEGÚN RESULTADO
+getSmallMessage(): string {
+  if (this.percentage >= 90) {
+    return '¡Increíble!';
+  } else if (this.percentage >= 80) {
+    return '¡Excelente trabajo!';
+  } else if (this.percentage >= 70) {
+    return '¡Muy bien!';
+  } else if (this.percentage >= 60) {
+    return 'Buen intento';
+  } else if (this.percentage >= 40) {
+    return 'Sigue adelante';
+  } else {
+    return 'No te rindas';
+  }
+}
+
+// ✅ MENSAJE GRANDE SEGÚN RESULTADO
+getLargeMessage(): string {
+  if (this.percentage >= 90) {
+    return '¡Dominas el tema!';
+  } else if (this.percentage >= 80) {
+    return '¡Vas por buen camino!';
+  } else if (this.percentage >= 70) {
+    return '¡Sigue así!';
+  } else if (this.percentage >= 60) {
+    return '¡Puedes mejorar!';
+  } else if (this.percentage >= 40) {
+    return '¡Sigue practicando!';
+  } else {
+    return '¡Inténtalo de nuevo!';
+  }
 }
 
 // ✅ Verificar si una opción fue seleccionada

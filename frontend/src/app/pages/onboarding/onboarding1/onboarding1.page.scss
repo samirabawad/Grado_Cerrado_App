@@ -1,6 +1,5 @@
 .onboarding-content {
-  --background: #E8E8E8;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
 .onboarding-container {
@@ -9,66 +8,92 @@
   align-items: center;
   justify-content: space-between;
   min-height: 100vh;
-  padding: 20px 20px 20px 20px;
+  padding: 40px 24px 32px 24px;
 }
 
-// Logo superior
-.logo-container {
-  margin-top: 20px;
-  margin-bottom: -85px;
+// ============================================
+// LOGO SECTION
+// ============================================
+.logo-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
   
   .main-logo {
-    width: 280px !important;
+    width: 220px;
     height: auto;
     object-fit: contain;
   }
 }
 
-// Mapache
-.mascot-container {
+// ============================================
+// ICON SECTION
+// ============================================
+.icon-section {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: -90px;
+  margin: 40px 0;
   
-  .mascot-image {
-    width: 650px !important;
-    height: 650px !important;
-    max-width: 650px !important;
-    max-height: 650px !important;
-    object-fit: contain;
+  .icon-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    animation: float 3s ease-in-out infinite;
+    
+    ion-icon {
+      font-size: 90px;
+      color: white;
+    }
   }
 }
 
-// Card de información
-.info-card {
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+// ============================================
+// CONTENT SECTION
+// ============================================
+.content-section {
   background: white;
-  border-radius: 20px;
-  padding: 10px 10px  !important;
-  margin-top: -10px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  padding: 32px 24px;
   width: 100%;
-  max-width: 350px;
+  max-width: 400px;
   text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
-.welcome-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 16px 0;
+.main-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 12px 0;
 }
 
-.welcome-description {
+.main-description {
   font-size: 16px;
-  color: #666;
-  margin: 0 0 24px 0;
-  line-height: 1.4;
+  color: #64748b;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
 }
 
-// Indicador de páginas
+// ============================================
+// PAGE INDICATOR
+// ============================================
 .page-indicator {
   display: flex;
   justify-content: center;
@@ -76,68 +101,111 @@
   margin-bottom: 24px;
   
   .indicator-dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: #DDD;
+    background: #e2e8f0;
+    transition: all 0.3s ease;
     
     &.active {
-      background: #333;
+      background: #10b981;
+      width: 32px;
+      border-radius: 5px;
     }
   }
 }
 
-// Botones
+// ============================================
+// BUTTONS
+// ============================================
 .button-container {
   display: flex;
-  gap: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #10b981;
+  gap: 12px;
+  width: 100%;
 }
 
 .action-button {
   flex: 1;
-  padding: 16px 20px;
+  padding: 16px 24px;
   border: none;
-  background: white;
-  color: #10b981;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   
-  &:first-child {
-    border-right: 1px solid #10b981;
+  &.secondary {
+    background: #f1f5f9;
+    color: #64748b;
+    
+    &:active {
+      background: #e2e8f0;
+      transform: scale(0.98);
+    }
   }
   
-  // Solo mostrar color en hover/touch
-  &:hover, &:active {
+  &.primary {
     background: #10b981;
     color: white;
-  }
-  
-  // Para dispositivos táctiles
-  &:focus {
-    background: #10b981;
-    color: white;
-    outline: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    
+    &:active {
+      background: #059669;
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    }
   }
 }
 
-// Responsive
+// ============================================
+// RESPONSIVE
+// ============================================
 @media (max-width: 480px) {
-  .logo-container .main-logo {
-    width: 200px;
+  .logo-section .main-logo {
+    width: 180px;
   }
   
-  .mascot-container .mascot-image {
-    width: 240px; // Aumentado de 180px
-    height: 240px; // Aumentado de 180px
+  .icon-section .icon-circle {
+    width: 140px;
+    height: 140px;
+    
+    ion-icon {
+      font-size: 70px;
+    }
   }
   
-  .info-card {
+  .content-section {
+    padding: 28px 20px;
+  }
+  
+  .main-title {
+    font-size: 28px;
+  }
+  
+  .main-description {
+    font-size: 15px;
+  }
+}
+
+@media (max-height: 700px) {
+  .onboarding-container {
+    padding: 24px 24px 20px 24px;
+  }
+  
+  .icon-section {
+    margin: 20px 0;
+    
+    .icon-circle {
+      width: 120px;
+      height: 120px;
+      
+      ion-icon {
+        font-size: 60px;
+      }
+    }
+  }
+  
+  .content-section {
     padding: 24px 20px;
   }
-
 }

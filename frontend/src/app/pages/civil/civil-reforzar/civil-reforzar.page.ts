@@ -105,6 +105,7 @@ export class CivilReforzarPage implements OnInit {
         console.warn('No hay usuario logueado');
         this.router.navigate(['/login']);
         return;
+
       }
 
       const studentId = currentUser.id;
@@ -285,11 +286,21 @@ export class CivilReforzarPage implements OnInit {
   // Cuando haces clic en un "tema débil"
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
+
     // La API de weak-topics devuelve temaId, no subtemaId
     this.selectedTemaId = topic.temaId;
     this.selectedSubtemaId = null;
     this.scopeType = 'tema';
     this.showThemeSelector = true;
+    this.expandedTema = topic.temaId;
+    this.expandedSections['testSection'] = true;
+    
+    setTimeout(() => {
+      const testSection = document.querySelector('.test-section');
+      if (testSection) {
+        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   toggleTemaExpansion(temaId: number) {
@@ -376,6 +387,7 @@ export class CivilReforzarPage implements OnInit {
 
       const sessionData: any = {
         studentId: currentUser.id,
+
         questionCount: this.selectedQuantity
       };
 

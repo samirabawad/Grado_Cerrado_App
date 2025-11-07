@@ -148,7 +148,6 @@ ion-content.procesal-content {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 32px;
-
   .study-card {
     background: white;
     border-radius: 20px;
@@ -178,6 +177,28 @@ ion-content.procesal-content {
       font-size: 16px;
       font-weight: 600;
       color: #1f2937;
+    }
+
+    // Estado deshabilitado
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+
+      .badge-proximamente {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      &:active {
+        transform: none;
+        border-color: transparent;
+      }
     }
   }
 }

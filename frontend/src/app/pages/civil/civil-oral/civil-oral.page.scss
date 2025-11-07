@@ -99,6 +99,142 @@ ion-content.civil-content {
     }
   }
 
+  .response-method-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .method-option {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+
+      &.selected {
+        background: #fff4e6;
+        border-color: #FF6F00;
+
+        ion-icon {
+          color: #FF6F00;
+        }
+
+        span {
+          color: #FF6F00;
+        }
+      }
+
+      &:active {
+        transform: scale(0.96);
+      }
+
+      ion-icon {
+        font-size: 32px;
+        color: #6b7280;
+      }
+
+      span {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+      }
+    }
+  }
+
+.method-explanation {
+    background: #fff4e6;
+    border: 1px solid #ffb366;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideDown 0.3s ease;
+
+    ion-icon {
+      font-size: 20px;
+      color: #FF6F00;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #FF6F00;
+      font-weight: 500;
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .response-method-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+
+    .method-option {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+
+      &.selected {
+        background: #fff4e6;
+        border-color: #FF6F00;
+
+        ion-icon {
+          color: #FF6F00;
+        }
+
+        span {
+          color: #FF6F00;
+        }
+      }
+
+      &:active {
+        transform: scale(0.96);
+      }
+
+      ion-icon {
+        font-size: 32px;
+        color: #ff6f0052;
+      }
+
+      span {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+      }
+    }
+  }
+
 .inline-picker-container {
     margin-bottom: 24px;
     background: #f9fafb;

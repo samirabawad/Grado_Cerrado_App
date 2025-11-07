@@ -42,7 +42,7 @@
             <ion-icon name="person"></ion-icon>
             <div class="info-text">
               <span class="info-label">Nombre Completo</span>
-              <span class="info-value">{{ user.nombre }}</span>
+              <span class="info-value">{{ user.nombreCompleto }}</span>
             </div>
             <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
@@ -71,6 +71,31 @@
         </div>
       </div>
     </div>
+
+<!-- SEGURIDAD -->
+    <div class="section">
+      <h2 class="section-title" (click)="toggleSection('security')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span style="display: flex; align-items: center; gap: 12px;">
+          <ion-icon name="lock-closed" style="font-size: 24px;"></ion-icon>
+          Seguridad
+        </span>
+        <ion-icon [name]="isSectionExpanded('security') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </h2>
+      
+      <div *ngIf="isSectionExpanded('security')">
+        <div class="info-card">
+          <div class="info-item editable" (click)="changePassword()">
+            <ion-icon name="key"></ion-icon>
+            <div class="info-text">
+              <span class="info-label">Contraseña</span>
+              <span class="info-value">••••••••</span>
+            </div>
+            <ion-icon name="create" class="edit-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- MODO ADAPTATIVO -->
     <div class="section">
@@ -322,7 +347,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
       <span style="display: flex; align-items: center; gap: 12px;">
         <ion-icon name="settings" style="font-size: 24px;"></ion-icon>
-        Corrección Test
+        Corrección Test Escrito
       </span>
       <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
     </div>
@@ -338,11 +363,11 @@
     <ion-card class="settings-card">
       <ion-card-content>
         
-        <!-- TÍTULO Y TOGGLE EN LA MISMA LÍNEA -->
+    <!-- TÍTULO Y TOGGLE EN LA MISMA LÍNEA -->
         <div class="correction-header">
           <div class="correction-title">
             <ion-icon name="checkmark-done"></ion-icon>
-            <span>Modo de Corrección en Tests</span>
+            <span>Modo de Corrección en Tests Escritos</span>
           </div>
           <ion-toggle 
             [(ngModel)]="correctionConfig.immediate" 
@@ -357,7 +382,7 @@
             <ion-icon name="flash"></ion-icon>
             <div>
               <strong>Modo Activo: Corrección Inmediata</strong>
-              <p>Verás la respuesta correcta y la explicación justo después de responder cada pregunta.</p>
+              <p>Verás la respuesta correcta y la explicación justo después de responder cada pregunta en tests escritos. Los tests orales siempre muestran la explicación.</p>
             </div>
           </ion-note>
         </div>
@@ -368,7 +393,7 @@
             <ion-icon name="document-text"></ion-icon>
             <div>
               <strong>Modo Activo: Corrección al Final</strong>
-              <p>Responderás todas las preguntas primero. Las correcciones y explicaciones se mostrarán al finalizar el test.</p>
+              <p>Responderás todas las preguntas primero en tests escritos. Las correcciones y explicaciones se mostrarán al finalizar el test. Los tests orales siempre muestran la explicación.</p>
             </div>
           </ion-note>
         </div>
@@ -378,12 +403,37 @@
   </div>
 </div>
 
-     <!-- BOTÓN CERRAR SESIÓN -->
-    <div class="logout-section">
-      <button class="logout-btn" (click)="logout()">
-        <ion-icon name="log-out-outline"></ion-icon>
-        Cerrar Sesión
-      </button>
+<!-- CUENTA -->
+    <div class="section">
+      <h2 class="section-title" (click)="toggleSection('account')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span style="display: flex; align-items: center; gap: 12px;">
+          <ion-icon name="person-remove" style="font-size: 24px; color: #ff4444;"></ion-icon>
+          Cuenta
+        </span>
+        <ion-icon [name]="isSectionExpanded('account') ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </h2>
+      
+      <div *ngIf="isSectionExpanded('account')">
+        <div class="info-card">
+          <div class="info-item editable" (click)="logout()">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <div class="info-text">
+              <span class="info-label">Cerrar Sesión</span>
+              <span class="info-value">Salir de la aplicación</span>
+            </div>
+            <ion-icon name="chevron-forward" class="edit-icon"></ion-icon>
+          </div>
+          
+          <div class="info-item editable danger" (click)="deleteAccount()">
+            <ion-icon name="trash-outline" style="color: #ff4444;"></ion-icon>
+            <div class="info-text">
+              <span class="info-label" style="color: #ff4444;">Eliminar Cuenta</span>
+              <span class="info-value">Esta acción es permanente</span>
+            </div>
+            <ion-icon name="chevron-forward" class="edit-icon" style="color: #ff4444;"></ion-icon>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="bottom-spacer"></div>

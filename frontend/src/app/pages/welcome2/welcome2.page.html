@@ -1,21 +1,26 @@
 <ion-content [fullscreen]="true" class="welcome2-content">
   <div class="welcome2-container">
     
-    <!-- Logo Principal -->
-    <div class="logo-container">
+    <!-- Logo superior -->
+    <div class="logo-section">
       <img src="assets/image/logo_grado_cerrado.png" alt="Grado Cerrado" class="main-logo">
     </div>
     
-    <!-- Botones de acción -->
-    <div class="buttons-container">
-      <button class="action-btn login-btn" (click)="iniciarSesion()">
-        Iniciar sesión
-      </button>
+    <!-- Sección central con ícono -->
+    <div class="center-section">
+      <div class="icon-circle">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </div>
+      <h2 class="welcome-text">¡Bienvenido de vuelta!</h2>
+      <p class="subtitle">Continúa tu preparación para el examen de grado</p>
     </div>
     
-    <!-- Mapache asomado en la parte inferior -->
-    <div class="mascot-container">
-      <img src="assets/image/asomado.png" alt="Mapache" class="mascot-image">
+    <!-- Botón de acción -->
+    <div class="button-section">
+      <button class="login-button" (click)="iniciarSesion()">
+        <ion-icon name="log-in-outline"></ion-icon>
+        <span>Iniciar sesión</span>
+      </button>
     </div>
     
   </div>
