@@ -37,14 +37,14 @@ export class HomePage implements OnInit {
     this.loadUserData();
   }
 
-async loadUserData() {
+  async loadUserData() {
     this.isLoading = true;
 
     try {
       const currentUser = this.apiService.getCurrentUser();
       
       if (!currentUser || !currentUser.id) {
-        console.warn('No hay usuario logueado');
+        console.warn('⚠️ No hay usuario logueado');
         this.userName = 'Estudiante';
         this.isLoading = false;
         return;
@@ -52,21 +52,12 @@ async loadUserData() {
 
       const studentId = currentUser.id;
 
-      // Obtener datos actualizados del backend
-      try {
-        const userResponse = await this.apiService.getCurrentUserComplete(studentId).toPromise();
-        if (userResponse && userResponse.success) {
-          this.userName = userResponse.data.nombre || 'Estudiante';
-        } else {
-          this.userName = currentUser.name || 'Estudiante';
-        }
-      } catch (error) {
-        console.error('Error obteniendo usuario completo:', error);
-        this.userName = currentUser.name || 'Estudiante';
-      }
+      // Usar el nombre del usuario almacenado en localStorage
+      this.userName = currentUser.name || 'Estudiante';
+      
+      console.log('📊 Cargando estadísticas para:', studentId, this.userName);
 
-      console.log('Cargando estadísticas para:', studentId, this.userName);
-
+      // Cargar estadísticas del dashboard
       try {
         const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
         if (statsResponse && statsResponse.success) {
@@ -76,14 +67,22 @@ async loadUserData() {
           this.overallSuccessRate = Math.round(stats.successRate || 0);
           this.userStreak = stats.streak || 0;
           
-          console.log('Estadísticas cargadas en home:', stats);
+          console.log('✅ Estadísticas cargadas:', {
+            sesiones: this.totalSessions,
+            preguntas: this.totalQuestions,
+            tasa: this.overallSuccessRate,
+            racha: this.userStreak
+          });
+        } else {
+          console.warn('⚠️ No se pudieron cargar estadísticas');
         }
       } catch (error) {
-        console.error('Error cargando estadísticas en home:', error);
+        console.error('❌ Error cargando estadísticas:', error);
+        // Mantener valores por defecto (0)
       }
 
     } catch (error) {
-      console.error('Error general en loadUserData:', error);
+      console.error('❌ Error general en loadUserData:', error);
     } finally {
       this.isLoading = false;
     }

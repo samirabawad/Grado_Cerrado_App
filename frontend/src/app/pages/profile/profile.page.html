@@ -55,7 +55,7 @@
             </div>
             <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
-          
+
           <div class="info-item">
             <ion-icon name="checkmark-circle"></ion-icon>
             <div class="info-text">
@@ -72,7 +72,7 @@
       </div>
     </div>
 
-<!-- SEGURIDAD -->
+    <!-- SEGURIDAD -->
     <div class="section">
       <h2 class="section-title" (click)="toggleSection('security')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
         <span style="display: flex; align-items: center; gap: 12px;">
@@ -81,7 +81,7 @@
         </span>
         <ion-icon [name]="isSectionExpanded('security') ? 'chevron-up' : 'chevron-down'"></ion-icon>
       </h2>
-      
+
       <div *ngIf="isSectionExpanded('security')">
         <div class="info-card">
           <div class="info-item editable" (click)="changePassword()">
@@ -93,8 +93,21 @@
             <ion-icon name="create" class="edit-icon"></ion-icon>
           </div>
         </div>
+
+       <!-- ELIMINAR CUENTA (igual a Contraseña, pero rojo) -->
+        <div class="info-card">
+          <div class="info-item editable delete-account" (click)="deleteAccount()">
+            <ion-icon name="trash-sharp"></ion-icon>
+            <div class="info-text">
+              <span class="info-label danger-label">Eliminar Cuenta</span>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     </div>
+
 
 
     <!-- MODO ADAPTATIVO -->
@@ -403,43 +416,16 @@
   </div>
 </div>
 
-<!-- CUENTA -->
-    <div class="section">
-      <h2 class="section-title" (click)="toggleSection('account')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-        <span style="display: flex; align-items: center; gap: 12px;">
-          <ion-icon name="person-remove" style="font-size: 24px; color: #ff4444;"></ion-icon>
-          Cuenta
-        </span>
-        <ion-icon [name]="isSectionExpanded('account') ? 'chevron-up' : 'chevron-down'"></ion-icon>
-      </h2>
-      
-      <div *ngIf="isSectionExpanded('account')">
-        <div class="info-card">
-          <div class="info-item editable" (click)="logout()">
-            <ion-icon name="log-out-outline"></ion-icon>
-            <div class="info-text">
-              <span class="info-label">Cerrar Sesión</span>
-              <span class="info-value">Salir de la aplicación</span>
-            </div>
-            <ion-icon name="chevron-forward" class="edit-icon"></ion-icon>
-          </div>
-          
-          <div class="info-item editable danger" (click)="deleteAccount()">
-            <ion-icon name="trash-outline" style="color: #ff4444;"></ion-icon>
-            <div class="info-text">
-              <span class="info-label" style="color: #ff4444;">Eliminar Cuenta</span>
-              <span class="info-value">Esta acción es permanente</span>
-            </div>
-            <ion-icon name="chevron-forward" class="edit-icon" style="color: #ff4444;"></ion-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="bottom-spacer"></div>
-  </div>  
+<!-- CERRAR SESIÓN (un solo botón, sin desplegable) -->
+<div class="section danger">
+  <h2 class="section-title logout-header" (click)="logout()">
+    <ion-icon name="log-out-sharp" class="danger-icon"></ion-icon>
+    <span>Cerrar Sesión</span>
+  </h2>
+</div>
 
 
+</div>
 
-  <app-bottom-nav></app-bottom-nav>
+<app-bottom-nav></app-bottom-nav>
 </ion-content>

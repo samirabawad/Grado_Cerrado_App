@@ -141,7 +141,7 @@ async loadAllUserData() {
     const currentUser = this.apiService.getCurrentUser();
     
     if (!currentUser || !currentUser.id) {
-      console.warn('No hay usuario logueado');
+      console.warn('⚠️ No hay usuario logueado');
       this.isLoading = false;
       await this.router.navigate(['/login']);
       return;
@@ -149,21 +149,13 @@ async loadAllUserData() {
 
     const studentId = currentUser.id;
     
-    // Obtener información completa del usuario desde el backend
-    const userResponse = await this.apiService.getCurrentUserComplete(studentId).toPromise();
+    // Usar los datos del usuario almacenados en localStorage
+    this.user.id = currentUser.id;
+    this.user.nombre = currentUser.name || 'Usuario';
+    this.user.nombreCompleto = currentUser.name || 'Usuario';
+    this.user.email = currentUser.email || 'usuario@example.com';
     
-    if (userResponse && userResponse.success) {
-      const userData = userResponse.data;
-      
-      this.user.id = userData.id;
-      this.user.nombre = userData.nombre || 'Usuario';
-      this.user.nombreCompleto = userData.nombreCompleto || userData.nombre || 'Usuario';
-      this.user.email = userData.email || 'usuario@example.com';
-      this.user.fecha_registro = userData.fechaRegistro ? new Date(userData.fechaRegistro) : new Date();
-      this.user.last_profile_update = userData.fechaModificacion;
-      
-      console.log('Usuario cargado:', this.user);
-    }
+    console.log('✅ Usuario cargado desde localStorage:', this.user);
 
     await this.loadDashboardStats(studentId);
     this.loadSettings();
@@ -171,13 +163,12 @@ async loadAllUserData() {
     this.loadAdaptiveConfig();
 
   } catch (error) {
-    console.error('Error cargando datos del usuario:', error);
+    console.error('❌ Error cargando datos del usuario:', error);
     await this.showToast('Error al cargar los datos del perfil', 'danger');
   } finally {
     this.isLoading = false;
   }
 }
-
   // ============================================
   // CARGAR ESTADÍSTICAS DEL DASHBOARD
   // ============================================
@@ -467,120 +458,98 @@ async loadAllUserData() {
   }
 
 async editName() {
-    // Primero obtener los datos completos del usuario
-    try {
-      const userResponse = await this.apiService.getCurrentUserComplete(this.user.id).toPromise();
-      
-      let currentData = {
-        nombre: this.user.nombre,
-        segundoNombre: '',
-        apellidoPaterno: '',
-        apellidoMaterno: ''
-      };
-
-      if (userResponse && userResponse.success) {
-        currentData = {
-          nombre: userResponse.data.nombre || '',
-          segundoNombre: userResponse.data.segundoNombre || '',
-          apellidoPaterno: userResponse.data.apellidoPaterno || '',
-          apellidoMaterno: userResponse.data.apellidoMaterno || ''
-        };
+  const alert = await this.alertController.create({
+    header: 'Editar Nombre',
+    message: 'Ingresa tu nombre completo',
+    inputs: [
+      {
+        name: 'nombre',
+        type: 'text',
+        placeholder: 'Nombre *',
+        value: this.user.nombre,
+        attributes: {
+          required: true
+        }
+      },
+      {
+        name: 'segundoNombre',
+        type: 'text',
+        placeholder: 'Segundo nombre (opcional)',
+        value: ''
+      },
+      {
+        name: 'apellidoPaterno',
+        type: 'text',
+        placeholder: 'Apellido paterno *',
+        value: '',
+        attributes: {
+          required: true
+        }
+      },
+      {
+        name: 'apellidoMaterno',
+        type: 'text',
+        placeholder: 'Apellido materno (opcional)',
+        value: ''
       }
-
-      const alert = await this.alertController.create({
-        header: 'Editar Nombre',
-inputs: [
-          {
-            name: 'nombre',
-            type: 'text',
-            placeholder: 'Nombre *',
-            value: currentData.nombre,
-            attributes: {
-              required: true
-            }
-          },
-          {
-            name: 'segundoNombre',
-            type: 'text',
-            placeholder: 'Segundo nombre (opcional)',
-            value: currentData.segundoNombre
-          },
-          {
-            name: 'apellidoPaterno',
-            type: 'text',
-            placeholder: 'Apellido paterno *',
-            value: currentData.apellidoPaterno,
-            attributes: {
-              required: true
-            }
-          },
-          {
-            name: 'apellidoMaterno',
-            type: 'text',
-            placeholder: 'Apellido materno (opcional)',
-            value: currentData.apellidoMaterno
+    ],
+    buttons: [
+      {
+        text: 'Cancelar',
+        role: 'cancel'
+      },
+      {
+        text: 'Guardar',
+        handler: async (data) => {
+          if (!data.nombre || data.nombre.trim() === '') {
+            await this.showToast('El nombre es obligatorio', 'danger');
+            return false;
           }
-        ],
-        buttons: [
-          {
-            text: 'Cancelar',
-            role: 'cancel'
-          },
-          {
-            text: 'Guardar',
-          handler: async (data) => {
-              // Validar campos obligatorios
-              if (!data.nombre || data.nombre.trim() === '') {
-                await this.showToast('El nombre es obligatorio', 'danger');
-                return false;
-              }
 
-              if (!data.apellidoPaterno || data.apellidoPaterno.trim() === '') {
-                await this.showToast('El apellido paterno es obligatorio', 'danger');
-                return false;
-              }
-
-              try {
-                const updates = {
-                  nombre: data.nombre.trim(),
-                  apellidoPaterno: data.apellidoPaterno.trim(),
-                  segundoNombre: data.segundoNombre?.trim() || null,
-                  apellidoMaterno: data.apellidoMaterno?.trim() || null
-                };
-
-                const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
-
-                if (response && response.success) {
-                  this.user.nombre = response.data.nombre;
-                  this.user.nombreCompleto = response.data.nombreCompleto;
-                  this.user.last_profile_update = response.data.fechaModificacion;
-
-                  // Actualizar el localStorage para que se refleje en home
-                  const currentUser = this.apiService.getCurrentUser();
-                  if (currentUser) {
-                    currentUser.name = response.data.nombre;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                  }
-
-                  await this.showToast('Perfil actualizado exitosamente', 'success');
-                }
-              } catch (error: any) {
-                console.error('Error actualizando nombre:', error);
-                await this.showToast(error.friendlyMessage || 'Error al actualizar el perfil', 'danger');
-              }
-
-              return true;
-            }
+          if (!data.apellidoPaterno || data.apellidoPaterno.trim() === '') {
+            await this.showToast('El apellido paterno es obligatorio', 'danger');
+            return false;
           }
-        ]
-      });
 
-      await alert.present();
-    } catch (error) {
-      console.error('Error cargando datos del usuario:', error);
-      await this.showToast('Error al cargar los datos', 'danger');
-    }
-  }
+          try {
+            const updates = {
+              nombre: data.nombre.trim(),
+              apellidoPaterno: data.apellidoPaterno.trim(),
+              segundoNombre: data.segundoNombre?.trim() || null,
+              apellidoMaterno: data.apellidoMaterno?.trim() || null
+            };
+
+            const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
+
+            if (response && response.success) {
+              // Actualizar datos locales
+              this.user.nombre = response.data.nombre;
+              this.user.nombreCompleto = response.data.nombreCompleto;
+              this.user.last_profile_update = response.data.fechaModificacion;
+
+              // Actualizar localStorage
+              const currentUser = this.apiService.getCurrentUser();
+              if (currentUser) {
+                currentUser.name = response.data.nombre;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+              }
+
+              await this.showToast('✅ Perfil actualizado exitosamente', 'success');
+            }
+          } catch (error: any) {
+            console.error('❌ Error actualizando nombre:', error);
+            await this.showToast(error.friendlyMessage || 'Error al actualizar el perfil', 'danger');
+          }
+
+          return true;
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
 
 async editEmail() {
     const alert = await this.alertController.create({
