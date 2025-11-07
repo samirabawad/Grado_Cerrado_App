@@ -2,19 +2,21 @@
   <div class="onboarding-container">
     
     <!-- Logo Principal -->
-    <div class="logo-container">
+    <div class="logo-section">
       <img src="assets/image/logo_grado_cerrado.png" alt="Grado Cerrado" class="main-logo">
     </div>
     
-    <!-- Mapache feliz -->
-    <div class="mascot-container">
-      <img src="assets/image/mcantante.png" alt="Mapache listo" class="mascot-image">
+    <!-- Ícono central grande -->
+    <div class="icon-section">
+      <div class="icon-circle">
+        <ion-icon name="mic-outline"></ion-icon>
+      </div>
     </div>
     
-    <!-- Card de información -->
-    <div class="info-card">
-      <h2 class="welcome-title">Responde por voz</h2>
-      <p class="welcome-description">
+    <!-- Contenido de bienvenida -->
+    <div class="content-section">
+      <h1 class="main-title">Responde por voz</h1>
+      <p class="main-description">
         Practica como en el examen oral<br>
         y recibe feedback al instante
       </p>
@@ -29,12 +31,12 @@
       <!-- Botones -->
       <div class="button-container">
         <button 
-          class="action-button" 
+          class="action-button secondary" 
           (click)="selectAction('atras')">
           Atrás
         </button>
         <button 
-          class="action-button" 
+          class="action-button primary" 
           (click)="selectAction('empezar')">
           Empezar
         </button>

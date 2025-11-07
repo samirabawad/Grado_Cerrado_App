@@ -2,12 +2,9 @@
 // CONFIGURACIÓN BÁSICA
 // ========================================
 .results-content {
-  --background: transparent;
-  background-image: url('/assets/image/fondo_blanco_app.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
+  --background: #ffffff;
+  background-color: #ffffff;
+  background-image: none;
   min-height: 100vh;
 }
 
@@ -25,7 +22,7 @@ ion-content.results-content {
   left: 0;
   right: 0;
   height: 60px;
-  background: #8E24AA;
+  background: #2563eb;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -64,65 +61,31 @@ ion-content.results-content {
 // ========================================
 .motivational-section {
   text-align: center;
-  margin-bottom: 24px;
+  padding: 20px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+
+  &.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
 
   .message-small {
-    font-size: 16px;
-    color: #666;
     margin: 0 0 8px 0;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   .message-large {
-    font-size: 32px;
-    font-weight: 800;
-    color: #8E24AA;
     margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
     line-height: 1.2;
-  }
-}
-
-// ========================================
-// NIVEL Y MAPACHE
-// ========================================
-.level-mapache-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-  .level-info {
-    flex: 1;
-
-    .level-label {
-      font-size: 14px;
-      color: #8E24AA;
-      margin: 0 0 4px 0;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .level-message {
-      font-size: 20px;
-      font-weight: 700;
-      color: #333;
-      margin: 0;
-    }
-  }
-
-  .mapache-container {
-    flex-shrink: 0;
-
-    .mapache-image {
-      width: 80px;
-      height: 80px;
-      object-fit: contain;
-    }
   }
 }
 
@@ -133,7 +96,7 @@ ion-content.results-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 
   .stat-item {
     display: flex;
@@ -224,12 +187,13 @@ ion-content.results-content {
   }
 
   .questions-container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
+    margin-bottom: 16px;
 
     .question-wrapper {
-      display: contents;
+      flex: 0 0 calc(20% - 10px);
 
       .question-circle {
         aspect-ratio: 1;
@@ -241,11 +205,7 @@ ion-content.results-content {
         font-weight: 700;
         cursor: pointer;
         transition: all 0.2s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-        &:active {
-          transform: scale(0.95);
-        }
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 
         &.correct {
           background: #4CAF50;
@@ -261,140 +221,89 @@ ion-content.results-content {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
           transform: scale(1.05);
         }
-      }
 
-      .question-dropdown {
-        grid-column: 1 / -1;
-        margin: 8px 0 12px 0;
-        animation: slideDown 0.3s ease-out;
-
-        .dropdown-content {
-          background: #f8f9fa;
-          border-radius: 12px;
-          padding: 16px;
-          border-left: 4px solid #8E24AA;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-          .question-text {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0 0 16px 0;
-            line-height: 1.5;
-          }
+        &:active {
+          transform: scale(0.95);
         }
       }
     }
   }
-}
 
-// ========================================
-// ALTERNATIVAS
-// ========================================
-.alternatives-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 16px 0;
-}
+  .question-dropdown-global {
+    width: 100%;
+    margin-top: 12px;
 
-.alternative-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px;
-  background: #ffffff;
-  border-radius: 10px;
-  border: 2px solid #e5e7eb;
-  transition: all 0.2s ease;
+    .dropdown-content {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 16px;
+      border-left: 4px solid #F44336;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-  &.alt-selected {
-    border-color: #8E24AA;
-    background: #f3e5f5;
-  }
-
-  &.alt-correct {
-    border-color: #4CAF50;
-    background: #f0fdf4;
-  }
-
-  &.alt-selected.alt-correct {
-    border-color: #4CAF50;
-    background: #dcfce7;
-  }
-
-  .alt-icon {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    ion-icon {
-      font-size: 22px;
-
-      &[name="checkmark-circle"] {
-        color: #4CAF50;
+      .question-text {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 16px 0;
+        line-height: 1.5;
       }
 
-      &[name="close-circle"] {
-        color: #F44336;
+      .answer-detail {
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 4px solid;
+
+        &.your-answer {
+          background: #eff6ff;
+          border-left-color: #3b82f6;
+        }
+
+        &.expected-answer {
+          background: #f0fdf4;
+          border-left-color: #10b981;
+        }
+
+        .label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 8px 0;
+        }
+
+        .content {
+          font-size: 14px;
+          color: #1f2937;
+          margin: 0;
+          line-height: 1.5;
+        }
       }
 
-      &[name="ellipse-outline"] {
-        color: #9ca3af;
+      .explanation-detail {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 12px;
+        border-radius: 8px;
+
+        .label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 8px 0;
+        }
+
+        .content {
+          font-size: 14px;
+          color: #1f2937;
+          margin: 0;
+          line-height: 1.5;
+        }
       }
     }
-  }
-
-  .alt-text {
-    flex: 1;
-    font-size: 14px;
-    color: #1f2937;
-    line-height: 1.5;
-  }
-}
-
-// ========================================
-// EXPLANATION BOX
-// ========================================
-.explanation-box {
-  margin-top: 16px;
-  padding: 14px;
-  background: #eff6ff;
-  border-left: 4px solid #3b82f6;
-  border-radius: 8px;
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-
-  ion-icon {
-    font-size: 20px;
-    color: #3b82f6;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  p {
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.6;
-    color: #374151;
-  }
-}
-
-// ========================================
-// ANIMACIÓN
-// ========================================
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -425,23 +334,23 @@ ion-content.results-content {
   }
 
   .btn-reforzar {
-    --background: #8E24AA;
-    --background-activated: #7B1FA2;
+    --background: #2563eb;
+    --background-activated: #2563eb;
     --color: white;
   }
 
   .btn-nuevo-test {
-    --background: #8E24AA;
-    --background-activated: #7B1FA2;
+    --background: #2563eb;
+    --background-activated: #1e40af;
     --color: white;
   }
 
   .btn-home {
-    --border-color: #8E24AA;
-    --color: #8E24AA;
+    --border-color: #2563eb;
+    --color: #2563eb;
     
     &:hover {
-      --background: rgba(142, 36, 170, 0.05);
+      --background: rgba(37, 99, 235, 0.05);
     }
   }
 }
@@ -452,22 +361,15 @@ ion-content.results-content {
 @media (max-width: 374px) {
   .motivational-section {
     .message-large {
-      font-size: 28px;
-    }
-  }
-
-  .level-mapache-row {
-    .mapache-container {
-      .mapache-image {
-        width: 60px;
-        height: 60px;
-      }
+      font-size: 24px;
     }
   }
 
   .questions-section {
     .questions-container {
-      grid-template-columns: repeat(4, 1fr);
+      .question-wrapper {
+        flex: 0 0 calc(25% - 10px);
+      }
     }
   }
 }

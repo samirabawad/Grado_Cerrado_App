@@ -57,12 +57,9 @@ export class ProcesalReforzarPage implements OnInit {
     return this.expandedSections[section];
   }
 
-getMainRecommendation() {
-  if (this.weakTopics.length === 0) return null;
-  
-  const firstTopic = this.weakTopics[0];
-  if (!firstTopic.area || !firstTopic.area.toLowerCase().includes('procesal')) {
-    return null;
+  getMainRecommendation() {
+    if (this.weakTopics.length === 0) return null;
+    return this.weakTopics[0];
   }
   
   return firstTopic;
@@ -99,7 +96,7 @@ getErrorSubtemasCount(tema: any): number {
 
       const studentId = currentUser.id;
 
-      // Cargar temas débiles SOLO DE PROCESAL
+// Cargar temas débiles SOLO DE PROCESAL
       try {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
@@ -126,24 +123,24 @@ getErrorSubtemasCount(tema: any): number {
         this.weakTopics = [];
       }
 
-      // Cargar sesiones recientes SOLO DE PROCESAL
+// Cargar sesiones recientes SOLO DE PROCESAL
       try {
-        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
+        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 50).toPromise();
         console.log('📦 Respuesta RAW del backend:', sessionsResponse);
         
         if (sessionsResponse && sessionsResponse.success) {
-          // Filtrar SOLO sesiones de Derecho Procesal
+          // Filtrar SOLO sesiones de Derecho Procesal y tomar las 5 más recientes
           this.recentSessions = (sessionsResponse.data || [])
             .filter((s: any) => s.area && s.area.toLowerCase().includes('procesal'))
-            .slice(0, 5) // Tomar solo las 5 más recientes
+            .slice(0, 5)
             .map((s: any) => ({
-              id: s.id,
-              testId: s.id,
+              id: s.testId,
+              testId: s.testId,
               date: s.date,
               area: s.area,
-              durationSeconds: s.duration || 0,
-              totalQuestions: s.questions || 0,
-              correctAnswers: s.correct || 0,
+              durationSeconds: s.durationSeconds || 0,
+              totalQuestions: s.totalQuestions || 0,
+              correctAnswers: s.correctAnswers || 0,
               successRate: s.successRate || 0
             }));
           
@@ -255,9 +252,19 @@ async loadTemasFromDatabase() {
 
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
-    this.selectedSubtemaId = topic.subtemaId;
-    this.scopeType = 'subtema';
+    
+    this.selectedTemaId = topic.temaId;
+    this.scopeType = 'tema';
     this.showThemeSelector = true;
+    this.expandedTema = topic.temaId;
+    this.expandedSections['testSection'] = true;
+    
+    setTimeout(() => {
+      const testSection = document.querySelector('.test-section');
+      if (testSection) {
+        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   toggleTemaExpansion(temaId: number) {
@@ -346,15 +353,13 @@ async startTest() {
       questionCount: this.selectedQuantity
     };
 
-    if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
-      sessionData.subtemaId = this.selectedSubtemaId;
-      console.log('🎯 Iniciando test - SUBTEMA:', this.selectedSubtemaId);
-    } else if (this.scopeType === 'tema' && this.selectedTemaId) {
-      sessionData.temaId = this.selectedTemaId;
-      console.log('🎯 Iniciando test - TEMA:', this.selectedTemaId);
-    } else {
-      console.log('🎯 Iniciando test - TODO Derecho Procesal');
-    }
+      const sessionData: any = {
+        studentId: currentUser.id,
+        difficulty: "intermedio",
+        legalAreas: ["Derecho Procesal"],
+        numberOfQuestions: this.selectedQuantity,
+        allowRepeatedQuestions: true
+      };
 
     console.log('📤 Datos de sesión enviados:', sessionData);
     console.log('🎯 Tiene errores en alcance:', hasErrorsInScope);

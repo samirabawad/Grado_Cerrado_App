@@ -18,8 +18,9 @@ export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
+  responseMethod: 'voice' | 'selection' = 'voice';
 
-difficultyLevels = [
+  difficultyLevels = [
     { value: 'basico', label: 'Básico' },
     { value: 'intermedio', label: 'Intermedio' },
     { value: 'avanzado', label: 'Avanzado' },
@@ -39,8 +40,9 @@ difficultyLevels = [
     private apiService: ApiService
   ) { }
 
-ngOnInit() {
+  ngOnInit() {
   }
+  
   ngAfterViewInit() {
     setTimeout(() => {
       const selectedIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
@@ -120,6 +122,29 @@ ngOnInit() {
     }
   }
 
+
+  scrollDifficultyUp() {
+    const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      this.scrollToOption(newIndex);
+    } else {
+      // Si está en el primero, ir al último
+      this.scrollToOption(this.difficultyLevels.length - 1);
+    }
+  }
+
+  scrollDifficultyDown() {
+    const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
+    if (currentIndex < this.difficultyLevels.length - 1) {
+      const newIndex = currentIndex + 1;
+      this.scrollToOption(newIndex);
+    } else {
+      // Si está en el último, ir al primero
+      this.scrollToOption(0);
+    }
+  }
+  
   async startVoicePractice() {
     const loading = await this.loadingController.create({
       message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
@@ -145,15 +170,21 @@ ngOnInit() {
         studentId: Number(currentUser.id),
         difficulty: difficultyToSend,
         legalAreas: ["Derecho Civil"],
-        questionCount: Number(this.selectedQuantity)
+        questionCount: Number(this.selectedQuantity),
+        responseMethod: this.responseMethod
       };
       
       console.log('📤 Enviando request ORAL:', sessionData);
       
-    const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
+      const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
+      
+      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
       
       if (sessionResponse && sessionResponse.success) {
         console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
+        
+        sessionResponse.responseMethod = this.responseMethod;
+        
         this.apiService.setCurrentSession(sessionResponse);
         await this.router.navigate(['/civil/civil-oral/test-oral-civil']);
         await loading.dismiss();

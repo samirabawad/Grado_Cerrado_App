@@ -85,6 +85,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   isPlayingExplanation: boolean = false;
   selectedOptionForCurrentQuestion: string | null = null;
   showCorrectAnswer: boolean = false;
+  responseMethod: 'voice' | 'selection' = 'voice';
 
   constructor(
     private router: Router,
@@ -95,42 +96,57 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) { }
 
-  async ngOnInit() {
+async ngOnInit() {
     this.sessionId = 'session_' + Date.now();
+    
+    // PRIMERO cargar la sesión para obtener el responseMethod
+    const session = this.apiService.getCurrentSession();
+    if (session) {
+      this.responseMethod = session.responseMethod || 
+                            session.session?.responseMethod || 
+                            session.data?.responseMethod || 
+                            'voice';
+      console.log('📋 Método de respuesta detectado:', this.responseMethod);
+    }
     
     await this.loadQuestionsFromBackend();
     
-    if (!this.audioService.isRecordingSupported()) {
-      await this.showUnsupportedAlert();
-      return;
-    }
-    
-    const initialized = await this.audioService.initializeRecording();
-    if (!initialized) {
-      await this.showMicrophoneErrorAlert();
-      return;
-    }
-    
-    this.recordingStateSubscription = this.audioService.recordingState$.subscribe(
-      (state: AudioRecordingState) => {
-        this.isRecording = state.isRecording;
-        this.recordingDuration = state.recordingDuration;
-        this.audioBlob = state.audioBlob;
-        this.audioUrl = state.audioUrl;
-        this.hasRecording = state.audioBlob !== null && state.audioBlob.size > 0;
-        
-        if (this.isRecording || this.hasRecording) {
-          this.recordingTime = this.audioService.formatDuration(state.recordingDuration);
-        }
-        
-        this.cdr.detectChanges();
+    // Solo inicializar grabación si el método es 'voice'
+    if (this.responseMethod === 'voice') {
+      if (!this.audioService.isRecordingSupported()) {
+        await this.showUnsupportedAlert();
+        return;
       }
-    );
+      
+      const initialized = await this.audioService.initializeRecording();
+      if (!initialized) {
+        await this.showMicrophoneErrorAlert();
+        return;
+      }
+      
+      this.recordingStateSubscription = this.audioService.recordingState$.subscribe(
+        (state: AudioRecordingState) => {
+          this.isRecording = state.isRecording;
+          this.recordingDuration = state.recordingDuration;
+          this.audioBlob = state.audioBlob;
+          this.audioUrl = state.audioUrl;
+          this.hasRecording = state.audioBlob !== null && state.audioBlob.size > 0;
+          
+          if (this.isRecording || this.hasRecording) {
+            this.recordingTime = this.audioService.formatDuration(state.recordingDuration);
+          }
+          
+          this.cdr.detectChanges();
+        }
+      );
+    } else {
+      console.log('✅ Modo selección: micrófono NO inicializado');
+    }
   }
 
   async loadQuestionsFromBackend() {
     try {
-      console.log('🔥 Cargando preguntas desde el backend...');
+      console.log('📥 Cargando preguntas desde el backend...');
       this.isLoading = true;
       
       const session = this.apiService.getCurrentSession();
@@ -162,7 +178,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
           this.currentQuestionNumber = 1;
           
           console.log('✅ Preguntas cargadas:', this.questions.length);
-          console.log('🔍 Primera pregunta:', this.questions[0]);
+          console.log('🔎 Primera pregunta:', this.questions[0]);
           
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -327,12 +343,10 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
         const voices = window.speechSynthesis.getVoices();
         console.log('🔊 Voces disponibles:', voices.map(v => `${v.name} (${v.lang})`));
         
-        // Buscar específicamente la voz Catalina
         let selectedVoice = voices.find(voice => 
           voice.name.toLowerCase().includes('catalina')
         );
         
-        // Si no existe Catalina, buscar alternativas femeninas en español
         if (!selectedVoice) {
           selectedVoice = voices.find(voice => 
             voice.lang.includes('es') && (
@@ -349,7 +363,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
           utterance.voice = selectedVoice;
           console.log('✅ Voz seleccionada:', selectedVoice.name);
         } else {
-          console.warn('⚠️ No se encontró voz Catalina, usando voz por defecto');
+          console.log('⚠️ Usando voz por defecto del sistema');
         }
         
         window.speechSynthesis.speak(utterance);
@@ -360,8 +374,6 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
       } else {
         window.speechSynthesis.onvoiceschanged = loadVoices;
       }
-    } else {
-      console.error('❌ speechSynthesis no disponible');
     }
   }
 
@@ -387,11 +399,34 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
 
   async toggleRecording() {
     if (this.isRecording) {
-      await this.audioService.stopRecording();
+      await this.stopRecording();
     } else {
+      await this.startRecording();
+    }
+  }
+
+  async startRecording() {
+    try {
+      this.stopAllAudio();
+      
       this.audioService.clearRecording();
+      
       await this.audioService.startRecording();
+      
+      console.log('🎤 Grabación iniciada');
       this.startResponseTimer();
+    } catch (error) {
+      console.error('❌ Error al iniciar grabación:', error);
+    }
+  }
+
+  async stopRecording() {
+    try {
+      await this.audioService.stopRecording();
+      this.stopResponseTimer();
+      console.log('⏹️ Grabación detenida');
+    } catch (error) {
+      console.error('❌ Error al detener grabación:', error);
     }
   }
 
@@ -407,9 +442,9 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     return 'Mantén presionado para grabar';
   }
 
-  async replayRecording() {
-    if (!this.audioUrl) {
-      console.warn('⚠️ No hay URL de audio para reproducir');
+async replayRecording() {
+    if (!this.audioBlob) {
+      console.warn('⚠️ No hay audio para reproducir');
       return;
     }
 
@@ -427,23 +462,30 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     }
 
     try {
-      this.recordingAudio = new Audio(this.audioUrl);
-      this.isPlayingRecording = true;
-      this.cdr.detectChanges();
-
-      this.recordingAudio.onended = () => {
-        this.isPlayingRecording = false;
+      const reader = new FileReader();
+      reader.readAsDataURL(this.audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        
+        this.recordingAudio = new Audio(base64data);
+        this.isPlayingRecording = true;
         this.cdr.detectChanges();
-      };
 
-      this.recordingAudio.onerror = (error) => {
-        console.error('❌ Error reproduciendo grabación:', error);
-        this.isPlayingRecording = false;
-        this.cdr.detectChanges();
-      };
+        this.recordingAudio.onended = () => {
+          this.isPlayingRecording = false;
+          this.cdr.detectChanges();
+        };
 
-      await this.recordingAudio.play();
-      console.log('▶️ Reproduciendo grabación');
+        this.recordingAudio.onerror = (error) => {
+          console.error('❌ Error reproduciendo grabación:', error);
+          this.isPlayingRecording = false;
+          this.cdr.detectChanges();
+        };
+
+        await this.recordingAudio.play();
+        console.log('▶️ Reproduciendo grabación');
+      };
     } catch (error) {
       console.error('❌ Error al reproducir:', error);
       this.isPlayingRecording = false;
@@ -476,42 +518,89 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   }
 
   playExplanationAudio() {
-    if (!this.evaluationResult?.explanation) return;
+      if (!this.evaluationResult?.explanation) return;
 
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-      utterance.lang = 'es-ES';
-      utterance.rate = 0.9;
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
+        utterance.lang = 'es-CL';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.2;
+        utterance.volume = 1.0;
 
-      utterance.onstart = () => {
-        this.isPlayingExplanation = true;
-        this.cdr.detectChanges();
-      };
+        utterance.onstart = () => {
+          this.isPlayingExplanation = true;
+          this.cdr.detectChanges();
+        };
 
-      utterance.onend = () => {
-        this.isPlayingExplanation = false;
-        this.cdr.detectChanges();
-      };
+        utterance.onend = () => {
+          this.isPlayingExplanation = false;
+          this.cdr.detectChanges();
+        };
 
-      window.speechSynthesis.speak(utterance);
-    }
+        utterance.onerror = () => {
+          this.isPlayingExplanation = false;
+          this.cdr.detectChanges();
+        };
+
+        const loadVoices = () => {
+          const voices = window.speechSynthesis.getVoices();
+          
+          let selectedVoice = voices.find(voice => 
+            voice.name.toLowerCase().includes('catalina')
+          );
+          
+          if (!selectedVoice) {
+            selectedVoice = voices.find(voice => 
+              voice.lang.includes('es') && (
+                voice.name.toLowerCase().includes('female') ||
+                voice.name.toLowerCase().includes('femenina') ||
+                voice.name.toLowerCase().includes('paulina')
+              )
+            );
+          }
+          
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+          }
+          
+          window.speechSynthesis.speak(utterance);
+        };
+
+        if (window.speechSynthesis.getVoices().length > 0) {
+          loadVoices();
+        } else {
+          window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+      }
   }
 
   pauseExplanationAudio() {
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && this.isPlayingExplanation) {
       window.speechSynthesis.cancel();
       this.isPlayingExplanation = false;
       this.cdr.detectChanges();
     }
   }
 
+  stopAllAudio() {
+    // Detener síntesis de voz (pregunta o explicación)
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
+    // Actualizar estados
+    this.isPlaying = false;
+    this.isPlayingExplanation = false;
+    this.cdr.detectChanges();
+  }
+
   async submitVoiceAnswer() {
     if (!this.audioBlob) {
       const alert = await this.alertController.create({
         header: 'Sin audio',
-        message: 'No hay audio grabado para transcribir.',
+        message: 'Primero debes grabar tu respuesta.',
         buttons: ['OK']
       });
       await alert.present();
@@ -522,75 +611,84 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
       message: 'Procesando tu respuesta...',
       spinner: 'crescent'
     });
-    
+
     await loading.present();
 
     try {
-      console.log('🎤 Audio original:', this.audioBlob.type, this.audioBlob.size, 'bytes');
-      
+      console.log('🎤 Preparando audio para transcripción...');
+      console.log('📊 Tamaño del blob:', this.audioBlob.size, 'bytes');
+      console.log('🎵 Tipo de blob:', this.audioBlob.type);
+
       const wavBlob = await this.convertToWav(this.audioBlob);
-      console.log('🔄 Audio convertido a WAV:', wavBlob.size, 'bytes');
-      
+      console.log('✅ Audio convertido a WAV:', wavBlob.size, 'bytes');
+
       const formData = new FormData();
-      const audioFile = new File([wavBlob], 'recording.wav', { type: 'audio/wav' });
-      formData.append('audioFile', audioFile);
-      
+      formData.append('audioFile', wavBlob, 'recording.wav');
+
       console.log('📤 Enviando audio WAV al backend');
-      
-      try {
+
+try {
         const transcriptionResponse = await this.apiService.transcribeAudioDirect(formData).toPromise();
+        
+        console.log('📥 Respuesta del backend:', transcriptionResponse);
         
         await loading.dismiss();
 
-        if (transcriptionResponse && transcriptionResponse.success) {
-          const transcription = transcriptionResponse.transcription || transcriptionResponse.data?.text || '';
+        // Intentar extraer transcripción de múltiples lugares
+        let transcription = '';
+        
+        if (transcriptionResponse) {
+          transcription = transcriptionResponse.transcription || 
+                         transcriptionResponse.data?.transcription ||
+                         transcriptionResponse.data?.text || 
+                         transcriptionResponse.text ||
+                         '';
+        }
+        
+        console.log('✅ Transcripción extraída:', transcription);
+        
+        if (!transcription || transcription.trim() === '') {
+          console.error('❌ Transcripción vacía. Respuesta completa:', JSON.stringify(transcriptionResponse));
           
-          console.log('✅ Transcripción recibida:', transcription);
-          
-          if (!transcription || transcription.trim() === '') {
-            const alert = await this.alertController.create({
-              header: 'No entendí',
-              message: 'No pude escuchar claramente. Habla más fuerte y claro, cerca del micrófono.',
-              buttons: ['OK']
-            });
-            await alert.present();
-            return;
-          }
-          
-          this.currentTranscription = transcription;
-          
-          const detectedOption = this.detectOptionFromTranscription(transcription);
-          
-          if (detectedOption) {
-            await this.selectAnswer(detectedOption);
-          } else {
-            const alert = await this.alertController.create({
-              header: 'No entendí tu respuesta',
-              message: `Dijiste: "${transcription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
-              buttons: ['OK']
-            });
-            await alert.present();
-          }
-          
-        } else {
-          await loading.dismiss();
           const alert = await this.alertController.create({
-            header: 'Error',
-            message: 'No se pudo transcribir el audio. Intenta de nuevo.',
+            header: 'No te escuché',
+            message: 'El sistema no pudo transcribir tu audio. Asegúrate de:\n• Hablar más fuerte y claro\n• Estar en un lugar silencioso\n• Mantener presionado mientras hablas',
+            buttons: ['OK']
+          });
+          await alert.present();
+          
+          this.audioService.clearRecording();
+          this.cdr.detectChanges();
+          return;
+        }
+        
+        this.currentTranscription = transcription;
+        
+        const detectedOption = this.detectOptionFromTranscription(transcription);
+        
+        if (detectedOption) {
+          await this.selectAnswer(detectedOption);
+        } else {
+          const alert = await this.alertController.create({
+            header: 'No entendí tu respuesta',
+            message: `Dijiste: "${transcription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
             buttons: ['OK']
           });
           await alert.present();
         }
+
       } catch (error: any) {
         console.error('❌ Error transcribiendo:', error);
         await loading.dismiss();
         
-        const alert = await this.alertController.create({
-          header: 'Error',
-          message: 'Hubo un error al procesar tu respuesta.',
-          buttons: ['OK']
-        });
-        await alert.present();
+        if (!this.showEvaluation) {
+          const alert = await this.alertController.create({
+            header: 'Error',
+            message: 'Hubo un error al procesar tu respuesta. Intenta de nuevo.',
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
       }
       
     } catch (error) {
@@ -682,45 +780,125 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     }
   }
 
-  detectOptionFromTranscription(transcription: string): string | null {
-    const text = transcription.toLowerCase().trim();
-    const question = this.getCurrentQuestion();
+detectOptionFromTranscription(transcription: string): string | null {
+    const text = transcription
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .trim();
     
+    const question = this.getCurrentQuestion();
     if (!question) return null;
 
+    console.log('🔍 Analizando transcripción:', text);
+
+    // Para Verdadero/Falso
     if (question.type == 2 || question.type == '2') {
-      if (text.includes('verdadero') || text.includes('true') || text.includes('sí') || text.includes('si') || text === 'v') {
+      // Buscar "verdadero" o sinónimos
+      if (/verdadero|true|correcto|afirmativo|si(?![a-z])|exacto/i.test(text)) {
+        console.log('✅ Detectado: Verdadero');
         return 'Verdadero';
       }
-      if (text.includes('falso') || text.includes('false') || text.includes('no') || text === 'f') {
+      
+      // Buscar "falso" o sinónimos
+      if (/falso|false|incorrecto|negativo|no(?![a-z])/i.test(text)) {
+        console.log('✅ Detectado: Falso');
         return 'Falso';
+      }
+
+      // Buscar letra A o variantes (para Verdadero)
+      if (/\bah\b|\ba\b|\bla a\b|\bletra a\b|\bopcion a\b|\balternativa a\b/i.test(text)) {
+        console.log('✅ Detectado: Verdadero (por letra A)');
+        return 'Verdadero';
+      }
+
+      // Buscar letra B o variantes (para Falso)  
+      if (/\bbe\b|\bb\b|\bla b\b|\bletra b\b|\bopcion b\b|\balternativa b\b/i.test(text)) {
+        console.log('✅ Detectado: Falso (por letra B)');
+        return 'Falso';
+      }
+
+      // Buscar solo V o F aisladas
+      const words = text.split(/\s+/);
+      for (const word of words) {
+        if (/^v[e]?$/i.test(word)) {
+          console.log('✅ Detectado: Verdadero (letra V)');
+          return 'Verdadero';
+        }
+        if (/^f[e]?$/i.test(word)) {
+          console.log('✅ Detectado: Falso (letra F)');
+          return 'Falso';
+        }
       }
     }
 
     const options = this.getCurrentQuestionOptions();
     
-    if (text === 'a' || text.includes('letra a') || text.includes('opción a') || text.includes('opcion a') || text.includes('alternativa a')) {
-      return options[0];
-    }
-    if (text === 'b' || text.includes('letra b') || text.includes('opción b') || text.includes('opcion b') || text.includes('alternativa b')) {
-      return options[1];
-    }
-    if (text === 'c' || text.includes('letra c') || text.includes('opción c') || text.includes('opcion c') || text.includes('alternativa c')) {
-      return options[2];
-    }
-    if (text === 'd' || text.includes('letra d') || text.includes('opción d') || text.includes('opcion d') || text.includes('alternativa d')) {
-      return options[3];
+    // Detectar letras A, B, C, D con más flexibilidad
+    const letterDetection = [
+      { patterns: [/\bah\b/, /\ba\b/, /\bla a\b/, /\bletra a\b/, /\bopcion a\b/, /\balternativa a\b/], index: 0 },
+      { patterns: [/\bbe\b/, /\bb\b/, /\bla b\b/, /\bletra b\b/, /\bopcion b\b/, /\balternativa b\b/], index: 1 },
+      { patterns: [/\bce\b/, /\bc\b/, /\bla c\b/, /\bletra c\b/, /\bopcion c\b/, /\balternativa c\b/], index: 2 },
+      { patterns: [/\bde\b/, /\bd\b/, /\bla d\b/, /\bletra d\b/, /\bopcion d\b/, /\balternativa d\b/], index: 3 }
+    ];
+
+    for (const detection of letterDetection) {
+      if (detection.index >= options.length) continue;
+      
+      for (const pattern of detection.patterns) {
+        if (pattern.test(text)) {
+          console.log(`✅ Detectado: Opción ${String.fromCharCode(65 + detection.index)}`);
+          return options[detection.index];
+        }
+      }
     }
 
-    for (const option of options) {
-      const optionWords = option.toLowerCase().split(' ').filter((w: string) => w.length > 3);
-      const matches = optionWords.filter((word: string) => text.includes(word));
+    // Si la transcripción es muy corta (1-3 palabras), intentar detectar letra al final
+    const words = text.split(/\s+/).filter(w => w.length > 0);
+    if (words.length <= 3) {
+      const lastWord = words[words.length - 1];
       
-      if (matches.length >= 2 || (optionWords.length <= 2 && matches.length >= 1)) {
+      if (/^ah?$/i.test(lastWord) && options.length > 0) {
+        console.log('✅ Detectado: Opción A (al final)');
+        return options[0];
+      }
+      if (/^be?$/i.test(lastWord) && options.length > 1) {
+        console.log('✅ Detectado: Opción B (al final)');
+        return options[1];
+      }
+      if (/^ce?$/i.test(lastWord) && options.length > 2) {
+        console.log('✅ Detectado: Opción C (al final)');
+        return options[2];
+      }
+      if (/^de?$/i.test(lastWord) && options.length > 3) {
+        console.log('✅ Detectado: Opción D (al final)');
+        return options[3];
+      }
+    }
+
+    // Buscar por contenido de la opción
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i];
+      const optionWords = option
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[.,;:!?¿¡]/g, ' ')
+        .split(/\s+/)
+        .filter((w: string) => w.length > 3);
+      
+      let matches = 0;
+      for (const word of optionWords) {
+        if (text.includes(word)) {
+          matches++;
+        }
+      }
+      
+      if (matches >= 2 || (optionWords.length > 0 && matches / optionWords.length > 0.5)) {
+        console.log(`✅ Detectado por contenido: Opción ${String.fromCharCode(65 + i)} (${matches} coincidencias)`);
         return option;
       }
     }
 
+    console.warn('❌ No se detectó ninguna opción en:', text);
     return null;
   }
 
@@ -736,11 +914,13 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     return { immediate: true };
   }
 
-  nextQuestion() {
+nextQuestion() {
     if (!this.canGoToNext()) {
       console.warn('⚠️ No se puede avanzar sin respuesta guardada');
       return;
     }
+    
+    this.stopAllAudio();
     
     if (this.isLastQuestion()) {
       this.completeTest();
@@ -752,6 +932,8 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
 
   previousQuestion() {
     if (this.currentQuestionNumber > 1) {
+      this.stopAllAudio();
+      
       this.currentQuestionNumber--;
       this.resetQuestionState();
     }
@@ -760,26 +942,26 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   resetQuestionState() {
     this.isPlaying = false;
     this.audioCompleted = false;
-    this.audioProgress = '00:02';
-    this.currentTranscription = '';
+    this.isRecording = false;
+    this.hasRecording = false;
     this.showEvaluation = false;
     this.evaluationResult = null;
     this.showCorrectAnswer = false;
-    this.selectedOptionForCurrentQuestion = null;
+    this.currentTranscription = '';
+    this.isPlayingExplanation = false;
+    
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     
     if (this.currentAudio) {
       this.currentAudio.pause();
       this.currentAudio = null;
     }
     
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    
     if (this.recordingAudio) {
       this.recordingAudio.pause();
       this.recordingAudio = null;
-      this.isPlayingRecording = false;
     }
     
     this.audioService.clearRecording();
@@ -801,10 +983,10 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   }
 
   async completeTest() {
-    console.log('🏁 Completando test oral');
+    console.log('🏁 Completando test oral procesal');
     
     const loading = await this.loadingController.create({
-      message: 'Finalizando test...',
+      message: 'Guardando resultados...',
       spinner: 'crescent'
     });
     
@@ -828,21 +1010,26 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
           
           questionDetails.push({
             questionNumber: index + 1,
-            questionText: q.questionText,
-            correct: evaluation.isCorrect
+            correct: evaluation.isCorrect,
+            questionText: q.questionText || q.text || '',
+            userAnswer: q.userAnswer || '',
+            expectedAnswer: evaluation.correctAnswer || q.correctAnswer || '',
+            explanation: evaluation.explanation || q.explanation || ''
           });
         } else {
           incorrectCount++;
           questionDetails.push({
             questionNumber: index + 1,
-            questionText: q.questionText,
-            correct: false
+            correct: false,
+            questionText: q.questionText || q.text || '',
+            userAnswer: '',
+            expectedAnswer: q.correctAnswer || '',
+            explanation: q.explanation || ''
           });
         }
       });
-      
-      const totalAnswered = correctCount + incorrectCount;
-      const percentage = totalAnswered > 0 
+
+      const percentage = this.totalQuestions > 0 
         ? Math.round((correctCount / this.totalQuestions) * 100) 
         : 0;
       
@@ -855,11 +1042,27 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
         questionDetails: questionDetails
       };
       
+      console.log('📊 Resultados calculados:', results);
+      
+      const currentSession = this.apiService.getCurrentSession();
+      if (currentSession && currentSession.testId) {
+        try {
+          const response = await this.apiService.finishTest(currentSession.testId).toPromise();
+          console.log('✅ Test oral guardado en BD:', response);
+        } catch (error) {
+          console.error('❌ Error guardando test en BD:', error);
+        }
+      } else {
+        console.error('⚠️ No hay testId en currentSession:', currentSession);
+      }
+      
       localStorage.setItem('current_oral_test_results', JSON.stringify(results));
-      console.log('✅ Resultados guardados:', results);
       
       await loading.dismiss();
       
+      this.apiService.clearCurrentSession();
+      
+      console.log('🎯 Navegando a resumen...');
       await this.router.navigate(['/procesal/procesal-oral/resumen-test-procesal-oral']);
       
     } catch (error) {
@@ -939,22 +1142,31 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
   }
 
   isOptionSelected(option: string): boolean {
-    const question = this.getCurrentQuestion();
-    if (!question || !question.userAnswer) return false;
-
-    if (question.type == 2 || question.type == '2') {
-      if (question.userAnswer === 'V' && option === 'Verdadero') return true;
-      if (question.userAnswer === 'F' && option === 'Falso') return true;
+    if (!this.showEvaluation) {
       return false;
     }
+    
+    const question = this.getCurrentQuestion();
+    if (!question) return false;
 
-    const options = this.getCurrentQuestionOptions();
-    const optionIndex = options.indexOf(option);
-    if (optionIndex !== -1) {
-      const letter = String.fromCharCode(65 + optionIndex);
-      return question.userAnswer === letter;
+    const answer = question.userAnswer;
+    if (!answer) return false;
+
+    if (question.type == 2 || question.type == '2') {
+      if (option === 'Verdadero') {
+        return answer === 'V' || answer.toLowerCase() === 'verdadero';
+      }
+      if (option === 'Falso') {
+        return answer === 'F' || answer.toLowerCase() === 'falso';
+      }
+    } else {
+      const options = this.getCurrentQuestionOptions();
+      const index = options.indexOf(option);
+      if (index !== -1) {
+        const expectedLetter = String.fromCharCode(65 + index);
+        return answer === expectedLetter;
+      }
     }
-
     return false;
   }
 
@@ -977,7 +1189,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     const optionIndex = options.indexOf(option);
     if (optionIndex !== -1) {
       const letter = String.fromCharCode(65 + optionIndex);
-      return question.correctAnswer.toUpperCase() === letter;
+      return question.correctAnswer.toUpperCase().trim() === letter;
     }
 
     return false;
@@ -1011,7 +1223,7 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
     return '';
   }
 
-  async selectAnswer(optionText: string) {
+async selectAnswer(optionText: string) {
     if (this.hasAnsweredCurrentQuestion()) {
       return;
     }
@@ -1053,9 +1265,87 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
       explanation: question.explanation
     };
     
+    // 🆕 GUARDAR LA RESPUESTA EN EL BACKEND
+    await this.saveAnswerToBackend(question, normalizedAnswer, isCorrect);
+    
     this.showCorrectAnswer = true;
     this.showEvaluation = true;
     this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.playExplanationAudio();
+    }, 1000);
+  }
+
+  async saveAnswerToBackend(question: any, answer: string, isCorrect: boolean) {
+    try {
+      const currentSession = this.apiService.getCurrentSession();
+      if (!currentSession || !currentSession.testId) {
+        console.warn('⚠️ No hay testId para guardar respuesta');
+        return;
+      }
+
+      const responseTime = this.questionResponseTime || 30;
+      
+      const hours = Math.floor(responseTime / 3600);
+      const minutes = Math.floor((responseTime % 3600) / 60);
+      const seconds = responseTime % 60;
+      const timeSpanString = `PT${hours}H${minutes}M${seconds}S`;
+      
+      const answerData = {
+        testId: currentSession.testId,
+        preguntaId: parseInt(question.id),
+        userAnswer: answer,
+        correctAnswer: question.correctAnswer,
+        explanation: question.explanation || '',
+        timeSpent: timeSpanString,
+        numeroOrden: this.currentQuestionNumber,
+        isCorrect: isCorrect
+      };
+      
+      console.log('📤 Guardando respuesta oral en BD:', answerData);
+      
+      await this.apiService.submitAnswer(answerData).toPromise();
+      console.log('✅ Respuesta oral guardada correctamente');
+      
+    } catch (error) {
+      console.error('❌ Error guardando respuesta oral:', error);
+    }
+  }
+
+  async selectOptionByClick(optionText: string) {
+    if (this.hasAnsweredCurrentQuestion()) {
+      console.warn('⚠️ Ya se respondió esta pregunta');
+      return;
+    }
+    
+    console.log('🖱️ Opción seleccionada por click:', optionText);
+    
+    const question = this.getCurrentQuestion();
+    if (!question) return;
+
+    let normalizedAnswer: string;
+    
+    if (question.type == 2 || question.type == '2') {
+      normalizedAnswer = optionText === 'Verdadero' ? 'V' : 'F';
+    } else {
+      const options = this.getCurrentQuestionOptions();
+      const optionIndex = options.indexOf(optionText);
+      
+      if (optionIndex !== -1) {
+        normalizedAnswer = String.fromCharCode(65 + optionIndex);
+      } else {
+        return;
+      }
+    }
+
+    this.selectedOptionForCurrentQuestion = optionText;
+    question.userAnswer = normalizedAnswer;
+    this.cdr.detectChanges();
+
+    setTimeout(async () => {
+      await this.selectAnswer(optionText);
+    }, 100);
   }
 
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {

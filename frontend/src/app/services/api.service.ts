@@ -177,7 +177,32 @@ export class ApiService {
       );
   }
 
-  updateUserProfile(userId: number, updates: { name?: string, email?: string }): Observable<any> {
+// Obtener información completa del usuario actual
+  getCurrentUserComplete(userId: number): Observable<any> {
+    const url = `${this.API_URL}/auth/current-user/${userId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Usuario completo obtenido:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo usuario completo:', error);
+          throw error;
+        })
+      );
+  }
+
+
+// Actualizar perfil del usuario
+  updateUserProfile(userId: number, updates: {
+    nombre?: string;
+    segundoNombre?: string;
+    apellidoPaterno?: string;
+    apellidoMaterno?: string;
+    email?: string;
+  }): Observable<any> {
     const url = `${this.API_URL}/auth/update-profile/${userId}`;
     
     console.log('Actualizando perfil:', updates);
@@ -192,6 +217,125 @@ export class ApiService {
           console.error('Error actualizando perfil:', error);
           
           let errorMessage = 'Error al actualizar el perfil';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
+// Cambiar contraseña
+  changePassword(userId: number, passwords: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<any> {
+    const url = `${this.API_URL}/auth/change-password/${userId}`;
+    
+    console.log('Cambiando contraseña para usuario:', userId);
+    
+    return this.http.put<any>(url, passwords, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Contraseña actualizada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error cambiando contraseña:', error);
+          
+          let errorMessage = 'Error al cambiar la contraseña';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+);
+  }
+
+  // Eliminar cuenta
+  deleteAccount(userId: number, password: string): Observable<any> {
+    const url = `${this.API_URL}/auth/delete-account/${userId}`;
+    
+    console.log('Eliminando cuenta para usuario:', userId);
+    
+    return this.http.delete<any>(url, {
+      ...this.httpOptions,
+      body: { password }
+    })
+      .pipe(
+        map((response: any) => {
+          console.log('Cuenta eliminada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error eliminando cuenta:', error);
+          
+          let errorMessage = 'Error al eliminar la cuenta';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
+  // Solicitar recuperación de contraseña
+  requestPasswordReset(email: string): Observable<any> {
+    const url = `${this.API_URL}/auth/request-password-reset`;
+    
+    console.log('Solicitando recuperación de contraseña para:', email);
+    
+    return this.http.post<any>(url, { email }, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Solicitud de recuperación enviada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error solicitando recuperación:', error);
+          
+          let errorMessage = 'Error al solicitar recuperación de contraseña';
+          
+          if (error.status === 400 && error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 0) {
+            errorMessage = 'No se puede conectar al servidor';
+          }
+          
+          throw { ...error, friendlyMessage: errorMessage };
+        })
+      );
+  }
+
+  // Resetear contraseña con token
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    const url = `${this.API_URL}/auth/reset-password`;
+    
+    console.log('Reseteando contraseña con token');
+    
+    return this.http.post<any>(url, { token, newPassword }, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Contraseña reseteada:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error reseteando contraseña:', error);
+          
+          let errorMessage = 'Error al resetear la contraseña';
           
           if (error.status === 400 && error.error?.message) {
             errorMessage = error.error.message;
@@ -234,6 +378,7 @@ export class ApiService {
     questionCount?: number;
     numberOfQuestions?: number;
     adaptiveMode?: boolean;
+    allowRepeatedQuestions?: boolean;
     TemaId?: number;
     SubtemaId?: number;
   }): Observable<any> {
@@ -266,7 +411,8 @@ export class ApiService {
       difficulty: config.difficulty || "basico",
       legalAreas: config.legalAreas || [],
       questionCount: config.numberOfQuestions || config.questionCount || 5,
-      adaptiveMode: adaptiveEnabled
+      adaptiveMode: adaptiveEnabled,
+      allowRepeatedQuestions: config.allowRepeatedQuestions || false
     };
 
   
@@ -346,7 +492,10 @@ export class ApiService {
     return this.currentSession$.value;
   }
 
-  setCurrentSession(session: any): void {
+setCurrentSession(session: any): void {
+    if (session && !session.responseMethod && session.data?.responseMethod) {
+      session.responseMethod = session.data.responseMethod;
+    }
     this.currentSession$.next(session);
     this.saveSessionToStorage(session);
   }

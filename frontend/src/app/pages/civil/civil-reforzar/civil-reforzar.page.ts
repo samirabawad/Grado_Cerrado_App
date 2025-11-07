@@ -108,13 +108,28 @@ export class CivilReforzarPage implements OnInit {
   async loadData() {
     this.isLoading = true;
 
+ // Cargar sesiones recientes SOLO DE CIVIL
     try {
-      const currentUser = this.apiService.getCurrentUser();
+      const sessionsResponse = await this.apiService.getRecentSessions(studentId, 50).toPromise();
+      console.log('📦 Respuesta RAW del backend:', sessionsResponse);
       
-      if (!currentUser || !currentUser.id) {
-        console.warn('No hay usuario logueado');
-        this.router.navigate(['/login']);
-        return;
+      if (sessionsResponse && sessionsResponse.success) {
+        // Filtrar SOLO sesiones de Derecho Civil y tomar las 5 más recientes
+        this.recentSessions = (sessionsResponse.data || [])
+          .filter((s: any) => s.area && s.area.toLowerCase().includes('civil'))
+          .slice(0, 5)
+          .map((s: any) => ({
+            id: s.testId,
+            testId: s.testId,
+            date: s.date,
+            area: s.area,
+            durationSeconds: s.durationSeconds || 0,
+            totalQuestions: s.totalQuestions || 0,
+            correctAnswers: s.correctAnswers || 0,
+            successRate: s.successRate || 0
+          }));
+        
+        console.log('✅ Sesiones de CIVIL mapeadas:', this.recentSessions);
       }
 
       const studentId = currentUser.id;
@@ -317,13 +332,19 @@ export class CivilReforzarPage implements OnInit {
   // Cuando haces clic en un "tema débil"
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
+    
     this.selectedTemaId = topic.temaId;
-    this.selectedSubtemaId = null;
     this.scopeType = 'tema';
     this.showThemeSelector = true;
-
-    // ir a la sección de Test
-    this.scrollToTestSection();
+    this.expandedTema = topic.temaId;
+    this.expandedSections['testSection'] = true;
+    
+    setTimeout(() => {
+      const testSection = document.querySelector('.test-section');
+      if (testSection) {
+        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   toggleTemaExpansion(temaId: number) {
@@ -412,7 +433,10 @@ export class CivilReforzarPage implements OnInit {
 
       const sessionData: any = {
         studentId: currentUser.id,
-        questionCount: this.selectedQuantity
+        difficulty: "intermedio",
+        legalAreas: ["Derecho Civil"],
+        numberOfQuestions: this.selectedQuantity,
+        allowRepeatedQuestions: true
       };
 
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {

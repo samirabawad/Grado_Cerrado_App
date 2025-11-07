@@ -2,19 +2,21 @@
   <div class="onboarding-container">
     
     <!-- Logo Principal -->
-    <div class="logo-container">
+    <div class="logo-section">
       <img src="assets/image/logo_grado_cerrado.png" alt="Grado Cerrado" class="main-logo">
     </div>
     
-    <!-- Mapache con gorro -->
-    <div class="mascot-container">
-      <img src="assets/image/mdiploma.png" alt="Mapache graduado" class="mascot-image">
+    <!-- Ícono central grande -->
+    <div class="icon-section">
+      <div class="icon-circle">
+        <ion-icon name="school-outline"></ion-icon>
+      </div>
     </div>
     
-    <!-- Card de información -->
-    <div class="info-card">
-      <h2 class="welcome-title">Bienvenido</h2>
-      <p class="welcome-description">
+    <!-- Contenido de bienvenida -->
+    <div class="content-section">
+      <h1 class="main-title">Bienvenido</h1>
+      <p class="main-description">
         Tu APP inteligente para preparar<br>
         tu examen de grado de Derecho
       </p>
@@ -29,12 +31,12 @@
       <!-- Botones -->
       <div class="button-container">
         <button 
-          class="action-button" 
+          class="action-button secondary" 
           (click)="selectAction('salir')">
           Salir
         </button>
         <button 
-          class="action-button" 
+          class="action-button primary" 
           (click)="selectAction('continuar')">
           Continuar
         </button>
