@@ -192,17 +192,28 @@
 
             <!-- Selector de temas (desplegable) -->
             <div *ngIf="showThemeSelector" class="theme-selector">
-              <div *ngFor="let tema of temas" class="tema-item">
+              <div *ngFor="let tema of temas" 
+                  class="tema-item" 
+                  [class.has-errors]="tema.hasErrors">
                 <div class="tema-header" (click)="toggleTema(tema.id)">
                   <div class="tema-info">
-                    <span class="tema-name">{{ tema.nombre }}</span>
+                    <span class="tema-name">
+                      {{ tema.nombre }}
+                      <span *ngIf="tema.hasErrors" class="error-indicator">
+                        <ion-icon name="alert-circle"></ion-icon>
+                        {{ getErrorSubtemasCount(tema) }} para reforzar
+                      </span>
+                    </span>
                     <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
                   </div>
                   <div class="tema-actions">
+                    <!-- Botón de selección de tema -->
                     <button 
                       class="select-tema-btn"
                       [class.selected]="scopeType === 'tema' && selectedTemaId === tema.id"
-                      (click)="selectScope('tema', tema.id); $event.stopPropagation()">
+                      [class.has-errors]="tema.hasErrors"
+                      (click)="onSelectTema(tema, $event)">
+                      <ion-icon *ngIf="tema.hasErrors" name="alert-circle-outline"></ion-icon>
                       {{ scopeType === 'tema' && selectedTemaId === tema.id ? 'Seleccionado' : 'Seleccionar' }}
                     </button>
                     <ion-icon 
@@ -212,15 +223,25 @@
                   </div>
                 </div>
 
-                <!-- Subtemas (desplegable) -->
+                <!-- Subtemas -->
                 <div *ngIf="expandedTema === tema.id" class="subtemas-list">
                   <div 
                     *ngFor="let subtema of tema.subtemas" 
                     class="subtema-item"
+                    [class.has-errors]="subtema.hasErrors"
                     [class.selected]="scopeType === 'subtema' && selectedSubtemaId === subtema.id"
-                    (click)="selectSubtema(subtema)">
-                    <span>{{ subtema.nombre }}</span>
+                    (click)="onSelectSubtema(subtema)">
+                    <div class="subtema-content">
+                      <ion-icon *ngIf="subtema.hasErrors" name="alert-circle" class="error-icon"></ion-icon>
+                      <span>{{ subtema.nombre }}</span>
+                    </div>
                     <span class="subtema-count">{{ subtema.cantidadPreguntas }} preg.</span>
+                  </div>
+                  
+                  <div *ngIf="getErrorSubtemasCount(tema) === 0" 
+                      class="no-errors-message">
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                    Sin preguntas para reforzar
                   </div>
                 </div>
               </div>

@@ -80,6 +80,27 @@ export class ApiService {
     console.log('ApiService inicializado con URL:', this.API_URL);
   }
 
+
+  // ========================================
+  // TEMAS Y SUBTEMAS
+  // ========================================
+
+
+    getTemasByArea(areaId: number) {
+    return this.http.get<any>(`${this.API_URL}/study/areas/${areaId}/temas-subtemas`);
+  }
+
+  // (Opcional) helpers para no estar recordando el número de área
+  getTemasCivil() {
+    // area_id = 1 → Derecho Civil
+    return this.getTemasByArea(1);
+  }
+
+  getTemasProcesal() {
+    // area_id = 2 → Derecho Procesal
+    return this.getTemasByArea(2);
+  }
+
   // ========================================
   // AUTENTICACIÓN
   // ========================================
@@ -425,6 +446,11 @@ export class ApiService {
         })
       );
   }
+
+
+  startReinforcementSession(data: any): Observable<any> {
+  return this.http.post(`${this.API_URL}/study/start-reinforcement-session`, data);
+}
 
   /**
    * ✅ Iniciar sesión ORAL
