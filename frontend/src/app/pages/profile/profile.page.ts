@@ -75,7 +75,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   // ============================================
   // SECCIONES EXPANDIBLES
   // ============================================
-  expandedSections: { [key: string]: boolean } = {
+    expandedSections: { [key: string]: boolean } = {
       personalInfo: false,
       security: false,
       adaptiveMode: false,
@@ -84,10 +84,9 @@ export class ProfilePage implements OnInit, AfterViewInit {
       preferredDays: false,
       reminders: false,
       progress: false,
-      configuration: false
+      configuration: false,
+      account: false
     };
-
-
   hasUnsavedChanges: boolean = false;
 
     // ============================================
@@ -782,6 +781,57 @@ async changePassword() {
           handler: () => {
             this.apiService.logout();
             this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+
+await alert.present();
+  }
+
+  async deleteAccount() {
+    const alert = await this.alertController.create({
+      header: 'Eliminar Cuenta',
+      message: 'Esta acción es permanente y eliminará todos tus datos. Por favor ingresa tu contraseña para confirmar:',
+      inputs: [
+        {
+          name: 'password',
+          type: 'password',
+          placeholder: 'Contraseña actual'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Eliminar Cuenta',
+          role: 'destructive',
+          handler: async (data) => {
+            if (!data.password) {
+              await this.showToast('Debes ingresar tu contraseña', 'danger');
+              return false;
+            }
+
+            try {
+              const userId = this.user.id;
+              const response = await this.apiService.deleteAccount(userId, data.password).toPromise();
+
+              if (response.success) {
+                await this.showToast('Cuenta eliminada exitosamente', 'success');
+                this.apiService.logout();
+                this.router.navigate(['/login']);
+              } else {
+                await this.showToast(response.message || 'Error al eliminar cuenta', 'danger');
+                return false;
+              }
+            } catch (error: any) {
+              console.error('Error eliminando cuenta:', error);
+              await this.showToast(error.error?.message || 'Error al eliminar cuenta', 'danger');
+              return false;
+            }
+            return true;
           }
         }
       ]
