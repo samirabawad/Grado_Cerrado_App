@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { IonContent, IonicModule, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { IonicModule, LoadingController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
@@ -14,6 +14,8 @@ import { ApiService } from '../../../services/api.service';
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class CivilReforzarPage implements OnInit {
+
+  @ViewChild(IonContent, { static: false }) ionContent!: IonContent;
   
   weakTopics: any[] = [];
   recentSessions: any[] = [];
@@ -34,6 +36,10 @@ export class CivilReforzarPage implements OnInit {
   
   isLoading: boolean = true;
 
+  // sets para marcar errores
+  temasConErrores: Set<number> = new Set();
+  subtemasConErrores: Set<number> = new Set(); // futuro por si hay stats por subtema
+
   constructor(
     private router: Router,
     private loadingController: LoadingController,
@@ -44,6 +50,10 @@ export class CivilReforzarPage implements OnInit {
   ngOnInit() {
     this.loadData();
   }
+
+  // =====================
+  // UI helpers
+  // =====================
 
   toggleSection(section: string) {
     this.expandedSections[section] = !this.expandedSections[section];
@@ -70,16 +80,12 @@ export class CivilReforzarPage implements OnInit {
   }
 
   getErrorSubtemasCount(tema: any): number {
-  return this.getErroresTema(tema.id);
-}
+    return this.getErroresTema(tema.id);
+  }
 
-
-  // -------------------------------------------------
-  // ERRORES POR TEMA (según weakTopics del backend)
-  // -------------------------------------------------
-
-  temasConErrores: Set<number> = new Set();
-  subtemasConErrores: Set<number> = new Set(); // lo dejamos por si luego hay stats por subtema
+  // =====================
+  // ERRORES POR TEMA
+  // =====================
 
   /** nº de errores en este tema según weakTopics */
   getErroresTema(temaId: number): number {
@@ -94,6 +100,10 @@ export class CivilReforzarPage implements OnInit {
   subtemaHasErrors(subtemaId: number): boolean {
     return this.subtemasConErrores.has(subtemaId);
   }
+
+  // =====================
+  // CARGA DE DATOS
+  // =====================
 
   async loadData() {
     this.isLoading = true;
@@ -125,8 +135,7 @@ export class CivilReforzarPage implements OnInit {
             if (topic.temaId) {
               this.temasConErrores.add(topic.temaId);
             }
-            // OJO: ahora mismo el backend no manda subtemaId,
-            // esto quedará vacío hasta que lo añadas en la API.
+            // actualmente casi nunca viene subtemaId
             if (topic.subtemaId) {
               this.subtemasConErrores.add(topic.subtemaId);
             }
@@ -141,7 +150,7 @@ export class CivilReforzarPage implements OnInit {
         this.weakTopics = [];
       }
 
-      // 2) Sesiones recientes SOLO de Derecho Civil (con fallback)
+      // 2) Sesiones recientes (Civil si está marcado, si no todo)
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
         console.log('📦 Respuesta RAW del backend (civil reforzar):', sessionsResponse);
@@ -149,33 +158,35 @@ export class CivilReforzarPage implements OnInit {
         if (sessionsResponse && sessionsResponse.success) {
           const raw = sessionsResponse.data || [];
 
-          // 1️⃣ Intentar quedarnos solo con sesiones de Civil si vienen marcadas
           const soloCivil = raw.filter((s: any) => {
             const areaName = (s.area || s.areaNombre || '').toLowerCase();
             const areaId = s.areaId || s.area_id;
 
             const isCivilByName = areaName.includes('civil');
-            const isCivilById = areaId === 1; // si en tu BD Civil = 1
+            const isCivilById = areaId === 1; // 1 = Civil en tu BD (ajusta si no)
 
             return isCivilByName || isCivilById;
           });
 
-          // 2️⃣ Si NO hay ninguna marcada como Civil, usamos TODO (lo que te pasa ahora)
           const base = soloCivil.length > 0 ? soloCivil : raw;
 
           this.recentSessions = base
             .slice(0, 5)
-            .map((s: any) => ({
-              // Muchos backends cambian los nombres, así cubrimos varios casos:
-              id: s.id ?? s.testId,
-              testId: s.testId ?? s.id,
-              date: s.date ?? s.fecha_test ?? s.fechaCreacion,
-              area: s.area || s.areaNombre || 'Derecho Civil',
-              durationSeconds: s.durationSeconds ?? s.duration ?? 0,
-              totalQuestions: s.totalQuestions ?? s.questions ?? s.numeroPreguntas ?? 0,
-              correctAnswers: s.correct ?? s.correctAnswers ?? s.totalCorrectas ?? 0,
-              successRate: s.successRate ?? s.porcentajeAcierto ?? 0
-            }));
+            .map((s: any) => {
+              const totalPreg = s.totalQuestions ?? s.totalquestions ?? s.questions ?? s.numeroPreguntas ?? 0;
+              const correctas = s.correctAnswers ?? s.correct ?? s.correctas ?? s.totalCorrectas ?? 0;
+
+              return {
+                id: s.id ?? s.testId,
+                testId: s.testId ?? s.id,
+                date: s.date ?? s.fecha_test ?? s.fechaCreacion,
+                area: s.area || s.areaNombre || 'Derecho Civil',
+                durationSeconds: s.durationSeconds ?? s.duration ?? 0,
+                totalQuestions: totalPreg,
+                correctAnswers: correctas,
+                successRate: totalPreg > 0 ? Math.round((correctas / totalPreg) * 100) : 0
+              };
+            });
 
           console.log('✅ Sesiones que se van a mostrar en Civil:', this.recentSessions);
         }
@@ -183,7 +194,6 @@ export class CivilReforzarPage implements OnInit {
         console.error('Error cargando sesiones recientes:', error);
         this.recentSessions = [];
       }
-
 
       // 3) Temas y subtemas de Derecho Civil
       try {
@@ -282,14 +292,38 @@ export class CivilReforzarPage implements OnInit {
     }
   }
 
+  // =====================
+  // SCROLL AL TEST
+  // =====================
+
+  scrollToTestSection() {
+    // abrir sección de test
+    this.expandedSections['testSection'] = true;
+
+    // pequeño delay para que Angular pinte la sección abierta
+    setTimeout(() => {
+      const el = document.getElementById('test-section');
+      if (el && this.ionContent) {
+        const y = el.offsetTop - 60; // ajusta el 60 si el header es más grande/pequeño
+        this.ionContent.scrollToPoint(0, y, 500); // 500 ms de animación
+      }
+    }, 0);
+  }
+
+  // =====================
+  // SELECCIÓN DE ALCANCE
+  // =====================
+
   // Cuando haces clic en un "tema débil"
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
-    // La API de weak-topics devuelve temaId, no subtemaId
     this.selectedTemaId = topic.temaId;
     this.selectedSubtemaId = null;
     this.scopeType = 'tema';
     this.showThemeSelector = true;
+
+    // ir a la sección de Test
+    this.scrollToTestSection();
   }
 
   toggleTemaExpansion(temaId: number) {
@@ -336,6 +370,10 @@ export class CivilReforzarPage implements OnInit {
     this.selectSubtema(subtema);
   }
 
+  // =====================
+  // INICIO DEL TEST
+  // =====================
+
   async startTest() {
     const loading = await this.loadingController.create({
       message: 'Preparando test...',
@@ -365,12 +403,10 @@ export class CivilReforzarPage implements OnInit {
       let hasErrorsInScope = false;
       
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
-        // de momento casi siempre será false, porque no tenemos stats por subtema
         hasErrorsInScope = this.subtemaHasErrors(this.selectedSubtemaId);
       } else if (this.scopeType === 'tema' && this.selectedTemaId) {
         hasErrorsInScope = this.temaHasErrors(this.selectedTemaId);
       } else if (this.scopeType === 'all') {
-        // hay errores en algún tema de Civil
         hasErrorsInScope = this.weakTopics.some(t => t.area?.toLowerCase().includes('civil'));
       }
 
@@ -409,7 +445,6 @@ export class CivilReforzarPage implements OnInit {
           });
           await toast.present();
           
-          // Después de avisar, test normal
           await new Promise(resolve => setTimeout(resolve, 2000));
           
           const normalSessionData = {
@@ -469,6 +504,10 @@ export class CivilReforzarPage implements OnInit {
       await toast.present();
     }
   }
+
+  // =====================
+  // NAVEGACIÓN
+  // =====================
 
   goBack() {
     this.router.navigate(['/civil']);
