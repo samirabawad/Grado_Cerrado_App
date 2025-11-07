@@ -166,69 +166,59 @@ export class HistorialPage implements OnInit {
     }
   }
 
-  getQuestionOptions(question: any): string[] {
-    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
-      return ['Verdadero', 'Falso'];
-    }
-    
-    if (Array.isArray(question.options) && question.options.length > 0) {
-      const firstOption = question.options[0];
-      
-      if (typeof firstOption === 'object') {
-        if ('text' in firstOption && firstOption.text) {
-          return question.options.map((opt: any) => opt.text);
-        }
-        if ('Text' in firstOption && firstOption.Text) {
-          return question.options.map((opt: any) => opt.Text);
-        }
-      }
-      
-      if (typeof firstOption === 'string') {
-        return question.options;
-      }
-    }
-    
-    return [];
+getQuestionOptions(question: any): string[] {
+  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+    return ['Verdadero', 'Falso'];
   }
+  
+  if (Array.isArray(question.answers) && question.answers.length > 0) {
+    return question.answers.map((answer: any) => answer.text);
+  }
+  
+  return [];
+}
 
-  isOptionSelected(question: any, option: string): boolean {
-    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
-      if (question.userAnswer === 'V' && option === 'Verdadero') return true;
-      if (question.userAnswer === 'F' && option === 'Falso') return true;
-      return false;
-    }
-    
-    const options = this.getQuestionOptions(question);
-    const optionIndex = options.indexOf(option);
-    if (optionIndex !== -1) {
-      const letter = String.fromCharCode(65 + optionIndex);
-      return question.userAnswer === letter;
-    }
-    
+isOptionSelected(question: any, option: string): boolean {
+  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+    if (question.selectedAnswer === 'V' && option === 'Verdadero') return true;
+    if (question.selectedAnswer === 'F' && option === 'Falso') return true;
     return false;
   }
+  
+  // Buscar la opción en answers y comparar su letra con selectedAnswer
+  if (Array.isArray(question.answers)) {
+    const answer = question.answers.find((a: any) => a.text === option);
+    if (answer) {
+      return answer.letter === question.selectedAnswer;
+    }
+  }
+  
+  return false;
+}
 
-  isOptionCorrect(question: any, option: string): boolean {
-    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
-      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
-      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
-                                  correctAnswerNorm === 'v' || 
-                                  correctAnswerNorm === 'verdadero';
-      
-      if (option === 'Verdadero' && isVerdaderoCorrect) return true;
-      if (option === 'Falso' && !isVerdaderoCorrect) return true;
-      return false;
+isOptionCorrect(question: any, option: string): boolean {
+  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+    // Para V/F, buscar en answers cuál tiene isCorrect = true
+    if (Array.isArray(question.answers)) {
+      const correctAnswer = question.answers.find((a: any) => a.isCorrect);
+      if (correctAnswer) {
+        if (correctAnswer.letter === 'A' && option === 'Verdadero') return true;
+        if (correctAnswer.letter === 'B' && option === 'Falso') return true;
+      }
     }
-    
-    const options = this.getQuestionOptions(question);
-    const optionIndex = options.indexOf(option);
-    if (optionIndex !== -1) {
-      const letter = String.fromCharCode(65 + optionIndex);
-      return question.correctAnswer.toUpperCase() === letter;
-    }
-    
     return false;
   }
+  
+  // Para opciones múltiples, buscar en answers
+  if (Array.isArray(question.answers)) {
+    const answer = question.answers.find((a: any) => a.text === option);
+    if (answer) {
+      return answer.isCorrect === true;
+    }
+  }
+  
+  return false;
+}
 
   getOptionLetter(index: number): string {
     return String.fromCharCode(65 + index);

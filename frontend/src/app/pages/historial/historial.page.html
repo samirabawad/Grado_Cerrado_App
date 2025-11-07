@@ -91,8 +91,8 @@
                 <div 
                   *ngFor="let question of sessionDetails.questions; let i = index"
                   class="question-dot"
-                  [class.correct]="question.correct"
-                  [class.incorrect]="!question.correct"
+                  [class.correct]="question.isCorrect"
+                  [class.incorrect]="!question.isCorrect"
                   (click)="toggleQuestion(i)">
                   {{ i + 1 }}
                 </div>
