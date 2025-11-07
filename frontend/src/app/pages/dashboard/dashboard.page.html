@@ -65,55 +65,47 @@
     </div>
 
     <!-- Estadísticas Generales - SOLO SESIONES -->
-<!-- Estadísticas Generales - SOLO SESIONES -->
-<div class="stats-overview">
-  <div class="stat-card sessions-card" (click)="navigateToAchievements()">
-    <h4 class="stat-title">Test Realizados</h4>
+    <div class="stats-overview">
+      <div class="stat-card sessions-card" (click)="navigateToAchievements()">
+        <h4 class="stat-title">Test Realizados</h4>
+        
+        <!-- Logro Actual -->
+        <div class="current-achievement">
+          <div class="achievement-left">
+            <div class="achievement-icon" [style.background]="getCurrentAchievementColor()">
+              <ion-icon [name]="getCurrentAchievementIcon()"></ion-icon>
+            </div>
+            <div class="achievement-info">
+              <p class="achievement-level">LOGRO {{ getCurrentAchievementLevel() }}</p>
+              <p class="achievement-name">{{ getCurrentAchievementName() }}</p>
+            </div>
+          </div>
+          
+          <div class="achievement-right">
+            <p class="sessions-progress-inline">
+              <span class="sessions-current">{{ totalSessions }}</span>
+              <span class="sessions-de">de</span>
+              <span class="sessions-total">{{ getNextMilestone() }}</span>
+            </p>
+          </div>
+        </div>
 
-    
-    <!-- Logro Actual -->
-    <div class="current-achievement">
-      <div class="achievement-left">
-        <div class="achievement-icon" [style.background]="getCurrentAchievementColor()">
-          <ion-icon [name]="getCurrentAchievementIcon()"></ion-icon>
+        <!-- Circulitos de progreso (10 círculos de 5 en 5) -->
+        <div class="sessions-badges">
+          <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+            <div class="session-badge" 
+                [class.completed]="getSessionsInCurrentMilestone() >= i * 5" 
+                [class.pending]="getSessionsInCurrentMilestone() < i * 5">
+              <ion-icon *ngIf="getSessionsInCurrentMilestone() >= i * 5" name="checkmark-circle"></ion-icon>
+              <ion-icon *ngIf="getSessionsInCurrentMilestone() < i * 5" name="ellipse-outline"></ion-icon>
+            </div>
+          </ng-container>
         </div>
-        <div class="achievement-info">
-          <p class="achievement-level">LOGRO {{ getCurrentAchievementLevel() }}</p>
-          <p class="achievement-name">{{ getCurrentAchievementName() }}</p>
-        </div>
-      </div>
-      
-      <div class="achievement-right">
-        <p class="sessions-progress-inline">
-          <span class="sessions-current">{{ totalSessions }}</span>
-          <span class="sessions-de">de</span>
-          <span class="sessions-total">{{ getNextMilestone() }}</span>
-        </p>
+
+        <!-- Mensaje motivacional debajo de los círculos -->
+        <p class="sessions-message-bottom">{{ getSessionMessage() }}</p>
       </div>
     </div>
-
-    <!-- Circulitos de progreso DINÁMICOS -->
-    <div class="sessions-progress-section">
-      <div class="progress-explanation">
-        <ion-icon name="information-circle-outline"></ion-icon>
-        <p>Completa 50 tests para desbloquear el siguiente logro</p>
-      </div>
-
-      <!-- Círculos originales -->
-      <div class="sessions-badges">
-        <div class="session-badge" 
-            *ngFor="let milestone of [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]"
-            [class.completed]="getSessionsInCurrentMilestone() >= milestone" 
-            [class.pending]="getSessionsInCurrentMilestone() < milestone">
-          <ion-icon *ngIf="getSessionsInCurrentMilestone() >= milestone" name="checkmark-circle"></ion-icon>
-          <ion-icon *ngIf="getSessionsInCurrentMilestone() < milestone" name="ellipse"></ion-icon>
-        </div>
-      </div>
-      
-      <p class="progress-detail">{{ getSessionsInCurrentMilestone() }}/50 tests en este nivel</p>
-    </div>
-  </div>
-</div>
 
     <!-- Gráfico Semanal/Mensual -->
     <div class="weekly-chart-container">
@@ -125,21 +117,16 @@
         </div>
       </div>
 
-    <!-- Navegación mensual (solo visible en vista mensual) -->
-    <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'week'">
-      <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
-        <ion-icon name="chevron-back"></ion-icon>
-      </button>
-      <span class="month-label">{{ currentMonthName }}</span>
-      <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
-        <ion-icon name="chevron-forward"></ion-icon>
-      </button>
-    </div>
-
-    <!-- Navegación semanal (solo visible en vista semanal) -->
-    <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'month'">
-      <span class="month-label">{{ currentWeekLabel }}</span>
-    </div>
+      <!-- Navegación mensual (solo visible cuando está en modo mes) -->
+      <div class="month-navigation" *ngIf="selectedTimeFrame === 'month'">
+        <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
+          <ion-icon name="chevron-back"></ion-icon>
+        </button>
+        <span class="month-label">{{ currentMonthName }}</span>
+        <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </button>
+      </div>
 
       <div class="chart-legend">
         <div class="legend-item">

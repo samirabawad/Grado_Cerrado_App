@@ -19,7 +19,6 @@ export class DashboardPage implements OnInit {
   userName: string = 'Estudiante';
   userLevel: string = 'Intermedio';
   userStreak: number = 0;
-  currentWeekLabel: string = '';
 
   totalSessions: number = 0;
   totalQuestions: number = 0;
@@ -30,7 +29,6 @@ export class DashboardPage implements OnInit {
 
   chartData: any[] = [];
   areaStats: any[] = [];
-  
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -45,12 +43,7 @@ export class DashboardPage implements OnInit {
     private apiService: ApiService
   ) { }
 
-  async ngOnInit() {
-    this.updateWeekLabel(); 
-    await this.loadDashboardData();
-  }
-
-  ionViewWillEnter() {
+  ngOnInit() {
     this.loadDashboardData();
   }
 
@@ -346,11 +339,11 @@ export class DashboardPage implements OnInit {
 async changeTimeFrame(timeFrame: string) {
   this.selectedTimeFrame = timeFrame;
   if (timeFrame === 'month') {
-    const currentMonth = new Date().getMonth() + 1;
+    // Determinar semestre actual (0 = Ene-Jun, 1 = Jul-Dic)
+    const currentMonth = new Date().getMonth() + 1; // 1-12
     this.currentSemester = currentMonth <= 6 ? 0 : 1;
     await this.loadMonthlyData();
   } else {
-    this.updateWeekLabel();
     await this.generateChartData();
   }
 }
@@ -380,31 +373,6 @@ updateMonthName() {
   this.currentMonthName = this.currentSemester === 0 
     ? `Enero - Junio ${year}` 
     : `Julio - Diciembre ${year}`;
-}
-
-updateWeekLabel() {
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  
-  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  
-  const mondayDay = monday.getDate();
-  const sundayDay = sunday.getDate();
-  const mondayMonth = months[monday.getMonth()];
-  const sundayMonth = months[sunday.getMonth()];
-  const year = sunday.getFullYear();
-  
-  if (monday.getMonth() === sunday.getMonth()) {
-    this.currentWeekLabel = `Semana del ${mondayDay} al ${sundayDay} de ${sundayMonth} ${year}`;
-  } else {
-    this.currentWeekLabel = `Semana del ${mondayDay} de ${mondayMonth} al ${sundayDay} de ${sundayMonth} ${year}`;
-  }
 }
 
 async navigateMonth(direction: number) {
@@ -449,20 +417,10 @@ async navigateMonth(direction: number) {
   }
 
   getBarHeight(value: number, type: 'civil' | 'procesal'): number {
-  if (!value || value === 0) return 0;
-  
-  // Encuentra el valor máximo en todo el chartData
-  const maxValue = Math.max(
-    ...this.chartData.map(day => Math.max(day.civil, day.procesal))
-  );
-  
-  // Si no hay datos, retorna 0
-  if (maxValue === 0) return 0;
-  
-  // Calcula el porcentaje basado en el máximo
-  // Multiplicamos por 100 para obtener porcentaje
-  return (value / maxValue) * 100;
-}
+    const maxValue = this.getMaxValue();
+    if (maxValue === 0) return 0;
+    return (value / maxValue) * 100;
+  }
 
   getDonutOffset(): number {
     const circumference = 219.8;
@@ -577,26 +535,6 @@ async navigateMonth(direction: number) {
     ];
     
     return names[level - 1] || 'Maestro Supremo';
-  }
-
-  // ========================================
-// MÉTODO PARA GENERAR BADGES DINÁMICOS
-// ========================================
-  getSessionBadges(): { completed: boolean }[] {
-    const sessionsInMilestone = this.getSessionsInCurrentMilestone();
-    const badges: { completed: boolean }[] = [];
-    
-    // Siempre mostrar 10 círculos
-    const totalBadges = 10;
-    const testsPerBadge = 5; // Cada círculo representa 5 tests
-    
-    for (let i = 1; i <= totalBadges; i++) {
-      badges.push({
-        completed: sessionsInMilestone >= i * testsPerBadge
-      });
-    }
-    
-    return badges;
   }
 
   // Obtener el ícono del logro actual

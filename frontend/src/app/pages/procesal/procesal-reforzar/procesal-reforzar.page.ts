@@ -57,7 +57,6 @@ export class ProcesalReforzarPage implements OnInit {
     return this.expandedSections[section];
   }
 
-
 getMainRecommendation() {
   if (this.weakTopics.length === 0) return null;
   
@@ -100,7 +99,7 @@ getErrorSubtemasCount(tema: any): number {
 
       const studentId = currentUser.id;
 
-// Cargar temas débiles SOLO DE PROCESAL
+      // Cargar temas débiles SOLO DE PROCESAL
       try {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
@@ -127,24 +126,24 @@ getErrorSubtemasCount(tema: any): number {
         this.weakTopics = [];
       }
 
-// Cargar sesiones recientes SOLO DE PROCESAL
+      // Cargar sesiones recientes SOLO DE PROCESAL
       try {
-        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 50).toPromise();
+        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
         console.log('📦 Respuesta RAW del backend:', sessionsResponse);
         
         if (sessionsResponse && sessionsResponse.success) {
-          // Filtrar SOLO sesiones de Derecho Procesal y tomar las 5 más recientes
+          // Filtrar SOLO sesiones de Derecho Procesal
           this.recentSessions = (sessionsResponse.data || [])
             .filter((s: any) => s.area && s.area.toLowerCase().includes('procesal'))
-            .slice(0, 5)
+            .slice(0, 5) // Tomar solo las 5 más recientes
             .map((s: any) => ({
-              id: s.testId,
-              testId: s.testId,
+              id: s.id,
+              testId: s.id,
               date: s.date,
               area: s.area,
-              durationSeconds: s.durationSeconds || 0,
-              totalQuestions: s.totalQuestions || 0,
-              correctAnswers: s.correctAnswers || 0,
+              durationSeconds: s.duration || 0,
+              totalQuestions: s.questions || 0,
+              correctAnswers: s.correct || 0,
               successRate: s.successRate || 0
             }));
           

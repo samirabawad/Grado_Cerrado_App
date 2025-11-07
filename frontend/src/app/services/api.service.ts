@@ -382,6 +382,8 @@ export class ApiService {
     TemaId?: number;
     SubtemaId?: number;
   }): Observable<any> {
+
+
     const url = `${this.API_URL}/Study/start-session`;
     
     const currentUser = this.getCurrentUser();
