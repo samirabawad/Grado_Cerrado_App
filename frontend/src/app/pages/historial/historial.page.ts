@@ -54,7 +54,7 @@ export class HistorialPage implements OnInit {
             testId: session.testId,
             date: new Date(session.date),
             area: session.area || 'Derecho Civil',
-            questionsAnswered: session.questionsAnswered || 0,
+            questionsAnswered: session.totalQuestions || 0,            
             correctAnswers: session.correctAnswers || 0,
             successRate: session.successRate || 0,
             difficulty: session.difficulty || 'intermedio'
