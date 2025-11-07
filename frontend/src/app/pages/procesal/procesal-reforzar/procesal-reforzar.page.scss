@@ -684,3 +684,119 @@ ion-content.procesal-content {
     line-height: 1.5;
   }
 }
+
+// Indicador de tema/subtema con errores
+.select-tema-btn {
+  padding: 8px 16px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  ion-icon {
+    font-size: 16px;
+    color: #f59e0b;
+  }
+
+  &.selected {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #3b82f6;
+
+    ion-icon {
+      color: #3b82f6;
+    }
+  }
+
+  &.has-errors:not(.selected) {
+    border-color: #fbbf24;
+    background: #fffbeb;
+    color: #d97706;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.subtema-item {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e5e7eb;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .subtema-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .error-icon {
+      font-size: 16px;
+      color: #f59e0b;
+    }
+  }
+
+  span {
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  .subtema-count {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  &.has-errors {
+    background: rgba(251, 191, 36, 0.05);
+    border-left: 3px solid #fbbf24;
+  }
+
+  &.selected {
+    background: #eff6ff;
+    
+    span {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+
+    .error-icon {
+      color: #3b82f6;
+    }
+  }
+
+  &:active {
+    background: #f1f5f9;
+  }
+}
+
+.no-errors-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  color: #10b981;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(16, 185, 129, 0.05);
+  border-radius: 8px;
+  margin: 8px;
+  
+  ion-icon {
+    font-size: 18px;
+  }
+}
