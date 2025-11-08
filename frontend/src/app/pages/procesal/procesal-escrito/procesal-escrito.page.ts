@@ -162,11 +162,13 @@ export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
+      const difficultyToSend = this.selectedDifficulty;
+
       const sessionData: any = {
-        studentId: currentUser.id,
-        difficulty: this.selectedDifficulty,
+        studentId: Number(currentUser.id),
+        difficulty: difficultyToSend, 
         legalAreas: ["Derecho Procesal"],
-        numberOfQuestions: this.selectedQuantity
+        questionCount: Number(this.selectedQuantity)
       };
       
       console.log('📤 Datos de sesión enviados (Procesal Escrito):', sessionData);

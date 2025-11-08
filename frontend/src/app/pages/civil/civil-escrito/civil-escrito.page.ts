@@ -162,11 +162,11 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
+      const difficultyToSend = this.selectedDifficulty;
 
       const sessionData: any = {
         studentId: Number(currentUser.id),
-        difficulty: difficultyToSend,
+        difficulty: difficultyToSend, 
         legalAreas: ["Derecho Civil"],
         questionCount: Number(this.selectedQuantity)
       };

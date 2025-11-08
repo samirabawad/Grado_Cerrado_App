@@ -164,9 +164,10 @@ async startVoicePractice() {
       return;
     }
 
+    const difficultyToSend = this.selectedDifficulty;
     const sessionData: any = {
       studentId: Number(currentUser.id),
-      difficulty: this.selectedDifficulty,  // ✅ Enviar siempre
+      difficulty: difficultyToSend,  // ✅ Enviar siempre
       legalAreas: ["Derecho Procesal"],
       questionCount: Number(this.selectedQuantity),
       responseMethod: this.responseMethod
