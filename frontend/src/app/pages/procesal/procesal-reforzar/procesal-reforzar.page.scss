@@ -19,12 +19,9 @@
 // CONFIGURACIÓN BÁSICA
 // ========================================
 .procesal-content {
-  --background: transparent;
-  background-image: url('/assets/image/fondo_blanco_app.png');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
+  --background: #ffffff;
+  background-color: #ffffff;
+  background-image: none;
   min-height: 100vh;
 }
 
@@ -386,4 +383,225 @@ ion-content.procesal-content {
   background: rgba(16,185,129,.05); border-radius: 8px; margin: 8px;
 
   ion-icon { font-size: 18px; }
+}
+
+// ========================================
+// ESTILOS PARA DESPLIEGUE DE SESIONES
+// ========================================
+.session-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.session-card-clean.active {
+  border: 2px solid #3b82f6;
+  background: #eff6ff;
+}
+
+.session-details {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: -8px;
+}
+
+.details-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+
+  ion-spinner {
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+  }
+}
+
+.questions-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  .question-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &.correct {
+      background: #d1fae5;
+      color: #10b981;
+      border: 2px solid #10b981;
+    }
+
+    &.incorrect {
+      background: #fee2e2;
+      color: #ef4444;
+      border: 2px solid #ef4444;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+.question-detail {
+  margin-top: 16px;
+}
+
+.question-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .question-number {
+      font-size: 14px;
+      font-weight: 700;
+      color: #3b82f6;
+      text-transform: uppercase;
+    }
+
+    .close-icon {
+      font-size: 24px;
+      color: #9ca3af;
+      cursor: pointer;
+    }
+  }
+
+  .question-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 20px 0;
+    line-height: 1.6;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    transition: all 0.2s;
+
+    .option-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+
+    .option-text {
+      flex: 1;
+      font-size: 15px;
+      color: #374151;
+      line-height: 1.5;
+    }
+
+    .option-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+
+      &.correct-icon {
+        color: #10b981;
+      }
+
+      &.incorrect-icon {
+        color: #ef4444;
+      }
+    }
+
+    &.correct {
+      background: #d1fae5;
+      border-color: #10b981;
+
+      .option-letter {
+        background: #10b981;
+        border-color: #10b981;
+        color: white;
+      }
+
+      .option-text {
+        color: #065f46;
+        font-weight: 600;
+      }
+    }
+
+    &.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+
+      .option-letter {
+        background: #ef4444;
+        border-color: #ef4444;
+        color: white;
+      }
+
+      .option-text {
+        color: #991b1b;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .explanation-box {
+    padding: 16px;
+    background: #eff6ff;
+    border-radius: 12px;
+    border-left: 4px solid #3b82f6;
+
+    h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #3b82f6;
+      text-transform: uppercase;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.6;
+      margin: 0;
+    }
+  }
 }

@@ -144,14 +144,6 @@ const routes: Routes = [
     path: 'civil/material-estudio-civil',
     loadComponent: () => import('./pages/civil/material-estudio-civil/material-estudio-civil.page').then(m => m.MaterialEstudioCivilPage)
   },
-  {
-    path: 'civil/plan-estudio-civil',
-    loadComponent: () => import('./pages/civil/plan-estudio-civil/plan-estudio-civil.page').then(m => m.PlanEstudioCivilPage)
-  },
-  {
-    path: 'detalle-test/:testId',
-    loadComponent: () => import('./pages/detalle-test/detalle-test.page').then(m => m.DetalleTestPage)
-  },
 
 // ========================================
   // PROCESAL - PÁGINA PRINCIPAL
@@ -208,10 +200,6 @@ const routes: Routes = [
   {
     path: 'procesal/material-estudio-procesal',
     loadComponent: () => import('./pages/procesal/material-estudio-procesal/material-estudio-procesal.page').then(m => m.MaterialEstudioProcesalPage)
-  },
-  {
-    path: 'procesal/plan-estudio-procesal',
-    loadComponent: () => import('./pages/procesal/plan-estudio-procesal/plan-estudio-procesal.page').then(m => m.PlanEstudioProcesalPage)
   },
   
 

@@ -20,6 +20,10 @@ export class CivilReforzarPage implements OnInit {
   weakTopics: any[] = [];
   recentSessions: any[] = [];
   temas: any[] = [];
+  expandedSession: number | null = null;
+  expandedQuestion: number | null = null;
+  sessionDetails: any = null;
+  isLoadingDetails: boolean = false;
   
   expandedSections: { [key: string]: boolean } = {
     weakTopics: false,
@@ -513,9 +517,78 @@ export class CivilReforzarPage implements OnInit {
     this.router.navigate(['/civil']);
   }
 
-  viewSession(session: any) {
-    console.log('📊 Ver detalle de sesión:', session);
+async viewSession(session: any) {
     const testId = session.testId || session.id;
-    this.router.navigate(['/detalle-test', testId]);
+    
+    if (this.expandedSession === testId) {
+      // Si ya está abierta, cerrarla
+      this.expandedSession = null;
+      this.sessionDetails = null;
+      this.expandedQuestion = null;
+    } else {
+      // Abrir y cargar detalles
+      this.expandedSession = testId;
+      await this.loadSessionDetails(testId);
+    }
+  }
+
+  async loadSessionDetails(testId: number) {
+    this.isLoadingDetails = true;
+    this.expandedQuestion = null;
+
+    try {
+      const response = await this.apiService.getTestDetail(testId).toPromise();
+      
+      if (response && response.success) {
+        this.sessionDetails = response.data;
+        console.log('Detalles del test cargados:', this.sessionDetails);
+      }
+    } catch (error) {
+      console.error('Error cargando detalles del test:', error);
+    } finally {
+      this.isLoadingDetails = false;
+    }
+  }
+
+  toggleQuestion(index: number) {
+    if (this.expandedQuestion === index) {
+      this.expandedQuestion = null;
+    } else {
+      this.expandedQuestion = index;
+    }
+  }
+
+  getQuestionOptions(question: any): string[] {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+      return ['Verdadero', 'Falso'];
+    }
+    
+    if (Array.isArray(question.answers) && question.answers.length > 0) {
+      return question.answers.map((answer: any) => answer.text);
+    }
+    
+    return [];
+  }
+
+  isOptionSelected(question: any, option: string): boolean {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+      return question.selectedAnswer === (option === 'Verdadero' ? 'true' : 'false');
+    }
+    return question.selectedAnswer === option;
+  }
+
+  isOptionCorrect(question: any, option: string): boolean {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+      const correctBool = question.questionText.toLowerCase().includes('verdader') || 
+                         question.answers?.some((a: any) => a.text.toLowerCase() === 'verdadero' && a.isCorrect);
+      return (option === 'Verdadero') === correctBool;
+    }
+    
+    const correctAnswer = question.answers?.find((a: any) => a.isCorrect);
+    return correctAnswer?.text === option;
+  }
+
+  getOptionLetter(index: number): string {
+    return String.fromCharCode(65 + index);
   }
 }
