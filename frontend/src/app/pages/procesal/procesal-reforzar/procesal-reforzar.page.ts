@@ -60,7 +60,14 @@ export class ProcesalReforzarPage implements OnInit {
   // =====================
 
   toggleSection(section: string) {
-    this.expandedSections[section] = !this.expandedSections[section];
+    if (this.expandedSections[section]) {
+      this.expandedSections[section] = false;
+    } else {
+      Object.keys(this.expandedSections).forEach(key => {
+        this.expandedSections[key] = false;
+      });
+      this.expandedSections[section] = true;
+    }
   }
 
   toggleTema(temaId: number) {
