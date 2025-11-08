@@ -87,7 +87,7 @@ export class ApiService {
   // ========================================
 
 
-    getTemasByArea(areaId: number) {
+  getTemasByArea(areaId: number) {
     return this.http.get<any>(`${this.API_URL}/study/areas/${areaId}/temas-subtemas`);
   }
 

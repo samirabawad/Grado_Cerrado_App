@@ -141,6 +141,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
           this.questionStartTime = new Date();
 
           this.skipInvalidQuestions();
+
           
         } catch (conversionError) {
           console.error('Error en conversión de preguntas:', conversionError);
@@ -167,6 +168,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     });
   }
 
+  // ✅ NUEVO: Convertir una sola pregunta
   convertSingleQuestion(q: any, index: number): Question {
     return {
       id: q.id?.toString() || `temp-${index}`,
@@ -205,27 +207,44 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       return [];
     }
 
+    // Verdadero/Falso
     if (this.isTrueFalseQuestion()) {
       return ['Verdadero', 'Falso'];
     }
 
+    // Selección múltiple
     if (Array.isArray(question.options) && question.options.length > 0) {
       const firstOption = question.options[0];
       
-      if (typeof firstOption === 'object') {
-        if ('text' in firstOption && firstOption.text) {
-          return question.options.map((opt: any) => opt.text);
-        }
-        if ('Text' in firstOption && firstOption.Text) {
-          return question.options.map((opt: any) => opt.Text);
-        }
+      // ✅ PRIORIDAD 1: Objeto con propiedad "Text" (backend)
+      if (typeof firstOption === 'object' && 'Text' in firstOption && firstOption.Text) {
+        console.log('✅ Usando options[].Text del backend');
+        return question.options.map((opt: any) => opt.Text);
       }
       
+      // ✅ PRIORIDAD 2: Objeto con propiedad "text" (minúscula)
+      if (typeof firstOption === 'object' && 'text' in firstOption && firstOption.text) {
+        console.log('✅ Usando options[].text');
+        return question.options.map((opt: any) => opt.text);
+      }
+      
+      // ✅ PRIORIDAD 3: Array de strings directos
       if (typeof firstOption === 'string') {
+        console.log('✅ Usando options[] como strings');
         return question.options;
       }
+      
+      // ✅ FALLBACK: Intentar extraer cualquier texto disponible
+      console.warn('⚠️ Formato de opciones no reconocido, intentando fallback...');
+      return question.options.map((opt: any) => {
+        if (typeof opt === 'string') return opt;
+        if (opt.Text) return opt.Text;
+        if (opt.text) return opt.text;
+        return 'Opción sin texto';
+      });
     }
 
+    // SI NO TIENE OPCIONES VÁLIDAS
     console.error('❌ Pregunta sin opciones válidas:', question);
     
     if (!question.userAnswer) {
@@ -235,19 +254,26 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     return [];
   }
 
+  // ✅ NUEVO MÉTODO: Obtener la letra (Id) de una opción por su texto
   getOptionLetterByText(optionText: string): string | null {
     const question = this.getCurrentQuestion();
     if (!question || !Array.isArray(question.options)) return null;
 
     const option = question.options.find((opt: any) => {
       if (typeof opt === 'object') {
-        return (opt.text === optionText || opt.Text === optionText);
+        // ✅ Comparar con Text (mayúscula) primero
+        if (opt.Text === optionText) return true;
+        // ✅ Luego con text (minúscula)
+        if (opt.text === optionText) return true;
       }
+      // ✅ String directo
       return opt === optionText;
     });
 
-    if (option && typeof option === 'object' && ('Id' in option || 'id' in option)) {
-      return (option.Id || option.id || '').toString().toUpperCase();
+    if (option && typeof option === 'object') {
+      // ✅ Devolver Id (mayúscula) primero, luego id (minúscula)
+      const id = option.Id || option.id;
+      if (id) return id.toString().toUpperCase();
     }
 
     return null;
@@ -258,71 +284,29 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     return question?.type === 'verdadero_falso' || question?.type === 2 || question?.type === '2';
   }
 
-  async selectAnswer(optionText: string) {
-    if (this.hasAnsweredCurrentQuestion()) {
-      return;
-    }
-    
-    const question = this.getCurrentQuestion();
-    if (!question) return;
+async selectAnswer(optionText: string) {
+  if (this.hasAnsweredCurrentQuestion()) {
+    return;
+  }
+  
+  const question = this.getCurrentQuestion();
+  if (!question) return;
 
-    let normalizedAnswer: string;
-    
-    if (this.isTrueFalseQuestion()) {
-      const letterFromBackend = this.getOptionLetterByText(optionText);
-      
-      if (letterFromBackend) {
-        normalizedAnswer = letterFromBackend;
-      } else {
-        normalizedAnswer = optionText === 'Verdadero' ? 'A' : 'B';
-      }
-      
-      // ✅ CRÍTICO: Convertir A/B a true/false para el backend
-      const answerForBackend = optionText === 'Verdadero' ? 'true' : 'false';
-      question.userAnswer = normalizedAnswer;
-      
-      const isCorrect = this.compareAnswers(answerForBackend, question.correctAnswer);
-      
-      const correctionConfig = localStorage.getItem('correctionConfig');
-      const showImmediateCorrection = correctionConfig 
-        ? JSON.parse(correctionConfig).immediate 
-        : true;
-      
-      if (showImmediateCorrection) {
-        question.wasAnswered = true;
-        question.wasCorrect = isCorrect;
-        
-        console.log(`${isCorrect ? '✅' : '❌'} V/F: "${optionText}" → ${answerForBackend} (correcta: ${question.correctAnswer})`);
-      } else {
-        question.wasAnswered = true;
-        question.wasCorrect = undefined;
-      }
-      
-      await this.sendAnswerToBackend(question, answerForBackend);
-      this.cdr.detectChanges();
-      return;
-    }
-    
-    // Selección múltiple
+  let normalizedAnswer: string;
+  
+  if (this.isTrueFalseQuestion()) {
     const letterFromBackend = this.getOptionLetterByText(optionText);
     
     if (letterFromBackend) {
       normalizedAnswer = letterFromBackend;
     } else {
-      const options = this.getCurrentQuestionOptions();
-      const optionIndex = options.indexOf(optionText);
-      
-      if (optionIndex !== -1) {
-        normalizedAnswer = String.fromCharCode(65 + optionIndex);
-      } else {
-        console.error('❌ No se encontró la opción en el array');
-        return;
-      }
+      normalizedAnswer = optionText === 'Verdadero' ? 'A' : 'B';
     }
     
+    const answerForBackend = optionText === 'Verdadero' ? 'true' : 'false';
     question.userAnswer = normalizedAnswer;
     
-    const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+    const isCorrect = this.compareAnswers(answerForBackend, question.correctAnswer);
     
     const correctionConfig = localStorage.getItem('correctionConfig');
     const showImmediateCorrection = correctionConfig 
@@ -333,15 +317,58 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       question.wasAnswered = true;
       question.wasCorrect = isCorrect;
       
-      console.log(`${isCorrect ? '✅' : '❌'} Opción ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
+      // ✅ Log solo aquí
+      console.log(`${isCorrect ? '✅' : '❌'} V/F: "${optionText}" → ${answerForBackend} (correcta: ${question.correctAnswer})`);
     } else {
       question.wasAnswered = true;
       question.wasCorrect = undefined;
     }
     
-    await this.sendAnswerToBackend(question, normalizedAnswer);
+    await this.sendAnswerToBackend(question, answerForBackend);
     this.cdr.detectChanges();
+    return;
   }
+  
+  // Selección múltiple
+  const letterFromBackend = this.getOptionLetterByText(optionText);
+  
+  if (letterFromBackend) {
+    normalizedAnswer = letterFromBackend;
+  } else {
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(optionText);
+    
+    if (optionIndex !== -1) {
+      normalizedAnswer = String.fromCharCode(65 + optionIndex);
+    } else {
+      console.error('❌ No se encontró la opción en el array');
+      return;
+    }
+  }
+  
+  question.userAnswer = normalizedAnswer;
+  
+  const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+  
+  const correctionConfig = localStorage.getItem('correctionConfig');
+  const showImmediateCorrection = correctionConfig 
+    ? JSON.parse(correctionConfig).immediate 
+    : true;
+  
+  if (showImmediateCorrection) {
+    question.wasAnswered = true;
+    question.wasCorrect = isCorrect;
+    
+    // ✅ Log solo aquí
+    console.log(`${isCorrect ? '✅' : '❌'} Opción ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
+  } else {
+    question.wasAnswered = true;
+    question.wasCorrect = undefined;
+  }
+  
+  await this.sendAnswerToBackend(question, normalizedAnswer);
+  this.cdr.detectChanges();
+}
 
   async showExplanationAlert(explanation: string) {
     const alert = await this.alertController.create({
@@ -370,10 +397,10 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
         const buttons = alertElement.shadowRoot?.querySelectorAll('.alert-button');
 
         if (wrapper) {
-          wrapper.style.background = 'linear-gradient(135deg, rgba(33, 150, 243, 0.95) 0%, rgba(30, 136, 229, 0.95) 100%)';
+          wrapper.style.background = 'linear-gradient(135deg, rgba(255, 111, 0, 0.95) 0%, rgba(251, 146, 60, 0.95) 100%)';
           wrapper.style.backdropFilter = 'blur(10px)';
           wrapper.style.borderRadius = '20px';
-          wrapper.style.boxShadow = '0 8px 32px rgba(33, 150, 243, 0.5)';
+          wrapper.style.boxShadow = '0 8px 32px rgba(255, 111, 0, 0.5)';
           wrapper.style.border = '2px solid rgba(255, 255, 255, 0.2)';
           wrapper.style.maxWidth = '90%';
         }
@@ -411,7 +438,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
         buttons?.forEach((button) => {
           const btn = button as HTMLElement;
           btn.style.background = 'white';
-          btn.style.color = '#2196F3';
+          btn.style.color = '#FF6F00';
           btn.style.borderRadius = '12px';
           btn.style.fontWeight = '700';
           btn.style.fontSize = '16px';
@@ -423,7 +450,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
           const inner = btn.querySelector('.alert-button-inner') as HTMLElement;
           if (inner) {
-            inner.style.color = '#2196F3';
+            inner.style.color = '#FF6F00';
             inner.style.fontWeight = '700';
           }
         });
@@ -465,6 +492,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
     const normalizedUser = userAnswer.trim().toLowerCase();
     const normalizedCorrect = correctAnswer.trim().toLowerCase();
+  
     
     // Comparación directa
     if (normalizedUser === normalizedCorrect) return true;
@@ -532,21 +560,25 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     if (!question || !question.userAnswer) return false;
     
     if (this.isTrueFalseQuestion()) {
+      // ✅ CORREGIDO: Usar la letra del backend también para V/F
       const letterFromBackend = this.getOptionLetterByText(optionText);
       if (letterFromBackend) {
         return question.userAnswer === letterFromBackend;
       }
       
-      if (question.userAnswer === 'A' && optionText === 'Verdadero') return true;
-      if (question.userAnswer === 'B' && optionText === 'Falso') return true;
+      // Fallback tradicional
+      if (question.userAnswer === 'V' && optionText === 'Verdadero') return true;
+      if (question.userAnswer === 'F' && optionText === 'Falso') return true;
       return false;
     }
     
+    // ✅ CORREGIDO: Usar la letra del backend en lugar del índice
     const letterFromBackend = this.getOptionLetterByText(optionText);
     if (letterFromBackend) {
       return question.userAnswer === letterFromBackend;
     }
     
+    // Fallback al método anterior
     const options = this.getCurrentQuestionOptions();
     const optionIndex = options.indexOf(optionText);
     if (optionIndex !== -1) {
@@ -693,7 +725,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
         ]
       });
       
-      await alert.dismiss();
+      await loading.dismiss();
       await alert.present();
     }
   }
@@ -788,6 +820,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     this.loadSessionFromBackend();
   }
 
+  // ✅ ACTUALIZADO: Reemplazar preguntas inválidas
   async skipInvalidQuestions() {
     const options = this.getCurrentQuestionOptions();
     
@@ -823,6 +856,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     }
   }
 
+  // ✅ NUEVO: Método para solicitar pregunta de reemplazo
   async requestReplacementQuestion(): Promise<any> {
     try {
       const response = await this.apiService.getReplacementQuestion(this.testId).toPromise();
@@ -838,6 +872,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     }
   }
 
+  // ✅ NUEVO: Saltar automáticamente si no hay reemplazo
   autoSkipQuestion() {
     setTimeout(() => {
       if (this.currentQuestionIndex < this.questions.length - 1) {
