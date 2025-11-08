@@ -300,6 +300,9 @@ export class ApiService {
       );
   }
 
+  startOralSession(sessionData: any): Observable<any> {
+  return this.http.post(`${this.API_URL}/study/start-oral-session`, sessionData);
+}
 
   startReinforcementSession(data: any): Observable<any> {
   return this.http.post(`${this.API_URL}/study/start-reinforcement-session`, data);

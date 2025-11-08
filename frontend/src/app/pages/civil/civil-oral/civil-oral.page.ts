@@ -145,58 +145,58 @@ export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   
-  async startVoicePractice() {
-    const loading = await this.loadingController.create({
-      message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
-      spinner: 'crescent',
-      cssClass: 'custom-loading'
-    });
-    
-    await loading.present();
-    
-    try {
-      const currentUser = this.apiService.getCurrentUser();
+async startVoicePractice() {
+  const loading = await this.loadingController.create({
+    message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
+    spinner: 'crescent',
+    cssClass: 'custom-loading'
+  });
+  
+  await loading.present();
+  
+  try {
+    const currentUser = this.apiService.getCurrentUser();
 
-      if (!currentUser || !currentUser.id) {
-        await loading.dismiss();
-        alert('Debes iniciar sesión para hacer un test');
-        this.router.navigate(['/login']);
-        return;
-      }
-
-      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
-
-      const sessionData: any = {
-        studentId: Number(currentUser.id),
-        difficulty: difficultyToSend,
-        legalAreas: ["Derecho Civil"],
-        questionCount: Number(this.selectedQuantity),
-        responseMethod: this.responseMethod
-      };
-      
-      console.log('📤 Enviando request ORAL:', sessionData);
-      
-      const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
-      
-      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
-      
-      if (sessionResponse && sessionResponse.success) {
-        console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
-        
-        sessionResponse.responseMethod = this.responseMethod;
-        
-        this.apiService.setCurrentSession(sessionResponse);
-        await this.router.navigate(['/civil/civil-oral/test-oral-civil']);
-        await loading.dismiss();
-      } else {
-        await loading.dismiss();
-        alert('No se pudo iniciar el test oral. Intenta nuevamente.');
-      }
-      
-    } catch (error) {
+    if (!currentUser || !currentUser.id) {
       await loading.dismiss();
-      console.error('❌ Error al iniciar test oral:', error);
-      alert('Hubo un error al iniciar el test oral. Intenta nuevamente.');
+      alert('Debes iniciar sesión para hacer un test');
+      this.router.navigate(['/login']);
+      return;
     }
+
+    const sessionData: any = {
+      studentId: Number(currentUser.id),
+      difficulty: this.selectedDifficulty,  // ✅ Enviar siempre
+      legalAreas: ["Derecho Procesal"],
+      questionCount: Number(this.selectedQuantity),
+      responseMethod: this.responseMethod
+    };
+    
+    console.log('📤 Enviando request ORAL:', sessionData);
+    
+    // ✅ CAMBIO CRÍTICO: Usar endpoint de test ORAL
+    const sessionResponse = await this.apiService.startOralSession(sessionData).toPromise();
+    
+    console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
+    
+    if (sessionResponse && sessionResponse.success) {
+      console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
+      
+      // Agregar responseMethod a la sesión
+      sessionResponse.responseMethod = this.responseMethod;
+      
+      this.apiService.setCurrentSession(sessionResponse);
+      await this.router.navigate(['/procesal/procesal-oral/test-oral-procesal']);
+      await loading.dismiss();
+    } else {
+      await loading.dismiss();
+      alert('No se pudo iniciar el test oral. Intenta nuevamente.');
+    }
+    
+  } catch (error) {
+    await loading.dismiss();
+    console.error('❌ Error al iniciar test oral:', error);
+    alert('Hubo un error al iniciar el test oral. Intenta nuevamente.');
   }
+}
 }

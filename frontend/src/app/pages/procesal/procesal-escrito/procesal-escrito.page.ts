@@ -162,33 +162,31 @@ export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
-
       const sessionData: any = {
-        studentId: Number(currentUser.id),
-        difficulty: difficultyToSend,
+        studentId: currentUser.id,
+        difficulty: this.selectedDifficulty,
         legalAreas: ["Derecho Procesal"],
-        questionCount: Number(this.selectedQuantity)
+        numberOfQuestions: this.selectedQuantity
       };
       
-      console.log('📤 Enviando request:', sessionData);
+      console.log('📤 Datos de sesión enviados (Procesal Escrito):', sessionData);
       
       const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
-      console.log('📥 Respuesta del servidor:', sessionResponse);
       
       if (sessionResponse && sessionResponse.success) {
-        console.log('✅ Preguntas recibidas:', sessionResponse.totalQuestions);
         this.apiService.setCurrentSession(sessionResponse);
+        console.log('✅ Sesión iniciada correctamente (Procesal Escrito)');
         await this.router.navigate(['/procesal/procesal-escrito/test-escrito-procesal']);
         await loading.dismiss();
       } else {
         await loading.dismiss();
+        console.error('❌ Error en respuesta:', sessionResponse);
         alert('No se pudo iniciar el test. Intenta nuevamente.');
       }
       
     } catch (error) {
       await loading.dismiss();
-      console.error('❌ Error al iniciar test:', error);
+      console.error('❌ Error al iniciar test (Procesal Escrito):', error);
       alert('Hubo un error al iniciar el test. Intenta nuevamente.');
     }
   }

@@ -141,7 +141,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
           this.questionStartTime = new Date();
 
           this.skipInvalidQuestions();
-
           
         } catch (conversionError) {
           console.error('Error en conversión de preguntas:', conversionError);
@@ -168,7 +167,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     });
   }
 
-  // ✅ NUEVO: Convertir una sola pregunta
   convertSingleQuestion(q: any, index: number): Question {
     return {
       id: q.id?.toString() || `temp-${index}`,
@@ -207,12 +205,10 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       return [];
     }
 
-    // Verdadero/Falso
     if (this.isTrueFalseQuestion()) {
       return ['Verdadero', 'Falso'];
     }
 
-    // Selección múltiple
     if (Array.isArray(question.options) && question.options.length > 0) {
       const firstOption = question.options[0];
       
@@ -230,7 +226,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       }
     }
 
-    // SI NO TIENE OPCIONES VÁLIDAS
     console.error('❌ Pregunta sin opciones válidas:', question);
     
     if (!question.userAnswer) {
@@ -240,7 +235,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     return [];
   }
 
-  // ✅ NUEVO MÉTODO: Obtener la letra (Id) de una opción por su texto
   getOptionLetterByText(optionText: string): string | null {
     const question = this.getCurrentQuestion();
     if (!question || !Array.isArray(question.options)) return null;
@@ -266,7 +260,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
   async selectAnswer(optionText: string) {
     if (this.hasAnsweredCurrentQuestion()) {
-      console.log('Ya respondiste esta pregunta');
       return;
     }
     
@@ -276,36 +269,54 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     let normalizedAnswer: string;
     
     if (this.isTrueFalseQuestion()) {
-      // ✅ Para V/F también usar la letra del backend
       const letterFromBackend = this.getOptionLetterByText(optionText);
       
       if (letterFromBackend) {
         normalizedAnswer = letterFromBackend;
-        console.log(`✅ V/F seleccionado: Letra ${normalizedAnswer} = "${optionText}"`);
       } else {
-        // Fallback tradicional
         normalizedAnswer = optionText === 'Verdadero' ? 'A' : 'B';
-        console.log(`⚠️ V/F usando fallback: Letra ${normalizedAnswer}`);
       }
-    } else {
-      // ✅ NUEVO: Usar la letra (Id) que viene del backend
-      const letterFromBackend = this.getOptionLetterByText(optionText);
       
-      if (letterFromBackend) {
-        normalizedAnswer = letterFromBackend;
-        console.log(`✅ Opción seleccionada: Letra ${normalizedAnswer} = "${optionText}"`);
-      } else {
-        // Fallback al método anterior si no se encuentra la letra
-        const options = this.getCurrentQuestionOptions();
-        const optionIndex = options.indexOf(optionText);
+      // ✅ CRÍTICO: Convertir A/B a true/false para el backend
+      const answerForBackend = optionText === 'Verdadero' ? 'true' : 'false';
+      question.userAnswer = normalizedAnswer;
+      
+      const isCorrect = this.compareAnswers(answerForBackend, question.correctAnswer);
+      
+      const correctionConfig = localStorage.getItem('correctionConfig');
+      const showImmediateCorrection = correctionConfig 
+        ? JSON.parse(correctionConfig).immediate 
+        : true;
+      
+      if (showImmediateCorrection) {
+        question.wasAnswered = true;
+        question.wasCorrect = isCorrect;
         
-        if (optionIndex !== -1) {
-          normalizedAnswer = String.fromCharCode(65 + optionIndex);
-          console.log(`⚠️ Usando índice como fallback: Letra ${normalizedAnswer} = "${optionText}"`);
-        } else {
-          console.error('❌ No se encontró la opción en el array');
-          return;
-        }
+        console.log(`${isCorrect ? '✅' : '❌'} V/F: "${optionText}" → ${answerForBackend} (correcta: ${question.correctAnswer})`);
+      } else {
+        question.wasAnswered = true;
+        question.wasCorrect = undefined;
+      }
+      
+      await this.sendAnswerToBackend(question, answerForBackend);
+      this.cdr.detectChanges();
+      return;
+    }
+    
+    // Selección múltiple
+    const letterFromBackend = this.getOptionLetterByText(optionText);
+    
+    if (letterFromBackend) {
+      normalizedAnswer = letterFromBackend;
+    } else {
+      const options = this.getCurrentQuestionOptions();
+      const optionIndex = options.indexOf(optionText);
+      
+      if (optionIndex !== -1) {
+        normalizedAnswer = String.fromCharCode(65 + optionIndex);
+      } else {
+        console.error('❌ No se encontró la opción en el array');
+        return;
       }
     }
     
@@ -315,15 +326,14 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     
     const correctionConfig = localStorage.getItem('correctionConfig');
     const showImmediateCorrection = correctionConfig 
-      ? JSON.parse(correctionConfig).showImmediateCorrection 
+      ? JSON.parse(correctionConfig).immediate 
       : true;
     
     if (showImmediateCorrection) {
       question.wasAnswered = true;
       question.wasCorrect = isCorrect;
       
-      console.log(`${isCorrect ? '✅' : '❌'} Respuesta ${isCorrect ? 'correcta' : 'incorrecta'}`);
-      console.log(`Usuario respondió: ${normalizedAnswer}, Correcta: ${question.correctAnswer}`);
+      console.log(`${isCorrect ? '✅' : '❌'} Opción ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
     } else {
       question.wasAnswered = true;
       question.wasCorrect = undefined;
@@ -453,20 +463,23 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
   }
 
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
-    const normalizedUser = userAnswer.trim().toUpperCase();
-    const normalizedCorrect = correctAnswer.trim().toUpperCase();
+    const normalizedUser = userAnswer.trim().toLowerCase();
+    const normalizedCorrect = correctAnswer.trim().toLowerCase();
     
+    // Comparación directa
     if (normalizedUser === normalizedCorrect) return true;
     
-    if ((normalizedUser === 'V' || normalizedUser === 'VERDADERO' || normalizedUser === 'TRUE') &&
-        (normalizedCorrect === 'V' || normalizedCorrect === 'VERDADERO' || normalizedCorrect === 'TRUE')) {
-      return true;
-    }
+    // Mapeo de variantes de Verdadero
+    const trueVariants = ['v', 'verdadero', 'true', 'a'];
+    const falseVariants = ['f', 'falso', 'false', 'b'];
     
-    if ((normalizedUser === 'F' || normalizedUser === 'FALSO' || normalizedUser === 'FALSE') &&
-        (normalizedCorrect === 'F' || normalizedCorrect === 'FALSO' || normalizedCorrect === 'FALSE')) {
-      return true;
-    }
+    const userIsTrue = trueVariants.includes(normalizedUser);
+    const correctIsTrue = trueVariants.includes(normalizedCorrect);
+    const userIsFalse = falseVariants.includes(normalizedUser);
+    const correctIsFalse = falseVariants.includes(normalizedCorrect);
+    
+    if (userIsTrue && correctIsTrue) return true;
+    if (userIsFalse && correctIsFalse) return true;
     
     return false;
   }
@@ -519,25 +532,21 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     if (!question || !question.userAnswer) return false;
     
     if (this.isTrueFalseQuestion()) {
-      // ✅ CORREGIDO: Usar la letra del backend también para V/F
       const letterFromBackend = this.getOptionLetterByText(optionText);
       if (letterFromBackend) {
         return question.userAnswer === letterFromBackend;
       }
       
-      // Fallback tradicional
-      if (question.userAnswer === 'V' && optionText === 'Verdadero') return true;
-      if (question.userAnswer === 'F' && optionText === 'Falso') return true;
+      if (question.userAnswer === 'A' && optionText === 'Verdadero') return true;
+      if (question.userAnswer === 'B' && optionText === 'Falso') return true;
       return false;
     }
     
-    // ✅ CORREGIDO: Usar la letra del backend en lugar del índice
     const letterFromBackend = this.getOptionLetterByText(optionText);
     if (letterFromBackend) {
       return question.userAnswer === letterFromBackend;
     }
     
-    // Fallback al método anterior
     const options = this.getCurrentQuestionOptions();
     const optionIndex = options.indexOf(optionText);
     if (optionIndex !== -1) {
@@ -579,7 +588,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     }
 
     if (this.isTrueFalseQuestion()) {
-      // ✅ CORREGIDO: Usar la letra del backend para V/F
       const letterFromBackend = this.getOptionLetterByText(optionText);
       if (!letterFromBackend) return 'default';
       
@@ -595,7 +603,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       return 'default';
     }
 
-    // ✅ CORREGIDO: Usar la letra del backend
     const letterFromBackend = this.getOptionLetterByText(optionText);
     if (!letterFromBackend) return 'default';
 
@@ -686,7 +693,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
         ]
       });
       
-      await loading.dismiss();
+      await alert.dismiss();
       await alert.present();
     }
   }
@@ -781,7 +788,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     this.loadSessionFromBackend();
   }
 
-  // ✅ ACTUALIZADO: Reemplazar preguntas inválidas
   async skipInvalidQuestions() {
     const options = this.getCurrentQuestionOptions();
     
@@ -817,7 +823,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ NUEVO: Método para solicitar pregunta de reemplazo
   async requestReplacementQuestion(): Promise<any> {
     try {
       const response = await this.apiService.getReplacementQuestion(this.testId).toPromise();
@@ -833,7 +838,6 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ NUEVO: Saltar automáticamente si no hay reemplazo
   autoSkipQuestion() {
     setTimeout(() => {
       if (this.currentQuestionIndex < this.questions.length - 1) {

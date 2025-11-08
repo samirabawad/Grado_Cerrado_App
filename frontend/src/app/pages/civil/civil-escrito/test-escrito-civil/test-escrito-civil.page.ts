@@ -264,74 +264,91 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return question?.type === 'verdadero_falso' || question?.type === 2 || question?.type === '2';
   }
 
-  async selectAnswer(optionText: string) {
-    if (this.hasAnsweredCurrentQuestion()) {
-      console.log('Ya respondiste esta pregunta');
-      return;
-    }
-    
-    const question = this.getCurrentQuestion();
-    if (!question) return;
+async selectAnswer(optionText: string) {
+  if (this.hasAnsweredCurrentQuestion()) {
+    return;
+  }
+  
+  const question = this.getCurrentQuestion();
+  if (!question) return;
 
-    let normalizedAnswer: string;
+  let normalizedAnswer: string;
+  
+  if (this.isTrueFalseQuestion()) {
+    const letterFromBackend = this.getOptionLetterByText(optionText);
     
-    if (this.isTrueFalseQuestion()) {
-      // ✅ Para V/F también usar la letra del backend
-      const letterFromBackend = this.getOptionLetterByText(optionText);
-      
-      if (letterFromBackend) {
-        normalizedAnswer = letterFromBackend;
-        console.log(`✅ V/F seleccionado: Letra ${normalizedAnswer} = "${optionText}"`);
-      } else {
-        // Fallback tradicional
-        normalizedAnswer = optionText === 'Verdadero' ? 'A' : 'B';
-        console.log(`⚠️ V/F usando fallback: Letra ${normalizedAnswer}`);
-      }
+    if (letterFromBackend) {
+      normalizedAnswer = letterFromBackend;
     } else {
-      // ✅ NUEVO: Usar la letra (Id) que viene del backend
-      const letterFromBackend = this.getOptionLetterByText(optionText);
-      
-      if (letterFromBackend) {
-        normalizedAnswer = letterFromBackend;
-        console.log(`✅ Opción seleccionada: Letra ${normalizedAnswer} = "${optionText}"`);
-      } else {
-        // Fallback al método anterior si no se encuentra la letra
-        const options = this.getCurrentQuestionOptions();
-        const optionIndex = options.indexOf(optionText);
-        
-        if (optionIndex !== -1) {
-          normalizedAnswer = String.fromCharCode(65 + optionIndex);
-          console.log(`⚠️ Usando índice como fallback: Letra ${normalizedAnswer} = "${optionText}"`);
-        } else {
-          console.error('❌ No se encontró la opción en el array');
-          return;
-        }
-      }
+      normalizedAnswer = optionText === 'Verdadero' ? 'A' : 'B';
     }
     
+    const answerForBackend = optionText === 'Verdadero' ? 'true' : 'false';
     question.userAnswer = normalizedAnswer;
     
-    const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+    const isCorrect = this.compareAnswers(answerForBackend, question.correctAnswer);
     
     const correctionConfig = localStorage.getItem('correctionConfig');
     const showImmediateCorrection = correctionConfig 
-      ? JSON.parse(correctionConfig).showImmediateCorrection 
+      ? JSON.parse(correctionConfig).immediate 
       : true;
     
     if (showImmediateCorrection) {
       question.wasAnswered = true;
       question.wasCorrect = isCorrect;
       
-      console.log(`${isCorrect ? '✅' : '❌'} Respuesta ${isCorrect ? 'correcta' : 'incorrecta'}`);
-      console.log(`Usuario respondió: ${normalizedAnswer}, Correcta: ${question.correctAnswer}`);
+      // ✅ Log solo aquí
+      console.log(`${isCorrect ? '✅' : '❌'} V/F: "${optionText}" → ${answerForBackend} (correcta: ${question.correctAnswer})`);
     } else {
       question.wasAnswered = true;
       question.wasCorrect = undefined;
     }
     
-    await this.sendAnswerToBackend(question, normalizedAnswer);
+    await this.sendAnswerToBackend(question, answerForBackend);
     this.cdr.detectChanges();
+    return;
   }
+  
+  // Selección múltiple
+  const letterFromBackend = this.getOptionLetterByText(optionText);
+  
+  if (letterFromBackend) {
+    normalizedAnswer = letterFromBackend;
+  } else {
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(optionText);
+    
+    if (optionIndex !== -1) {
+      normalizedAnswer = String.fromCharCode(65 + optionIndex);
+    } else {
+      console.error('❌ No se encontró la opción en el array');
+      return;
+    }
+  }
+  
+  question.userAnswer = normalizedAnswer;
+  
+  const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+  
+  const correctionConfig = localStorage.getItem('correctionConfig');
+  const showImmediateCorrection = correctionConfig 
+    ? JSON.parse(correctionConfig).immediate 
+    : true;
+  
+  if (showImmediateCorrection) {
+    question.wasAnswered = true;
+    question.wasCorrect = isCorrect;
+    
+    // ✅ Log solo aquí
+    console.log(`${isCorrect ? '✅' : '❌'} Opción ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
+  } else {
+    question.wasAnswered = true;
+    question.wasCorrect = undefined;
+  }
+  
+  await this.sendAnswerToBackend(question, normalizedAnswer);
+  this.cdr.detectChanges();
+}
 
   async showExplanationAlert(explanation: string) {
     const alert = await this.alertController.create({
@@ -453,20 +470,24 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   }
 
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
-    const normalizedUser = userAnswer.trim().toUpperCase();
-    const normalizedCorrect = correctAnswer.trim().toUpperCase();
+    const normalizedUser = userAnswer.trim().toLowerCase();
+    const normalizedCorrect = correctAnswer.trim().toLowerCase();
+  
     
+    // Comparación directa
     if (normalizedUser === normalizedCorrect) return true;
     
-    if ((normalizedUser === 'V' || normalizedUser === 'VERDADERO' || normalizedUser === 'TRUE') &&
-        (normalizedCorrect === 'V' || normalizedCorrect === 'VERDADERO' || normalizedCorrect === 'TRUE')) {
-      return true;
-    }
+    // Mapeo de variantes de Verdadero
+    const trueVariants = ['v', 'verdadero', 'true', 'a'];
+    const falseVariants = ['f', 'falso', 'false', 'b'];
     
-    if ((normalizedUser === 'F' || normalizedUser === 'FALSO' || normalizedUser === 'FALSE') &&
-        (normalizedCorrect === 'F' || normalizedCorrect === 'FALSO' || normalizedCorrect === 'FALSE')) {
-      return true;
-    }
+    const userIsTrue = trueVariants.includes(normalizedUser);
+    const correctIsTrue = trueVariants.includes(normalizedCorrect);
+    const userIsFalse = falseVariants.includes(normalizedUser);
+    const correctIsFalse = falseVariants.includes(normalizedCorrect);
+    
+    if (userIsTrue && correctIsTrue) return true;
+    if (userIsFalse && correctIsFalse) return true;
     
     return false;
   }
@@ -579,7 +600,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     }
 
     if (this.isTrueFalseQuestion()) {
-      // ✅ CORREGIDO: Usar la letra del backend para V/F
       const letterFromBackend = this.getOptionLetterByText(optionText);
       if (!letterFromBackend) return 'default';
       
@@ -595,7 +615,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
       return 'default';
     }
 
-    // ✅ CORREGIDO: Usar la letra del backend
     const letterFromBackend = this.getOptionLetterByText(optionText);
     if (!letterFromBackend) return 'default';
 
