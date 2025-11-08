@@ -108,27 +108,103 @@
         <ion-icon [name]="isSectionExpanded('recentSessions') ? 'chevron-up' : 'chevron-down'"></ion-icon>
       </h2>
 
-      <div *ngIf="isSectionExpanded('recentSessions')">
+<div *ngIf="isSectionExpanded('recentSessions')">
         <div *ngIf="!isLoading && recentSessions.length > 0" class="sessions-list-new">
-          <div *ngFor="let session of recentSessions"
-               class="session-card-clean"
-               (click)="viewSession(session)">
+          <div *ngFor="let session of recentSessions" class="session-wrapper">
+            
+            <!-- Tarjeta de sesión -->
+            <div 
+              class="session-card-clean"
+              [class.active]="expandedSession === (session.testId || session.id)"
+              (click)="viewSession(session)">
 
-            <!-- Contenido principal -->
-            <div class="session-info">
-              <h3 class="session-title">Test General</h3>
-              <p class="session-subtitle">{{ session.area || 'Derecho Civil' }}</p>
-              <p class="session-date">{{ session.date | date: 'dd/MM/yyyy HH:mm' }}</p>
+              <!-- Contenido principal -->
+              <div class="session-info">
+                <h3 class="session-title">Test Civil</h3>
+                <p class="session-subtitle">{{ session.area || 'Derecho Civil' }}</p>
+                <p class="session-date">{{ session.date | date: 'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+
+              <!-- Badge naranja -->
+              <div class="stat-badge">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                <span>{{ session.correctAnswers || 0 }}/{{ session.totalQuestions || 0 }}</span>
+              </div>
+
+              <!-- Flecha que cambia según expansión -->
+              <ion-icon 
+                [name]="expandedSession === (session.testId || session.id) ? 'chevron-up' : 'chevron-down'" 
+                class="session-arrow">
+              </ion-icon>
             </div>
 
-            <!-- Badge naranja igual que detalle-test -->
-            <div class="stat-badge">
-              <ion-icon name="checkmark-circle"></ion-icon>
-              <span>{{ session.correctAnswers || 0 }}/{{ session.totalQuestions || 0 }}</span>
+            <!-- Detalles de la sesión (desplegable) -->
+            <div *ngIf="expandedSession === (session.testId || session.id)" class="session-details">
+              
+              <!-- Loading -->
+              <div *ngIf="isLoadingDetails" class="details-loading">
+                <ion-spinner name="circular"></ion-spinner>
+                <p>Cargando preguntas...</p>
+              </div>
+
+              <!-- Pelotitas de preguntas -->
+              <div *ngIf="!isLoadingDetails && sessionDetails" class="questions-dots">
+                <div 
+                  *ngFor="let question of sessionDetails.questions; let i = index"
+                  class="question-dot"
+                  [class.correct]="question.isCorrect"
+                  [class.incorrect]="!question.isCorrect"
+                  (click)="toggleQuestion(i)">
+                  {{ i + 1 }}
+                </div>
+              </div>
+
+              <!-- Pregunta expandida -->
+              <div *ngIf="expandedQuestion !== null && sessionDetails" class="question-detail">
+                <div class="question-card">
+                  <div class="question-header">
+                    <span class="question-number">Pregunta {{ expandedQuestion + 1 }}</span>
+                    <ion-icon 
+                      name="close-circle" 
+                      class="close-icon"
+                      (click)="expandedQuestion = null">
+                    </ion-icon>
+                  </div>
+
+                  <p class="question-text">{{ sessionDetails.questions[expandedQuestion].questionText }}</p>
+
+                  <div class="options-list">
+                    <div 
+                      *ngFor="let option of getQuestionOptions(sessionDetails.questions[expandedQuestion]); let i = index"
+                      class="option-item"
+                      [class.selected]="isOptionSelected(sessionDetails.questions[expandedQuestion], option)"
+                      [class.correct]="isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
+                      [class.incorrect]="isOptionSelected(sessionDetails.questions[expandedQuestion], option) && !isOptionCorrect(sessionDetails.questions[expandedQuestion], option)">
+                      
+                      <div class="option-letter">{{ getOptionLetter(i) }}</div>
+                      <div class="option-text">{{ option }}</div>
+                      
+                      <ion-icon 
+                        *ngIf="isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
+                        name="checkmark-circle"
+                        class="option-icon correct-icon">
+                      </ion-icon>
+                      <ion-icon 
+                        *ngIf="isOptionSelected(sessionDetails.questions[expandedQuestion], option) && !isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
+                        name="close-circle"
+                        class="option-icon incorrect-icon">
+                      </ion-icon>
+                    </div>
+                  </div>
+
+                  <div class="explanation-box">
+                    <h4>Explicación</h4>
+                    <p>{{ sessionDetails.questions[expandedQuestion].explanation || 'No hay explicación disponible' }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- Flecha -->
-            <ion-icon name="chevron-forward" class="session-arrow"></ion-icon>
           </div>
         </div>
 

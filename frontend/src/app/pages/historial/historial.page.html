@@ -47,11 +47,16 @@
               
               <div class="session-header">
                 <div class="session-area">
-                  <ion-icon name="book"></ion-icon>
-                  <span>{{ session.area }}</span>
+                    <ion-icon 
+                      name="book" 
+                      [style.color]="session.area && session.area.toLowerCase().includes('civil') ? '#FF6F00' : '#3b82f6'">
+                    </ion-icon>
+                    <span [style.color]="session.area && session.area.toLowerCase().includes('civil') ? '#FF6F00' : '#3b82f6'">
+                      {{ session.area && session.area.toLowerCase().includes('civil') ? 'Derecho Civil' : 'Derecho Procesal' }}
+                    </span>
+                  </div>    
+                  <div class="session-time">{{ formatDate(session.date) }}</div>
                 </div>
-                <div class="session-time">{{ formatDate(session.date) }}</div>
-              </div>
 
               <div class="session-stats">
                 <div class="stat-item">
@@ -67,7 +72,7 @@
               <div class="session-footer">
                 <div 
                   class="success-rate"
-                  [style.color]="getSuccessRateColor(session.successRate)">
+                  [style.color]="session.area && session.area.toLowerCase().includes('civil') ? '#FF6F00' : '#3b82f6'">
                   {{ session.successRate }}% aciertos
                 </div>
                 <ion-icon 

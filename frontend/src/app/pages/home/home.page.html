@@ -2,13 +2,17 @@
   <div class="home-container">
 
   <div class="scrollable-content">
-  <!-- HERO centrado -->
+<!-- HERO con avatar a la izquierda -->
   <div class="hero-header">
-    <button class="avatar-wrap xl" (click)="goToProfile()" aria-label="Perfil">
+    <button class="avatar-wrap" (click)="goToProfile()" aria-label="Perfil">
       <img [src]="userAvatarUrl || defaultAvatar" alt="avatar" />
     </button>
-    <div class="hello-text">Hola,</div>
-    <h1 class="hero-name">{{ getFirstName() }}</h1>
+    <div class="user-info">
+      <h1 class="hero-greeting">
+        <span class="hello-text">Hola,</span>
+        <span class="hero-name">{{ getFirstName() }}</span>
+      </h1>
+    </div>
   </div>
 
   <!-- 🔥 TARJETA DE RACHA GRANDE -->
@@ -46,7 +50,7 @@
 
       <!-- Elige qué quieres aprender hoy -->
       <div class="continue-section">
-        <h2 class="section-title">Elige qué quieres aprender hoy</h2>
+      <h2 class="section-title-large">Elige qué quieres aprender hoy</h2>
         <div class="area-cards">
           <div class="area-card civil" (click)="goToCivil()">
             <div class="area-icon">
