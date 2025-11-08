@@ -17,7 +17,7 @@ import { environment } from 'src/environments/environment';
 export class HomePage implements OnInit {
 
 
-  defaultAvatar = 'assets/image/msombra.png';
+  defaultAvatar = 'assets/avatars/racoon1.svg';
   userAvatarUrl = this.defaultAvatar;
 
   userName: string = 'Estudiante';
