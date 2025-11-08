@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+
 // ========================================
 // INTERFACES 
 // ========================================
@@ -203,6 +204,40 @@ export class ApiService {
       })
     );
 }
+
+// ✅ Correcto (sin el segundo "api")
+updateUserAvatar(userId: number, payload: { avatarId: number | null; avatarUrl: string | null }) {
+  return this.http.put<any>(`${this.API_URL}/study/users/${userId}/avatar`, payload);
+}
+uploadProfilePhoto(userId: number, formData: FormData) {
+  return this.http.post<any>(`${this.API_URL}/study/users/${userId}/avatar/upload`, formData);
+}
+getUserProfile(userId: number) {
+  return this.http.get<any>(`${this.API_URL}/study/users/${userId}/profile`);
+}
+
+private getFilesBase(): string {
+  return this.API_URL.replace(/\/api\/?$/, '');
+}
+
+// Convierte rutas relativas del backend a absolutas con el host del API
+public toAbsoluteFileUrl(url?: string): string {
+  if (!url) return '';
+  // si ya es absoluta o data/blob, la dejo igual
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+
+  // base: quita el sufijo /api de environment.apiUrl
+  const base = environment.apiUrl.replace(/\/api\/?$/, '');
+
+  // si viene como "/avatars/xxxxx.png" -> pega el host del API delante
+  if (url.startsWith('/')) return `${base}${url}`;
+
+  // para "assets/..." u otras rutas relativas, lo dejo tal cual (sirve para assets locales)
+  return url;
+}
+
+
+
   logout(): void {
     localStorage.removeItem('currentUser');
     this.clearCurrentSession();

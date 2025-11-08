@@ -1,24 +1,29 @@
 <ion-content [fullscreen]="true" class="home-content">
   <div class="home-container">
 
-    <div class="dashboard-header">
-      <h1 class="header-title">Hola, {{ getFirstName() }}</h1>
-    </div>
+  <div class="scrollable-content">
+  <!-- HERO centrado -->
+  <div class="hero-header">
+    <button class="avatar-wrap xl" (click)="goToProfile()" aria-label="Perfil">
+      <img [src]="userAvatarUrl || defaultAvatar" alt="avatar" />
+    </button>
+    <div class="hello-text">Hola,</div>
+    <h1 class="hero-name">{{ getFirstName() }}</h1>
+  </div>
 
-    <div class="scrollable-content">
-      
-    <!-- 🔥 TARJETA DE RACHA GRANDE -->
-    <div class="streak-main-section">
-      <div class="streak-main-card" (click)="goToRacha()">
-        <div class="streak-header">
-          <h3 class="streak-title">Tu Racha</h3>
-          <div class="streak-icon-number">
-            <ion-icon name="flame" class="flame-icon-green"></ion-icon>
-            <span class="streak-number">{{ userStreak }}</span>
-          </div>
+  <!-- 🔥 TARJETA DE RACHA GRANDE -->
+  <div class="streak-main-section">
+    <div class="streak-main-card" (click)="goToRacha()">
+      <div class="streak-header">
+        <h3 class="streak-title">Tu Racha</h3>
+        <div class="streak-icon-number">
+          <ion-icon name="flame" class="flame-icon-green"></ion-icon>
+          <span class="streak-number">{{ userStreak }}</span>
         </div>
       </div>
     </div>
+  </div>
+
 
       <!-- 📊 ESTADÍSTICAS RÁPIDAS -->
       <div class="quick-stats-section">

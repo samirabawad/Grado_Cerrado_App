@@ -4,6 +4,8 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
+import { environment } from 'src/environments/environment';
+
 
 @Component({
   selector: 'app-home',
@@ -13,6 +15,10 @@ import { ApiService } from '../../services/api.service';
   imports: [IonicModule, CommonModule, BottomNavComponent]
 })
 export class HomePage implements OnInit {
+
+
+  defaultAvatar = 'assets/image/msombra.png';
+  userAvatarUrl = this.defaultAvatar;
 
   userName: string = 'Estudiante';
   userCoins: number = 0;
@@ -31,7 +37,33 @@ export class HomePage implements OnInit {
 
   async ngOnInit() {
     this.loadUserData();
+    this.loadUserAvatar();
+
   }
+
+  private loadUserAvatar() {
+    // ⬇️ usar apiService (no existe this.api)
+    const current = this.apiService.getCurrentUser();
+    const raw = current?.avatarUrl || current?.avatar || '';
+    const resolved = this.buildAvatarUrl(raw);
+    this.userAvatarUrl = resolved || this.defaultAvatar;
+  }
+
+
+  // Convierte '/avatars/...' a 'http://host:puerto/avatars/...'
+  private buildAvatarUrl(url?: string): string {
+    if (!url) return '';
+    if (url.startsWith('/avatars/')) {
+      const filesBase = environment.apiUrl.replace(/\/api\/?$/, '');
+      return `${filesBase}${url}`;
+    }
+    return url;
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
+  }
+
 
   ionViewWillEnter() {
     this.loadUserData();

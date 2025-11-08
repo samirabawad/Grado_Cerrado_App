@@ -19,6 +19,9 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
   @ViewChild('timeInput') timeInput!: ElementRef<HTMLInputElement>;
 
+  // ======== NUEVO: input para subir foto ========
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   // ============================================
   // PROPIEDADES DE USUARIO
   // ============================================
@@ -29,11 +32,25 @@ export class ProfilePage implements OnInit, AfterViewInit {
     email: 'usuario@example.com',
     nivel_actual: 'basico',
     fecha_registro: new Date(),
+    // avatar original que tenías
     avatar: 'assets/image/msombra.png',
+    // ======== NUEVO: url unificada para mostrar en UI ========
+    avatarUrl: '' as string,
     activo: true,
     verificado: false,
-    last_profile_update: null as string | null 
+    last_profile_update: null as string | null
   };
+
+
+// ======== NUEVO: configuración de avatares ========
+defaultAvatar = 'assets/image/msombra.png';
+raccoonAvatars: { id: number; url: string }[] = [
+  { id: 1, url: 'assets/avatars/racoon1.svg' },
+  { id: 2, url: 'assets/avatars/racoon2.svg' },
+];
+avatarPickerOpen = false;
+pendingAvatar: { id: number; url: string } | null = null;
+
 
   stats = {
     racha_dias_actual: 0,
@@ -75,21 +92,21 @@ export class ProfilePage implements OnInit, AfterViewInit {
   // ============================================
   // SECCIONES EXPANDIBLES
   // ============================================
-    expandedSections: { [key: string]: boolean } = {
-      personalInfo: false,
-      security: false,
-      adaptiveMode: false,
-      frequency: false,
-      weeklyGoal: false,
-      preferredDays: false,
-      reminders: false,
-      progress: false,
-      configuration: false,
-      account: false
-    };
+  expandedSections: { [key: string]: boolean } = {
+    personalInfo: false,
+    security: false,
+    adaptiveMode: false,
+    frequency: false,
+    weeklyGoal: false,
+    preferredDays: false,
+    reminders: false,
+    progress: false,
+    configuration: false,
+    account: false
+  };
   hasUnsavedChanges: boolean = false;
 
-    // ============================================
+  // ============================================
   // CONTRASEÑA – FORM
   // ============================================
   passwordForm = {
@@ -104,7 +121,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
     const { currentPassword, newPassword, confirmPassword } = this.passwordForm;
     return !!currentPassword && !!newPassword && newPassword.length >= 6 && newPassword === confirmPassword;
   }
-
 
   // ============================================
   // MODO ADAPTATIVO
@@ -125,61 +141,61 @@ export class ProfilePage implements OnInit, AfterViewInit {
     this.loadAllUserData();
     this.loadCorrectionConfig();
   }
-  
 
-  ngAfterViewInit() {
-  }
-  
+  ngAfterViewInit() {}
 
-// ============================================
-// CARGAR TODOS LOS DATOS
-// ============================================
-async loadAllUserData() {
-  this.isLoading = true;
+  // ============================================
+  // CARGAR TODOS LOS DATOS
+  // ============================================
+  async loadAllUserData() {
+    this.isLoading = true;
 
-  try {
-    const currentUser = this.apiService.getCurrentUser();
-    
-    if (!currentUser || !currentUser.id) {
-      console.warn('⚠️ No hay usuario logueado');
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+
+      if (!currentUser || !currentUser.id) {
+        console.warn('⚠️ No hay usuario logueado');
+        this.isLoading = false;
+        await this.router.navigate(['/login']);
+        return;
+      }
+
+      const studentId = currentUser.id;
+
+      // Usar los datos del usuario almacenados en localStorage
+      this.user.id = currentUser.id;
+      this.user.nombre = currentUser.name || 'Usuario';
+      this.user.nombreCompleto = currentUser.name || 'Usuario';
+      this.user.email = currentUser.email || 'usuario@example.com';
+
+      // ======== NUEVO: setear avatarUrl desde localStorage o default ========
+      this.user.avatarUrl = currentUser.avatarUrl || currentUser.avatar || this.user.avatar || this.defaultAvatar;
+
+      console.log('✅ Usuario cargado desde localStorage:', this.user);
+
+      await this.loadDashboardStats(studentId);
+      this.loadSettings();
+      this.loadStudyFrequency();
+      this.loadAdaptiveConfig();
+
+    } catch (error) {
+      console.error('❌ Error cargando datos del usuario:', error);
+      await this.showToast('Error al cargar los datos del perfil', 'danger');
+    } finally {
       this.isLoading = false;
-      await this.router.navigate(['/login']);
-      return;
     }
-
-    const studentId = currentUser.id;
-    
-    // Usar los datos del usuario almacenados en localStorage
-    this.user.id = currentUser.id;
-    this.user.nombre = currentUser.name || 'Usuario';
-    this.user.nombreCompleto = currentUser.name || 'Usuario';
-    this.user.email = currentUser.email || 'usuario@example.com';
-    
-    console.log('✅ Usuario cargado desde localStorage:', this.user);
-
-    await this.loadDashboardStats(studentId);
-    this.loadSettings();
-    this.loadStudyFrequency();
-    this.loadAdaptiveConfig();
-
-  } catch (error) {
-    console.error('❌ Error cargando datos del usuario:', error);
-    await this.showToast('Error al cargar los datos del perfil', 'danger');
-  } finally {
-    this.isLoading = false;
   }
-}
+
   // ============================================
   // CARGAR ESTADÍSTICAS DEL DASHBOARD
   // ============================================
-  
   async loadDashboardStats(studentId: number) {
     try {
       const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
-      
+
       if (statsResponse && statsResponse.success) {
         const data = statsResponse.data;
-        
+
         this.stats.total_tests = data.totalTests || 0;
         this.stats.total_preguntas = data.totalQuestions || 0;
         this.stats.promedio_aciertos = Math.round(data.successRate || 0);
@@ -197,7 +213,6 @@ async loadAllUserData() {
   // ============================================
   // MÉTODOS DE FRECUENCIA
   // ============================================
-
   increaseFrequency() {
     if (this.frecuenciaConfig.frecuenciaSemanal < 7) {
       this.frecuenciaConfig.frecuenciaSemanal++;
@@ -282,7 +297,7 @@ async loadAllUserData() {
         next: (response) => {
           if (response && response.success && response.data) {
             const objetivoDias = response.data.objetivoDias;
-            
+
             this.frecuenciaConfig = {
               frecuenciaSemanal: response.data.frecuenciaSemanal || 3,
               objetivoDias: (objetivoDias === 'flexible' || objetivoDias === 'estricto' || objetivoDias === 'personalizado') 
@@ -309,11 +324,9 @@ async loadAllUserData() {
     }
   }
 
-
   // ============================================
   // MODO ADAPTATIVO
   // ============================================
-
   async loadAdaptiveConfig() {
     this.isLoadingAdaptive = true;
 
@@ -322,7 +335,7 @@ async loadAllUserData() {
       if (!currentUser || !currentUser.id) return;
 
       const response = await this.apiService.getAdaptiveModeConfig(currentUser.id).toPromise();
-      
+
       if (response && response.success && response.data) {
         this.adaptiveModeEnabled = response.data.adaptiveModeEnabled || false;
         this.adaptiveConfig.enabled = this.adaptiveModeEnabled;
@@ -373,7 +386,6 @@ async loadAllUserData() {
   // ============================================
   // CONFIGURACIÓN
   // ============================================
-
   loadSettings() {
     const saved = localStorage.getItem('appSettings');
     if (saved) {
@@ -396,7 +408,6 @@ async loadAllUserData() {
   // ============================================
   // SECCIONES
   // ============================================
-
   toggleSection(section: string) {
     this.expandedSections[section] = !this.expandedSections[section];
   }
@@ -408,7 +419,6 @@ async loadAllUserData() {
   // ============================================
   // UTILIDADES
   // ============================================
-
   getNivelFormatted(): string {
     const niveles: { [key: string]: string } = {
       'basico': 'Básico',
@@ -428,27 +438,27 @@ async loadAllUserData() {
 
   canEditProfile(): boolean {
     if (!this.user.last_profile_update) return true;
-    
+
     const lastUpdate = new Date(this.user.last_profile_update);
     const now = new Date();
     const daysSinceUpdate = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     return daysSinceUpdate >= 30;
   }
 
   getDaysUntilCanEdit(): number {
     if (!this.user.last_profile_update) return 0;
-    
+
     const lastUpdate = new Date(this.user.last_profile_update);
     const now = new Date();
     const daysSinceUpdate = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     return Math.max(0, 30 - daysSinceUpdate);
   }
 
   getLastUpdateFormatted(): string {
     if (!this.user.last_profile_update) return 'Nunca';
-    
+
     const lastUpdate = new Date(this.user.last_profile_update);
     return lastUpdate.toLocaleDateString('es-ES', { 
       day: 'numeric', 
@@ -457,101 +467,100 @@ async loadAllUserData() {
     });
   }
 
-async editName() {
-  const alert = await this.alertController.create({
-    header: 'Editar Nombre',
-    message: 'Ingresa tu nombre completo',
-    inputs: [
-      {
-        name: 'nombre',
-        type: 'text',
-        placeholder: 'Nombre *',
-        value: this.user.nombre,
-        attributes: {
-          required: true
-        }
-      },
-      {
-        name: 'segundoNombre',
-        type: 'text',
-        placeholder: 'Segundo nombre (opcional)',
-        value: ''
-      },
-      {
-        name: 'apellidoPaterno',
-        type: 'text',
-        placeholder: 'Apellido paterno *',
-        value: '',
-        attributes: {
-          required: true
-        }
-      },
-      {
-        name: 'apellidoMaterno',
-        type: 'text',
-        placeholder: 'Apellido materno (opcional)',
-        value: ''
-      }
-    ],
-    buttons: [
-      {
-        text: 'Cancelar',
-        role: 'cancel'
-      },
-      {
-        text: 'Guardar',
-        handler: async (data) => {
-          if (!data.nombre || data.nombre.trim() === '') {
-            await this.showToast('El nombre es obligatorio', 'danger');
-            return false;
+  async editName() {
+    const alert = await this.alertController.create({
+      header: 'Editar Nombre',
+      message: 'Ingresa tu nombre completo',
+      inputs: [
+        {
+          name: 'nombre',
+          type: 'text',
+          placeholder: 'Nombre *',
+          value: this.user.nombre,
+          attributes: {
+            required: true
           }
-
-          if (!data.apellidoPaterno || data.apellidoPaterno.trim() === '') {
-            await this.showToast('El apellido paterno es obligatorio', 'danger');
-            return false;
+        },
+        {
+          name: 'segundoNombre',
+          type: 'text',
+          placeholder: 'Segundo nombre (opcional)',
+          value: ''
+        },
+        {
+          name: 'apellidoPaterno',
+          type: 'text',
+          placeholder: 'Apellido paterno *',
+          value: '',
+          attributes: {
+            required: true
           }
-
-          try {
-            const updates = {
-              nombre: data.nombre.trim(),
-              apellidoPaterno: data.apellidoPaterno.trim(),
-              segundoNombre: data.segundoNombre?.trim() || null,
-              apellidoMaterno: data.apellidoMaterno?.trim() || null
-            };
-
-            const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
-
-            if (response && response.success) {
-              // Actualizar datos locales
-              this.user.nombre = response.data.nombre;
-              this.user.nombreCompleto = response.data.nombreCompleto;
-              this.user.last_profile_update = response.data.fechaModificacion;
-
-              // Actualizar localStorage
-              const currentUser = this.apiService.getCurrentUser();
-              if (currentUser) {
-                currentUser.name = response.data.nombre;
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-              }
-
-              await this.showToast('✅ Perfil actualizado exitosamente', 'success');
+        },
+        {
+          name: 'apellidoMaterno',
+          type: 'text',
+          placeholder: 'Apellido materno (opcional)',
+          value: ''
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Guardar',
+          handler: async (data) => {
+            if (!data.nombre || data.nombre.trim() === '') {
+              await this.showToast('El nombre es obligatorio', 'danger');
+              return false;
             }
-          } catch (error: any) {
-            console.error('❌ Error actualizando nombre:', error);
-            await this.showToast(error.friendlyMessage || 'Error al actualizar el perfil', 'danger');
+
+            if (!data.apellidoPaterno || data.apellidoPaterno.trim() === '') {
+              await this.showToast('El apellido paterno es obligatorio', 'danger');
+              return false;
+            }
+
+            try {
+              const updates = {
+                nombre: data.nombre.trim(),
+                apellidoPaterno: data.apellidoPaterno.trim(),
+                segundoNombre: data.segundoNombre?.trim() || null,
+                apellidoMaterno: data.apellidoMaterno?.trim() || null
+              };
+
+              const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
+
+              if (response && response.success) {
+                // Actualizar datos locales
+                this.user.nombre = response.data.nombre;
+                this.user.nombreCompleto = response.data.nombreCompleto;
+                this.user.last_profile_update = response.data.fechaModificacion;
+
+                // Actualizar localStorage
+                const currentUser = this.apiService.getCurrentUser();
+                if (currentUser) {
+                  currentUser.name = response.data.nombre;
+                  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+
+                await this.showToast('✅ Perfil actualizado exitosamente', 'success');
+              }
+            } catch (error: any) {
+              console.error('❌ Error actualizando nombre:', error);
+              await this.showToast(error.friendlyMessage || 'Error al actualizar el perfil', 'danger');
+            }
+
+            return true;
           }
-
-          return true;
         }
-      }
-    ]
-  });
+      ]
+    });
 
-  await alert.present();
-}
+    await alert.present();
+  }
 
-
-async editEmail() {
+  async editEmail() {
     const alert = await this.alertController.create({
       header: 'Editar Email',
       message: 'Ingresa un email válido con dominio real (ejemplo: @gmail.com, @outlook.com)',
@@ -575,25 +584,21 @@ async editEmail() {
         {
           text: 'Guardar',
           handler: async (data) => {
-            // Validar que el email no esté vacío
             if (!data.email || data.email.trim() === '') {
               await this.showToast('El email es obligatorio', 'danger');
               return false;
             }
 
             const emailTrimmed = data.email.trim().toLowerCase();
-
-            // Validar formato básico de email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(emailTrimmed)) {
               await this.showToast('Formato de email inválido', 'danger');
               return false;
             }
 
-            // Validar que tenga un dominio conocido (opcional pero recomendado)
             const dominiosValidos = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'live.com', 'msn.com'];
             const dominio = emailTrimmed.split('@')[1];
-            
+
             if (!dominiosValidos.includes(dominio)) {
               const confirmar = confirm(`El dominio "${dominio}" no es común. ¿Estás seguro que es correcto?`);
               if (!confirmar) {
@@ -612,7 +617,6 @@ async editEmail() {
                 this.user.email = response.data.email;
                 this.user.last_profile_update = response.data.fechaModificacion;
 
-                // Actualizar el localStorage para que se refleje en home
                 const currentUser = this.apiService.getCurrentUser();
                 if (currentUser) {
                   currentUser.email = response.data.email;
@@ -632,11 +636,10 @@ async editEmail() {
       ]
     });
 
-
     await alert.present();
   }
 
-async changePassword() {
+  async changePassword() {
     const alert = await this.alertController.create({
       header: 'Cambiar Contraseña',
       message: 'Ingresa tu contraseña actual y la nueva contraseña',
@@ -678,19 +681,16 @@ async changePassword() {
         {
           text: 'Cambiar',
           handler: async (data) => {
-            // Validar que todos los campos estén completos
             if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
               await this.showToast('Todos los campos son obligatorios', 'danger');
               return false;
             }
 
-            // Validar longitud mínima
             if (data.newPassword.length < 6) {
               await this.showToast('La nueva contraseña debe tener al menos 6 caracteres', 'danger');
               return false;
             }
 
-            // Validar que las contraseñas coincidan
             if (data.newPassword !== data.confirmPassword) {
               await this.showToast('Las contraseñas no coinciden', 'danger');
               return false;
@@ -722,9 +722,6 @@ async changePassword() {
     await alert.present();
   }
 
-
-
-
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastController.create({
       message,
@@ -755,7 +752,7 @@ async changePassword() {
       ]
     });
 
-await alert.present();
+    await alert.present();
   }
 
   async deleteAccount() {
@@ -829,13 +826,11 @@ await alert.present();
   // ============================================
   // CONFIGURACIÓN DE CORRECCIÓN
   // ============================================
-  
   loadCorrectionConfig() {
     const saved = localStorage.getItem('correctionConfig');
     if (saved) {
       this.correctionConfig = JSON.parse(saved);
     } else {
-      // Por defecto: corrección inmediata
       this.correctionConfig = { immediate: true };
     }
     console.log('✅ Configuración de corrección cargada:', this.correctionConfig);
@@ -844,13 +839,101 @@ await alert.present();
   async onCorrectionModeChange() {
     try {
       localStorage.setItem('correctionConfig', JSON.stringify(this.correctionConfig));
-  
-      
       console.log('💾 Configuración de corrección guardada:', this.correctionConfig);
     } catch (error) {
       console.error('Error guardando configuración de corrección:', error);
       await this.showToast('❌ Error al guardar la configuración', 'danger');
     }
   }
+
   
+  // ============================================
+  // AVATAR / FOTO DE PERFIL
+  // ============================================
+  openAvatarPicker() { this.avatarPickerOpen = true; this.pendingAvatar = null; }
+  closeAvatarPicker() { this.avatarPickerOpen = false; this.pendingAvatar = null; }
+  selectAvatar(a: { id: number; url: string }) { this.pendingAvatar = a; }
+
+  async saveSelectedAvatar() {
+    if (!this.pendingAvatar) return;
+    try {
+      const current = this.apiService.getCurrentUser();
+      await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
+
+      // Refresca UI (el back mapeará id->url pública si aplica). Para assets locales, queda igual.
+      this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
+
+      // Sincroniza localStorage
+      current.avatarUrl = this.user.avatarUrl;
+      current.avatar = this.user.avatarUrl;
+      localStorage.setItem('currentUser', JSON.stringify(current));
+
+      await this.showToast('✅ Avatar actualizado', 'success');
+    } catch (e) {
+      console.error(e);
+      await this.showToast('No se pudo actualizar el avatar', 'danger');
+    } finally {
+      this.closeAvatarPicker();
+    }
+  }
+
+  triggerFile() {
+    if (this.fileInput?.nativeElement) this.fileInput.nativeElement.click();
+  }
+
+  async onFileSelected(ev: any) {
+    const file: File | undefined = ev?.target?.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      await this.showToast('La imagen excede 2MB', 'danger');
+      ev.target.value = '';
+      return;
+    }
+
+    try {
+      const current = this.apiService.getCurrentUser();
+
+      // Subir al backend
+      const form = new FormData();
+      form.append('file', file);
+      const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
+
+      // El back responde { data: { url: "/avatars/xxxxx.png" } }
+      const rawUrl = resp?.data?.url as string;
+      const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
+
+      // Refrescar UI / localStorage
+      this.user.avatarUrl = absoluteUrl;
+      current.avatarUrl = absoluteUrl;
+      current.avatar = absoluteUrl;
+      localStorage.setItem('currentUser', JSON.stringify(current));
+
+      await this.showToast('✅ Foto de perfil actualizada', 'success');
+    } catch (e) {
+      console.error(e);
+      await this.showToast('Error subiendo la imagen', 'danger');
+    } finally {
+      ev.target.value = '';
+    }
+  }
+
+  async removeAvatar() {
+    try {
+      const current = this.apiService.getCurrentUser();
+      await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
+
+      // Volver al default
+      this.user.avatarUrl = this.defaultAvatar;
+      current.avatarUrl = this.defaultAvatar;
+      current.avatar = this.defaultAvatar;
+      localStorage.setItem('currentUser', JSON.stringify(current));
+
+      await this.showToast('Avatar quitado', 'success');
+    } catch (e) {
+      console.error(e);
+      await this.showToast('No se pudo quitar el avatar', 'danger');
+    }
+  }
+
 }

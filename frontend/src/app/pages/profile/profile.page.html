@@ -5,8 +5,59 @@
     <h1 class="header-title">Mi Perfil</h1>
   </div>
 
-
   <div class="scrollable-content">
+
+    
+<!-- Card de Avatar (limpio y compacto) -->
+<ion-card class="avatar-card">
+  <ion-card-content class="avatar-card-content">
+    <div class="avatar-preview">
+      <img [src]="user.avatarUrl || defaultAvatar" alt="" />
+      <!-- FAB para subir foto -->
+      <button class="avatar-edit-fab" (click)="triggerFile()" aria-label="Subir foto">
+        <ion-icon name="camera"></ion-icon>
+      </button>
+    </div>
+
+    <div class="avatar-actions">
+      <button class="avatar-btn primary" (click)="openAvatarPicker()">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        Elegir avatar
+      </button>
+      <button class="avatar-btn" (click)="triggerFile()">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        Subir foto
+      </button>
+      <button class="avatar-btn danger" (click)="removeAvatar()" [disabled]="user.avatarUrl === defaultAvatar">
+        <ion-icon name="trash-outline"></ion-icon>
+        Quitar
+      </button>
+    </div>
+
+    <p class="avatar-hint">Formatos: JPG/PNG/SVG • Máx 2MB</p>
+  </ion-card-content>
+</ion-card>
+
+<!-- input de archivo -->
+<input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
+
+<!-- Picker de avatares -->
+<div class="avatar-picker" *ngIf="avatarPickerOpen">
+  <h3>Elige un avatar</h3>
+  <div class="avatar-grid">
+    <button class="avatar-opt"
+            *ngFor="let a of raccoonAvatars"
+            (click)="selectAvatar(a)"
+            [class.selected]="a.id === pendingAvatar?.id"
+            aria-label="Seleccionar avatar">
+      <img [src]="a.url" />
+    </button>
+  </div>
+  <div class="avatar-picker-actions">
+    <button class="avatar-btn" (click)="closeAvatarPicker()">Cancelar</button>
+    <button class="avatar-btn primary" (click)="saveSelectedAvatar()" [disabled]="!pendingAvatar">Usar avatar</button>
+  </div>
+</div>
 
     <div class="quick-stats">
       <div class="stat-box">
