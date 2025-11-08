@@ -91,11 +91,9 @@ export class RachaPage implements OnInit {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 100).toPromise();
         if (sessionsResponse && sessionsResponse.success && sessionsResponse.data) {
           sessionsResponse.data.forEach((session: any) => {
-            // ✅ CRÍTICO: Convertir fecha UTC a fecha local
-            const dateStr = this.convertToLocalDateKey(session.date);
+            const date = new Date(session.date);
+            const dateStr = this.formatDateKey(date);
             this.studiedDates.add(dateStr);
-            this.studiedDates.add(dateStr);
-            console.log('📅 Sesión procesada:', { original: session.date, local: dateStr });
           });
         }
 
@@ -110,28 +108,6 @@ export class RachaPage implements OnInit {
     } finally {
       this.isLoading = false;
     }
-  }
-
-
-// Convierte un ISO a clave de fecha local YYYY-MM-DD.
-// Si no trae zona (Z o ±hh:mm), lo tratamos como UTC.
-  convertToLocalDateKey(iso: string): string {
-    const s = iso.replace(' ', 'T'); // por si viene con espacio
-    const hasTZ = /Z|[+-]\d\d:\d\d$/.test(s);
-    const d = new Date(hasTZ ? s : (s + 'Z')); // <-- fuerza UTC si no especifica zona
-
-    const fmt = new Intl.DateTimeFormat(undefined, {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-    });
-
-    // "DD/MM/AAAA" o "MM/DD/YYYY" según locale; lo pasamos a YYYY-MM-DD
-    const [p1, p2, p3] = fmt.format(d).split(/[\/\-\.]/);
-    const isMonthFirst = new Date('2001-02-03').toLocaleDateString().startsWith('2');
-    const day = isMonthFirst ? p2 : p1;
-    const month = isMonthFirst ? p1 : p2;
-    const year = p3.length === 2 ? '20' + p3 : p3;
-    return `${year}-${month}-${day}`;
   }
 
 
