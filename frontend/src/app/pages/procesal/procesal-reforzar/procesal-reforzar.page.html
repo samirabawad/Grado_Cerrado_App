@@ -8,8 +8,8 @@
   <!-- Contenido principal -->
   <div class="content-area">
 
-<!-- ========================================
-         BANNER - MENSAJE CUANDO NO HAY DATOS
+    <!-- ========================================
+         RECOMENDACIÓN DE ESTUDIO (BANNER SIEMPRE VISIBLE)
          ======================================== -->
     <div class="recommendation-banner" *ngIf="!isLoading && getMainRecommendation()">
       <div class="banner-icon">
@@ -27,21 +27,16 @@
       </button>
     </div>
 
-    <!-- Mensaje cuando no hay datos -->
-    <div class="empty-state-banner" *ngIf="!isLoading && !getMainRecommendation() && weakTopics.length === 0">
-      <ion-icon name="document-text-outline"></ion-icon>
-      <h3>Comienza tu estudio en Procesal</h3>
-      <p>Realiza tests para ver tus estadísticas y recomendaciones aquí</p>
-    </div>
-
     <!-- ========================================
-         OTROS TEMAS A REFORZAR
+         PRINCIPALES TEMAS A REFORZAR
          ======================================== -->
     <div class="section">
-      <h2 class="section-title" (click)="toggleSection('weakTopics')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+      <h2 class="section-title"
+          (click)="toggleSection('weakTopics')"
+          style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
         <span style="display: flex; align-items: center; gap: 12px;">
           <ion-icon name="trending-down" style="font-size: 24px;"></ion-icon>
-          Otros Temas a Reforzar
+          Principales Temas a Reforzar
         </span>
         <ion-icon [name]="isSectionExpanded('weakTopics') ? 'chevron-up' : 'chevron-down'"></ion-icon>
       </h2>
@@ -56,10 +51,10 @@
 
         <!-- Lista de temas débiles -->
         <div *ngIf="!isLoading && weakTopics.length > 0" class="weak-topics-list-new">
-          <div *ngFor="let topic of weakTopics" 
-               class="topic-card-new" 
+          <div *ngFor="let topic of weakTopics"
+               class="topic-card-new"
                (click)="selectWeakTopic(topic)">
-            
+
             <!-- Indicador de prioridad (círculo izquierda) -->
             <div class="priority-indicator"
                  [class.priority-high]="topic.tasaError >= 70"
@@ -71,7 +66,9 @@
             <div class="topic-content-new">
               <div class="topic-main">
                 <h3 class="topic-title-new">{{ topic.nombre }}</h3>
-                <p class="topic-subtitle-new">{{ topic.totalErrores }} de {{ topic.totalIntentos }} incorrectas</p>
+                <p class="topic-subtitle-new">
+                  {{ topic.totalErrores }} de {{ topic.totalIntentos }} incorrectas
+                </p>
               </div>
 
               <div class="topic-right">
@@ -81,6 +78,7 @@
                      [class.badge-low]="topic.tasaError < 40">
                   {{ topic.tasaError.toFixed(0) }}%
                 </div>
+                <!-- si quieres puedes quitar esta flecha -->
                 <ion-icon name="chevron-forward" class="arrow-icon"></ion-icon>
               </div>
             </div>
@@ -96,11 +94,13 @@
       </div>
     </div>
 
-   <!-- ========================================
+    <!-- ========================================
          SESIONES RECIENTES
          ======================================== -->
     <div class="section">
-      <h2 class="section-title" (click)="toggleSection('recentSessions')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+      <h2 class="section-title"
+          (click)="toggleSection('recentSessions')"
+          style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
         <span style="display: flex; align-items: center; gap: 12px;">
           <ion-icon name="time" style="font-size: 24px;"></ion-icon>
           Sesiones Recientes
@@ -110,10 +110,10 @@
 
       <div *ngIf="isSectionExpanded('recentSessions')">
         <div *ngIf="!isLoading && recentSessions.length > 0" class="sessions-list-new">
-          <div *ngFor="let session of recentSessions" 
-               class="session-card-clean" 
+          <div *ngFor="let session of recentSessions"
+               class="session-card-clean"
                (click)="viewSession(session)">
-            
+
             <!-- Contenido principal -->
             <div class="session-info">
               <h3 class="session-title">Test General</h3>
@@ -121,7 +121,7 @@
               <p class="session-date">{{ session.date | date: 'dd/MM/yyyy HH:mm' }}</p>
             </div>
 
-            <!-- Badge azul igual que detalle-test -->
+            <!-- Badge naranja igual que detalle-test -->
             <div class="stat-badge">
               <ion-icon name="checkmark-circle"></ion-icon>
               <span>{{ session.correctAnswers || 0 }}/{{ session.totalQuestions || 0 }}</span>
@@ -140,12 +140,14 @@
       </div>
     </div>
 
-    
     <!-- ========================================
          TEST DE REFUERZO
          ======================================== -->
-    <div class="section test-section">
-      <h2 class="section-title" (click)="toggleSection('testSection')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+    <!-- ojo: id y nombre que usamos en TS -->
+    <div class="section test-section" id="test-section">
+      <h2 class="section-title"
+          (click)="toggleSection('testSection')"
+          style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
         <span style="display: flex; align-items: center; gap: 12px;">
           <ion-icon name="school" style="font-size: 24px;"></ion-icon>
           Test de Refuerzo
@@ -156,24 +158,24 @@
       <div *ngIf="isSectionExpanded('testSection')">
         <div class="test-config-card">
           
-      <!-- Cantidad de preguntas -->
-      <div class="config-section">
-        <h3>Cantidad de preguntas</h3>
-        <div class="quantity-chips">
-          <div class="chip" 
-              [class.selected]="selectedQuantity === 1" 
-              (click)="selectedQuantity = 1">1</div>
-          <div class="chip" 
-              [class.selected]="selectedQuantity === 5" 
-              (click)="selectedQuantity = 5">5</div>
-          <div class="chip" 
-              [class.selected]="selectedQuantity === 10" 
-              (click)="selectedQuantity = 10">10</div>
-          <div class="chip" 
-              [class.selected]="selectedQuantity === 15" 
-              (click)="selectedQuantity = 15">15</div>
-        </div>
-      </div>
+          <!-- Cantidad de preguntas -->
+          <div class="config-section">
+            <h3>Cantidad de preguntas</h3>
+            <div class="quantity-chips">
+              <div class="chip"
+                   [class.selected]="selectedQuantity === 1"
+                   (click)="selectedQuantity = 1">1</div>
+              <div class="chip"
+                   [class.selected]="selectedQuantity === 5"
+                   (click)="selectedQuantity = 5">5</div>
+              <div class="chip"
+                   [class.selected]="selectedQuantity === 10"
+                   (click)="selectedQuantity = 10">10</div>
+              <div class="chip"
+                   [class.selected]="selectedQuantity === 15"
+                   (click)="selectedQuantity = 15">15</div>
+            </div>
+          </div>
 
           <!-- Alcance del test -->
           <div class="config-section">
@@ -197,22 +199,23 @@
               Seleccionar tema/subtema
             </button>
 
-            <!-- Selector de temas (desplegable) -->
+            <!-- Selector de temas -->
             <div *ngIf="showThemeSelector" class="theme-selector">
-              <div *ngFor="let tema of temas" 
-                  class="tema-item" 
-                  [class.has-errors]="tema.hasErrors">
+              <div *ngFor="let tema of temas"
+                   class="tema-item"
+                   [class.has-errors]="tema.hasErrors">
+                
+                <!-- Header del tema -->
                 <div class="tema-header" (click)="toggleTema(tema.id)">
                   <div class="tema-info">
                     <span class="tema-name">
                       {{ tema.nombre }}
-                      <span *ngIf="tema.hasErrors" class="error-indicator">
-                        <ion-icon name="alert-circle"></ion-icon>
-                        {{ getErrorSubtemasCount(tema) }} para reforzar
-                      </span>
                     </span>
-                    <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
+                    <span class="tema-count">
+                      {{ tema.cantidadPreguntas }} preguntas
+                    </span>
                   </div>
+
                   <div class="tema-actions">
                     <!-- Botón de selección de tema -->
                     <button 
@@ -220,9 +223,14 @@
                       [class.selected]="scopeType === 'tema' && selectedTemaId === tema.id"
                       [class.has-errors]="tema.hasErrors"
                       (click)="onSelectTema(tema, $event)">
-                      <ion-icon *ngIf="tema.hasErrors" name="alert-circle-outline"></ion-icon>
+                      <ion-icon 
+                        *ngIf="tema.hasErrors" 
+                        name="alert-circle-outline" 
+                        class="btn-error-icon">
+                      </ion-icon>
                       {{ scopeType === 'tema' && selectedTemaId === tema.id ? 'Seleccionado' : 'Seleccionar' }}
                     </button>
+
                     <ion-icon 
                       [name]="expandedTema === tema.id ? 'chevron-up' : 'chevron-down'"
                       class="expand-icon">
@@ -233,24 +241,38 @@
                 <!-- Subtemas -->
                 <div *ngIf="expandedTema === tema.id" class="subtemas-list">
                   <div 
-                    *ngFor="let subtema of tema.subtemas" 
+                    *ngFor="let subtema of tema.subtemas"
                     class="subtema-item"
                     [class.has-errors]="subtema.hasErrors"
                     [class.selected]="scopeType === 'subtema' && selectedSubtemaId === subtema.id"
                     (click)="onSelectSubtema(subtema)">
+                    
                     <div class="subtema-content">
-                      <ion-icon *ngIf="subtema.hasErrors" name="alert-circle" class="error-icon"></ion-icon>
+                      <ion-icon 
+                        *ngIf="subtema.hasErrors" 
+                        name="alert-circle" 
+                        class="error-icon">
+                      </ion-icon>
                       <span>{{ subtema.nombre }}</span>
                     </div>
-                    <span class="subtema-count">{{ subtema.cantidadPreguntas }} preg.</span>
+
+                    <span class="subtema-count">
+                      {{ subtema.cantidadPreguntas }} preg.
+                    </span>
                   </div>
-                  
-                  <div *ngIf="getErrorSubtemasCount(tema) === 0" 
-                      class="no-errors-message">
-                    <ion-icon name="checkmark-circle"></ion-icon>
-                    Sin preguntas para reforzar
+
+                  <!-- Mensaje abajo -->
+                  <div class="no-errors-message">
+                    <ion-icon [name]="tema.hasErrors ? 'alert-circle' : 'checkmark-circle'"></ion-icon>
+                    <span *ngIf="tema.hasErrors">
+                      Tienes preguntas para reforzar en este tema
+                    </span>
+                    <span *ngIf="!tema.hasErrors">
+                      No tienes preguntas para reforzar en este tema
+                    </span>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -264,7 +286,7 @@
       </div>
     </div>
 
-  </div>
+  </div> <!-- /content-area -->
 
   <!-- Bottom Navigation -->
   <app-bottom-nav></app-bottom-nav>

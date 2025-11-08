@@ -105,156 +105,159 @@ export class CivilReforzarPage implements OnInit {
   // CARGA DE DATOS
   // =====================
 
-async loadData() {
-  this.isLoading = true;
+  async loadData() {
+    this.isLoading = true;
 
-  try {
-    // 1) Obtener usuario PRIMERO
-    const userStr = localStorage.getItem('currentUser');
-    if (!userStr) {
-      console.warn('⚠️ No hay usuario en sesión');
-      this.isLoading = false;
-      return;
-    }
-
-    const currentUser = JSON.parse(userStr);
-    const studentId = currentUser.id;
-
-    // 2) Temas débiles SOLO de Derecho Civil
     try {
-      const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
-      if (weakResponse && weakResponse.success) {
-        this.weakTopics = (weakResponse.data || []).filter((topic: any) => {
-          return topic.area && topic.area.toLowerCase().includes('civil');
-        });
-        
-        // Marcar temas y subtemas con errores
-        this.temasConErrores.clear();
-        this.subtemasConErrores.clear();
-
-        this.weakTopics.forEach(topic => {
-          if (topic.temaId) {
-            this.temasConErrores.add(topic.temaId);
-          }
-          if (topic.subtemaId) {
-            this.subtemasConErrores.add(topic.subtemaId);
-          }
-        });
-        
-        console.log('✅ Temas débiles de CIVIL:', this.weakTopics);
-        console.log('📍 Temas con errores:', Array.from(this.temasConErrores));
-        console.log('📍 Subtemas con errores:', Array.from(this.subtemasConErrores));
+      const currentUser = this.apiService.getCurrentUser();
+      
+      if (!currentUser || !currentUser.id) {
+        console.warn('No hay usuario logueado');
+        this.router.navigate(['/login']);
+        return;
       }
-    } catch (error) {
-      console.error('Error cargando temas débiles:', error);
-      this.weakTopics = [];
-    }
 
-    // 3) Sesiones recientes SOLO DE CIVIL
-    try {
-      const sessionsResponse = await this.apiService.getRecentSessions(studentId, 50).toPromise();
-      console.log('📦 Respuesta RAW del backend:', sessionsResponse);
+      const studentId = currentUser.id;
 
-      if (sessionsResponse && sessionsResponse.success) {
-        const raw = sessionsResponse.data || [];
+      // 1) Temas débiles SOLO de Derecho Civil
+      try {
+        const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
+        if (weakResponse && weakResponse.success) {
+          this.weakTopics = (weakResponse.data || []).filter((topic: any) => {
+            return topic.area && topic.area.toLowerCase().includes('civil');
+          });
+          
+          // Marcar temas y subtemas con errores
+          this.temasConErrores.clear();
+          this.subtemasConErrores.clear();
 
-        const soloCivil = raw.filter((s: any) => {
-          const areaName = (s.area || s.areaNombre || '').toLowerCase();
-          const areaId = s.areaId || s.area_id;
+          this.weakTopics.forEach(topic => {
+            if (topic.temaId) {
+              this.temasConErrores.add(topic.temaId);
+            }
+            // actualmente casi nunca viene subtemaId
+            if (topic.subtemaId) {
+              this.subtemasConErrores.add(topic.subtemaId);
+            }
+          });
+          
+          console.log('✅ Temas débiles de CIVIL:', this.weakTopics);
+          console.log('📍 Temas con errores:', Array.from(this.temasConErrores));
+          console.log('📍 Subtemas con errores:', Array.from(this.subtemasConErrores));
+        }
+      } catch (error) {
+        console.error('Error cargando temas débiles:', error);
+        this.weakTopics = [];
+      }
 
-          const isCivilByName = areaName.includes('civil');
-          const isCivilById = areaId === 1; // 1 = Civil en tu BD
+      // 2) Sesiones recientes (Civil si está marcado, si no todo)
+      try {
+        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
+        console.log('📦 Respuesta RAW del backend (civil reforzar):', sessionsResponse);
 
-          return isCivilByName || isCivilById;
-        });
+        if (sessionsResponse && sessionsResponse.success) {
+          const raw = sessionsResponse.data || [];
 
-        this.recentSessions = soloCivil
-          .slice(0, 5)
-          .map((s: any) => {
-            const totalPreg = s.totalQuestions ?? s.totalquestions ?? s.questions ?? s.numeroPreguntas ?? 0;
-            const correctas = s.correctAnswers ?? s.correct ?? s.correctas ?? s.totalCorrectas ?? 0;
+          const soloCivil = raw.filter((s: any) => {
+            const areaName = (s.area || s.areaNombre || '').toLowerCase();
+            const areaId = s.areaId || s.area_id;
 
-            return {
-              id: s.id ?? s.testId,
-              testId: s.testId ?? s.id,
-              date: s.date ?? s.fecha_test ?? s.fechaCreacion,
-              area: s.area || s.areaNombre || 'Derecho Civil',
-              durationSeconds: s.durationSeconds ?? s.duration ?? 0,
-              totalQuestions: totalPreg,
-              correctAnswers: correctas,
-              successRate: totalPreg > 0 ? Math.round((correctas / totalPreg) * 100) : 0
-            };
+            const isCivilByName = areaName.includes('civil');
+            const isCivilById = areaId === 1; // 1 = Civil en tu BD (ajusta si no)
+
+            return isCivilByName || isCivilById;
           });
 
-        console.log('✅ Sesiones de CIVIL mapeadas:', this.recentSessions);
-      }
-    } catch (error) {
-      console.error('Error cargando sesiones recientes:', error);
-      this.recentSessions = [];
-    }
+          const base = soloCivil.length > 0 ? soloCivil : raw;
 
-    // 4) Temas y subtemas de Derecho Civil
-    try {
-      const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
-      
-      if (statsResponse && statsResponse.success && statsResponse.data) {
-        const civilArea = statsResponse.data.find((item: any) => 
-          item.type === 'area' && item.area === 'Derecho Civil'
-        );
-        
-        if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
-          this.temas = civilArea.temas.map((tema: any) => {
-            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
-              const porcentaje = subtema.totalPreguntas > 0 
-                ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
-                : 0;
+          this.recentSessions = base
+            .slice(0, 5)
+            .map((s: any) => {
+              const totalPreg = s.totalQuestions ?? s.totalquestions ?? s.questions ?? s.numeroPreguntas ?? 0;
+              const correctas = s.correctAnswers ?? s.correct ?? s.correctas ?? s.totalCorrectas ?? 0;
+
               return {
-                id: subtema.subtemaId,
-                nombre: subtema.subtemaNombre,
-                totalPreguntas: subtema.totalPreguntas,
-                preguntasCorrectas: subtema.preguntasCorrectas,
-                porcentaje,
-                cantidadPreguntas: subtema.totalPreguntas,
-                hasErrors: this.subtemaHasErrors(subtema.subtemaId)
+                id: s.id ?? s.testId,
+                testId: s.testId ?? s.id,
+                date: s.date ?? s.fecha_test ?? s.fechaCreacion,
+                area: s.area || s.areaNombre || 'Derecho Civil',
+                durationSeconds: s.durationSeconds ?? s.duration ?? 0,
+                totalQuestions: totalPreg,
+                correctAnswers: correctas,
+                successRate: totalPreg > 0 ? Math.round((correctas / totalPreg) * 100) : 0
               };
             });
-            
-            const porcentajeTema = subtemasConPorcentaje.length > 0
-              ? Math.round(subtemasConPorcentaje.reduce((sum: number, s: any) => sum + s.porcentaje, 0) / subtemasConPorcentaje.length)
-              : 0;
-            
-            return {
-              id: tema.temaId,
-              nombre: tema.temaNombre,
-              totalPreguntas: tema.totalPreguntas,
-              preguntasCorrectas: tema.preguntasCorrectas,
-              porcentaje: porcentajeTema,
-              cantidadPreguntas: tema.totalPreguntas,
-              subtemas: subtemasConPorcentaje,
-              hasErrors: this.temaHasErrors(tema.temaId)
-            };
-          });
 
-          console.log('✅ Temas cargados desde estadísticas:', this.temas);
+          console.log('✅ Sesiones que se van a mostrar en Civil:', this.recentSessions);
+        }
+      } catch (error) {
+        console.error('Error cargando sesiones recientes:', error);
+        this.recentSessions = [];
+      }
+
+      // 3) Temas y subtemas de Derecho Civil
+      try {
+        const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+        
+        if (statsResponse && statsResponse.success && statsResponse.data) {
+          const civilArea = statsResponse.data.find((item: any) => 
+            item.type === 'area' && item.area === 'Derecho Civil'
+          );
+          
+          if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
+            this.temas = civilArea.temas.map((tema: any) => {
+              const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
+                const porcentaje = subtema.totalPreguntas > 0 
+                  ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
+                  : 0;
+                return {
+                  id: subtema.subtemaId,
+                  nombre: subtema.subtemaNombre,
+                  totalPreguntas: subtema.totalPreguntas,
+                  preguntasCorrectas: subtema.preguntasCorrectas,
+                  porcentaje,
+                  cantidadPreguntas: subtema.totalPreguntas,
+                  hasErrors: this.subtemaHasErrors(subtema.subtemaId)
+                };
+              });
+              
+              const porcentajeTema = subtemasConPorcentaje.length > 0
+                ? Math.round(subtemasConPorcentaje.reduce((sum: number, s: any) => sum + s.porcentaje, 0) / subtemasConPorcentaje.length)
+                : 0;
+              
+              return {
+                id: tema.temaId,
+                nombre: tema.temaNombre,
+                totalPreguntas: tema.totalPreguntas,
+                preguntasCorrectas: tema.preguntasCorrectas,
+                porcentaje: porcentajeTema,
+                cantidadPreguntas: tema.totalPreguntas,
+                subtemas: subtemasConPorcentaje,
+                hasErrors: this.temaHasErrors(tema.temaId)
+              };
+            });
+
+            console.log('✅ Temas cargados desde estadísticas:', this.temas);
+          } else {
+            console.log('⚠️ No hay estadísticas, cargando estructura de BD...');
+            await this.loadTemasFromDatabase();
+          }
         } else {
           console.log('⚠️ No hay estadísticas, cargando estructura de BD...');
           await this.loadTemasFromDatabase();
         }
-      } else {
-        console.log('⚠️ No hay estadísticas, cargando estructura de BD...');
+      } catch (error) {
+        console.error('Error cargando temas:', error);
         await this.loadTemasFromDatabase();
       }
-    } catch (error) {
-      console.error('Error cargando temas:', error);
-      await this.loadTemasFromDatabase();
-    }
 
-  } catch (error) {
-    console.error('Error general cargando datos:', error);
-  } finally {
-    this.isLoading = false;
+    } catch (error) {
+      console.error('Error general cargando datos:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
-}
+
   async loadTemasFromDatabase() {
     try {
       // 1 = Derecho Civil
@@ -314,19 +317,13 @@ async loadData() {
   // Cuando haces clic en un "tema débil"
   selectWeakTopic(topic: any) {
     console.log('🎯 Tema débil seleccionado:', topic);
-    
     this.selectedTemaId = topic.temaId;
+    this.selectedSubtemaId = null;
     this.scopeType = 'tema';
     this.showThemeSelector = true;
-    this.expandedTema = topic.temaId;
-    this.expandedSections['testSection'] = true;
-    
-    setTimeout(() => {
-      const testSection = document.querySelector('.test-section');
-      if (testSection) {
-        testSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+
+    // ir a la sección de Test
+    this.scrollToTestSection();
   }
 
   toggleTemaExpansion(temaId: number) {
@@ -415,10 +412,7 @@ async loadData() {
 
       const sessionData: any = {
         studentId: currentUser.id,
-        difficulty: "intermedio",
-        legalAreas: ["Derecho Civil"],
-        numberOfQuestions: this.selectedQuantity,
-        allowRepeatedQuestions: true
+        questionCount: this.selectedQuantity
       };
 
       if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
