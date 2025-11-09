@@ -542,7 +542,7 @@ async startTest() {
 }
 
   // =====================
-  // NAVEGACIÃ“N
+  // NAVEGACION
   // =====================
 
   goBack() {
@@ -620,42 +620,105 @@ async viewSession(session: any) {
     return correctAnswer?.text === option;
   }
 
+    // ✅ Validar si una cantidad está disponible
+    canSelectQuantity(quantity: number): boolean {
+      // Si no hay modo seleccionado, permitir todas las cantidades
+      if (!this.practiceMode) {
+        return true;
+      }
+  
+  const max = this.getMaxAvailableQuestions();
+  return quantity <= max;
+}
+  // ✅ Método para obtener el máximo de preguntas disponibles según el modo
+    getMaxAvailableQuestions(): number {
+      // Si no hay modo seleccionado, retornar 0
+      if (!this.practiceMode) {
+        return 0;
+      }
+      
+      if (this.practiceMode === 'mix') {
+        // Modo mixto: sumar TODOS los errores de todos los temas
+        return this.weakTopics.reduce((sum, topic) => sum + (topic.totalErrores || 0), 0);
+      } else if (this.practiceMode === 'tema' && this.selectedTemaId) {
+        // Modo tema específico: solo errores de ese tema
+        const tema = this.temas.find(t => t.id === this.selectedTemaId);
+        return tema ? (tema.totalErrores || 0) : 0;
+      }
+      
+      return 0;
+    }
+
   getOptionLetter(index: number): string {
     return String.fromCharCode(65 + index);
   }
 
+  // ✅ Actualizar selectQuantity para ajustar automáticamente
   selectQuantity(quantity: number) {
-    this.selectedQuantity = quantity;
+    const maxAvailable = this.getMaxAvailableQuestions();
+    
+    if (quantity <= maxAvailable) {
+      this.selectedQuantity = quantity;
+    } else {
+      // Ajustar a la cantidad máxima disponible
+      this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
+    }
   }
 
-  canSelectQuantity(quantity: number): boolean {
-    return true;
-  }
-
+  // ✅ Método para obtener errores disponibles (actualizado)
   getAvailableErrors(): number {
-    return this.weakTopics.reduce((sum, topic) => sum + (topic.totalErrores || 0), 0);
+    return this.getMaxAvailableQuestions();
   }
-
+  
+  // ✅ Actualizar selectPracticeMode para ajustar cantidad
   selectPracticeMode(mode: 'mix' | 'tema') {
     this.practiceMode = mode;
+    
     if (mode === 'mix') {
       this.selectedTemaId = null;
+      
+      // Ajustar cantidad si excede el nuevo límite
+      const maxAvailable = this.getMaxAvailableQuestions();
+      if (this.selectedQuantity > maxAvailable) {
+        this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
+      }
     }
   }
 
   getTemasWithErrors(): any[] {
     return this.temas.filter(t => t.hasErrors && t.totalErrores > 0);
   }
-
+  
+  // ✅ Actualizar selectTemaForPractice para ajustar cantidad
   selectTemaForPractice(tema: any) {
     this.selectedTemaId = tema.id;
+    
+    // Ajustar cantidad si excede el límite del tema
+    const maxAvailable = this.getMaxAvailableQuestions();
+    if (this.selectedQuantity > maxAvailable) {
+      this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
+    }
   }
 
+
+  // ✅ Actualizar canStartTest
   canStartTest(): boolean {
-    if (this.practiceMode === 'tema' && !this.selectedTemaId) return false;
-    return this.getAvailableErrors() > 0;
+    const maxAvailable = this.getMaxAvailableQuestions();
+    
+    if (maxAvailable === 0) {
+      return false; // No hay errores disponibles
+    }
+    
+    if (this.practiceMode === 'tema' && !this.selectedTemaId) {
+      return false; // Modo tema pero no hay tema seleccionado
+    }
+    
+    if (this.selectedQuantity > maxAvailable) {
+      return false; // Cantidad seleccionada excede disponible
+    }
+    
+    return true;
   }
-
   async startErrorPractice() {
     await this.startTest();
   }
