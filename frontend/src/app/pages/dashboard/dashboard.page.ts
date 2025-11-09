@@ -30,6 +30,7 @@ export class DashboardPage implements OnInit {
 
   chartData: any[] = [];
   areaStats: any[] = [];
+  allWeakTopics: any[] = [];
   
   
   isLoading: boolean = true;
@@ -82,20 +83,20 @@ export class DashboardPage implements OnInit {
           this.overallSuccessRate = Math.round(stats.successRate || 0);
           this.userStreak = stats.streak || 0;
           
-          console.log('Estadísticas cargadas:', stats);
+          console.log('EstadÃ­sticas cargadas:', stats);
         }
       } catch (error) {
-        console.error('Error cargando estadísticas:', error);
+        console.error('Error cargando estadÃ­sticas:', error);
       }
 
       try {
         const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();        
         if (areaResponse && areaResponse.success) {
-          console.log('Datos jerárquicos:', areaResponse.data);
+          console.log('Datos jerÃ¡rquicos:', areaResponse.data);
           
           this.areaStats = [];
           
-          // PRIMERO procesamos las áreas (Civil y Procesal)
+          // PRIMERO procesamos las Ã¡reas (Civil y Procesal)
           const areasNoGenerales: any[] = [];
           
           areaResponse.data.forEach((item: any) => {
@@ -164,7 +165,7 @@ export class DashboardPage implements OnInit {
             ? Math.round((civilArea.successRate + procesalArea.successRate) / 2)
             : 0;
 
-          // Agregar el área General CON EL PROMEDIO CALCULADO
+          // Agregar el Ã¡rea General CON EL PROMEDIO CALCULADO
           this.areaStats.push({
             area: 'General',
             sessions: 0,
@@ -176,13 +177,25 @@ export class DashboardPage implements OnInit {
             temas: []
           });
 
-          // Agregar las áreas no generales
+          // Agregar las Ã¡reas no generales
           this.areaStats = [...this.areaStats, ...areasNoGenerales];
           
-          console.log('Estadísticas procesadas:', this.areaStats);
+          console.log('EstadÃ­sticas procesadas:', this.areaStats);
         }
       } catch (error) {
-        console.error('Error cargando estadísticas por área:', error);
+        console.error('Error cargando estadÃ­sticas por Ã¡rea:', error);
+      }
+
+      // Cargar temas débiles desde el backend
+      try {
+        const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
+        if (weakResponse && weakResponse.success) {
+          this.allWeakTopics = weakResponse.data || [];
+          console.log('âœ… Temas dÃ©biles cargados:', this.allWeakTopics);
+        }
+      } catch (error) {
+        console.error('Error cargando temas dÃ©biles:', error);
+        this.allWeakTopics = [];
       }
 
       await this.generateChartData();
@@ -199,16 +212,16 @@ export class DashboardPage implements OnInit {
 
   getDefaultProcesalTemas(): any[] {
     const temasBase = [
-      { id: 1, nombre: 'Jurisdicción' },
-      { id: 2, nombre: 'Acción procesal' },
+      { id: 1, nombre: 'JurisdicciÃ³n' },
+      { id: 2, nombre: 'AcciÃ³n procesal' },
       { id: 3, nombre: 'Proceso' },
       { id: 4, nombre: 'Competencia' },
       { id: 5, nombre: 'Prueba' },
       { id: 6, nombre: 'Cosa juzgada' },
-      { id: 7, nombre: 'Organización judicial' },
+      { id: 7, nombre: 'OrganizaciÃ³n judicial' },
       { id: 8, nombre: 'Procedimientos' },
       { id: 9, nombre: 'Medidas cautelares e incidentes' },
-      { id: 10, nombre: 'Representación procesal' },
+      { id: 10, nombre: 'RepresentaciÃ³n procesal' },
       { id: 11, nombre: 'Recursos' }
     ];
 
@@ -221,14 +234,14 @@ export class DashboardPage implements OnInit {
       subtemas: [
         {
           subtemaId: tema.id * 100 + 1,
-          subtemaNombre: 'Conceptos básicos',
+          subtemaNombre: 'Conceptos bÃ¡sicos',
           totalPreguntas: 0,
           preguntasCorrectas: 0,
           porcentajeAcierto: 0
         },
         {
           subtemaId: tema.id * 100 + 2,
-          subtemaNombre: 'Aplicación práctica',
+          subtemaNombre: 'AplicaciÃ³n prÃ¡ctica',
           totalPreguntas: 0,
           preguntasCorrectas: 0,
           porcentajeAcierto: 0
@@ -338,7 +351,7 @@ export class DashboardPage implements OnInit {
         this.chartData = progressResponse.data;
       }
     } catch (error) {
-      console.error('Error generando datos del gráfico:', error);
+      console.error('Error generando datos del grÃ¡fico:', error);
       this.chartData = [];
     }
   }
@@ -422,7 +435,7 @@ async navigateMonth(direction: number) {
   }
 
   goToSession(sessionId: number) {
-    console.log('Navegando a sesión:', sessionId);
+    console.log('Navegando a sesiÃ³n:', sessionId);
   }
 
   startNewSession() {
@@ -436,12 +449,12 @@ async navigateMonth(direction: number) {
   getMaxValue(): number {
     if (this.chartData.length === 0) return 10;
     
-    // Si estamos en vista mensual, el máximo siempre es 100
+    // Si estamos en vista mensual, el mÃ¡ximo siempre es 100
     if (this.selectedTimeFrame === 'month') {
       return 100;
     }
     
-    // Si estamos en vista semanal, calculamos el máximo dinámicamente
+    // Si estamos en vista semanal, calculamos el mÃ¡ximo dinÃ¡micamente
     const maxCivil = Math.max(...this.chartData.map(d => d.civil || 0));
     const maxProcesal = Math.max(...this.chartData.map(d => d.procesal || 0));
     const maxTotal = Math.max(maxCivil, maxProcesal);
@@ -451,7 +464,7 @@ async navigateMonth(direction: number) {
   getBarHeight(value: number, type: 'civil' | 'procesal'): number {
   if (!value || value === 0) return 0;
   
-  // Encuentra el valor máximo en todo el chartData
+  // Encuentra el valor mÃ¡ximo en todo el chartData
   const maxValue = Math.max(
     ...this.chartData.map(day => Math.max(day.civil, day.procesal))
   );
@@ -459,7 +472,7 @@ async navigateMonth(direction: number) {
   // Si no hay datos, retorna 0
   if (maxValue === 0) return 0;
   
-  // Calcula el porcentaje basado en el máximo
+  // Calcula el porcentaje basado en el mÃ¡ximo
   // Multiplicamos por 100 para obtener porcentaje
   return (value / maxValue) * 100;
 }
@@ -511,7 +524,7 @@ async navigateMonth(direction: number) {
   }
 
   // ========================================
-  // MÉTODOS PARA SISTEMA DE LOGROS
+  // MÃ‰TODOS PARA SISTEMA DE LOGROS
   // ========================================
   
   // Obtener sesiones dentro del milestone actual (de 0 a 50)
@@ -519,18 +532,18 @@ async navigateMonth(direction: number) {
     return this.totalSessions % 50;
   }
 
-  // Obtener el siguiente milestone (múltiplo de 50)
+  // Obtener el siguiente milestone (mÃºltiplo de 50)
   getNextMilestone(): number {
     return Math.ceil((this.totalSessions + 1) / 50) * 50;
   }
 
-  // Obtener el nivel del logro actual (cuántos milestones de 50 has completado)
-  // Obtener el nivel del logro actual (cuántos logros has desbloqueado)
+  // Obtener el nivel del logro actual (cuÃ¡ntos milestones de 50 has completado)
+  // Obtener el nivel del logro actual (cuÃ¡ntos logros has desbloqueado)
   getCurrentAchievementLevel(): number {
-    // Si no has completado ningún logro, estás en nivel 0
+    // Si no has completado ningÃºn logro, estÃ¡s en nivel 0
     if (this.totalSessions < 50) return 0;
     
-    // Calcular cuántos logros de 50 tests has completado
+    // Calcular cuÃ¡ntos logros de 50 tests has completado
     return Math.floor(this.totalSessions / 50);
   }
 
@@ -559,9 +572,9 @@ async navigateMonth(direction: number) {
       'Prodigio',          // 650
       'Genio',             // 700
       'Leyenda',           // 750
-      'Titán',             // 800
-      'Campeón',           // 850
-      'Héroe',             // 900
+      'TitÃ¡n',             // 800
+      'CampeÃ³n',           // 850
+      'HÃ©roe',             // 900
       'Inmortal',          // 950
       'Supremo',           // 1000
       'Trascendental',     // 1050
@@ -580,15 +593,15 @@ async navigateMonth(direction: number) {
   }
 
   // ========================================
-// MÉTODO PARA GENERAR BADGES DINÁMICOS
+// MÃ‰TODO PARA GENERAR BADGES DINÃMICOS
 // ========================================
   getSessionBadges(): { completed: boolean }[] {
     const sessionsInMilestone = this.getSessionsInCurrentMilestone();
     const badges: { completed: boolean }[] = [];
     
-    // Siempre mostrar 10 círculos
+    // Siempre mostrar 10 cÃ­rculos
     const totalBadges = 10;
-    const testsPerBadge = 5; // Cada círculo representa 5 tests
+    const testsPerBadge = 5; // Cada cÃ­rculo representa 5 tests
     
     for (let i = 1; i <= totalBadges; i++) {
       badges.push({
@@ -599,11 +612,11 @@ async navigateMonth(direction: number) {
     return badges;
   }
 
-  // Obtener el ícono del logro actual
+  // Obtener el Ã­cono del logro actual
   getCurrentAchievementIcon(): string {
     const level = this.getCurrentAchievementLevel();
     
-    // Si no has completado ningún logro, mostrar un ícono de "en progreso"
+    // Si no has completado ningÃºn logro, mostrar un Ã­cono de "en progreso"
     if (level === 0) {
       return 'time-outline';
     }
@@ -624,9 +637,9 @@ async navigateMonth(direction: number) {
       'sparkles',        // 650 Prodigio
       'flash',           // 700 Genio
       'rocket',          // 750 Leyenda
-      'shield',          // 800 Titán
-      'flag',            // 850 Campeón
-      'star-half',       // 900 Héroe
+      'shield',          // 800 TitÃ¡n
+      'flag',            // 850 CampeÃ³n
+      'star-half',       // 900 HÃ©roe
       'infinite',        // 950 Inmortal
       'diamond',         // 1000 Supremo
       'prism',           // 1050 Trascendental
@@ -648,7 +661,7 @@ async navigateMonth(direction: number) {
   getCurrentAchievementColor(): string {
     const level = this.getCurrentAchievementLevel();
     
-    // Si no has completado ningún logro
+    // Si no has completado ningÃºn logro
     if (level === 0) {
       return '#9ca3af';
     }
@@ -665,7 +678,7 @@ async navigateMonth(direction: number) {
     return colors[level - 1] || '#10b981';
   }
 
-  // Navegar a página de logros
+  // Navegar a pÃ¡gina de logros
   navigateToAchievements() {
     this.router.navigate(['/logros']);
   }
@@ -675,25 +688,61 @@ async navigateMonth(direction: number) {
     const remaining = this.getNextMilestone() - this.totalSessions;
     
     if (this.totalSessions === 0) {
-      return '¡Empieza a aprender!';
+      return 'Â¡Empieza a aprender!';
     }
     
     if (remaining === 0) {
-      return '¡Logro desbloqueado! 🎉';
+      return 'Â¡Logro desbloqueado! ðŸŽ‰';
     }
     
     if (remaining <= 5) {
-      return `¡Solo ${remaining} para el logro!`;
+      return `Â¡Solo ${remaining} para el logro!`;
     }
     
     if (this.totalSessions >= 30) {
-      return '¡Vas excelente!';
+      return 'Â¡Vas excelente!';
     }
     
     if (this.totalSessions >= 10) {
-      return '¡Tú puedes más!';
+      return 'Â¡TÃº puedes mÃ¡s!';
     }
     
-    return '¡Sigue así!';
+    return 'Â¡Sigue asÃ­!';
+  }
+
+  // =====================
+  // PUNTOS DÃ‰BILES
+  // =====================
+
+  getTop3WeakTopicsCivil(): any[] {
+    if (!this.allWeakTopics || this.allWeakTopics.length === 0) return [];
+    
+    // Filtrar solo temas de Derecho Civil y tomar los primeros 3
+    const civilWeakTopics = this.allWeakTopics
+      .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('civil'))
+      .slice(0, 3);
+
+    return civilWeakTopics;
+  }
+
+  getTop3WeakTopicsProcesal(): any[] {
+    if (!this.allWeakTopics || this.allWeakTopics.length === 0) return [];
+    
+    // Filtrar solo temas de Derecho Procesal y tomar los primeros 3
+    const procesalWeakTopics = this.allWeakTopics
+      .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('procesal'))
+      .slice(0, 3);
+
+    return procesalWeakTopics;
+  }
+
+  goToReforzarWithTopic(area: 'civil' | 'procesal', topic: any) {
+    const route = area === 'civil' ? '/civil/civil-reforzar' : '/procesal/procesal-reforzar';
+    this.router.navigate([route], {
+      queryParams: { 
+        temaId: topic.temaId,
+        fromDashboard: 'true'
+      }
+    });
   }
 }

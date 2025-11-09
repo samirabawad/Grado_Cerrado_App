@@ -38,7 +38,7 @@
       <div 
         *ngFor="let option of getCurrentQuestionOptions(); let i = index"
         class="option-button"
-        [class.selected]="getOptionState(option) === 'selected'"        
+        [class.selected]="getOptionState(option) === 'selected'"
         [class.correct]="getOptionState(option) === 'correct'"
         [class.incorrect]="getOptionState(option) === 'incorrect'"
         [class.disabled]="!canSelectOption()"
@@ -54,6 +54,34 @@
           class="option-icon">
         </ion-icon>
       </div>
+    </div>
+
+    <!-- PANEL DE EVALUACIÓN (como test-oral) -->
+    <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
+      <div 
+        class="evaluation-header" 
+        [class.correct]="evaluationResult?.isCorrect" 
+        [class.incorrect]="!evaluationResult?.isCorrect">
+        <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+        <span>{{ evaluationResult?.isCorrect ? '¡Correcto!' : 'Incorrecto' }}</span>
+      </div>
+
+      <div class="evaluation-body">
+        <div class="eval-section">
+          <div class="eval-label">Tu respuesta:</div>
+          <div class="eval-text">{{ evaluationResult?.userAnswer }}</div>
+        </div>
+
+        <div class="eval-section">
+          <div class="eval-label">Explicación:</div>
+          <div class="eval-text explanation">{{ evaluationResult?.explanation }}</div>
+        </div>
+      </div>
+
+      <button class="close-eval-btn" (click)="closeEvaluation()">
+        <ion-icon name="close-circle"></ion-icon>
+        Cerrar
+      </button>
     </div>
 
     <!-- Botones de navegación -->
@@ -106,5 +134,4 @@
     <p>Error al cargar el test</p>
     <ion-button (click)="retryLoading()">Reintentar</ion-button>
   </div>
-
 </ion-content>

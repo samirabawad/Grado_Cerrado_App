@@ -21,7 +21,7 @@ ion-content.test-content {
   left: 0;
   right: 0;
   height: 60px;
-  background: #FF6F00;
+  background: #ff6f00;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -30,13 +30,13 @@ ion-content.test-content {
 
   .back-icon {
     font-size: 24px;
-    color: white;
+    color: #fff;
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: white;
+    color: #fff;
     font-size: 18px;
     font-weight: 600;
     margin: 0;
@@ -74,20 +74,22 @@ ion-content.test-content {
     border: 2px solid transparent;
 
     &.current {
-      background: #FF6F00;
-      border-color: #FF6F00;
+      background: #ff6f00;
+      border-color: #ff6f00;
       transform: scale(1.3);
       box-shadow: 0 0 8px rgba(255, 111, 0, 0.4);
     }
 
     &.completed {
-      background: #4CAF50;
-      border-color: #4CAF50;
+      background: #4caf50;
+      border-color: #4caf50;
     }
   }
 }
 
+// ========================================
 // CHIP DE CATEGORÍA Y CONTADOR
+// ========================================
 .category-row {
   display: flex;
   justify-content: space-between;
@@ -103,30 +105,7 @@ ion-content.test-content {
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 600;
-  color: #FF6F00;
-}
-
-.question-counter {
-  font-size: 14px;
-  font-weight: 600;
-  color: #666;
-}// CHIP DE CATEGORÍA Y CONTADOR
-.category-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.category-chip {
-  display: inline-block;
-  background: rgba(255, 111, 0, 0.1);
-  border: 1px solid rgba(255, 111, 0, 0.3);
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #FF6F00;
+  color: #ff6f00;
 }
 
 .question-counter {
@@ -139,7 +118,7 @@ ion-content.test-content {
 // TEXTO DE LA PREGUNTA
 // ========================================
 .question-text {
-  background: white;
+  background: #fff;
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 24px;
@@ -169,7 +148,7 @@ ion-content.test-content {
 }
 
 .option-button {
-  background: white;
+  background: #fff;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 16px;
@@ -192,30 +171,30 @@ ion-content.test-content {
 
   &.selected .option-letter {
     background: #64748b;
-    color: white;
+    color: #fff;
     box-shadow: 0 2px 6px rgba(100, 116, 139, 0.3);
   }
 
   &.correct {
-    border-color: #4CAF50;
+    border-color: #4caf50;
     background: rgba(76, 175, 80, 0.1);
     pointer-events: none;
   }
 
   &.correct .option-letter {
-    background: #4CAF50;
-    color: white;
+    background: #4caf50;
+    color: #fff;
   }
 
   &.incorrect {
-    border-color: #F44336;
+    border-color: #f44336;
     background: rgba(244, 67, 54, 0.1);
     pointer-events: none;
   }
 
   &.incorrect .option-letter {
-    background: #F44336;
-    color: white;
+    background: #f44336;
+    color: #fff;
   }
 
   &.disabled {
@@ -268,15 +247,15 @@ ion-content.test-content {
     --border-radius: 12px;
 
     &.primary {
-      --background: #FF6F00;
-      --background-activated: #E65100;
-      --color: white;
+      --background: #ff6f00;
+      --background-activated: #e65100;
+      --color: #fff;
     }
 
     &.finish {
-      --background: #4CAF50;
-      --background-activated: #388E3C;
-      --color: white;
+      --background: #4caf50;
+      --background-activated: #388e3c;
+      --color: #fff;
     }
   }
 }
@@ -323,7 +302,7 @@ ion-content.test-content {
   gap: 16px;
 
   ion-spinner {
-    --color: #FF6F00;
+    --color: #ff6f00;
     width: 48px;
     height: 48px;
   }
@@ -348,7 +327,7 @@ ion-content.test-content {
 
   ion-icon {
     font-size: 64px;
-    color: #F44336;
+    color: #f44336;
   }
 
   p {
@@ -358,18 +337,19 @@ ion-content.test-content {
   }
 
   ion-button {
-    --background: #FF6F00;
-    --background-activated: #E65100;
+    --background: #ff6f00;
+    --background-activated: #e65100;
   }
 }
 
 // ========================================
-// ✅ ESTILO DEL POP-UP DE EXPLICACIÓN
+// ✅ ESTILO DEL POP-UP DE EXPLICACIÓN (DEPRECATED)
 // ========================================
+/*
 :global(.explanation-alert) {
   --background: rgba(255, 111, 0, 0.95);
   --backdrop-opacity: 0.5;
-  
+
   .alert-wrapper {
     background: rgba(255, 111, 0, 0.95);
     backdrop-filter: blur(10px);
@@ -380,9 +360,9 @@ ion-content.test-content {
 
   .alert-head {
     padding: 20px 20px 16px 20px;
-    
+
     h2 {
-      color: white;
+      color: #fff;
       font-size: 20px;
       font-weight: 700;
       text-align: center;
@@ -391,7 +371,7 @@ ion-content.test-content {
 
   .alert-message {
     padding: 0 20px 20px 20px;
-    color: white;
+    color: #fff;
     font-size: 16px;
     line-height: 1.6;
     text-align: left;
@@ -401,10 +381,10 @@ ion-content.test-content {
 
   .alert-button-group {
     padding: 0 20px 20px 20px;
-    
+
     button {
-      background: white;
-      color: #FF6F00;
+      background: #fff;
+      color: #ff6f00;
       border-radius: 12px;
       font-weight: 700;
       font-size: 16px;
@@ -422,6 +402,7 @@ ion-content.test-content {
     }
   }
 }
+*/
 
 // ========================================
 // RESPONSIVE
@@ -437,5 +418,112 @@ ion-content.test-content {
 
   .option-button {
     padding: 14px;
+  }
+}
+
+// ========================================
+// PANEL DE EVALUACIÓN (como test-oral)
+// ========================================
+.evaluation-panel {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+
+  .evaluation-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+
+    &.correct {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+    }
+
+    &.incorrect {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+    }
+
+    ion-icon {
+      font-size: 28px;
+    }
+  }
+
+  .evaluation-body {
+    padding: 20px;
+  }
+
+  .eval-section {
+    margin-bottom: 20px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .eval-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .eval-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1e293b;
+    padding: 14px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    border-left: 4px solid #cbd5e1;
+
+    &.explanation {
+      background: #fffbeb;
+      border-left-color: #f59e0b;
+    }
+  }
+
+  .close-eval-btn {
+    width: 100%;
+    padding: 16px;
+    background: #ff6f00;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:active {
+      transform: scale(0.98);
+      background: #e65100;
+    }
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }

@@ -1,5 +1,5 @@
-<ion-content class="test-content">
-  <!-- ✅ HEADER IGUAL QUE CIVIL.PAGE -->
+<ion-content class="procesal-content">
+  <!-- ✅ HEADER IGUAL QUE PROCESAL.PAGE -->
   <div class="dashboard-header">
     <ion-icon name="chevron-back" class="back-icon" (click)="exitTest()"></ion-icon>
     <h1 class="header-title">Derecho Procesal</h1>
@@ -7,10 +7,10 @@
 
   <!-- Contenido principal -->
   <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
-    
+
     <!-- ✅ PUNTITOS DE PROGRESO -->
     <div class="progress-dots">
-      <div 
+      <div
         *ngFor="let q of questions; let i = index"
         class="dot"
         [class.completed]="i < currentQuestionIndex"
@@ -35,19 +35,19 @@
 
     <!-- Opciones de respuesta -->
     <div class="options-container">
-      <div 
+      <div
         *ngFor="let option of getCurrentQuestionOptions(); let i = index"
         class="option-button"
-        [class.selected]="getOptionState(option) === 'selected'"        
+        [class.selected]="getOptionState(option) === 'selected'"
         [class.correct]="getOptionState(option) === 'correct'"
         [class.incorrect]="getOptionState(option) === 'incorrect'"
         [class.disabled]="!canSelectOption()"
         (click)="selectAnswer(option)">
-        
+
         <div class="option-letter">{{ getOptionLetter(i) }}</div>
         <div class="option-text">{{ option }}</div>
 
-        <ion-icon 
+        <ion-icon
           *ngIf="shouldShowOptionIcon(option)"
           [name]="getOptionIcon(option)"
           [style.color]="getOptionIconColor(option)"
@@ -56,18 +56,43 @@
       </div>
     </div>
 
-    <!-- Botones de navegación -->
+    <!-- ✅ PANEL DE EVALUACIÓN (como test-oral) -->
+    <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
+      <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
+        <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+        <span>{{ evaluationResult?.isCorrect ? '¡Correcto!' : 'Incorrecto' }}</span>
+      </div>
+
+      <div class="evaluation-body">
+        <div class="eval-section">
+          <div class="eval-label">Tu respuesta:</div>
+          <div class="eval-text">{{ evaluationResult?.userAnswer }}</div>
+        </div>
+
+        <div class="eval-section">
+          <div class="eval-label">Explicación:</div>
+          <div class="eval-text explanation">{{ evaluationResult?.explanation }}</div>
+        </div>
+      </div>
+
+      <button class="close-eval-btn" (click)="closeEvaluation()">
+        <ion-icon name="close-circle"></ion-icon>
+        Cerrar
+      </button>
+    </div>
+
+    <!-- ✅ Botones de navegación -->
     <div class="navigation-buttons">
-      <ion-button 
+      <ion-button
         *ngIf="currentQuestionIndex > 0"
-        fill="outline" 
+        fill="outline"
         (click)="previousQuestion()"
         class="nav-btn">
         <ion-icon name="chevron-back" slot="start"></ion-icon>
         Anterior
       </ion-button>
 
-      <ion-button 
+      <ion-button
         *ngIf="currentQuestionIndex < totalQuestions - 1"
         (click)="nextQuestion()"
         class="nav-btn primary">
@@ -75,7 +100,7 @@
         <ion-icon name="chevron-forward" slot="end"></ion-icon>
       </ion-button>
 
-      <ion-button 
+      <ion-button
         *ngIf="currentQuestionIndex === totalQuestions - 1"
         (click)="finishTest()"
         class="nav-btn finish">
@@ -91,7 +116,6 @@
         Abandonar test
       </button>
     </div>
-
   </div>
 
   <!-- Loading state -->
@@ -106,5 +130,4 @@
     <p>Error al cargar el test</p>
     <ion-button (click)="retryLoading()">Reintentar</ion-button>
   </div>
-
 </ion-content>

@@ -26,7 +26,8 @@
     margin-right: 12px;
   }
 
-  .header-title {color: rgb(0, 0, 0);
+  .header-title {
+    color: rgb(0, 0, 0);
     font-size: 18px;
     font-weight: 600;
     margin: 0;
@@ -244,7 +245,6 @@
     transform: scale(0.98);
   }
 
-  // Logro actual
   .current-achievement {
     display: flex;
     align-items: center;
@@ -324,68 +324,66 @@
     }
   }
 
-  // Circulitos de progreso (10 círculos)
-.sessions-progress-section {
-  .progress-explanation {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    background: #f0fdf4;
-    border-radius: 12px;
-    margin-bottom: 16px;
+  .sessions-progress-section {
+    .progress-explanation {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: #f0fdf4;
+      border-radius: 12px;
+      margin-bottom: 16px;
 
-    ion-icon {
-      font-size: 20px;
-      color: #10b981;
-      flex-shrink: 0;
+      ion-icon {
+        font-size: 20px;
+        color: #10b981;
+        flex-shrink: 0;
+      }
+
+      p {
+        margin: 0;
+        font-size: 13px;
+        color: #065f46;
+        font-weight: 500;
+      }
     }
 
-    p {
-      margin: 0;
+    .sessions-badges {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 12px;
+
+      .session-badge {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        ion-icon {
+          font-size: 28px;
+        }
+
+        &.completed ion-icon {
+          color: #10b981;
+        }
+
+        &.pending ion-icon {
+          color: #cbd5e1;
+        }
+      }
+    }
+
+    .progress-detail {
+      text-align: center;
+      margin: 8px 0 0 0;
       font-size: 13px;
-      color: #065f46;
+      color: #64748b;
       font-weight: 500;
     }
   }
 
-  .sessions-badges {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    margin-bottom: 12px;
-
-    .session-badge {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      ion-icon {
-        font-size: 28px;
-      }
-
-      &.completed ion-icon {
-        color: #10b981;
-      }
-
-      &.pending ion-icon {
-        color: #cbd5e1;
-      }
-    }
-  }
-
-  .progress-detail {
-    text-align: center;
-    margin: 8px 0 0 0;
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 500;
-  }
-}
-
-  // Mensaje motivacional debajo de los círculos
   .sessions-message-bottom {
     text-align: center;
     margin: 8px 0 0 0;
@@ -447,89 +445,89 @@
     }
   }
 
-.month-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 0 10px;
-  min-height: 36px; // Altura mínima para reservar el espacio
-  transition: opacity 0.3s ease; // Transición suave
-
-  &.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none; // Evita que se pueda hacer clic cuando está oculto
-  }
-
-  .nav-arrow {
-    background: transparent;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    width: 36px;
-    height: 36px;
+  .month-navigation {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
+    margin-bottom: 15px;
+    padding: 0 10px;
+    min-height: 36px;
+    transition: opacity 0.3s ease;
 
-    ion-icon {
-      font-size: 20px;
-      color: #64748b;
+    &.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    &:hover:not(:disabled) {
-      border-color: #10b981;
-      background: #f0fdf4;
+    .nav-arrow {
+      background: transparent;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
 
       ion-icon {
-        color: #10b981;
+        font-size: 20px;
+        color: #64748b;
+      }
+
+      &:hover:not(:disabled) {
+        border-color: #10b981;
+        background: #f0fdf4;
+
+        ion-icon {
+          color: #10b981;
+        }
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
       }
     }
 
-    &:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
+    .month-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      text-align: center;
+      flex: 1;
     }
   }
 
-.month-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  text-align: center;
-  flex: 1; 
-}
-}
-
-.chart-legend {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 25px; // Cambia de 15px a 25px o más
-  justify-content: center;
-
-  .legend-item {
+  .chart-legend {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #64748b;
+    gap: 15px;
+    margin-bottom: 25px;
+    justify-content: center;
 
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #64748b;
 
-      &.civil {
-        background: linear-gradient(180deg, #fb923c, #f97316);
-      }
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
 
-      &.procesal {
-        background: linear-gradient(180deg, #60a5fa, #3b82f6);
+        &.civil {
+          background: linear-gradient(180deg, #fb923c, #f97316);
+        }
+
+        &.procesal {
+          background: linear-gradient(180deg, #60a5fa, #3b82f6);
+        }
       }
     }
-  }
   }
 
   .chart-area {
@@ -610,6 +608,172 @@
 }
 
 // ========================================
+// PUNTOS MÁS DÉBILES
+// ========================================
+.weak-points-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 0 0 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .section-title-weak {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 20px 0;
+
+    ion-icon {
+      font-size: 24px;
+      color: #ef4444;
+    }
+  }
+
+  .weak-area-container {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .weak-area-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+
+      ion-icon {
+        font-size: 20px;
+      }
+
+      &.civil {
+        color: #f97316;
+      }
+
+      &.procesal {
+        color: #3b82f6;
+      }
+    }
+
+    .weak-topics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .weak-topic-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+
+      &.civil {
+        background: #fff7ed;
+        border-color: #fed7aa;
+
+        &:active {
+          background: #ffedd5;
+          transform: scale(0.98);
+        }
+      }
+
+      &.procesal {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+
+        &:active {
+          background: #dbeafe;
+          transform: scale(0.98);
+        }
+      }
+
+      .weak-topic-rank {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: #64748b;
+        flex-shrink: 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .weak-topic-content {
+        flex: 1;
+
+        .weak-topic-name {
+          margin: 0 0 4px 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: #1e293b;
+        }
+
+        .weak-topic-stats {
+          margin: 0;
+          font-size: 13px;
+          color: #64748b;
+        }
+      }
+
+      .weak-topic-badge {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        flex-shrink: 0;
+
+        &.civil {
+          background: #f97316;
+          color: white;
+        }
+
+        &.procesal {
+          background: #3b82f6;
+          color: white;
+        }
+      }
+
+      .weak-topic-arrow {
+        font-size: 20px;
+        color: #94a3b8;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .no-weak-points {
+    text-align: center;
+    padding: 40px 20px;
+
+    ion-icon {
+      font-size: 64px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      color: #64748b;
+      font-weight: 500;
+    }
+  }
+}
+
+// ========================================
 // ESTADÍSTICAS POR ÁREA
 // ========================================
 .area-stats-container {
@@ -658,31 +822,30 @@
         margin-bottom: 16px;
         user-select: none;
 
-      .area-left-duo {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;
-        min-width: 0;
+        .area-left-duo {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+          min-width: 0;
 
-        .area-emoji {
-                  font-size: 48px;
-                  width: 64px;
-                  height: 64px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  border-radius: 50%;
-                  background: rgba(0, 0, 0, 0.03);
-                  flex-shrink: 0;
+          .area-emoji {
+            font-size: 48px;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.03);
+            flex-shrink: 0;
 
-                  img {
-                    width: 48px;
-                    height: 48px;
-                    object-fit: contain;
-                  }
-                }
-
+            img {
+              width: 48px;
+              height: 48px;
+              object-fit: contain;
+            }
+          }
 
           .area-title-info {
             flex: 1;
@@ -984,7 +1147,6 @@
   height: 100px;
 }
 
-// Colores de iconos por área - círculo con fondo de color
 .area-card-duolingo[data-area="Derecho Civil"] .area-emoji {
   background: #f97316 !important;
   
@@ -1005,12 +1167,10 @@
 // RESPONSIVE - PANTALLAS PEQUEÑAS
 // ========================================
 @media (max-width: 380px) {
-  // Ajustar padding general
   .scrollable-content {
     padding: 0 12px 100px 12px;
   }
 
-  // Tarjeta general más compacta
   .general-card {
     padding: 16px !important;
 
@@ -1035,7 +1195,6 @@
     }
   }
 
-  // Logro actual más compacto
   .current-achievement {
     flex-direction: column !important;
     text-align: center !important;
@@ -1083,7 +1242,6 @@
     }
   }
 
-  // Círculos de sesiones más pequeños
   .sessions-badges {
     gap: 4px !important;
 
@@ -1097,12 +1255,10 @@
     }
   }
 
-  // Mensaje motivacional más pequeño
   .sessions-message-bottom {
     font-size: 28px !important;
   }
 
-  // Tarjetas de área más compactas
   .area-card-duolingo {
     padding: 16px !important;
 
@@ -1133,7 +1289,6 @@
       }
     }
 
-    // Temas más compactos
     .tema-card-duolingo {
       padding: 12px !important;
 
@@ -1153,7 +1308,6 @@
         }
       }
 
-      // Subtemas más compactos
       .subtema-item-duolingo {
         padding: 10px !important;
 
