@@ -74,14 +74,12 @@ export class ProcesalPage implements OnInit, OnDestroy {
         );
         
         if (procesalArea) {
-          // MISMO CÁLCULO QUE DASHBOARD
-          const temasConNuevoCalculo = procesalArea.temas.map((tema: any) => {
+          const temasConPorcentaje = procesalArea.temas.map((tema: any) => {
             const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
-              if (subtema.porcentajeAcierto !== undefined) {
-                return Math.round(subtema.porcentajeAcierto);
-              }
-              if (subtema.totalPreguntas === 0) return 0;
-              return Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100);
+              const porcentaje = subtema.totalPreguntas > 0 
+                ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
+                : 0;
+              return porcentaje;
             });
             
             const porcentajeTema = subtemasConPorcentaje.length > 0
@@ -91,8 +89,8 @@ export class ProcesalPage implements OnInit, OnDestroy {
             return porcentajeTema;
           });
           
-          const successRate = temasConNuevoCalculo.length > 0
-            ? Math.round(temasConNuevoCalculo.reduce((sum: number, p: number) => sum + p, 0) / temasConNuevoCalculo.length)
+          const successRate = temasConPorcentaje.length > 0
+            ? Math.round(temasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / temasConPorcentaje.length)
             : 0;
           
           this.procesalStats = {
@@ -104,21 +102,11 @@ export class ProcesalPage implements OnInit, OnDestroy {
           console.log('✅ Estadísticas de Derecho Procesal:', this.procesalStats);
         } else {
           console.log('⚠️ No se encontró Derecho Procesal');
-          this.procesalStats = {
-            area: 'Derecho Procesal',
-            successRate: 0,
-            temas: []
-          };
         }
       }
       
     } catch (error) {
       console.error('❌ Error cargando estadísticas de Procesal:', error);
-      this.procesalStats = {
-        area: 'Derecho Procesal',
-        successRate: 0,
-        temas: []
-      };
     } finally {
       this.isLoading = false;
     }
