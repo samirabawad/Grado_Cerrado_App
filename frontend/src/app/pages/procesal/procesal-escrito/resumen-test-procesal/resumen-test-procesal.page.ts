@@ -5,15 +5,34 @@ import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
 import { trigger, transition, style, animate } from '@angular/animations';
 
+// ----------------------
+// Tipos/Interfaces
+// ----------------------
+type QuestionType = 'verdadero_falso' | string | number;
+
+interface OptionObj {
+  text?: string;   // { text: '...' }
+  Text?: string;   // { Text: '...' }
+}
+
 interface QuestionResult {
   questionNumber: number;
   questionText: string;
-  userAnswer: string;
-  correctAnswer: string;
+  userAnswer: string;    // 'A' | 'B' | 'V' | 'F' | etc.
+  correctAnswer: string; // 'A' | 'B' | 'true' | 'v' | etc.
   explanation: string;
   isCorrect: boolean;
-  options?: any[];
-  type?: string;
+  options?: Array<OptionObj | string>;
+  type?: QuestionType;
+}
+
+interface StoredResults {
+  correctAnswers?: number;
+  incorrectAnswers?: number;
+  totalQuestions?: number;
+  percentage?: number;
+  incorrectQuestions?: QuestionResult[];
+  allQuestions?: QuestionResult[];
 }
 
 @Component({
@@ -35,92 +54,87 @@ interface QuestionResult {
   ]
 })
 export class ResumenTestProcesalPage implements OnInit {
-  
-  correctAnswers: number = 0;
-  incorrectAnswers: number = 0;
-  totalQuestions: number = 5;
-  percentage: number = 0;
-  
-  levelTitle: string = 'NIVEL PRINCIPIANTE';
-  levelSubtitle: string = '¡Sigue practicando!';
-  motivationalMessage: string = '¡Sigue practicando!';
-  
+
+  // Totales
+  correctAnswers = 0;
+  incorrectAnswers = 0;
+  totalQuestions = 5;
+  percentage = 0;
+
+  // Mensaje motivacional
+  motivationalMessage = '¡Sigue practicando!';
+
+  // Listados
   questionResults: QuestionResult[] = [];
   incorrectQuestions: QuestionResult[] = [];
-  
+
+  // Control del desplegable
   expandedQuestionIndex: number | null = null;
 
-  constructor(private router: Router) { }
+  private readonly LS_RESULTS_KEY = 'current_test_results';
+  private readonly LS_REVIEW_KEY = 'questions_to_review';
 
-  ngOnInit() {
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
     this.loadResults();
   }
 
-  loadResults() {
-    const resultsData = localStorage.getItem('current_test_results');
-    
-    if (!resultsData) {
-      console.error('No hay resultados guardados');
-      this.router.navigate(['/procesal/procesal-escrito']);
-      return;
-    }
-
+  // ----------------------
+  // Carga y normalización
+  // ----------------------
+  loadResults(): void {
     try {
-      const results = JSON.parse(resultsData);
-      console.log('📊 Resultados cargados:', results);
+      const resultsString = localStorage.getItem(this.LS_RESULTS_KEY);
 
-      this.correctAnswers = results.correctAnswers || 0;
-      this.incorrectAnswers = results.incorrectAnswers || 0;
-      this.totalQuestions = results.totalQuestions || 0;
-      this.percentage = results.percentage || 0;
-
-      if (results.allQuestions && Array.isArray(results.allQuestions)) {
-        this.questionResults = results.allQuestions.map((r: any) => ({
-          questionNumber: r.questionNumber,
-          questionText: r.questionText,
-          userAnswer: r.userAnswer,
-          correctAnswer: r.correctAnswer,
-          explanation: r.explanation || 'Sin explicación disponible',
-          isCorrect: r.isCorrect,
-          options: r.options || [],
-          type: r.type || 'multiple_choice'
-        }));
-
-        this.incorrectQuestions = this.questionResults.filter(q => !q.isCorrect);
+      if (!resultsString) {
+        console.warn('No hay resultados guardados');
+        this.router.navigate(['/procesal/procesal-escrito']);
+        return;
       }
 
-      this.setLevel();
-      this.setMotivationalMessage();
+      const results: StoredResults = JSON.parse(resultsString);
 
+      console.log('📊 Resultados cargados:', results);
+
+      this.correctAnswers = results.correctAnswers ?? 0;
+      this.incorrectAnswers = results.incorrectAnswers ?? 0;
+      this.totalQuestions = results.totalQuestions ?? 5;
+      this.percentage = results.percentage ?? 0;
+      this.incorrectQuestions = results.incorrectQuestions ?? [];
+
+      // Usar allQuestions si existe; si no, construir lista compatible
+      if (Array.isArray(results.allQuestions) && results.allQuestions.length > 0) {
+        this.questionResults = results.allQuestions;
+      } else {
+        this.questionResults = [];
+        for (let i = 0; i < this.totalQuestions; i++) {
+          const num = i + 1;
+          const incorrect = this.incorrectQuestions.find(q => q.questionNumber === num);
+          this.questionResults.push({
+            questionNumber: num,
+            questionText: incorrect?.questionText ?? 'Pregunta respondida correctamente',
+            userAnswer: incorrect?.userAnswer ?? '',
+            correctAnswer: incorrect?.correctAnswer ?? '',
+            explanation: incorrect?.explanation ?? '',
+            isCorrect: !incorrect,
+            options: incorrect?.options,
+            type: incorrect?.type
+          });
+        }
+      }
+
+      this.setMotivationalMessage();
     } catch (error) {
-      console.error('Error al parsear resultados:', error);
+      console.error('Error cargando resultados:', error);
       this.router.navigate(['/procesal/procesal-escrito']);
     }
   }
 
-  formatAnswer(answer: any): string {
-    if (answer === null || answer === undefined) return 'Sin respuesta';
-    if (typeof answer === 'boolean') return answer ? 'Verdadero' : 'Falso';
-    return String(answer);
-  }
-
-  setLevel() {
-    if (this.percentage >= 90) {
-      this.levelTitle = 'NIVEL EXPERTO';
-      this.levelSubtitle = '¡Dominas el tema!';
-    } else if (this.percentage >= 70) {
-      this.levelTitle = 'NIVEL AVANZADO';
-      this.levelSubtitle = '¡Muy buen trabajo!';
-    } else if (this.percentage >= 50) {
-      this.levelTitle = 'NIVEL INTERMEDIO';
-      this.levelSubtitle = 'Vas por buen camino';
-    } else {
-      this.levelTitle = 'NIVEL PRINCIPIANTE';
-      this.levelSubtitle = '¡Sigue practicando!';
-    }
-  }
-
-  setMotivationalMessage() {
+  // ----------------------
+  // Mensajes motivacionales
+  // ----------------------
+  setMotivationalMessage(): void {
     if (this.percentage >= 90) {
       this.motivationalMessage = '¡Excelente! Dominas el tema';
     } else if (this.percentage >= 80) {
@@ -136,136 +150,143 @@ export class ResumenTestProcesalPage implements OnInit {
     }
   }
 
-  toggleQuestion(index: number) {
-    if (this.expandedQuestionIndex === index) {
-      this.expandedQuestionIndex = null;
-    } else {
-      this.expandedQuestionIndex = index;
+  getSmallMessage(): string {
+    if (this.percentage >= 90) return '¡Increíble!';
+    if (this.percentage >= 80) return '¡Excelente trabajo!';
+    if (this.percentage >= 70) return '¡Muy bien!';
+    if (this.percentage >= 60) return 'Buen intento';
+    if (this.percentage >= 40) return 'Sigue adelante';
+    return 'No te rindas';
     }
+
+  getLargeMessage(): string {
+    if (this.percentage >= 90) return '¡Dominas el tema!';
+    if (this.percentage >= 80) return '¡Vas por buen camino!';
+    if (this.percentage >= 70) return '¡Sigue así!';
+    if (this.percentage >= 60) return '¡Puedes mejorar!';
+    if (this.percentage >= 40) return '¡Sigue practicando!';
+    return '¡Inténtalo de nuevo!';
   }
 
-  reviewIncorrect() {
-    localStorage.setItem('questions_to_review', JSON.stringify(this.incorrectQuestions));
+  // ----------------------
+  // Desplegable por pregunta
+  // ----------------------
+  toggleQuestion(index: number): void {
+    this.expandedQuestionIndex = this.expandedQuestionIndex === index ? null : index;
+  }
+
+  // ----------------------
+  // Navegación
+  // ----------------------
+  reviewIncorrect(): void {
+    localStorage.setItem(this.LS_REVIEW_KEY, JSON.stringify(this.incorrectQuestions ?? []));
     this.router.navigate(['/procesal/procesal-reforzar']);
   }
 
-  takeNewTest() {
-    localStorage.removeItem('current_test_results');
+  takeNewTest(): void {
+    localStorage.removeItem(this.LS_RESULTS_KEY);
     this.router.navigate(['/procesal/procesal-escrito']);
   }
 
-  goBack() {
-    localStorage.removeItem('current_test_results');
-    this.router.navigate(['/procesal/procesal-escrito']);
+  goBack(): void {
+    localStorage.removeItem(this.LS_RESULTS_KEY);
+    this.router.navigate(['/procesal']);
   }
 
-  goToHome() {
-    localStorage.removeItem('current_test_results');
+  goToHome(): void {
+    localStorage.removeItem(this.LS_RESULTS_KEY);
     this.router.navigate(['/dashboard']);
   }
 
-  getQuestionOptions(question: any): string[] {
-    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
+  // ----------------------
+  // Helpers de preguntas/opciones
+  // ----------------------
+  getQuestionOptions(question: QuestionResult): string[] {
+    // Verdadero / Falso
+    if (this.isTrueFalse(question.type)) {
       return ['Verdadero', 'Falso'];
     }
-    
-    if (Array.isArray(question.options) && question.options.length > 0) {
-      const firstOption = question.options[0];
-      
-      if (typeof firstOption === 'object') {
-        if ('text' in firstOption && firstOption.text) {
-          return question.options.map((opt: any) => opt.text);
-        }
-        if ('Text' in firstOption && firstOption.Text) {
-          return question.options.map((opt: any) => opt.Text);
-        }
+
+    // Selección múltiple
+    const opts = question.options ?? [];
+    if (opts.length === 0) return [];
+
+    const first = opts[0];
+    // Objetos con { text } o { Text }
+    if (typeof first === 'object' && first !== null) {
+      if ('text' in first && (first as OptionObj).text) {
+        return (opts as OptionObj[]).map(o => o.text ?? '');
       }
-      
-      if (typeof firstOption === 'string') {
-        return question.options;
+      if ('Text' in first && (first as OptionObj).Text) {
+        return (opts as OptionObj[]).map(o => o.Text ?? '');
       }
     }
-    
+    // Strings directos
+    if (typeof first === 'string') {
+      return opts as string[];
+    }
+
     return [];
   }
 
-  isOptionSelected(question: any, option: string): boolean {
-    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
-      if (question.userAnswer === 'V' && option === 'Verdadero') return true;
-      if (question.userAnswer === 'F' && option === 'Falso') return true;
-      return false;
+  isOptionSelected(question: QuestionResult, option: string): boolean {
+    // Verdadero / Falso
+    if (this.isTrueFalse(question.type)) {
+      const ua = this.normTF(question.userAnswer);
+      return (option === 'Verdadero' && ua === true) || (option === 'Falso' && ua === false);
     }
-    
+
+    // Selección múltiple por letra
     const options = this.getQuestionOptions(question);
     const optionIndex = options.indexOf(option);
-    if (optionIndex !== -1) {
-      const letter = String.fromCharCode(65 + optionIndex);
-      return question.userAnswer === letter;
-    }
-    
-    return false;
+    if (optionIndex === -1) return false;
+
+    const expectedLetter = this.getOptionLetter(optionIndex);
+    return (question.userAnswer ?? '').toUpperCase().trim() === expectedLetter;
   }
 
-  isOptionCorrect(question: any, option: string): boolean {
-    if (question.type === 'verdadero_falso' || question.type === 2 || question.type === '2') {
-      const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
-      const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
-                                  correctAnswerNorm === 'v' || 
-                                  correctAnswerNorm === 'verdadero';
-      
-      if (option === 'Verdadero' && isVerdaderoCorrect) return true;
-      if (option === 'Falso' && !isVerdaderoCorrect) return true;
-      return false;
+  isOptionCorrect(question: QuestionResult, option: string): boolean {
+    // Verdadero / Falso
+    if (this.isTrueFalse(question.type)) {
+      const ca = this.normTF(question.correctAnswer);
+      if (ca === null) return false; // no interpretable
+      return (option === 'Verdadero' && ca === true) || (option === 'Falso' && ca === false);
     }
-    
+
+    // Selección múltiple por letra
     const options = this.getQuestionOptions(question);
     const optionIndex = options.indexOf(option);
-    if (optionIndex !== -1) {
-      const letter = String.fromCharCode(65 + optionIndex);
-      return question.correctAnswer.toUpperCase() === letter;
-    }
-    
-    return false;
+    if (optionIndex === -1) return false;
+
+    const expectedLetter = this.getOptionLetter(optionIndex);
+    return (question.correctAnswer ?? '').toUpperCase().trim() === expectedLetter;
   }
 
   getOptionLetter(index: number): string {
-    return String.fromCharCode(65 + index);
+    return String.fromCharCode(65 + index); // 0 -> 'A'
   }
 
-    // ✅ MENSAJE SEGÚN RESULTADO
-
-// ✅ MENSAJE PEQUEÑO SEGÚN RESULTADO
-getSmallMessage(): string {
-  if (this.percentage >= 90) {
-    return '¡Increíble!';
-  } else if (this.percentage >= 80) {
-    return '¡Excelente trabajo!';
-  } else if (this.percentage >= 70) {
-    return '¡Muy bien!';
-  } else if (this.percentage >= 60) {
-    return 'Buen intento';
-  } else if (this.percentage >= 40) {
-    return 'Sigue adelante';
-  } else {
-    return 'No te rindas';
+  // ----------------------
+  // Normalizadores
+  // ----------------------
+  private isTrueFalse(type: QuestionType | undefined): boolean {
+    return (
+      type === 'verdadero_falso' ||
+      type === 2 ||
+      type === '2'
+    );
   }
-}
 
-// ✅ MENSAJE GRANDE SEGÚN RESULTADO
-getLargeMessage(): string {
-  if (this.percentage >= 90) {
-    return '¡Dominas el tema!';
-  } else if (this.percentage >= 80) {
-    return '¡Vas por buen camino!';
-  } else if (this.percentage >= 70) {
-    return '¡Sigue así!';
-  } else if (this.percentage >= 60) {
-    return '¡Puedes mejorar!';
-  } else if (this.percentage >= 40) {
-    return '¡Sigue practicando!';
-  } else {
-    return '¡Inténtalo de nuevo!';
+  /**
+   * Normaliza valores de V/F:
+   * - true/verdadero/v -> true
+   * - false/falso/f    -> false
+   * - otro/no interpretable -> null
+   */
+  private normTF(value: string | undefined | null): boolean | null {
+    const v = (value ?? '').toString().trim().toLowerCase();
+    if (['true', 'v', 'verdadero', 't', '1', 'sí', 'si'].includes(v)) return true;
+    if (['false', 'f', 'falso', '0', 'no'].includes(v)) return false;
+    return null;
   }
-}
-
 }
