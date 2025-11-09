@@ -7,6 +7,7 @@
   background-image: none;
   min-height: 100vh;
 }
+
 ion-content.test-content {
   --overflow: auto;
   height: 100%;
@@ -343,10 +344,10 @@ ion-content.test-content {
 }
 
 // ========================================
-// ✅ ESTILO DEL POP-UP DE EXPLICACIÓN (DEPRECATED)
+// ✅ ESTILO DEL POP-UP DE EXPLICACIÓN (DEPRECATED - no se usa)
 // ========================================
 /*
-:global(.explanation-alert) {
+.explanation-alert {
   --background: rgba(255, 111, 0, 0.95);
   --backdrop-opacity: 0.5;
 
@@ -359,8 +360,7 @@ ion-content.test-content {
   }
 
   .alert-head {
-    padding: 20px 20px 16px 20px;
-
+    padding: 20px 20px 16px;
     h2 {
       color: #fff;
       font-size: 20px;
@@ -370,7 +370,7 @@ ion-content.test-content {
   }
 
   .alert-message {
-    padding: 0 20px 20px 20px;
+    padding: 0 20px 20px;
     color: #fff;
     font-size: 16px;
     line-height: 1.6;
@@ -380,8 +380,7 @@ ion-content.test-content {
   }
 
   .alert-button-group {
-    padding: 0 20px 20px 20px;
-
+    padding: 0 20px 20px;
     button {
       background: #fff;
       color: #ff6f00;
@@ -394,11 +393,7 @@ ion-content.test-content {
       text-transform: none;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       transition: all 0.2s ease;
-
-      &:active {
-        transform: scale(0.96);
-        background: rgba(255, 255, 255, 0.9);
-      }
+      &:active { transform: scale(0.96); }
     }
   }
 }
@@ -490,40 +485,9 @@ ion-content.test-content {
       border-left-color: #f59e0b;
     }
   }
-
-  .close-eval-btn {
-    width: 100%;
-    padding: 16px;
-    background: #ff6f00;
-    color: #fff;
-    border: none;
-    font-size: 16px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:active {
-      transform: scale(0.98);
-      background: #e65100;
-    }
-
-    ion-icon {
-      font-size: 20px;
-    }
-  }
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
