@@ -352,3 +352,27 @@ ion-button.start-button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.quantity-option.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(33, 150, 243, 0.1);
+  border-left: 3px solid #2196F3;
+  border-radius: 8px;
+  margin-top: 12px;
+  margin-bottom: 20px; // ✅ Agregar margen inferior
+  font-size: 14px;
+  color: #2196F3;
+  
+  ion-icon {
+    font-size: 20px;
+  }
+}
