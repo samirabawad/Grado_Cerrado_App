@@ -1,4 +1,4 @@
-// INICIO DEL ARCHIVO - Copiar desde aquí
+// INICIO DEL ARCHIVO - Copiar desde aquÃ­
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
@@ -42,7 +42,7 @@ interface TestResults {
   grade: string;
   level: string;
   incorrectQuestions: any[];
-  allQuestions?: any[];
+  allQuestions?: any[]; 
   timeUsed?: number;
   timeUsedFormatted?: string;
   sessionId?: string;
@@ -64,7 +64,7 @@ interface TestResults {
         animate('300ms ease-in', style({ height: 0, opacity: 0, overflow: 'hidden' }))
       ])
     ])
-  ],
+  ]
 })
 export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
@@ -74,11 +74,10 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
   timeRemaining = 0;
   timer: any;
   isTestCompleted = false;
-
-  // Panel de evaluación (como test-oral)
+  
+  // Propiedades para panel de evaluación (como test-oral)
   showEvaluation: boolean = false;
   evaluationResult: any = null;
-
   isLoading = true;
   loadingError = false;
 
@@ -97,7 +96,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     private alertController: AlertController,
     private loadingController: LoadingController,
     private cdr: ChangeDetectorRef
-  ) {
+  ) { 
     console.log('TestEscritoProcesalPage constructor inicializado');
   }
 
@@ -114,31 +113,32 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
   async loadSessionFromBackend() {
     try {
-      console.log('Iniciando carga de sesión...');
+      console.log('Iniciando carga de sesiÃ³n...');
+      
       const session = this.apiService.getCurrentSession();
-
+      
       if (!session || !session.questions || session.questions.length === 0) {
-        console.error('❌ No hay sesión activa o no tiene preguntas');
+        console.error('âŒ No hay sesiÃ³n activa o no tiene preguntas');
         this.loadingError = true;
         this.isLoading = false;
         return;
       }
 
-      console.log('✅ Sesión encontrada:', session);
-
+      console.log('âœ… SesiÃ³n encontrada:', session);
+      
       this.currentSession = session as BackendSession;
       this.testId = session.testId || session.session?.id || 0;
       this.sessionId = session.session?.id?.toString() || '';
-
-      console.log('🏷️ Test ID:', this.testId);
-      console.log('🏷️ Session ID:', this.sessionId);
-
+      
+      console.log('ðŸ†” Test ID:', this.testId);
+      console.log('ðŸ†” Session ID:', this.sessionId);
+      
       setTimeout(() => {
         try {
           this.questions = this.convertBackendQuestions(session.questions);
-
+          
           if (this.questions.length === 0) {
-            console.error('❌ No se pudieron convertir las preguntas');
+            console.error('âŒ No se pudieron convertir las preguntas');
             this.loadingError = true;
             this.isLoading = false;
             return;
@@ -147,10 +147,10 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
           this.totalQuestions = this.questions.length;
           this.currentQuestionNumber = 1;
           this.currentQuestionIndex = 0;
-
-          console.log(`✅ ${this.totalQuestions} preguntas cargadas correctamente`);
-          console.log('📄 Primera pregunta:', this.questions[0]);
-
+          
+          console.log(`âœ… ${this.totalQuestions} preguntas cargadas correctamente`);
+          console.log('ðŸ“‹ Primera pregunta:', this.questions[0]);
+          
           this.isLoading = false;
           this.cdr.detectChanges();
 
@@ -158,13 +158,14 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
           this.skipInvalidQuestions();
 
+          
         } catch (conversionError) {
-          console.error('Error en conversión de preguntas:', conversionError);
+          console.error('Error en conversiÃ³n de preguntas:', conversionError);
           this.loadingError = true;
           this.isLoading = false;
         }
       }, 100);
-
+      
     } catch (error) {
       console.error('Error en loadSessionFromBackend:', error);
       this.loadingError = true;
@@ -177,25 +178,25 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       console.error('backendQuestions no es un array:', backendQuestions);
       return [];
     }
-
+    
     return backendQuestions.map((q: any, index: number) => {
       return this.convertSingleQuestion(q, index);
     });
   }
 
-  // ✅ Convertir una sola pregunta
+  // âœ… NUEVO: Convertir una sola pregunta
   convertSingleQuestion(q: any, index: number): Question {
     return {
       id: q.id?.toString() || `temp-${index}`,
       text: q.questionText || q.text || 'Texto no disponible',
       questionText: q.questionText || q.text || 'Texto no disponible',
       type: q.type || 'seleccion_multiple',
-      category: q.tema || q.category || q.legalArea || 'Sin categoría',
-      tema: q.tema || q.category || q.legalArea || 'Sin categoría',
+      category: q.tema || q.category || q.legalArea || 'Sin categorÃ­a',
+      tema: q.tema || q.category || q.legalArea || 'Sin categorÃ­a',
       legalArea: q.legalArea || q.tema || q.category || 'General',
       difficulty: q.difficulty || q.level || 2,
       correctAnswer: q.correctAnswer || 'A',
-      explanation: q.explanation || 'Explicación no disponible',
+      explanation: q.explanation || 'ExplicaciÃ³n no disponible',
       options: q.options || []
     };
   }
@@ -211,14 +212,14 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
   getCurrentQuestionCategory(): string {
     const question = this.getCurrentQuestion();
-    return question?.tema || question?.category || question?.legalArea || 'Sin categoría';
+    return question?.tema || question?.category || question?.legalArea || 'Sin categorÃ­a';
   }
 
   getCurrentQuestionOptions(): string[] {
     const question = this.getCurrentQuestion();
-
+    
     if (!question) {
-      console.warn('⚠️ No hay pregunta actual');
+      console.warn('âš ï¸ No hay pregunta actual');
       return [];
     }
 
@@ -227,59 +228,66 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       return ['Verdadero', 'Falso'];
     }
 
-    // Selección múltiple
+    // SelecciÃ³n mÃºltiple
     if (Array.isArray(question.options) && question.options.length > 0) {
       const firstOption = question.options[0];
-
-      // PRIORIDAD 1: Objeto con propiedad "Text" (backend)
+      
+      // âœ… PRIORIDAD 1: Objeto con propiedad "Text" (backend)
       if (typeof firstOption === 'object' && 'Text' in firstOption && firstOption.Text) {
+        console.log('âœ… Usando options[].Text del backend');
         return question.options.map((opt: any) => opt.Text);
       }
-
-      // PRIORIDAD 2: Objeto con propiedad "text"
+      
+      // âœ… PRIORIDAD 2: Objeto con propiedad "text" (minÃºscula)
       if (typeof firstOption === 'object' && 'text' in firstOption && firstOption.text) {
+        console.log('âœ… Usando options[].text');
         return question.options.map((opt: any) => opt.text);
       }
-
-      // PRIORIDAD 3: Array de strings directos
+      
+      // âœ… PRIORIDAD 3: Array de strings directos
       if (typeof firstOption === 'string') {
+        console.log('âœ… Usando options[] como strings');
         return question.options;
       }
-
-      // FALLBACK: Extraer cualquier texto disponible
-      console.warn('⚠️ Formato de opciones no reconocido, usando fallback…');
+      
+      // âœ… FALLBACK: Intentar extraer cualquier texto disponible
+      console.warn('âš ï¸ Formato de opciones no reconocido, intentando fallback...');
       return question.options.map((opt: any) => {
         if (typeof opt === 'string') return opt;
-        if (opt?.Text) return opt.Text;
-        if (opt?.text) return opt.text;
-        return 'Opción sin texto';
+        if (opt.Text) return opt.Text;
+        if (opt.text) return opt.text;
+        return 'OpciÃ³n sin texto';
       });
     }
 
-    // Sin opciones válidas
-    console.error('❌ Pregunta sin opciones válidas:', question);
-
+    // SI NO TIENE OPCIONES VÃLIDAS
+    console.error('âŒ Pregunta sin opciones vÃ¡lidas:', question);
+    
     if (!question.userAnswer) {
       question.userAnswer = 'SKIP';
     }
-
+    
     return [];
   }
 
-  // ✅ Obtener la letra (Id) de una opción por su texto
+  // âœ… NUEVO MÃ‰TODO: Obtener la letra (Id) de una opciÃ³n por su texto
   getOptionLetterByText(optionText: string): string | null {
     const question = this.getCurrentQuestion();
     if (!question || !Array.isArray(question.options)) return null;
 
     const option = question.options.find((opt: any) => {
       if (typeof opt === 'object') {
+        // âœ… Comparar con Text (mayÃºscula) primero
         if (opt.Text === optionText) return true;
+        // âœ… Luego con text (minÃºscula)
         if (opt.text === optionText) return true;
       }
+      // âœ… String directo
       return opt === optionText;
     });
 
     if (option && typeof option === 'object') {
+      // âœ… Devolver Id (mayÃºscula) primero, luego id (minÃºscula)
       const id = option.Id || option.id;
       if (id) return id.toString().toUpperCase();
     }
@@ -292,79 +300,101 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     return question?.type === 'verdadero_falso' || question?.type === 2 || question?.type === '2';
   }
 
-  async selectAnswer(optionText: string) {
-    if (this.hasAnsweredCurrentQuestion()) return;
+async selectAnswer(optionText: string) {
+  if (this.hasAnsweredCurrentQuestion()) {
+    return;
+  }
+  
+  const question = this.getCurrentQuestion();
+  if (!question) return;
 
-    const question = this.getCurrentQuestion();
-    if (!question) return;
-
-    let normalizedAnswer: string;
-
-    if (this.isTrueFalseQuestion()) {
-      const letterFromBackend = this.getOptionLetterByText(optionText);
-      normalizedAnswer = letterFromBackend || (optionText === 'Verdadero' ? 'A' : 'B');
-
-      const answerForBackend = optionText === 'Verdadero' ? 'true' : 'false';
-      question.userAnswer = normalizedAnswer;
-
-      const isCorrect = this.compareAnswers(answerForBackend, question.correctAnswer);
-
-      const correctionConfig = localStorage.getItem('correctionConfig');
-      const showImmediateCorrection = correctionConfig ? JSON.parse(correctionConfig).immediate : true;
-
-      if (showImmediateCorrection) {
-        question.wasAnswered = true;
-        question.wasCorrect = isCorrect;
-        console.log(`${isCorrect ? '✅' : '❌'} V/F: "${optionText}" → ${answerForBackend} (correcta: ${question.correctAnswer})`);
-        this.showEvaluationPanel(question, optionText, isCorrect);
-      } else {
-        question.wasAnswered = true;
-        question.wasCorrect = undefined;
-      }
-
-      await this.sendAnswerToBackend(question, answerForBackend);
-      this.cdr.detectChanges();
-      return;
-    }
-
-    // Selección múltiple
+  let normalizedAnswer: string;
+  
+  if (this.isTrueFalseQuestion()) {
     const letterFromBackend = this.getOptionLetterByText(optionText);
+    
     if (letterFromBackend) {
       normalizedAnswer = letterFromBackend;
     } else {
-      const options = this.getCurrentQuestionOptions();
-      const optionIndex = options.indexOf(optionText);
-      if (optionIndex === -1) {
-        console.error('❌ No se encontró la opción en el array');
-        return;
-      }
-      normalizedAnswer = String.fromCharCode(65 + optionIndex);
+      normalizedAnswer = optionText === 'Verdadero' ? 'A' : 'B';
     }
-
+    
+    const answerForBackend = optionText === 'Verdadero' ? 'true' : 'false';
     question.userAnswer = normalizedAnswer;
-
-    const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
-
+    
+    const isCorrect = this.compareAnswers(answerForBackend, question.correctAnswer);
+    
     const correctionConfig = localStorage.getItem('correctionConfig');
-    const showImmediateCorrection = correctionConfig ? JSON.parse(correctionConfig).immediate : true;
-
+    const showImmediateCorrection = correctionConfig 
+      ? JSON.parse(correctionConfig).immediate 
+      : true;
+    
     if (showImmediateCorrection) {
       question.wasAnswered = true;
       question.wasCorrect = isCorrect;
-      console.log(`${isCorrect ? '✅' : '❌'} Opción ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
+      
+      // âœ… Log solo aquÃ­
+      console.log(`${isCorrect ? 'âœ…' : 'âŒ'} V/F: "${optionText}" â†’ ${answerForBackend} (correcta: ${question.correctAnswer})`);
+      
+      // Mostrar panel de evaluación
       this.showEvaluationPanel(question, optionText, isCorrect);
     } else {
       question.wasAnswered = true;
       question.wasCorrect = undefined;
     }
-
-    await this.sendAnswerToBackend(question, normalizedAnswer);
+    
+    await this.sendAnswerToBackend(question, answerForBackend);
     this.cdr.detectChanges();
+    return;
   }
+  
+  // SelecciÃ³n mÃºltiple
+  const letterFromBackend = this.getOptionLetterByText(optionText);
+  
+  if (letterFromBackend) {
+    normalizedAnswer = letterFromBackend;
+  } else {
+    const options = this.getCurrentQuestionOptions();
+    const optionIndex = options.indexOf(optionText);
+    
+    if (optionIndex !== -1) {
+      normalizedAnswer = String.fromCharCode(65 + optionIndex);
+    } else {
+      console.error('âŒ No se encontrÃ³ la opciÃ³n en el array');
+      return;
+    }
+  }
+  
+  question.userAnswer = normalizedAnswer;
+  
+  const isCorrect = this.compareAnswers(normalizedAnswer, question.correctAnswer);
+  
+  const correctionConfig = localStorage.getItem('correctionConfig');
+  const showImmediateCorrection = correctionConfig 
+    ? JSON.parse(correctionConfig).immediate 
+    : true;
+  
+  if (showImmediateCorrection) {
+    question.wasAnswered = true;
+    question.wasCorrect = isCorrect;
+    
+    // âœ… Log solo aquÃ­
+    console.log(`${isCorrect ? 'âœ…' : 'âŒ'} OpciÃ³n ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
+      
+      // Mostrar panel de evaluación
+      this.showEvaluationPanel(question, optionText, isCorrect);
+  } else {
+    question.wasAnswered = true;
+    question.wasCorrect = undefined;
+  }
+  
+  await this.sendAnswerToBackend(question, normalizedAnswer);
+  this.cdr.detectChanges();
+}
 
   async showExplanationAlert(explanation: string) {
     const alert = await this.alertController.create({
-      header: '💡 Explicación',
+      header: 'ðŸ’¡ ExplicaciÃ³n',
       message: explanation,
       cssClass: 'explanation-alert',
       backdropDismiss: false,
@@ -403,11 +433,11 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
           head.style.borderBottom = '1px solid rgba(255, 255, 255, 0.2)';
           const h2 = head.querySelector('h2');
           if (h2) {
-            (h2 as HTMLElement).style.color = 'white';
-            (h2 as HTMLElement).style.fontSize = '22px';
-            (h2 as HTMLElement).style.fontWeight = '700';
-            (h2 as HTMLElement).style.margin = '0';
-            (h2 as HTMLElement).style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            h2.style.color = 'white';
+            h2.style.fontSize = '22px';
+            h2.style.fontWeight = '700';
+            h2.style.margin = '0';
+            h2.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
           }
         }
 
@@ -454,15 +484,15 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     try {
       const questionEndTime = new Date();
       const responseTime = Math.floor((questionEndTime.getTime() - this.questionStartTime.getTime()) / 1000);
-
+      
       const hours = Math.floor(responseTime / 3600);
       const minutes = Math.floor((responseTime % 3600) / 60);
       const seconds = responseTime % 60;
       const timeSpanString = `PT${hours}H${minutes}M${seconds}S`;
-
+      
       const answerData = {
         testId: this.testId,
-        preguntaId: parseInt(question.id, 10),
+        preguntaId: parseInt(question.id),
         userAnswer: answer,
         correctAnswer: question.correctAnswer,
         explanation: question.explanation || '',
@@ -470,36 +500,37 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
         numeroOrden: this.currentQuestionIndex + 1,
         isCorrect: this.compareAnswers(answer, question.correctAnswer)
       };
-
-      console.log('📝 Enviando respuesta al backend:', answerData);
-
+      
+      console.log('ðŸ“¤ Enviando respuesta al backend:', answerData);
+      
       await this.apiService.submitAnswer(answerData).toPromise();
-      console.log('✅ Respuesta enviada correctamente');
-
+      console.log('âœ… Respuesta enviada correctamente');
+      
     } catch (error) {
-      console.error('❌ Error enviando respuesta:', error);
+      console.error('âŒ Error enviando respuesta:', error);
     }
   }
 
   compareAnswers(userAnswer: string, correctAnswer: string): boolean {
     const normalizedUser = userAnswer.trim().toLowerCase();
     const normalizedCorrect = correctAnswer.trim().toLowerCase();
-
-    // Comparación directa
+  
+    
+    // ComparaciÃ³n directa
     if (normalizedUser === normalizedCorrect) return true;
-
-    // Mapeo de variantes de Verdadero/Falso
+    
+    // Mapeo de variantes de Verdadero
     const trueVariants = ['v', 'verdadero', 'true', 'a'];
     const falseVariants = ['f', 'falso', 'false', 'b'];
-
+    
     const userIsTrue = trueVariants.includes(normalizedUser);
     const correctIsTrue = trueVariants.includes(normalizedCorrect);
     const userIsFalse = falseVariants.includes(normalizedUser);
     const correctIsFalse = falseVariants.includes(normalizedCorrect);
-
+    
     if (userIsTrue && correctIsTrue) return true;
     if (userIsFalse && correctIsFalse) return true;
-
+    
     return false;
   }
 
@@ -514,8 +545,11 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       this.currentQuestionNumber++;
       this.selectedAnswer = '';
       this.questionStartTime = new Date();
-
-      console.log(`➡️ Avanzando a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
+      
+      // Ocultar panel de evaluación al cambiar de pregunta
+      this.closeEvaluation();
+      
+      console.log(`âž¡ï¸ Avanzando a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
     } else {
       this.finishTest();
     }
@@ -526,15 +560,18 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       this.currentQuestionIndex--;
       this.currentQuestionNumber--;
       this.selectedAnswer = '';
-
-      console.log(`⬅️ Retrocediendo a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
+      
+      // Ocultar panel de evaluación al cambiar de pregunta
+      this.closeEvaluation();
+      
+      console.log(`â¬…ï¸ Retrocediendo a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
     }
   }
 
   hasAnsweredCurrentQuestion(): boolean {
     const question = this.getCurrentQuestion();
     return !!question?.userAnswer;
-    }
+  }
 
   async showAnswerRequiredAlert() {
     const alert = await this.alertController.create({
@@ -542,37 +579,41 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       message: 'Debes seleccionar una respuesta antes de continuar.',
       buttons: ['OK']
     });
-
+    
     await alert.present();
   }
 
   isOptionSelected(optionText: string): boolean {
     const question = this.getCurrentQuestion();
     if (!question || !question.userAnswer) return false;
-
+    
     if (this.isTrueFalseQuestion()) {
-      // Usar la letra del backend también para V/F
+      // âœ… CORREGIDO: Usar la letra del backend tambiÃ©n para V/F
       const letterFromBackend = this.getOptionLetterByText(optionText);
-      if (letterFromBackend) return question.userAnswer === letterFromBackend;
-
+      if (letterFromBackend) {
+        return question.userAnswer === letterFromBackend;
+      }
+      
       // Fallback tradicional
       if (question.userAnswer === 'V' && optionText === 'Verdadero') return true;
       if (question.userAnswer === 'F' && optionText === 'Falso') return true;
       return false;
     }
-
-    // Usar la letra del backend
+    
+    // âœ… CORREGIDO: Usar la letra del backend en lugar del Ã­ndice
     const letterFromBackend = this.getOptionLetterByText(optionText);
-    if (letterFromBackend) return question.userAnswer === letterFromBackend;
-
-    // Fallback por índice
+    if (letterFromBackend) {
+      return question.userAnswer === letterFromBackend;
+    }
+    
+    // Fallback al mÃ©todo anterior
     const options = this.getCurrentQuestionOptions();
     const optionIndex = options.indexOf(optionText);
     if (optionIndex !== -1) {
       const letter = String.fromCharCode(65 + optionIndex);
       return question.userAnswer === letter;
     }
-
+    
     return false;
   }
 
@@ -588,16 +629,17 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
   }
 
   shouldShowOptionIcon(option: string): boolean {
-    const state = this.getOptionState(option);
-    return state === 'correct' || state === 'incorrect';
+    return this.hasAnsweredCurrentQuestion();
   }
 
   getOptionState(optionText: string): 'correct' | 'incorrect' | 'selected' | 'default' {
     if (!this.hasAnsweredCurrentQuestion()) return 'default';
-
+    
     const correctionConfig = localStorage.getItem('correctionConfig');
-    const showImmediateCorrection = correctionConfig ? JSON.parse(correctionConfig).immediate : true;
-
+    const showImmediateCorrection = correctionConfig 
+      ? JSON.parse(correctionConfig).immediate 
+      : true;
+    
     const question = this.getCurrentQuestion();
     if (!question) return 'default';
 
@@ -608,23 +650,33 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     if (this.isTrueFalseQuestion()) {
       const letterFromBackend = this.getOptionLetterByText(optionText);
       if (!letterFromBackend) return 'default';
-
+      
       const isCorrect = this.compareAnswers(letterFromBackend, question.correctAnswer);
       const isSelected = question.userAnswer === letterFromBackend;
-
-      if (isSelected) return isCorrect ? 'correct' : 'incorrect';
+      
+      if (isSelected) {
+        return isCorrect ? 'correct' : 'incorrect';
+      }
+      
       if (isCorrect) return 'correct';
+      
       return 'default';
     }
 
     const letterFromBackend = this.getOptionLetterByText(optionText);
     if (!letterFromBackend) return 'default';
 
-    const isCorrect = this.compareAnswers(letterFromBackend, question.correctAnswer);
-    const isSelected = question.userAnswer === letterFromBackend;
-
-    if (isSelected) return isCorrect ? 'correct' : 'incorrect';
+    const optionLetter = letterFromBackend;
+    
+    const isCorrect = this.compareAnswers(optionLetter, question.correctAnswer);
+    const isSelected = question.userAnswer === optionLetter;
+    
+    if (isSelected) {
+      return isCorrect ? 'correct' : 'incorrect';
+    }
+    
     if (isCorrect) return 'correct';
+    
     return 'default';
   }
 
@@ -653,46 +705,54 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
-
+    
     await loading.present();
 
     try {
       const results = this.calculateResults();
-
-      console.log('📊 Resultados calculados:', results);
-
+      
+      console.log('ðŸ“Š Resultados calculados:', results);
+      
       const currentSession = this.apiService.getCurrentSession();
       if (currentSession && currentSession.testId) {
         try {
           const response = await this.apiService.finishTest(currentSession.testId).toPromise();
-          console.log('✅ Test guardado en BD:', response);
+          console.log('âœ… Test guardado en BD:', response);
         } catch (error) {
-          console.error('❌ Error guardando test en BD:', error);
+          console.error('âŒ Error guardando test en BD:', error);
         }
       }
-
+      
       localStorage.setItem('current_test_results', JSON.stringify(results));
-
+      
       await loading.dismiss();
-
+      
       this.apiService.clearCurrentSession();
-
-      console.log('🎯 Navegando a resumen...');
+      
+      console.log('ðŸŽ¯ Navegando a resumen...');
       await this.router.navigate(['/procesal/procesal-escrito/resumen-test-procesal']);
-
+      
     } catch (error) {
-      console.error('❌ Error finalizando test:', error);
+      console.error('âŒ Error finalizando test:', error);
       await loading.dismiss();
-
+      
       const alert = await this.alertController.create({
         header: 'Error',
-        message: 'Hubo un problema al guardar los resultados. ¿Deseas intentar de nuevo?',
+        message: 'Hubo un problema al guardar los resultados. Â¿Deseas intentar de nuevo?',
         buttons: [
-          { text: 'Cancelar', role: 'cancel' },
-          { text: 'Reintentar', handler: () => this.finishTest() }
+          {
+            text: 'Cancelar',
+            role: 'cancel'
+          },
+          {
+            text: 'Reintentar',
+            handler: () => {
+              this.finishTest();
+            }
+          }
         ]
       });
-
+      
       await loading.dismiss();
       await alert.present();
     }
@@ -702,11 +762,11 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     let correctAnswers = 0;
     let incorrectAnswers = 0;
     const incorrectQuestions: any[] = [];
-    const allQuestions: any[] = [];
+    const allQuestions: any[] = []; 
 
     this.questions.forEach((question, index) => {
       if (question.userAnswer === 'SKIP') {
-        console.log(`⏭️ Pregunta ${index + 1} saltada (sin opciones), no se incluye en resultados`);
+        console.log(`â­ï¸ Pregunta ${index + 1} saltada (sin opciones), no se incluye en resultados`);
         return;
       }
 
@@ -737,11 +797,11 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     });
 
     const totalAnswered = correctAnswers + incorrectAnswers;
-    const percentage = totalAnswered > 0
-      ? Math.round((correctAnswers / totalAnswered) * 100)
+    const percentage = totalAnswered > 0 
+      ? Math.round((correctAnswers / totalAnswered) * 100) 
       : 0;
 
-    console.log('📊 Resultados finales:', {
+    console.log('ðŸ“Š Resultados finales:', {
       correctAnswers,
       incorrectAnswers,
       percentage,
@@ -757,7 +817,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       grade: this.getGradeFromPercentage(percentage),
       level: this.getLevelFromPercentage(percentage),
       incorrectQuestions,
-      allQuestions,
+      allQuestions, 
       sessionId: this.sessionId
     };
   }
@@ -773,7 +833,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
   getLevelFromPercentage(percentage: number): string {
     if (percentage >= 80) return 'Avanzado';
     if (percentage >= 60) return 'Intermedio';
-    return 'Básico';
+    return 'BÃ¡sico';
   }
 
   exitTest() {
@@ -788,50 +848,51 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     this.loadSessionFromBackend();
   }
 
-  // ✅ Reemplazar preguntas inválidas
+  // âœ… ACTUALIZADO: Reemplazar preguntas invÃ¡lidas
   async skipInvalidQuestions() {
     const options = this.getCurrentQuestionOptions();
-
+    
     if (options.length === 0) {
-      console.log('⏭️ Pregunta sin opciones detectada, solicitando reemplazo...');
-
+      console.log('â­ï¸ Pregunta sin opciones detectada, solicitando reemplazo...');
+      
       const question = this.getCurrentQuestion();
       if (!question) return;
-
+      
       question.userAnswer = 'SKIP';
-
+      
       try {
         const newQuestion = await this.requestReplacementQuestion();
-
+        
         if (newQuestion) {
-          console.log('✅ Pregunta de reemplazo recibida:', newQuestion);
-
-          this.questions[this.currentQuestionIndex] =
-            this.convertSingleQuestion(newQuestion, this.currentQuestionIndex);
-
+          console.log('âœ… Pregunta de reemplazo recibida:', newQuestion);
+          
+          this.questions[this.currentQuestionIndex] = this.convertSingleQuestion(newQuestion, this.currentQuestionIndex);
+          
           this.questions[this.currentQuestionIndex].userAnswer = undefined;
-
+          
           this.cdr.detectChanges();
-
-          console.log('✅ Pregunta reemplazada exitosamente');
+          
+          console.log('âœ… Pregunta reemplazada exitosamente');
         } else {
-          console.warn('⚠️ No se pudo obtener pregunta de reemplazo, saltando…');
+          console.warn('âš ï¸ No se pudo obtener pregunta de reemplazo, saltando...');
           this.autoSkipQuestion();
         }
       } catch (error) {
-        console.error('❌ Error obteniendo pregunta de reemplazo:', error);
+        console.error('âŒ Error obteniendo pregunta de reemplazo:', error);
         this.autoSkipQuestion();
       }
     }
   }
 
-  // ✅ Solicitar pregunta de reemplazo
+  // âœ… NUEVO: MÃ©todo para solicitar pregunta de reemplazo
   async requestReplacementQuestion(): Promise<any> {
     try {
       const response = await this.apiService.getReplacementQuestion(this.testId).toPromise();
+      
       if (response && response.success && response.question) {
         return response.question;
       }
+      
       return null;
     } catch (error) {
       console.error('Error solicitando pregunta de reemplazo:', error);
@@ -839,7 +900,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ Saltar automáticamente si no hay reemplazo
+  // âœ… NUEVO: Saltar automÃ¡ticamente si no hay reemplazo
   autoSkipQuestion() {
     setTimeout(() => {
       if (this.currentQuestionIndex < this.questions.length - 1) {
@@ -855,6 +916,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
   // =====================
   // PANEL DE EVALUACIÓN (como test-oral)
   // =====================
+  
   showEvaluationPanel(question: Question, userAnswerText: string, isCorrect: boolean) {
     this.evaluationResult = {
       isCorrect: isCorrect,
@@ -862,7 +924,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       correctAnswer: question.correctAnswer,
       explanation: question.explanation || 'Explicación no disponible'
     };
-
+    
     this.showEvaluation = true;
     console.log('📊 Mostrando panel de evaluación:', this.evaluationResult);
   }

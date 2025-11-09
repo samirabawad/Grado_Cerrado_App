@@ -1,5 +1,5 @@
-// ========================================
-// CONFIGURACIÓN BÁSICA
+ // ========================================
+// CONFIGURACIÃ“N BÃSICA
 // ========================================
 .procesal-content {
   --background: #ffffff !important;
@@ -15,7 +15,7 @@ ion-content {
 }
 
 // ========================================
-// ✅ HEADER IGUAL QUE PROCESAL.PAGE
+// âœ… HEADER IGUAL QUE PROCESAL.PAGE
 // ========================================
 .dashboard-header {
   position: fixed;
@@ -32,13 +32,13 @@ ion-content {
 
   .back-icon {
     font-size: 24px;
-    color: #fff;
+    color: white;
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: #fff;
+    color: white;
     font-size: 18px;
     font-weight: 600;
     margin: 0;
@@ -58,7 +58,7 @@ ion-content {
 }
 
 // ========================================
-// ✅ PUNTITOS DE PROGRESO
+// âœ… PUNTITOS DE PROGRESO
 // ========================================
 .progress-dots {
   display: flex;
@@ -83,14 +83,14 @@ ion-content {
     }
 
     &.completed {
-      background: #4caf50;
-      border-color: #4caf50;
+      background: #4CAF50;
+      border-color: #4CAF50;
     }
   }
 }
 
 // ========================================
-// CATEGORÍA Y CONTADOR
+// CATEGORÃA Y CONTADOR
 // ========================================
 .category-row {
   display: flex;
@@ -120,7 +120,7 @@ ion-content {
 // TEXTO DE LA PREGUNTA
 // ========================================
 .question-text {
-  background: #fff;
+  background: white;
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 24px;
@@ -150,7 +150,7 @@ ion-content {
 }
 
 .option-button {
-  background: #fff;
+  background: white;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 16px;
@@ -173,19 +173,19 @@ ion-content {
 
   &.selected .option-letter {
     background: #3b82f6;
-    color: #fff;
+    color: white;
     box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
   }
 
   &.correct {
-    border-color: #4caf50;
+    border-color: #4CAF50;
     background: rgba(76, 175, 80, 0.1);
     pointer-events: none;
   }
 
   &.correct .option-letter {
-    background: #4caf50;
-    color: #fff;
+    background: #4CAF50;
+    color: white;
   }
 
   &.incorrect {
@@ -196,7 +196,7 @@ ion-content {
 
   &.incorrect .option-letter {
     background: #f44336;
-    color: #fff;
+    color: white;
   }
 
   &.disabled {
@@ -233,7 +233,7 @@ ion-content {
 }
 
 // ========================================
-// BOTONES DE NAVEGACIÓN
+// BOTONES DE NAVEGACIÃ“N
 // ========================================
 .navigation-buttons {
   display: flex;
@@ -251,19 +251,19 @@ ion-content {
     &.primary {
       --background: #3b82f6;
       --background-activated: #2563eb;
-      --color: #fff;
+      --color: white;
     }
 
     &.finish {
-      --background: #4caf50;
-      --background-activated: #388e3c;
-      --color: #fff;
+      --background: #4CAF50;
+      --background-activated: #388E3C;
+      --color: white;
     }
   }
 }
 
 // ========================================
-// BOTÓN DE ABANDONAR
+// BOTÃ“N DE ABANDONAR
 // ========================================
 .exit-button-container {
   display: flex;
@@ -345,14 +345,12 @@ ion-content {
 }
 
 // ========================================
-// ✅ ESTILO DEL POP-UP DE EXPLICACIÓN
+// âœ… ESTILO DEL POP-UP DE EXPLICACIÃ“N
 // ========================================
-// Nota: si usas encapsulación por defecto en Angular y esto no aplica,
-// puedes moverlo a global.scss o usar :host ::ng-deep .explanation-alert { ... }
 :global(.explanation-alert) {
   --background: rgba(59, 130, 246, 0.95);
   --backdrop-opacity: 0.5;
-
+  
   .alert-wrapper {
     background: rgba(59, 130, 246, 0.95);
     backdrop-filter: blur(10px);
@@ -363,9 +361,9 @@ ion-content {
 
   .alert-head {
     padding: 20px 20px 16px 20px;
-
+    
     h2 {
-      color: #fff;
+      color: white;
       font-size: 20px;
       font-weight: 700;
       text-align: center;
@@ -374,7 +372,7 @@ ion-content {
 
   .alert-message {
     padding: 0 20px 20px 20px;
-    color: #fff;
+    color: white;
     font-size: 16px;
     line-height: 1.6;
     text-align: left;
@@ -384,9 +382,9 @@ ion-content {
 
   .alert-button-group {
     padding: 0 20px 20px 20px;
-
+    
     button {
-      background: #fff;
+      background: white;
       color: #3b82f6;
       border-radius: 12px;
       font-weight: 700;
@@ -422,12 +420,11 @@ ion-content {
     padding: 14px;
   }
 }
-
 // ========================================
 // PANEL DE EVALUACIÓN (como test-oral)
 // ========================================
 .evaluation-panel {
-  background: #fff;
+  background: white;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   margin: 20px 0;
@@ -444,12 +441,12 @@ ion-content {
 
     &.correct {
       background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff;
+      color: white;
     }
 
     &.incorrect {
       background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: #fff;
+      color: white;
     }
 
     ion-icon {
@@ -493,30 +490,6 @@ ion-content {
     }
   }
 
-  .close-eval-btn {
-    width: 100%;
-    padding: 16px;
-    background: #3b82f6;
-    color: #fff;
-    border: none;
-    font-size: 16px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:active {
-      transform: scale(0.98);
-      background: #2563eb;
-    }
-
-    ion-icon {
-      font-size: 20px;
-    }
-  }
 }
 
 @keyframes slideUp {
