@@ -19,6 +19,13 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
 
+  // Nuevas propiedades para tema
+  scopeType: 'all' | 'tema' = 'all';
+  showThemeSelector: boolean = false;
+  selectedTemaId: number | null = null;
+  temas: any[] = [];
+  isLoading: boolean = false;
+
   difficultyLevels = [
     { value: 'basico', label: 'Básico' },
     { value: 'intermedio', label: 'Intermedio' },
@@ -40,6 +47,7 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   ) { }
 
   ngOnInit() {
+    this.loadTemas();
   }
 
   ngAfterViewInit() {
@@ -55,6 +63,80 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     if (this.scrollTimeout) {
       clearTimeout(this.scrollTimeout);
     }
+  }
+
+  async loadTemas() {
+    this.isLoading = true;
+
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+      
+      if (!currentUser || !currentUser.id) {
+        console.warn('No hay usuario logueado');
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      const studentId = currentUser.id;
+
+      try {
+        const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+        
+        if (statsResponse && statsResponse.success && statsResponse.data) {
+          const civilArea = statsResponse.data.find((item: any) => 
+            item.type === 'area' && item.area === 'Derecho Civil'
+          );
+          
+          if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
+            this.temas = civilArea.temas.map((tema: any) => ({
+              id: tema.temaId,
+              nombre: tema.temaNombre,
+              cantidadPreguntas: tema.totalPreguntas || 0
+            }));
+
+            console.log('✅ Temas cargados para selector:', this.temas);
+          } else {
+            console.log('⚠️ No hay temas en Civil');
+            this.temas = [];
+          }
+        }
+      } catch (error) {
+        console.error('Error cargando temas:', error);
+        this.temas = [];
+      }
+
+    } catch (error) {
+      console.error('Error general cargando temas:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  selectScope(type: 'all' | 'tema') {
+    this.scopeType = type;
+    
+    if (type === 'all') {
+      this.selectedTemaId = null;
+      this.showThemeSelector = false;
+      console.log('✅ Seleccionado: Todo Derecho Civil');
+    } else if (type === 'tema') {
+      this.showThemeSelector = !this.showThemeSelector;
+      if (!this.showThemeSelector) {
+        this.selectedTemaId = null;
+      }
+      console.log('✅ Modo tema:', this.showThemeSelector);
+    }
+  }
+
+  selectTema(temaId: number) {
+    this.selectedTemaId = temaId;
+    this.scopeType = 'tema';
+    console.log('✅ Tema seleccionado:', temaId);
+  }
+
+  getSelectedTemaName(): string {
+    const tema = this.temas.find(t => t.id === this.selectedTemaId);
+    return tema ? tema.nombre : '';
   }
 
   goBack() {
@@ -127,7 +209,6 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
       const newIndex = currentIndex - 1;
       this.scrollToOption(newIndex);
     } else {
-      // Si está en el primero, ir al último
       this.scrollToOption(this.difficultyLevels.length - 1);
     }
   }
@@ -138,7 +219,6 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
       const newIndex = currentIndex + 1;
       this.scrollToOption(newIndex);
     } else {
-      // Si está en el último, ir al primero
       this.scrollToOption(0);
     }
   }
@@ -170,6 +250,14 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
         legalAreas: ["Derecho Civil"],
         questionCount: Number(this.selectedQuantity)
       };
+
+      // Agregar TemaId si está seleccionado
+      if (this.scopeType === 'tema' && this.selectedTemaId) {
+        sessionData.TemaId = this.selectedTemaId;
+        console.log('📚 Test con tema específico:', this.selectedTemaId);
+      } else {
+        console.log('📚 Test con TODO Derecho Civil');
+      }
       
       console.log('📤 Enviando request:', sessionData);
       
