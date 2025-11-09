@@ -330,134 +330,133 @@ export class ProcesalReforzarPage implements OnInit {
   // TEST
   // =====================
 
-  async startTest() {
-    const loading = await this.loadingController.create({
-      message: 'Preparando test...',
-      spinner: 'crescent'
-    });
-    await loading.present();
+async startTest() {
+  const loading = await this.loadingController.create({
+    message: 'Preparando test...',
+    spinner: 'crescent',
+    cssClass: 'custom-loading'
+  });
+  
+  await loading.present();
+  
+  try {
+    const currentUser = this.apiService.getCurrentUser();
 
-    try {
-      const currentUser = this.apiService.getCurrentUser();
-      
-      if (!currentUser || !currentUser.id) {
-        await loading.dismiss();
-        const toast = await this.toastController.create({
-          message: 'Debes iniciar sesión para hacer un test',
-          duration: 3000,
-          color: 'warning',
-          position: 'top'
-        });
-        await toast.present();
-        this.router.navigate(['/login']);
-        return;
-      }
-
-      // ¿Hay errores en el alcance seleccionado?
-      let hasErrorsInScope = false;
-      
-      if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
-        hasErrorsInScope = this.subtemaHasErrors(this.selectedSubtemaId);
-      } else if (this.scopeType === 'tema' && this.selectedTemaId) {
-        hasErrorsInScope = this.temaHasErrors(this.selectedTemaId);
-      } else if (this.scopeType === 'all') {
-        hasErrorsInScope = this.weakTopics.some(t => t.area?.toLowerCase().includes('procesal'));
-      }
-
-      const sessionData: any = {
-        studentId: currentUser.id,
-        questionCount: this.selectedQuantity
-      };
-
-      if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
-        sessionData.subtemaId = this.selectedSubtemaId;
-        console.log('🎯 Iniciando test - SUBTEMA:', this.selectedSubtemaId);
-      } else if (this.scopeType === 'tema' && this.selectedTemaId) {
-        sessionData.temaId = this.selectedTemaId;
-        console.log('🎯 Iniciando test - TEMA:', this.selectedTemaId);
-      } else {
-        console.log('🎯 Iniciando test - TODO Derecho Procesal');
-      }
-
-      console.log('📤 Datos de sesión enviados:', sessionData);
-      console.log('🎯 Tiene errores en alcance:', hasErrorsInScope);
-
-      let sessionResponse;
-      
-      // Usar endpoint de REFORZAMIENTO solo si hay errores
-      if (hasErrorsInScope) {
-        loading.message = 'Preparando test de reforzamiento...';
-        sessionResponse = await this.apiService.startReinforcementSession(sessionData).toPromise();
-        
-        if (sessionResponse?.success && sessionResponse.noQuestionsToReinforce) {
-          await loading.dismiss();
-          const toast = await this.toastController.create({
-            message: '✅ ¡Excelente! No tienes preguntas para reforzar. Iniciando test normal...',
-            duration: 2000,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
-          
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          const normalSessionData = {
-            studentId: currentUser.id,
-            difficulty: 'intermedio',
-            legalAreas: ['Derecho Procesal'],
-            numberOfQuestions: this.selectedQuantity,
-            ...(sessionData.subtemaId && { SubtemaId: sessionData.subtemaId }),
-            ...(sessionData.temaId && { TemaId: sessionData.temaId })
-          };
-          
-          sessionResponse = await this.apiService.startStudySession(normalSessionData).toPromise();
-        }
-      } else {
-        // No hay errores → test normal
-        loading.message = 'Preparando test de práctica...';
-        const normalSessionData = {
-          studentId: currentUser.id,
-          difficulty: 'intermedio',
-          legalAreas: ['Derecho Procesal'],
-          numberOfQuestions: this.selectedQuantity,
-          ...(sessionData.subtemaId && { SubtemaId: sessionData.subtemaId }),
-          ...(sessionData.temaId && { TemaId: sessionData.temaId })
-        };
-        
-        sessionResponse = await this.apiService.startStudySession(normalSessionData).toPromise();
-      }
-      
-      if (sessionResponse?.success) {
-        this.apiService.setCurrentSession(sessionResponse);
-        console.log('✅ Sesión iniciada correctamente');
-        await this.router.navigate(['/procesal/procesal-escrito/test-escrito-procesal']);
-        await loading.dismiss();
-      } else {
-        await loading.dismiss();
-        console.error('❌ Error en respuesta:', sessionResponse);
-        
-        const toast = await this.toastController.create({
-          message: 'No se pudo iniciar el test. Intenta nuevamente.',
-          duration: 3000,
-          color: 'danger',
-          position: 'top'
-        });
-        await toast.present();
-      }
-      
-    } catch (error) {
+    if (!currentUser || !currentUser.id) {
       await loading.dismiss();
-      console.error('❌ Error al iniciar test:', error);
+      const toast = await this.toastController.create({
+        message: 'Debes iniciar sesión para hacer un test',
+        duration: 3000,
+        color: 'warning',
+        position: 'top'
+      });
+      await toast.present();
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // ✅ Construir sessionData base
+    const sessionData: any = {
+      studentId: currentUser.id,
+      questionCount: this.selectedQuantity,
+      difficulty: 'intermedio',
+      legalAreas: ['Derecho Procesal']
+    };
+
+    // ✅ Agregar filtros de alcance
+    if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
+      sessionData.SubtemaId = this.selectedSubtemaId;
+      console.log('🎯 Iniciando test - SUBTEMA:', this.selectedSubtemaId);
+    } else if (this.scopeType === 'tema' && this.selectedTemaId) {
+      sessionData.TemaId = this.selectedTemaId;
+      console.log('🎯 Iniciando test - TEMA:', this.selectedTemaId);
+    } else {
+      console.log('🎯 Iniciando test - TODO Derecho Procesal');
+    }
+
+    console.log('📤 Datos de sesión enviados:', sessionData);
+
+    // ✅ Verificar si hay errores
+    let hasErrorsInScope = false;
+    
+    if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
+      hasErrorsInScope = this.subtemaHasErrors(this.selectedSubtemaId);
+    } else if (this.scopeType === 'tema' && this.selectedTemaId) {
+      hasErrorsInScope = this.temaHasErrors(this.selectedTemaId);
+    } else if (this.scopeType === 'all') {
+      hasErrorsInScope = this.weakTopics.some(t => t.area?.toLowerCase().includes('procesal'));
+    }
+
+    console.log('🎯 Tiene errores en alcance:', hasErrorsInScope);
+
+    let sessionResponse;
+    
+    // ✅ Usar endpoint correcto según si hay errores
+    if (hasErrorsInScope) {
+      loading.message = 'Preparando test de reforzamiento...';
+      
+      // ✅ Para reforzamiento, usar formato diferente
+      const reinforcementData = {
+        studentId: currentUser.id,
+        questionCount: this.selectedQuantity,
+        ...(this.selectedSubtemaId && { SubtemaId: this.selectedSubtemaId }),
+        ...(this.selectedTemaId && { TemaId: this.selectedTemaId })
+      };
+      
+      sessionResponse = await this.apiService.startReinforcementSession(reinforcementData).toPromise();
+      
+      if (sessionResponse?.success && sessionResponse.noQuestionsToReinforce) {
+        await loading.dismiss();
+        const toast = await this.toastController.create({
+          message: '✅ ¡Excelente! No tienes preguntas para reforzar. Iniciando test normal...',
+          duration: 2000,
+          color: 'success',
+          position: 'top'
+        });
+        await toast.present();
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // ✅ Usar sessionData que ya tiene todo configurado
+        sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
+      }
+    } else {
+      // ✅ Test normal - usar sessionData directamente
+      loading.message = 'Preparando test de práctica...';
+      sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
+    }
+    
+    if (sessionResponse?.success) {
+      this.apiService.setCurrentSession(sessionResponse);
+      console.log('✅ Sesión iniciada correctamente');
+      await this.router.navigate(['/procesal/procesal-escrito/test-escrito-procesal']);
+      await loading.dismiss();
+    } else {
+      await loading.dismiss();
+      console.error('❌ Error en respuesta:', sessionResponse);
       
       const toast = await this.toastController.create({
-        message: 'Hubo un error al iniciar el test. Intenta nuevamente.',
+        message: 'No se pudo iniciar el test. Intenta nuevamente.',
         duration: 3000,
         color: 'danger',
         position: 'top'
       });
       await toast.present();
     }
+    
+  } catch (error) {
+    await loading.dismiss();
+    console.error('❌ Error al iniciar test:', error);
+    
+    const toast = await this.toastController.create({
+      message: 'Hubo un error al iniciar el test. Intenta nuevamente.',
+      duration: 3000,
+      color: 'danger',
+      position: 'top'
+    });
+    await toast.present();
   }
+}
 
   // =====================
   // NAVEGACIÓN
