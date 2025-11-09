@@ -64,7 +64,6 @@
       </div>
     </div>
 
-    <!-- Estadísticas Generales - SOLO SESIONES -->
 <!-- Estadísticas Generales - SOLO SESIONES -->
 <div class="stats-overview">
   <div class="stat-card sessions-card" (click)="navigateToAchievements()">
@@ -114,6 +113,8 @@
     </div>
   </div>
 </div>
+
+
 
     <!-- Gráfico Semanal/Mensual -->
     <div class="weekly-chart-container">
@@ -169,6 +170,60 @@
       </div>
     </div>
 
+
+    <!-- NUEVA SECCIÓN: PUNTOS MÁS DÉBILES -->
+    <div class="weak-points-section">
+      <h2 class="section-title-weak">
+        <ion-icon name="trending-down"></ion-icon>
+        Puntos más débiles
+      </h2>
+
+      <!-- Civil -->
+      <div class="weak-area-container" *ngIf="getTop3WeakTopicsCivil().length > 0">
+        <h3 class="weak-area-title civil">
+          <ion-icon name="scale"></ion-icon>
+          Derecho Civil
+        </h3>
+        <div class="weak-topics-list">
+          <div *ngFor="let topic of getTop3WeakTopicsCivil(); let i = index" 
+               class="weak-topic-card civil"
+               (click)="goToReforzarWithTopic('civil', topic)">
+            <div class="weak-topic-rank">{{ i + 1 }}</div>
+            <div class="weak-topic-content">
+              <h4 class="weak-topic-name">{{ topic.nombre }}</h4>
+              <p class="weak-topic-stats">{{ topic.totalErrores }} de {{ topic.totalIntentos }} incorrectas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Procesal -->
+      <div class="weak-area-container" *ngIf="getTop3WeakTopicsProcesal().length > 0">
+        <h3 class="weak-area-title procesal">
+          <ion-icon name="book"></ion-icon>
+          Derecho Procesal
+        </h3>
+        <div class="weak-topics-list">
+          <div *ngFor="let topic of getTop3WeakTopicsProcesal(); let i = index" 
+               class="weak-topic-card procesal"
+               (click)="goToReforzarWithTopic('procesal', topic)">
+            <div class="weak-topic-rank">{{ i + 1 }}</div>
+            <div class="weak-topic-content">
+              <h4 class="weak-topic-name">{{ topic.nombre }}</h4>
+              <p class="weak-topic-stats">{{ topic.totalErrores }} de {{ topic.totalIntentos }} incorrectas</p>
+            </div>
+            <ion-icon name="chevron-forward" class="weak-topic-arrow"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje si no hay puntos débiles -->
+      <div class="no-weak-points" *ngIf="getTop3WeakTopicsCivil().length === 0 && getTop3WeakTopicsProcesal().length === 0">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <p>¡Excelente! No tienes puntos débiles en este momento</p>
+      </div>
+    </div>
+    
     <!-- Estadísticas por Área - SOLO CIVIL Y PROCESAL -->
     <div class="area-stats-container" #areaStatsSection>
       <h2>Rendimiento por Área</h2>

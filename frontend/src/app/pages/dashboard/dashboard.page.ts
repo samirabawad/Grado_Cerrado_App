@@ -696,4 +696,74 @@ async navigateMonth(direction: number) {
     
     return '¡Sigue así!';
   }
+
+  // =====================
+  // PUNTOS DÉBILES
+  // =====================
+
+  getTop3WeakTopicsCivil(): any[] {
+    if (!this.areaStats || this.areaStats.length === 0) return [];
+    
+    const civilArea = this.areaStats.find(a => a.area === 'Derecho Civil');
+    if (!civilArea || !civilArea.temas) return [];
+
+    // Obtener todos los temas con sus errores
+    const temasConErrores = civilArea.temas
+      .map((tema: any) => {
+        const totalPreguntas = tema.totalPreguntas || 0;
+        const correctas = tema.preguntasCorrectas || 0;
+        const incorrectas = totalPreguntas - correctas;
+        const tasaError = totalPreguntas > 0 ? (incorrectas / totalPreguntas) * 100 : 0;
+
+        return {
+          nombre: tema.temaNombre,
+          totalErrores: incorrectas,
+          totalIntentos: totalPreguntas,
+          tasaError: tasaError,
+          temaId: tema.temaId
+        };
+      })
+      .filter((tema: any) => tema.totalErrores > 0) // Solo temas con errores
+      .sort((a: any, b: any) => b.tasaError - a.tasaError); // Ordenar por tasa de error descendente
+
+    return temasConErrores.slice(0, 3); // Top 3
+  }
+
+  getTop3WeakTopicsProcesal(): any[] {
+    if (!this.areaStats || this.areaStats.length === 0) return [];
+    
+    const procesalArea = this.areaStats.find(a => a.area === 'Derecho Procesal');
+    if (!procesalArea || !procesalArea.temas) return [];
+
+    // Obtener todos los temas con sus errores
+    const temasConErrores = procesalArea.temas
+      .map((tema: any) => {
+        const totalPreguntas = tema.totalPreguntas || 0;
+        const correctas = tema.preguntasCorrectas || 0;
+        const incorrectas = totalPreguntas - correctas;
+        const tasaError = totalPreguntas > 0 ? (incorrectas / totalPreguntas) * 100 : 0;
+
+        return {
+          nombre: tema.temaNombre,
+          totalErrores: incorrectas,
+          totalIntentos: totalPreguntas,
+          tasaError: tasaError,
+          temaId: tema.temaId
+        };
+      })
+      .filter((tema: any) => tema.totalErrores > 0) // Solo temas con errores
+      .sort((a: any, b: any) => b.tasaError - a.tasaError); // Ordenar por tasa de error descendente
+
+    return temasConErrores.slice(0, 3); // Top 3
+  }
+
+  goToReforzarWithTopic(area: 'civil' | 'procesal', topic: any) {
+    const route = area === 'civil' ? '/civil/civil-reforzar' : '/procesal/procesal-reforzar';
+    this.router.navigate([route], {
+      queryParams: { 
+        temaId: topic.temaId,
+        fromDashboard: 'true'
+      }
+    });
+  }
 }

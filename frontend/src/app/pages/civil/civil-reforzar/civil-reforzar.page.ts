@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { IonContent, IonicModule, LoadingController, ToastController } from '@ionic/angular';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../../services/api.service';
 
@@ -10,49 +11,129 @@ import { ApiService } from '../../../services/api.service';
   templateUrl: './civil-reforzar.page.html',
   styleUrls: ['./civil-reforzar.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, BottomNavComponent]
+  imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class CivilReforzarPage implements OnInit {
+
+  @ViewChild(IonContent, { static: false }) ionContent!: IonContent;
   
-  isLoading: boolean = true;
-  
-  // Datos principales
   weakTopics: any[] = [];
   recentSessions: any[] = [];
   temas: any[] = [];
-  
-  // Control de secciones expandibles
-  expandedSections: { [key: string]: boolean } = {
-    'recentSessions': false
-  };
-  
-  // Sesiones
   expandedSession: number | null = null;
+  expandedQuestion: number | null = null;
   sessionDetails: any = null;
   isLoadingDetails: boolean = false;
-  expandedQuestion: number | null = null;
   
-  // Nueva lógica de práctica de errores
-  practiceMode: 'mix' | 'tema' | null = null;
-  selectedQuantity: number = 1;
+  expandedSections: { [key: string]: boolean } = {
+    weakTopics: false,
+    recentSessions: false,
+    testSection: false
+  };
+  
+  selectedQuantity: number = 5;
+  scopeType: 'all' | 'tema' | 'subtema' = 'all';
   selectedTemaId: number | null = null;
+  selectedSubtemaId: number | null = null;
+  expandedTema: number | null = null;
+  showThemeSelector: boolean = false;
   
-  // Sets para tracking de errores
+  isLoading: boolean = true;
+  practiceMode: 'mix' | 'tema' | null = null;
+
+  // sets para marcar errores
   temasConErrores: Set<number> = new Set();
-  subtemasConErrores: Set<number> = new Set();
-  
+  subtemasConErrores: Set<number> = new Set(); // futuro por si hay stats por subtema
+
   constructor(
     private router: Router,
-    private apiService: ApiService,
-    private alertController: AlertController
+    private route: ActivatedRoute,
+    private loadingController: LoadingController,
+    private toastController: ToastController,
+    private apiService: ApiService
   ) { }
 
   ngOnInit() {
-    this.loadData();
+    this.route.queryParams.subscribe(params => {
+      const temaId = params['temaId'];
+      const fromDashboard = params['fromDashboard'];
+      
+      if (fromDashboard === 'true' && temaId) {
+        this.loadData().then(() => {
+          // ACTIVAR modo tema
+          this.practiceMode = 'tema';
+          this.selectedTemaId = Number(temaId);
+          this.scopeType = 'tema';
+          this.showThemeSelector = true;
+          this.expandedSections['testSection'] = true;
+          
+          console.log('✅ Navegando desde dashboard con tema:', {
+            temaId: this.selectedTemaId,
+            practiceMode: this.practiceMode,
+            tema: this.temas.find(t => t.id === Number(temaId))
+          });
+        });
+      } else {
+        this.loadData();
+      }
+    });
   }
 
-  ionViewWillEnter() {
-    this.loadData();
+  // =====================
+  // UI helpers
+  // =====================
+
+  toggleSection(section: string) {
+    if (this.expandedSections[section]) {
+      this.expandedSections[section] = false;
+    } else {
+      Object.keys(this.expandedSections).forEach(key => {
+        this.expandedSections[key] = false;
+      });
+      this.expandedSections[section] = true;
+    }
+  }
+
+  toggleTema(temaId: number) {
+    this.expandedTema = this.expandedTema === temaId ? null : temaId;
+  }
+
+  isSectionExpanded(section: string): boolean {
+    return this.expandedSections[section];
+  }
+
+  // RecomendaciÃ³n principal solo si es de Derecho Civil
+  getMainRecommendation() {
+    if (this.weakTopics.length === 0) return null;
+    
+    const firstTopic = this.weakTopics[0];
+    if (!firstTopic.area || !firstTopic.area.toLowerCase().includes('civil')) {
+      return null;
+    }
+    
+    return firstTopic;
+  }
+
+  getErrorSubtemasCount(tema: any): number {
+    return this.getErroresTema(tema.id);
+  }
+
+  // =====================
+  // ERRORES POR TEMA
+  // =====================
+
+  /** nÂº de errores en este tema segÃºn weakTopics */
+  getErroresTema(temaId: number): number {
+    const topic = this.weakTopics.find(t => t.temaId === temaId);
+    return topic ? (topic.totalErrores || 0) : 0;
+  }
+
+  temaHasErrors(temaId: number): boolean {
+    return this.getErroresTema(temaId) > 0;
+  }
+
+  subtemaHasErrors(subtemaId: number): boolean {
+    return this.subtemasConErrores.has(subtemaId);
   }
 
   // =====================
@@ -73,7 +154,7 @@ export class CivilReforzarPage implements OnInit {
 
       const studentId = currentUser.id;
 
-      // 1) Temas débiles SOLO de Derecho Civil
+      // 1) Temas dÃ©biles SOLO de Derecho Civil
       try {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
@@ -89,21 +170,25 @@ export class CivilReforzarPage implements OnInit {
             if (topic.temaId) {
               this.temasConErrores.add(topic.temaId);
             }
+            // actualmente casi nunca viene subtemaId
             if (topic.subtemaId) {
               this.subtemasConErrores.add(topic.subtemaId);
             }
           });
           
-          console.log('✅ Temas débiles de CIVIL:', this.weakTopics);
+          console.log('âœ… Temas dÃ©biles de CIVIL:', this.weakTopics);
+          console.log('ðŸ“ Temas con errores:', Array.from(this.temasConErrores));
+          console.log('ðŸ“ Subtemas con errores:', Array.from(this.subtemasConErrores));
         }
       } catch (error) {
-        console.error('Error cargando temas débiles:', error);
+        console.error('Error cargando temas dÃ©biles:', error);
         this.weakTopics = [];
       }
 
-      // 2) Sesiones recientes (Civil)
+      // 2) Sesiones recientes (Civil si estÃ¡ marcado, si no todo)
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
+        console.log('ðŸ“¦ Respuesta RAW del backend (civil reforzar):', sessionsResponse);
 
         if (sessionsResponse && sessionsResponse.success) {
           const raw = sessionsResponse.data || [];
@@ -111,7 +196,11 @@ export class CivilReforzarPage implements OnInit {
           const soloCivil = raw.filter((s: any) => {
             const areaName = (s.area || s.areaNombre || '').toLowerCase();
             const areaId = s.areaId || s.area_id;
-            return areaName.includes('civil') || areaId === 1;
+
+            const isCivilByName = areaName.includes('civil');
+            const isCivilById = areaId === 1; // 1 = Civil en tu BD (ajusta si no)
+
+            return isCivilByName || isCivilById;
           });
 
           const base = soloCivil.length > 0 ? soloCivil : raw;
@@ -134,7 +223,7 @@ export class CivilReforzarPage implements OnInit {
               };
             });
 
-          console.log('✅ Sesiones Civil:', this.recentSessions);
+          console.log('âœ… Sesiones que se van a mostrar en Civil:', this.recentSessions);
         }
       } catch (error) {
         console.error('Error cargando sesiones recientes:', error);
@@ -168,30 +257,37 @@ export class CivilReforzarPage implements OnInit {
               });
               
               const porcentajeTema = subtemasConPorcentaje.length > 0
-                ? Math.round(subtemasConPorcentaje.reduce((sum: number, sub: any) => 
-                    sum + sub.porcentaje, 0) / subtemasConPorcentaje.length)
+                ? Math.round(subtemasConPorcentaje.reduce((sum: number, s: any) => sum + s.porcentaje, 0) / subtemasConPorcentaje.length)
                 : 0;
 
               // Calcular total de errores del tema
-              const totalErroresTema = this.getTemaErrorCount(tema.temaId);
-
+              const totalErroresTema = this.getErroresTema(tema.temaId);
+              
               return {
                 id: tema.temaId,
                 nombre: tema.temaNombre,
-                cantidadPreguntas: tema.totalPreguntas,
+                totalPreguntas: tema.totalPreguntas,
+                preguntasCorrectas: tema.preguntasCorrectas,
                 porcentaje: porcentajeTema,
+                cantidadPreguntas: tema.totalPreguntas,
                 subtemas: subtemasConPorcentaje,
                 hasErrors: this.temaHasErrors(tema.temaId),
                 totalErrores: totalErroresTema
               };
             });
 
-            console.log('✅ Temas Civil:', this.temas);
+            console.log('âœ… Temas cargados desde estadÃ­sticas:', this.temas);
+          } else {
+            console.log('âš ï¸ No hay estadÃ­sticas, cargando estructura de BD...');
+            await this.loadTemasFromDatabase();
           }
+        } else {
+          console.log('âš ï¸ No hay estadÃ­sticas, cargando estructura de BD...');
+          await this.loadTemasFromDatabase();
         }
       } catch (error) {
         console.error('Error cargando temas:', error);
-        this.temas = [];
+        await this.loadTemasFromDatabase();
       }
 
     } catch (error) {
@@ -201,55 +297,353 @@ export class CivilReforzarPage implements OnInit {
     }
   }
 
-  // =====================
-  // ERRORES POR TEMA
-  // =====================
+  async loadTemasFromDatabase() {
+    try {
+      // 1 = Derecho Civil
+      const response = await this.apiService.getTemasByArea(1).toPromise();
 
-  getTemaErrorCount(temaId: number): number {
-    const topic = this.weakTopics.find(t => t.temaId === temaId);
-    return topic ? (topic.totalErrores || 0) : 0;
+      if (response && response.success) {
+        const temasDesdeApi = response.data || [];
+
+        this.temas = temasDesdeApi.map((tema: any) => ({
+          id: tema.id,
+          nombre: tema.nombre,
+          totalPreguntas: 0,
+          preguntasCorrectas: 0,
+          porcentaje: 0,
+          cantidadPreguntas: 0,
+          subtemas: (tema.subtemas || []).map((sub: any) => ({
+            id: sub.id,
+            nombre: sub.nombre,
+            cantidadPreguntas: 0,
+            porcentaje: 0
+          }))
+        }));
+
+        console.log('âœ… Temas cargados desde BD (Civil):', this.temas);
+      } else {
+        console.warn('âš ï¸ Respuesta sin Ã©xito cargando temas de Civil:', response);
+        this.temas = [];
+      }
+    } catch (error) {
+      console.error('âŒ Error cargando temas de Civil desde BD:', error);
+      this.temas = [];
+    }
   }
 
-  temaHasErrors(temaId: number): boolean {
-    return this.temasConErrores.has(temaId);
-  }
+  // =====================
+  // SCROLL AL TEST
+  // =====================
 
-  subtemaHasErrors(subtemaId: number): boolean {
-    return this.subtemasConErrores.has(subtemaId);
+  scrollToTestSection() {
+    // abrir secciÃ³n de test
+    this.expandedSections['testSection'] = true;
+
+    // pequeÃ±o delay para que Angular pinte la secciÃ³n abierta
+    setTimeout(() => {
+      const el = document.getElementById('test-section');
+      if (el && this.ionContent) {
+        const y = el.offsetTop - 60; // ajusta el 60 si el header es mÃ¡s grande/pequeÃ±o
+        this.ionContent.scrollToPoint(0, y, 500); // 500 ms de animaciÃ³n
+      }
+    }, 0);
   }
 
   // =====================
-  // PRÁCTICA DE ERRORES
+  // SELECCIÃ“N DE ALCANCE
   // =====================
+
+  // Cuando haces clic en un "tema dÃ©bil"
+  selectWeakTopic(topic: any) {
+    console.log('ðŸŽ¯ Tema dÃ©bil seleccionado:', topic);
+    this.selectedTemaId = topic.temaId;
+    this.selectedSubtemaId = null;
+    this.scopeType = 'tema';
+    this.showThemeSelector = true;
+
+    // ir a la secciÃ³n de Test
+    this.scrollToTestSection();
+  }
+
+  toggleTemaExpansion(temaId: number) {
+    this.expandedTema = this.expandedTema === temaId ? null : temaId;
+  }
+
+  selectScope(type: 'all' | 'tema' | 'subtema', id: number | null = null) {
+    this.scopeType = type;
+    
+    if (type === 'all') {
+      this.selectedTemaId = null;
+      this.selectedSubtemaId = null;
+      this.showThemeSelector = false;
+      console.log('âœ… Seleccionado: Todo Derecho Civil');
+    } else if (type === 'tema') {
+      this.selectedTemaId = id;
+      this.selectedSubtemaId = null;
+      this.showThemeSelector = true;
+      console.log('âœ… Tema seleccionado:', id);
+    } else if (type === 'subtema') {
+      this.showThemeSelector = true;
+      console.log('âœ… Modo subtema activado');
+    }
+  }
+
+  selectSubtema(subtema: any) {
+    this.scopeType = 'subtema';
+    this.selectedSubtemaId = subtema.id;
+    this.selectedTemaId = null;
+    
+    console.log('âœ… Subtema seleccionado:', {
+      subtemaId: subtema.id,
+      nombre: subtema.nombre,
+      scopeType: this.scopeType
+    });
+  }
+
+  onSelectTema(tema: any, event: Event) {
+    event.stopPropagation();
+    this.selectScope('tema', tema.id);
+  }
+
+  onSelectSubtema(subtema: any) {
+    this.selectSubtema(subtema);
+  }
+
+  // =====================
+  // INICIO DEL TEST
+  // =====================
+
+  async startTest() {
+    const loading = await this.loadingController.create({
+      message: 'Preparando test...',
+      spinner: 'crescent',
+      cssClass: 'custom-loading'
+    });
+    
+    await loading.present();
+    
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+
+      if (!currentUser || !currentUser.id) {
+        await loading.dismiss();
+        const toast = await this.toastController.create({
+          message: 'Debes iniciar sesiÃ³n para hacer un test',
+          duration: 3000,
+          color: 'warning',
+          position: 'top'
+        });
+        await toast.present();
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      // Â¿Hay errores en el alcance seleccionado?
+      let hasErrorsInScope = false;
+      
+      if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
+        hasErrorsInScope = this.subtemaHasErrors(this.selectedSubtemaId);
+      } else if (this.scopeType === 'tema' && this.selectedTemaId) {
+        hasErrorsInScope = this.temaHasErrors(this.selectedTemaId);
+      } else if (this.scopeType === 'all') {
+        hasErrorsInScope = this.weakTopics.some(t => t.area?.toLowerCase().includes('civil'));
+      }
+
+      const sessionData: any = {
+        studentId: currentUser.id,
+        questionCount: this.selectedQuantity
+      };
+
+      if (this.scopeType === 'subtema' && this.selectedSubtemaId) {
+        sessionData.subtemaId = this.selectedSubtemaId;
+        console.log('ðŸŽ¯ Iniciando test - SUBTEMA:', this.selectedSubtemaId);
+      } else if (this.scopeType === 'tema' && this.selectedTemaId) {
+        sessionData.temaId = this.selectedTemaId;
+        console.log('ðŸŽ¯ Iniciando test - TEMA:', this.selectedTemaId);
+      } else {
+        console.log('ðŸŽ¯ Iniciando test - TODO Derecho Civil');
+      }
+
+      console.log('ðŸ“¤ Datos de sesiÃ³n enviados:', sessionData);
+      console.log('ðŸŽ¯ Tiene errores en alcance:', hasErrorsInScope);
+
+      let sessionResponse;
+      
+      // Usar endpoint de REFORZAMIENTO solo si hay errores
+      if (hasErrorsInScope) {
+        loading.message = 'Preparando test de reforzamiento...';
+        sessionResponse = await this.apiService.startReinforcementSession(sessionData).toPromise();
+        
+        if (sessionResponse?.success && sessionResponse.noQuestionsToReinforce) {
+          await loading.dismiss();
+          const toast = await this.toastController.create({
+            message: 'âœ… Â¡Excelente! No tienes preguntas para reforzar. Iniciando test normal...',
+            duration: 2000,
+            color: 'success',
+            position: 'top'
+          });
+          await toast.present();
+          
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          const normalSessionData = {
+            studentId: currentUser.id,
+            difficulty: 'intermedio',
+            legalAreas: ['Derecho Civil'],
+            numberOfQuestions: this.selectedQuantity,
+            ...(sessionData.subtemaId && { SubtemaId: sessionData.subtemaId }),
+            ...(sessionData.temaId && { TemaId: sessionData.temaId })
+          };
+          
+          sessionResponse = await this.apiService.startStudySession(normalSessionData).toPromise();
+        }
+      } else {
+        // No hay errores â†’ test normal
+        loading.message = 'Preparando test de prÃ¡ctica...';
+        const normalSessionData = {
+          studentId: currentUser.id,
+          difficulty: 'intermedio',
+          legalAreas: ['Derecho Civil'],
+          numberOfQuestions: this.selectedQuantity,
+          ...(sessionData.subtemaId && { SubtemaId: sessionData.subtemaId }),
+          ...(sessionData.temaId && { TemaId: sessionData.temaId })
+        };
+        
+        sessionResponse = await this.apiService.startStudySession(normalSessionData).toPromise();
+      }
+      
+      if (sessionResponse?.success) {
+        this.apiService.setCurrentSession(sessionResponse);
+        console.log('âœ… SesiÃ³n iniciada correctamente');
+        await this.router.navigate(['/civil/civil-escrito/test-escrito-civil']);
+        await loading.dismiss();
+      } else {
+        await loading.dismiss();
+        console.error('âŒ Error en respuesta:', sessionResponse);
+        
+        const toast = await this.toastController.create({
+          message: 'No se pudo iniciar el test. Intenta nuevamente.',
+          duration: 3000,
+          color: 'danger',
+          position: 'top'
+        });
+        await toast.present();
+      }
+      
+    } catch (error) {
+      await loading.dismiss();
+      console.error('âŒ Error al iniciar test:', error);
+      
+      const toast = await this.toastController.create({
+        message: 'Hubo un error al iniciar el test. Intenta nuevamente.',
+        duration: 3000,
+        color: 'danger',
+        position: 'top'
+      });
+      await toast.present();
+    }
+  }
+
+  // =====================
+  // NAVEGACIÃ“N
+  // =====================
+
+  goBack() {
+    this.router.navigate(['/civil']);
+  }
+
+async viewSession(session: any) {
+    const testId = session.testId || session.id;
+    
+    if (this.expandedSession === testId) {
+      // Si ya estÃ¡ abierta, cerrarla
+      this.expandedSession = null;
+      this.sessionDetails = null;
+      this.expandedQuestion = null;
+    } else {
+      // Abrir y cargar detalles
+      this.expandedSession = testId;
+      await this.loadSessionDetails(testId);
+    }
+  }
+
+  async loadSessionDetails(testId: number) {
+    this.isLoadingDetails = true;
+    this.expandedQuestion = null;
+
+    try {
+      const response = await this.apiService.getTestDetail(testId).toPromise();
+      
+      if (response && response.success) {
+        this.sessionDetails = response.data;
+        console.log('Detalles del test cargados:', this.sessionDetails);
+      }
+    } catch (error) {
+      console.error('Error cargando detalles del test:', error);
+    } finally {
+      this.isLoadingDetails = false;
+    }
+  }
+
+  toggleQuestion(index: number) {
+    if (this.expandedQuestion === index) {
+      this.expandedQuestion = null;
+    } else {
+      this.expandedQuestion = index;
+    }
+  }
+
+  getQuestionOptions(question: any): string[] {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+      return ['Verdadero', 'Falso'];
+    }
+    
+    if (Array.isArray(question.answers) && question.answers.length > 0) {
+      return question.answers.map((answer: any) => answer.text);
+    }
+    
+    return [];
+  }
+
+  isOptionSelected(question: any, option: string): boolean {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+      return question.selectedAnswer === (option === 'Verdadero' ? 'true' : 'false');
+    }
+    return question.selectedAnswer === option;
+  }
+
+  isOptionCorrect(question: any, option: string): boolean {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+      const correctBool = question.questionText.toLowerCase().includes('verdader') || 
+                         question.answers?.some((a: any) => a.text.toLowerCase() === 'verdadero' && a.isCorrect);
+      return (option === 'Verdadero') === correctBool;
+    }
+    
+    const correctAnswer = question.answers?.find((a: any) => a.isCorrect);
+    return correctAnswer?.text === option;
+  }
+
+  getOptionLetter(index: number): string {
+    return String.fromCharCode(65 + index);
+  }
+
+  selectQuantity(quantity: number) {
+    this.selectedQuantity = quantity;
+  }
+
+  canSelectQuantity(quantity: number): boolean {
+    return true;
+  }
+
+  getAvailableErrors(): number {
+    return this.weakTopics.reduce((sum, topic) => sum + (topic.totalErrores || 0), 0);
+  }
 
   selectPracticeMode(mode: 'mix' | 'tema') {
     this.practiceMode = mode;
     if (mode === 'mix') {
       this.selectedTemaId = null;
     }
-    console.log('✅ Modo seleccionado:', mode);
-  }
-
-  selectQuantity(quantity: number) {
-    if (this.canSelectQuantity(quantity)) {
-      this.selectedQuantity = quantity;
-    }
-  }
-
-  canSelectQuantity(quantity: number): boolean {
-    const available = this.getAvailableErrors();
-    return available >= quantity;
-  }
-
-  getAvailableErrors(): number {
-    if (this.practiceMode === 'mix') {
-      // Total de errores de todos los temas
-      return this.weakTopics.reduce((sum, topic) => sum + (topic.totalErrores || 0), 0);
-    } else if (this.practiceMode === 'tema' && this.selectedTemaId) {
-      // Errores del tema seleccionado
-      return this.getTemaErrorCount(this.selectedTemaId);
-    }
-    return 0;
   }
 
   getTemasWithErrors(): any[] {
@@ -258,138 +652,14 @@ export class CivilReforzarPage implements OnInit {
 
   selectTemaForPractice(tema: any) {
     this.selectedTemaId = tema.id;
-    console.log('✅ Tema seleccionado para práctica:', tema.nombre);
   }
 
   canStartTest(): boolean {
-    if (!this.practiceMode) return false;
     if (this.practiceMode === 'tema' && !this.selectedTemaId) return false;
-    return this.getAvailableErrors() >= this.selectedQuantity;
+    return this.getAvailableErrors() > 0;
   }
 
   async startErrorPractice() {
-    if (!this.canStartTest()) {
-      const alert = await this.alertController.create({
-        header: 'No se puede iniciar',
-        message: 'Selecciona un modo de práctica válido',
-        buttons: ['OK']
-      });
-      await alert.present();
-      return;
-    }
-
-    const currentUser = this.apiService.getCurrentUser();
-    if (!currentUser || !currentUser.id) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    // Aquí iría la lógica para iniciar el test con solo preguntas con error
-    // Por ahora solo navegar
-    console.log('🚀 Iniciando práctica de errores:', {
-      mode: this.practiceMode,
-      quantity: this.selectedQuantity,
-      temaId: this.selectedTemaId
-    });
-
-    // TODO: Implementar endpoint que devuelva solo preguntas con error
-    const alert = await this.alertController.create({
-      header: 'Función en desarrollo',
-      message: `Modo: ${this.practiceMode}, Cantidad: ${this.selectedQuantity}`,
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  // =====================
-  // RECOMENDACIÓN
-  // =====================
-
-  getMainRecommendation() {
-    if (this.weakTopics.length === 0) return null;
-    
-    const firstTopic = this.weakTopics[0];
-    if (!firstTopic.area || !firstTopic.area.toLowerCase().includes('civil')) {
-      return null;
-    }
-    
-    return firstTopic;
-  }
-
-  async selectWeakTopic(topic: any) {
-    console.log('Tema débil seleccionado:', topic);
-    // Aquí puedes navegar o iniciar test específico
-  }
-
-  // =====================
-  // SECCIONES EXPANDIBLES
-  // =====================
-
-  toggleSection(section: string) {
-    this.expandedSections[section] = !this.expandedSections[section];
-  }
-
-  isSectionExpanded(section: string): boolean {
-    return this.expandedSections[section] || false;
-  }
-
-  // =====================
-  // SESIONES
-  // =====================
-
-  async viewSession(session: any) {
-    const sessionId = session.testId || session.id;
-    
-    if (this.expandedSession === sessionId) {
-      this.expandedSession = null;
-      this.sessionDetails = null;
-      return;
-    }
-
-    this.expandedSession = sessionId;
-    this.isLoadingDetails = true;
-    this.expandedQuestion = null;
-
-    try {
-      const response = await this.apiService.getTestDetail(sessionId).toPromise();
-      
-      if (response && response.success) {
-        this.sessionDetails = response.data;
-        console.log('✅ Detalles de sesión:', this.sessionDetails);
-      }
-    } catch (error) {
-      console.error('Error cargando detalles:', error);
-    } finally {
-      this.isLoadingDetails = false;
-    }
-  }
-
-  toggleQuestion(index: number) {
-    this.expandedQuestion = this.expandedQuestion === index ? null : index;
-  }
-
-  getQuestionOptions(question: any): string[] {
-    if (!question || !question.options) return [];
-    return question.options;
-  }
-
-  isOptionSelected(question: any, option: string): boolean {
-    return question.userAnswer === option;
-  }
-
-  isOptionCorrect(question: any, option: string): boolean {
-    return question.correctAnswer === option;
-  }
-
-  getOptionLetter(index: number): string {
-    return String.fromCharCode(65 + index);
-  }
-
-  // =====================
-  // NAVEGACIÓN
-  // =====================
-
-  goBack() {
-    this.router.navigate(['/civil']);
+    await this.startTest();
   }
 }
