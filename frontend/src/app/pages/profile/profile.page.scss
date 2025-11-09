@@ -346,6 +346,12 @@
   padding: 0;
   box-shadow: none;
   margin-top: 0;
+  overflow: visible;
+}
+
+.avatar-card-content {
+  padding: 0;
+  overflow: visible;
 }
 
 .avatar-card-content {
@@ -362,6 +368,7 @@
   align-items: center;
   width: 100%;
   max-width: 100%;
+  overflow: visible;
 }
 
 .avatar-preview {
@@ -522,18 +529,21 @@
 
 /* Contenedor circular con anillo */
 .avatar-preview {
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
   position: relative;
+  border-radius: 50%;
+  overflow: visible;
+  background: #f3f4f6;
   border: 3px solid #10b981;
-  box-shadow: 0 6px 16px rgba(16,185,129,.18);
-
+  
   img {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     display: block;
-    background: #f3f4f6;
+    border-radius: 50%;
   }
 }
 

@@ -133,9 +133,9 @@ async iniciarSesion() {
   irARegistro() {
     this.router.navigate(['/registro']);
   }
+  
   // Recuperar contraseña
-// Recuperar contraseña
-  async forgotPassword() {
+async forgotPassword() {
     const alert = await this.alertController.create({
       header: 'Recuperar Contraseña',
       message: 'Ingresa tu email y te enviaremos un código de recuperación',

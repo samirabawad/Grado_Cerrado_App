@@ -1256,22 +1256,34 @@ async completeTest() {
     this.router.navigate(['/civil/civil-oral']);
   }
 
-  convertBackendQuestions(backendQuestions: any[]): Question[] {
-    return backendQuestions.map((q: any) => ({
-      id: q.id?.toString() || Math.random().toString(),
-      text: q.texto_pregunta || q.questionText || q.text || '',
-      questionText: q.texto_pregunta || q.questionText || q.text || '',
-      type: q.tipo || q.type || 1,
-      category: q.tema || q.category || 'Derecho Civil',
-      tema: q.tema || q.category || 'Derecho Civil',
-      legalArea: q.legalArea || 'Derecho Civil',
-      difficulty: q.nivel || q.difficulty || 2,
-      correctAnswer: q.respuesta_correcta || q.correctAnswer || '',
-      explanation: q.explicacion || q.explanation || 'Sin explicación disponible',
-      options: q.opciones || q.options || [],
-      userAnswer: '',
-      isAnswered: false
-    }));
+convertBackendQuestions(backendQuestions: any[]): Question[] {
+    console.log('🔄 Convirtiendo preguntas del backend...');
+    console.log('🔄 Primera pregunta RAW:', JSON.stringify(backendQuestions[0], null, 2));
+    
+    return backendQuestions.map((q: any, index: number) => {
+      const converted = {
+        id: q.id?.toString() || Math.random().toString(),
+        text: q.texto_pregunta || q.questionText || q.text || '',
+        questionText: q.texto_pregunta || q.questionText || q.text || '',
+        type: q.tipo || q.type || 1,
+        category: q.tema || q.category || 'Derecho Civil',
+        tema: q.tema || q.category || 'Derecho Civil',
+        legalArea: q.legalArea || 'Derecho Civil',
+        difficulty: q.nivel || q.difficulty || 2,
+        correctAnswer: q.respuesta_correcta || q.correctAnswer || '',
+        explanation: q.explicacion || q.explanation || 'Sin explicación disponible',
+        options: q.opciones || q.options || q.Opciones || q.Options || [],
+        userAnswer: '',
+        isAnswered: false
+      };
+      
+      if (index === 0) {
+        console.log('✅ Primera pregunta CONVERTIDA:', JSON.stringify(converted, null, 2));
+        console.log('✅ Opciones extraídas:', converted.options);
+      }
+      
+      return converted;
+    });
   }
 
 async selectOptionByClick(optionText: string) {

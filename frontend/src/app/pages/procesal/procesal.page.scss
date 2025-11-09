@@ -47,8 +47,12 @@ ion-content.procesal-content {
 // CONTENIDO PRINCIPAL
 // ========================================
 .content-area {
-  padding: calc(env(safe-area-inset-top) + 80px) 20px 100px;
+  margin-top: 80px;
+  padding: 0 20px 100px;
+  position: relative;
+  z-index: 1;
 }
+
 
 // ========================================
 // PROGRESO CARD - ESTILO DASHBOARD CON AZUL

@@ -6,6 +6,7 @@
 
   <div class="content-area">
     <div class="selector-card">
+<!-- Cantidad de preguntas -->
       <h2>¿Cuántas preguntas?</h2>
       
       <div class="quantity-selector">
@@ -19,6 +20,14 @@
         
         <button 
           class="quantity-option" 
+          [class.selected]="selectedQuantity === 3"
+          (click)="selectedQuantity = 3">
+          <span class="number">3</span>
+          <span class="label">Preguntas</span>
+        </button>
+        
+        <button 
+          class="quantity-option" 
           [class.selected]="selectedQuantity === 5"
           (click)="selectedQuantity = 5">
           <span class="number">5</span>
@@ -27,21 +36,14 @@
         
         <button 
           class="quantity-option" 
-          [class.selected]="selectedQuantity === 10"
-          (click)="selectedQuantity = 10">
-          <span class="number">10</span>
-          <span class="label">Preguntas</span>
-        </button>
-        
-        <button 
-          class="quantity-option" 
-          [class.selected]="selectedQuantity === 20"
-          (click)="selectedQuantity = 20">
-          <span class="number">20</span>
+          [class.selected]="selectedQuantity === 7"
+          (click)="selectedQuantity = 7">
+          <span class="number">7</span>
           <span class="label">Preguntas</span>
         </button>
       </div>
 
+      <!-- Nivel de dificultad -->
       <h2>Nivel de dificultad</h2>
       
       <div class="inline-picker-container">
@@ -55,19 +57,72 @@
             {{ level.label }}
           </div>
         </div>
-      <div class="picker-arrows">
+        <div class="picker-arrows">
           <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
           <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
         </div>
+      </div>
+      
+      <!-- ¿Qué quieres practicar? -->
+      <h2>¿Qué quieres practicar?</h2>
+      <p class="practice-subtitle">Elige todo el temario de Procesal o enfócate en un tema específico</p>
+      
+      <button 
+        class="scope-btn"
+        [class.active]="scopeType === 'all'"
+        (click)="selectScope('all')">
+        <ion-icon name="globe"></ion-icon>
+        Todo el temario de Procesal
+      </button>
+
+      <button 
+        class="scope-btn"
+        [class.active]="showThemeSelector"
+        (click)="selectScope('tema')">
+        <ion-icon name="list"></ion-icon>
+        Un tema específico
+      </button>
+
+      <!-- Estado dinámico -->
+      <div class="practice-status" *ngIf="scopeType === 'all'">
+        <ion-icon name="book"></ion-icon>
+        <span>Practicarás con preguntas de todos los temas</span>
+      </div>
+
+      <div class="practice-status selected" *ngIf="scopeType === 'tema' && selectedTemaId">
+        <ion-icon name="bookmark"></ion-icon>
+        <span>Practicarás solo: <strong>{{ getSelectedTemaName() }}</strong></span>
+      </div>
+
+      <!-- Selector de temas -->
+      <div *ngIf="showThemeSelector" class="theme-selector">
+        <div class="theme-selector-header">Selecciona un tema</div>
+        <div *ngFor="let tema of temas"
+             class="tema-item"
+             [class.selected]="selectedTemaId === tema.id"
+             (click)="selectTema(tema.id)">
+          <div class="tema-header">
+            <span class="tema-nombre">{{ tema.nombre }}</span>
+            <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validación -->
+      <div class="validation-message" *ngIf="showThemeSelector && !selectedTemaId">
+        <ion-icon name="alert-circle"></ion-icon>
+        <span>Selecciona un tema para continuar</span>
       </div>
 
       <ion-button 
         expand="block" 
         class="start-button"
+        [disabled]="showThemeSelector && !selectedTemaId"
         (click)="startQuickPractice()">
         <ion-icon name="play-outline" slot="start"></ion-icon>
         Empezar Test
       </ion-button>
+
     </div>
   </div>
 
