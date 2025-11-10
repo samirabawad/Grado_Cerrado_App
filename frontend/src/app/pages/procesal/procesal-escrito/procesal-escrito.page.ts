@@ -59,12 +59,6 @@ export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     }, 50);
   }
   ngAfterViewInit() {
-    setTimeout(() => {
-      const selectedIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
-      if (selectedIndex >= 0) {
-        this.scrollToOption(selectedIndex);
-      }
-    }, 100);
   }
 
   ngOnDestroy() {
