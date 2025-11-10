@@ -405,11 +405,24 @@ pendingAvatar: { id: number; url: string } | null = null;
     immediate: true // Por defecto corrección inmediata
   };
 
-  // ============================================
+// ============================================
   // SECCIONES
   // ============================================
   toggleSection(section: string) {
-    this.expandedSections[section] = !this.expandedSections[section];
+    // Si la sección ya está abierta, la cerramos
+    if (this.expandedSections[section]) {
+      this.expandedSections[section] = false;
+    } else {
+      // Cerrar todas las secciones principales
+      Object.keys(this.expandedSections).forEach(key => {
+        // Solo cerrar secciones principales, no subsecciones
+        if (['personalInfo', 'security', 'adaptiveMode', 'frequency', 'progress', 'settings'].includes(key)) {
+          this.expandedSections[key] = false;
+        }
+      });
+      // Abrir la sección clickeada
+      this.expandedSections[section] = true;
+    }
   }
 
   isSectionExpanded(section: string): boolean {
