@@ -43,7 +43,7 @@ export class ProcesalReforzarPage implements OnInit {
 
   // sets para marcar errores
   temasConErrores: Set<number> = new Set();
-  subtemasConErrores: Set<number> = new Set();
+  subtemasConErrores: Set<number> = new Set(); // futuro por si hay stats por subtema
 
   constructor(
     private router: Router,
@@ -102,7 +102,7 @@ export class ProcesalReforzarPage implements OnInit {
     return this.expandedSections[section];
   }
 
-  // Recomendación principal solo si es de Derecho Procesal
+  // RecomendaciÃ³n principal solo si es de Derecho Procesal
   getMainRecommendation() {
     if (this.weakTopics.length === 0) return null;
     
@@ -115,21 +115,21 @@ export class ProcesalReforzarPage implements OnInit {
   }
 
   getErrorSubtemasCount(tema: any): number {
-    return this.getTemaErrorCount(tema.id);
+    return this.getErroresTema(tema.id);
   }
 
   // =====================
   // ERRORES POR TEMA
   // =====================
 
-  /** nº de errores en este tema según weakTopics */
-  getTemaErrorCount(temaId: number): number {
+  /** nÂº de errores en este tema segÃºn weakTopics */
+  getErroresTema(temaId: number): number {
     const topic = this.weakTopics.find(t => t.temaId === temaId);
     return topic ? (topic.totalErrores || 0) : 0;
   }
 
   temaHasErrors(temaId: number): boolean {
-    return this.getTemaErrorCount(temaId) > 0;
+    return this.getErroresTema(temaId) > 0;
   }
 
   subtemaHasErrors(subtemaId: number): boolean {
@@ -154,7 +154,7 @@ export class ProcesalReforzarPage implements OnInit {
 
       const studentId = currentUser.id;
 
-      // 1) Temas débiles SOLO de Derecho Procesal
+      // 1) Temas dÃ©biles SOLO de Derecho Procesal
       try {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
@@ -176,34 +176,34 @@ export class ProcesalReforzarPage implements OnInit {
             }
           });
           
-          console.log('✅ Temas débiles de PROCESAL:', this.weakTopics);
-          console.log('📊 Temas con errores:', Array.from(this.temasConErrores));
-          console.log('📊 Subtemas con errores:', Array.from(this.subtemasConErrores));
+          console.log('âœ… Temas dÃ©biles de procesal:', this.weakTopics);
+          console.log('ðŸ“ Temas con errores:', Array.from(this.temasConErrores));
+          console.log('ðŸ“ Subtemas con errores:', Array.from(this.subtemasConErrores));
         }
       } catch (error) {
-        console.error('Error cargando temas débiles:', error);
+        console.error('Error cargando temas dÃ©biles:', error);
         this.weakTopics = [];
       }
 
-      // 2) Sesiones recientes (Procesal si está marcado, si no todo)
+      // 2) Sesiones recientes (procesal si estÃ¡ marcado, si no todo)
       try {
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 20).toPromise();
-        console.log('📦 Respuesta RAW del backend (procesal reforzar):', sessionsResponse);
+        console.log('ðŸ“¦ Respuesta RAW del backend (procesal reforzar):', sessionsResponse);
 
         if (sessionsResponse && sessionsResponse.success) {
           const raw = sessionsResponse.data || [];
 
-          const soloProcesal = raw.filter((s: any) => {
+          const soloprocesal = raw.filter((s: any) => {
             const areaName = (s.area || s.areaNombre || '').toLowerCase();
             const areaId = s.areaId || s.area_id;
 
-            const isProcesalByName = areaName.includes('procesal');
-            const isProcesalById = areaId === 2; // 2 = Procesal en tu BD
+            const isprocesalByName = areaName.includes('procesal');
+            const isprocesalById = areaId === 1; // 1 = procesal en tu BD (ajusta si no)
 
-            return isProcesalByName || isProcesalById;
+            return isprocesalByName || isprocesalById;
           });
 
-          const base = soloProcesal.length > 0 ? soloProcesal : raw;
+          const base = soloprocesal.length > 0 ? soloprocesal : raw;
 
           this.recentSessions = base
             .slice(0, 5)
@@ -223,7 +223,7 @@ export class ProcesalReforzarPage implements OnInit {
               };
             });
 
-          console.log('✅ Sesiones que se van a mostrar en Procesal:', this.recentSessions);
+          console.log('âœ… Sesiones que se van a mostrar en procesal:', this.recentSessions);
         }
       } catch (error) {
         console.error('Error cargando sesiones recientes:', error);
@@ -239,7 +239,7 @@ export class ProcesalReforzarPage implements OnInit {
             item.type === 'area' && item.area === 'Derecho Procesal'
           );
           
-          if (procesalArea && procesalArea.temas) {
+          if (procesalArea && procesalArea.temas && procesalArea.temas.length > 0) {
             this.temas = procesalArea.temas.map((tema: any) => {
               const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
                 const porcentaje = subtema.totalPreguntas > 0 
@@ -257,29 +257,37 @@ export class ProcesalReforzarPage implements OnInit {
               });
               
               const porcentajeTema = subtemasConPorcentaje.length > 0
-                ? Math.round(subtemasConPorcentaje.reduce((sum: number, sub: any) => 
-                    sum + sub.porcentaje, 0) / subtemasConPorcentaje.length)
+                ? Math.round(subtemasConPorcentaje.reduce((sum: number, s: any) => sum + s.porcentaje, 0) / subtemasConPorcentaje.length)
                 : 0;
 
-              const totalErroresTema = this.getTemaErrorCount(tema.temaId);
-
+              // Calcular total de errores del tema
+              const totalErroresTema = this.getErroresTema(tema.temaId);
+              
               return {
                 id: tema.temaId,
                 nombre: tema.temaNombre,
-                cantidadPreguntas: tema.totalPreguntas,
+                totalPreguntas: tema.totalPreguntas,
+                preguntasCorrectas: tema.preguntasCorrectas,
                 porcentaje: porcentajeTema,
+                cantidadPreguntas: tema.totalPreguntas,
                 subtemas: subtemasConPorcentaje,
                 hasErrors: this.temaHasErrors(tema.temaId),
                 totalErrores: totalErroresTema
               };
             });
 
-            console.log('✅ Temas Procesal:', this.temas);
+            console.log('âœ… Temas cargados desde estadÃ­sticas:', this.temas);
+          } else {
+            console.log('âš ï¸ No hay estadÃ­sticas, cargando estructura de BD...');
+            await this.loadTemasFromDatabase();
           }
+        } else {
+          console.log('âš ï¸ No hay estadÃ­sticas, cargando estructura de BD...');
+          await this.loadTemasFromDatabase();
         }
       } catch (error) {
         console.error('Error cargando temas:', error);
-        this.temas = [];
+        await this.loadTemasFromDatabase();
       }
 
     } catch (error) {
@@ -289,45 +297,120 @@ export class ProcesalReforzarPage implements OnInit {
     }
   }
 
-  // =====================
-  // SELECTOR DE ALCANCE/TEMA
-  // =====================
+  async loadTemasFromDatabase() {
+    try {
+      // 1 = Derecho Procesal
+      const response = await this.apiService.getTemasByArea(1).toPromise();
 
-  setScopeType(type: 'all' | 'tema' | 'subtema') {
-    this.scopeType = type;
-    if (type === 'all') {
-      this.selectedTemaId = null;
-      this.selectedSubtemaId = null;
-    } else if (type === 'tema') {
-      this.selectedSubtemaId = null;
+      if (response && response.success) {
+        const temasDesdeApi = response.data || [];
+
+        this.temas = temasDesdeApi.map((tema: any) => ({
+          id: tema.id,
+          nombre: tema.nombre,
+          totalPreguntas: 0,
+          preguntasCorrectas: 0,
+          porcentaje: 0,
+          cantidadPreguntas: 0,
+          subtemas: (tema.subtemas || []).map((sub: any) => ({
+            id: sub.id,
+            nombre: sub.nombre,
+            cantidadPreguntas: 0,
+            porcentaje: 0
+          }))
+        }));
+
+        console.log('âœ… Temas cargados desde BD (procesal):', this.temas);
+      } else {
+        console.warn('âš ï¸ Respuesta sin Ã©xito cargando temas de procesal:', response);
+        this.temas = [];
+      }
+    } catch (error) {
+      console.error('âŒ Error cargando temas de procesal desde BD:', error);
+      this.temas = [];
     }
   }
 
-  selectTema(temaId: number) {
-    this.selectedTemaId = this.selectedTemaId === temaId ? null : temaId;
-  }
+  // =====================
+  // SCROLL AL TEST
+  // =====================
 
-  selectSubtema(subtemaId: number) {
-    this.selectedSubtemaId = this.selectedSubtemaId === subtemaId ? null : subtemaId;
-  }
-
-  getSubtemasForTema(temaId: number): any[] {
-    const tema = this.temas.find(t => t.id === temaId);
-    return tema ? tema.subtemas : [];
-  }
-
-  async selectWeakTopic(topic: any) {
-    this.practiceMode = 'tema';
-    this.selectedTemaId = topic.temaId;
-    this.scopeType = 'tema';
-    this.showThemeSelector = true;
+  scrollToTestSection() {
+    // abrir secciÃ³n de test
     this.expandedSections['testSection'] = true;
-    
-    await this.ionContent?.scrollToBottom(300);
+
+    // pequeÃ±o delay para que Angular pinte la secciÃ³n abierta
+    setTimeout(() => {
+      const el = document.getElementById('test-section');
+      if (el && this.ionContent) {
+        const y = el.offsetTop - 60; // ajusta el 60 si el header es mÃ¡s grande/pequeÃ±o
+        this.ionContent.scrollToPoint(0, y, 500); // 500 ms de animaciÃ³n
+      }
+    }, 0);
   }
 
   // =====================
-  // TEST
+  // SELECCIÃ“N DE ALCANCE
+  // =====================
+
+  // Cuando haces clic en un "tema dÃ©bil"
+  selectWeakTopic(topic: any) {
+    console.log('ðŸŽ¯ Tema dÃ©bil seleccionado:', topic);
+    this.selectedTemaId = topic.temaId;
+    this.selectedSubtemaId = null;
+    this.scopeType = 'tema';
+    this.showThemeSelector = true;
+
+    // ir a la secciÃ³n de Test
+    this.scrollToTestSection();
+  }
+
+  toggleTemaExpansion(temaId: number) {
+    this.expandedTema = this.expandedTema === temaId ? null : temaId;
+  }
+
+  selectScope(type: 'all' | 'tema' | 'subtema', id: number | null = null) {
+    this.scopeType = type;
+    
+    if (type === 'all') {
+      this.selectedTemaId = null;
+      this.selectedSubtemaId = null;
+      this.showThemeSelector = false;
+      console.log('âœ… Seleccionado: Todo Derecho Procesal');
+    } else if (type === 'tema') {
+      this.selectedTemaId = id;
+      this.selectedSubtemaId = null;
+      this.showThemeSelector = true;
+      console.log('âœ… Tema seleccionado:', id);
+    } else if (type === 'subtema') {
+      this.showThemeSelector = true;
+      console.log('âœ… Modo subtema activado');
+    }
+  }
+
+  selectSubtema(subtema: any) {
+    this.scopeType = 'subtema';
+    this.selectedSubtemaId = subtema.id;
+    this.selectedTemaId = null;
+    
+    console.log('âœ… Subtema seleccionado:', {
+      subtemaId: subtema.id,
+      nombre: subtema.nombre,
+      scopeType: this.scopeType
+    });
+  }
+
+  onSelectTema(tema: any, event: Event) {
+    event.stopPropagation();
+    this.selectScope('tema', tema.id);
+  }
+
+  onSelectSubtema(subtema: any) {
+    this.selectSubtema(subtema);
+  }
+
+  // =====================
+  // INICIO DEL TEST
   // =====================
 
 async startTest() {
@@ -459,7 +542,7 @@ async startTest() {
 }
 
   // =====================
-  // NAVEGACIÓN
+  // NAVEGACION
   // =====================
 
   goBack() {
@@ -470,7 +553,7 @@ async viewSession(session: any) {
     const testId = session.testId || session.id;
     
     if (this.expandedSession === testId) {
-      // Si ya está abierta, cerrarla
+      // Si ya estÃ¡ abierta, cerrarla
       this.expandedSession = null;
       this.sessionDetails = null;
       this.expandedQuestion = null;
@@ -537,42 +620,105 @@ async viewSession(session: any) {
     return correctAnswer?.text === option;
   }
 
+    // ✅ Validar si una cantidad está disponible
+    canSelectQuantity(quantity: number): boolean {
+      // Si no hay modo seleccionado, permitir todas las cantidades
+      if (!this.practiceMode) {
+        return true;
+      }
+  
+  const max = this.getMaxAvailableQuestions();
+  return quantity <= max;
+}
+  // ✅ Método para obtener el máximo de preguntas disponibles según el modo
+    getMaxAvailableQuestions(): number {
+      // Si no hay modo seleccionado, retornar 0
+      if (!this.practiceMode) {
+        return 0;
+      }
+      
+      if (this.practiceMode === 'mix') {
+        // Modo mixto: sumar TODOS los errores de todos los temas
+        return this.weakTopics.reduce((sum, topic) => sum + (topic.totalErrores || 0), 0);
+      } else if (this.practiceMode === 'tema' && this.selectedTemaId) {
+        // Modo tema específico: solo errores de ese tema
+        const tema = this.temas.find(t => t.id === this.selectedTemaId);
+        return tema ? (tema.totalErrores || 0) : 0;
+      }
+      
+      return 0;
+    }
+
   getOptionLetter(index: number): string {
     return String.fromCharCode(65 + index);
   }
 
+  // ✅ Actualizar selectQuantity para ajustar automáticamente
   selectQuantity(quantity: number) {
-    this.selectedQuantity = quantity;
+    const maxAvailable = this.getMaxAvailableQuestions();
+    
+    if (quantity <= maxAvailable) {
+      this.selectedQuantity = quantity;
+    } else {
+      // Ajustar a la cantidad máxima disponible
+      this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
+    }
   }
 
-  canSelectQuantity(quantity: number): boolean {
-    return true;
-  }
-
+  // ✅ Método para obtener errores disponibles (actualizado)
   getAvailableErrors(): number {
-    return this.weakTopics.reduce((sum, topic) => sum + (topic.totalErrores || 0), 0);
+    return this.getMaxAvailableQuestions();
   }
-
+  
+  // ✅ Actualizar selectPracticeMode para ajustar cantidad
   selectPracticeMode(mode: 'mix' | 'tema') {
     this.practiceMode = mode;
+    
     if (mode === 'mix') {
       this.selectedTemaId = null;
+      
+      // Ajustar cantidad si excede el nuevo límite
+      const maxAvailable = this.getMaxAvailableQuestions();
+      if (this.selectedQuantity > maxAvailable) {
+        this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
+      }
     }
   }
 
   getTemasWithErrors(): any[] {
     return this.temas.filter(t => t.hasErrors && t.totalErrores > 0);
   }
-
+  
+  // ✅ Actualizar selectTemaForPractice para ajustar cantidad
   selectTemaForPractice(tema: any) {
     this.selectedTemaId = tema.id;
+    
+    // Ajustar cantidad si excede el límite del tema
+    const maxAvailable = this.getMaxAvailableQuestions();
+    if (this.selectedQuantity > maxAvailable) {
+      this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
+    }
   }
 
+
+  // ✅ Actualizar canStartTest
   canStartTest(): boolean {
-    if (this.practiceMode === 'tema' && !this.selectedTemaId) return false;
-    return this.getAvailableErrors() > 0;
+    const maxAvailable = this.getMaxAvailableQuestions();
+    
+    if (maxAvailable === 0) {
+      return false; // No hay errores disponibles
+    }
+    
+    if (this.practiceMode === 'tema' && !this.selectedTemaId) {
+      return false; // Modo tema pero no hay tema seleccionado
+    }
+    
+    if (this.selectedQuantity > maxAvailable) {
+      return false; // Cantidad seleccionada excede disponible
+    }
+    
+    return true;
   }
-
   async startErrorPractice() {
     await this.startTest();
   }

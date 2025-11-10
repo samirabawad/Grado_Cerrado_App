@@ -845,3 +845,138 @@ ion-content.civil-content {
     margin-right: auto;
   }
 }
+
+.quantity-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px; // ✅ Reducir margen
+
+  .quantity-option {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.selected {
+      background: #fff4e6;
+      border-color: #FF6F00;
+
+      .number {
+        color: #FF6F00;
+      }
+
+      .label {
+        color: #FF6F00;
+      }
+    }
+
+    // ✅ AGREGAR ESTO - Estado deshabilitado
+    &.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+      background: #f3f4f6;
+      
+      .number {
+        color: #9ca3af;
+      }
+
+      .label {
+        color: #9ca3af;
+      }
+
+      &.selected {
+        background: #f3f4f6;
+        border-color: #e5e7eb;
+        
+        .number {
+          color: #9ca3af;
+        }
+
+        .label {
+          color: #9ca3af;
+        }
+      }
+    }
+
+    &:active:not(.disabled) {
+      transform: scale(0.96);
+    }
+
+    .number {
+      display: block;
+      font-size: 32px;
+      font-weight: 700;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #9ca3af;
+    }
+  }
+}
+
+// ✅ Actualizar info-message
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 111, 0, 0.1);
+  border-left: 3px solid #FF6F00;
+  border-radius: 8px;
+  margin-top: 0; // ✅ Sin margen superior
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #FF6F00;
+  
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+// ✅ Mensaje de ayuda
+.helper-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f8fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 20px;
+
+  ion-icon {
+    font-size: 48px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #64748b;
+    text-align: center;
+  }
+}
+
+// ✅ Animación de rebote
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}

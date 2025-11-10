@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, LoadingController } from '@ionic/angular';
+import { IonicModule, LoadingController, IonContent } from '@ionic/angular'; // ✅ Importar IonContent
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
@@ -37,6 +37,8 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     return [...this.difficultyLevels, ...this.difficultyLevels, ...this.difficultyLevels];
   }
 
+  @ViewChild(IonContent) content!: IonContent; // ✅ Agregar ViewChild
+
   @ViewChild('pickerWheel') pickerWheel?: ElementRef;
   private scrollTimeout: any;
 
@@ -50,6 +52,12 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     this.loadTemas();
   }
 
+  // ✅ Mover el scroll aquí
+  ionViewWillEnter() {
+    setTimeout(() => {
+      this.content?.scrollToTop(300); // 300ms de animación suave
+    }, 50);
+  }
   ngAfterViewInit() {
     setTimeout(() => {
       const selectedIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
@@ -65,52 +73,74 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  async loadTemas() {
-    this.isLoading = true;
+async loadTemas() {
+  this.isLoading = true;
+
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    
+    if (!currentUser || !currentUser.id) {
+      console.warn('No hay usuario logueado');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const studentId = currentUser.id;
 
     try {
-      const currentUser = this.apiService.getCurrentUser();
+      const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
       
-      if (!currentUser || !currentUser.id) {
-        console.warn('No hay usuario logueado');
-        this.router.navigate(['/login']);
-        return;
-      }
-
-      const studentId = currentUser.id;
-
-      try {
-        const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+      if (statsResponse && statsResponse.success && statsResponse.data) {
+        const civilArea = statsResponse.data.find((item: any) => 
+          item.type === 'area' && item.area === 'Derecho Civil'
+        );
         
-        if (statsResponse && statsResponse.success && statsResponse.data) {
-          const civilArea = statsResponse.data.find((item: any) => 
-            item.type === 'area' && item.area === 'Derecho Civil'
-          );
-          
-          if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
-            this.temas = civilArea.temas.map((tema: any) => ({
+        if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
+          this.temas = civilArea.temas
+            .map((tema: any) => ({
               id: tema.temaId,
               nombre: tema.temaNombre,
               cantidadPreguntas: tema.totalPreguntas || 0
-            }));
+            }))
+            .filter((tema: any) => tema.cantidadPreguntas > 0); // ✅ Solo temas con preguntas
 
-            console.log('✅ Temas cargados para selector:', this.temas);
-          } else {
-            console.log('⚠️ No hay temas en Civil');
-            this.temas = [];
-          }
+          console.log('✅ Temas cargados para selector:', this.temas);
+        } else {
+          console.log('⚠️ No hay temas en civil');
+          this.temas = [];
         }
-      } catch (error) {
-        console.error('Error cargando temas:', error);
-        this.temas = [];
       }
-
     } catch (error) {
-      console.error('Error general cargando temas:', error);
-    } finally {
-      this.isLoading = false;
+      console.error('Error cargando temas:', error);
+      this.temas = [];
     }
+
+  } catch (error) {
+    console.error('Error general cargando temas:', error);
+  } finally {
+    this.isLoading = false;
   }
+}
+
+// ✅ Método para saber cuántas preguntas permite el tema seleccionado
+getMaxQuestionsForSelectedTema(): number {
+  if (this.scopeType === 'all') {
+    return 7; // Sin límite para "todo el temario"
+  }
+  
+  if (this.selectedTemaId) {
+    const tema = this.temas.find(t => t.id === this.selectedTemaId);
+    return tema ? tema.cantidadPreguntas : 0;
+  }
+  
+  return 0;
+}
+
+// ✅ Validar si una cantidad está disponible
+canSelectQuantity(quantity: number): boolean {
+  const max = this.getMaxQuestionsForSelectedTema();
+  return quantity <= max;
+}
 
   selectScope(type: 'all' | 'tema') {
     this.scopeType = type;
@@ -131,9 +161,15 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   selectTema(temaId: number) {
     this.selectedTemaId = temaId;
     this.scopeType = 'tema';
-    console.log('✅ Tema seleccionado:', temaId);
+    
+    // ✅ Ajustar cantidad seleccionada si excede el límite
+    const maxQuestions = this.getMaxQuestionsForSelectedTema();
+    if (this.selectedQuantity > maxQuestions) {
+      this.selectedQuantity = Math.min(maxQuestions, 1);
+    }
+    
+    console.log('✅ Tema seleccionado:', temaId, 'Máx preguntas:', maxQuestions);
   }
-
   getSelectedTemaName(): string {
     const tema = this.temas.find(t => t.id === this.selectedTemaId);
     return tema ? tema.nombre : '';

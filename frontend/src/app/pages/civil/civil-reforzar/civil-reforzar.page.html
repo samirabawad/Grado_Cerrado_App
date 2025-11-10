@@ -218,40 +218,6 @@
       </h2>
 
       <div class="test-config-card">
-        
-        <!-- Cantidad de preguntas -->
-        <div class="config-section">
-          <h3>Cantidad de preguntas</h3>
-          <div class="quantity-chips">
-            <div class="chip"
-                 [class.selected]="selectedQuantity === 1"
-                 [class.disabled]="!canSelectQuantity(1)"
-                 (click)="canSelectQuantity(1) && selectQuantity(1)">
-              1
-            </div>
-            <div class="chip"
-                 [class.selected]="selectedQuantity === 3"
-                 [class.disabled]="!canSelectQuantity(3)"
-                 (click)="canSelectQuantity(3) && selectQuantity(3)">
-              3
-            </div>
-            <div class="chip"
-                 [class.selected]="selectedQuantity === 5"
-                 [class.disabled]="!canSelectQuantity(5)"
-                 (click)="canSelectQuantity(5) && selectQuantity(5)">
-              5
-            </div>
-            <div class="chip"
-                 [class.selected]="selectedQuantity === 7"
-                 [class.disabled]="!canSelectQuantity(7)"
-                 (click)="canSelectQuantity(7) && selectQuantity(7)">
-              7
-            </div>
-          </div>
-          <p class="available-errors" *ngIf="getAvailableErrors() > 0">
-            {{ getAvailableErrors() }} preguntas con error disponibles
-          </p>
-        </div>
 
         <!-- Tipo de práctica -->
         <div class="config-section">
@@ -297,6 +263,65 @@
             </div>
           </div>
         </div>
+
+      <!-- Cantidad de preguntas -->
+      <div class="config-section" *ngIf="!practiceMode || (practiceMode === 'mix') || (practiceMode === 'tema' && selectedTemaId)">
+        <h3>Cantidad de preguntas</h3>
+        <div class="quantity-chips">
+          <div class="chip"
+              [class.selected]="selectedQuantity === 1"
+              [class.disabled]="practiceMode && !canSelectQuantity(1)"
+              (click)="(!practiceMode || canSelectQuantity(1)) && selectQuantity(1)">
+            1
+          </div>
+          <div class="chip"
+              [class.selected]="selectedQuantity === 3"
+              [class.disabled]="practiceMode && !canSelectQuantity(3)"
+              (click)="(!practiceMode || canSelectQuantity(3)) && selectQuantity(3)">
+            3
+          </div>
+          <div class="chip"
+              [class.selected]="selectedQuantity === 5"
+              [class.disabled]="practiceMode && !canSelectQuantity(5)"
+              (click)="(!practiceMode || canSelectQuantity(5)) && selectQuantity(5)">
+            5
+          </div>
+          <div class="chip"
+              [class.selected]="selectedQuantity === 7"
+              [class.disabled]="practiceMode && !canSelectQuantity(7)"
+              (click)="(!practiceMode || canSelectQuantity(7)) && selectQuantity(7)">
+            7
+          </div>
+        </div>
+        
+        <!-- ✅ Mensaje solo si se seleccionó un modo -->
+        <p class="available-errors" *ngIf="practiceMode && getMaxAvailableQuestions() > 0">
+          <ion-icon name="information-circle"></ion-icon>
+          <span *ngIf="practiceMode === 'mix'">
+            {{ getMaxAvailableQuestions() }} preguntas con error disponibles (todos los temas)
+          </span>
+          <span *ngIf="practiceMode === 'tema' && selectedTemaId">
+            {{ getMaxAvailableQuestions() }} preguntas con error en este tema
+          </span>
+        </p>
+        
+        <!-- ✅ Mensaje de no errores solo si se seleccionó un modo -->
+        <p class="no-errors-message" *ngIf="practiceMode && getMaxAvailableQuestions() === 0">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <span *ngIf="practiceMode === 'mix'">
+            ¡Excelente! No tienes errores para practicar
+          </span>
+          <span *ngIf="practiceMode === 'tema' && selectedTemaId">
+            No tienes errores en este tema
+          </span>
+        </p>
+      </div>
+
+      <!-- ✅ Mensaje de ayuda cuando está en modo tema pero no ha seleccionado -->
+      <div class="helper-message" *ngIf="practiceMode === 'tema' && !selectedTemaId">
+        <ion-icon name="arrow-up-circle"></ion-icon>
+        <p>Selecciona un tema de la lista para continuar</p>
+      </div>
 
         <!-- Botón iniciar test -->
         <button 
