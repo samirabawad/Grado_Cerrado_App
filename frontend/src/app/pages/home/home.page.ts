@@ -6,7 +6,6 @@ import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-na
 import { ApiService } from '../../services/api.service';
 import { environment } from 'src/environments/environment';
 
-
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -16,35 +15,17 @@ import { environment } from 'src/environments/environment';
 })
 export class HomePage implements OnInit {
 
-
   defaultAvatar = 'assets/avatars/racoon1.svg';
   userAvatarUrl = this.defaultAvatar;
 
-  getInitialAvatar(): string {
-  const name = this.userName || 'U';
-  const initial = name.charAt(0).toUpperCase();
-  
-  // SVG con inicial
-  const svg = `
-    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="50" fill="#9CA3AF"/>
-      <text x="50" y="50" font-family="Arial, sans-serif" font-size="48" 
-            font-weight="bold" fill="white" text-anchor="middle" 
-            dominant-baseline="central">${initial}</text>
-    </svg>
-  `;
-  
-  return 'data:image/svg+xml;base64,' + btoa(svg);
-}
-
   userName: string = 'Estudiante';
   userCoins: number = 0;
-  
+
   userStreak: number = 0;
   totalSessions: number = 0;
   totalQuestions: number = 0;
   overallSuccessRate: number = 0;
-  
+
   isLoading: boolean = true;
 
   constructor(
@@ -55,21 +36,19 @@ export class HomePage implements OnInit {
   async ngOnInit() {
     this.loadUserData();
     this.loadUserAvatar();
-
   }
 
-private loadUserAvatar() {
-  const current = this.apiService.getCurrentUser();
-  const raw = current?.avatarUrl || current?.avatar || '';
-  
-  if (raw && raw !== this.defaultAvatar) {
-    const resolved = this.buildAvatarUrl(raw);
-    this.userAvatarUrl = resolved || this.getInitialAvatar();
-  } else {
-    this.userAvatarUrl = this.getInitialAvatar();
-  }
-}
+  private loadUserAvatar() {
+    const current = this.apiService.getCurrentUser();
+    const raw = current?.avatarUrl || current?.avatar || '';
 
+    if (raw && raw !== this.defaultAvatar) {
+      const resolved = this.buildAvatarUrl(raw);
+      this.userAvatarUrl = resolved || this.getInitialAvatar();
+    } else {
+      this.userAvatarUrl = this.getInitialAvatar();
+    }
+  }
 
   // Convierte '/avatars/...' a 'http://host:puerto/avatars/...'
   private buildAvatarUrl(url?: string): string {
@@ -81,10 +60,22 @@ private loadUserAvatar() {
     return url;
   }
 
-  goToProfile() {
-    this.router.navigate(['/profile']);
-  }
+  getInitialAvatar(): string {
+    const name = this.userName || 'U';
+    const initial = name.charAt(0).toUpperCase();
 
+    // SVG con inicial
+    const svg = `
+      <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="50" fill="#9CA3AF"/>
+        <text x="50" y="50" font-family="Arial, sans-serif" font-size="48"
+              font-weight="bold" fill="white" text-anchor="middle"
+              dominant-baseline="central">${initial}</text>
+      </svg>
+    `;
+
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
 
   ionViewWillEnter() {
     this.loadUserData();
@@ -95,7 +86,7 @@ private loadUserAvatar() {
 
     try {
       const currentUser = this.apiService.getCurrentUser();
-      
+
       if (!currentUser || !currentUser.id) {
         console.warn('⚠️ No hay usuario logueado');
         this.userName = 'Estudiante';
@@ -107,19 +98,20 @@ private loadUserAvatar() {
 
       // Usar el nombre del usuario almacenado en localStorage
       this.userName = currentUser.name || 'Estudiante';
-      
+
       console.log('📊 Cargando estadísticas para:', studentId, this.userName);
 
       // Cargar estadísticas del dashboard
       try {
         const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
+
         if (statsResponse && statsResponse.success) {
           const stats = statsResponse.data;
           this.totalSessions = stats.totalTests || 0;
           this.totalQuestions = stats.totalQuestions || 0;
           this.overallSuccessRate = Math.round(stats.successRate || 0);
           this.userStreak = stats.streak || 0;
-          
+
           console.log('✅ Estadísticas cargadas:', {
             sesiones: this.totalSessions,
             preguntas: this.totalQuestions,
@@ -176,6 +168,10 @@ private loadUserAvatar() {
     if (this.totalQuestions === 0) return 0;
     const goal = 200;
     return Math.min((this.totalQuestions / goal) * 100, 100);
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
   }
 
   goToCivil() {

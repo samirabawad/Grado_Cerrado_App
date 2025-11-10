@@ -1,35 +1,49 @@
 <ion-content [fullscreen]="true" class="felicidades-content">
   <div class="felicidades-container">
-    
-    <!-- Logo Principal -->
+
+    <!-- ========================= -->
+    <!-- LOGO PRINCIPAL -->
+    <!-- ========================= -->
     <div class="logo-section">
-      <img src="assets/image/logo_grado_cerrado.png" alt="Grado Cerrado" class="main-logo">
+      <img 
+        src="assets/image/logo_grado_cerrado.png" 
+        alt="Grado Cerrado" 
+        class="main-logo"
+      >
     </div>
-    
-    <!-- Ícono central grande -->
+
+    <!-- ========================= -->
+    <!-- ÍCONO CENTRAL GRANDE -->
+    <!-- ========================= -->
     <div class="icon-section">
       <div class="icon-circle">
         <ion-icon name="checkmark-circle"></ion-icon>
       </div>
     </div>
-    
-    <!-- Contenido de felicitación -->
+
+    <!-- ========================= -->
+    <!-- CONTENIDO DE FELICITACIÓN -->
+    <!-- ========================= -->
     <div class="content-section">
       <h1 class="main-title">¡Felicidades!</h1>
+
       <p class="main-description">
         Ya estás un paso más adelante<br>
         para aprobar tu examen de grado
       </p>
-      
-      <!-- Botón -->
+
+      <!-- ========================= -->
+      <!-- BOTÓN DE ACCIÓN -->
+      <!-- ========================= -->
       <div class="button-container">
         <button 
           class="action-button primary" 
-          (click)="goToHome()">
+          (click)="goToHome()"
+        >
           Ir al Inicio
         </button>
       </div>
     </div>
-    
+
   </div>
 </ion-content>

@@ -36,8 +36,7 @@ export class RegistroPage implements OnInit {
     private apiService: ApiService
   ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit(): void {}
 
   isNombreValid(): boolean {
     return this.nombre.trim().length > 0;
@@ -56,21 +55,21 @@ export class RegistroPage implements OnInit {
   }
 
   isFormValid(): boolean {
-    return this.isNombreValid() && 
-           this.isEmailValid() && 
-           this.isPasswordValid() && 
+    return this.isNombreValid() &&
+           this.isEmailValid() &&
+           this.isPasswordValid() &&
            this.isPasswordMatchValid();
   }
 
-  togglePasswordVisibility() {
+  togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
-  toggleConfirmPasswordVisibility() {
+  toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  async registrarUsuario() {
+  async registrarUsuario(): Promise<void> {
     if (!this.isFormValid()) {
       await this.showAlert('Error de validación', 'Por favor, completa correctamente todos los campos obligatorios.');
       return;
@@ -80,11 +79,11 @@ export class RegistroPage implements OnInit {
       message: 'Creando tu cuenta...',
       spinner: 'circles'
     });
-    
+
     await loading.present();
     this.isLoading = true;
 
-    //VARIABLE QUE GUARDA EL NOMBRE COMPLETO DEL USUARIO. LLEGAR Y USAR.
+    // Variable que guarda el nombre completo del usuario. Llegar y usar.
     const nombreCompleto = this.buildNombreCompleto();
 
     const registerData = {
@@ -98,37 +97,36 @@ export class RegistroPage implements OnInit {
 
     try {
       const response = await this.apiService.registerUser(registerData).toPromise();
-      
+
       console.log('✅ Usuario registrado exitosamente:', response);
-      
+
       if (response.success) {
         localStorage.setItem('currentUser', JSON.stringify(response.user));
-        
+
         await loading.dismiss();
         this.isLoading = false;
-        
+
         this.router.navigate(['/felicidades']);
-        
       } else {
         await loading.dismiss();
         this.isLoading = false;
         await this.showAlert('Error en el registro', response.message || 'Error desconocido');
       }
-      
+
     } catch (error: any) {
       console.error('❌ Error en registro:', error);
-      
+
       await loading.dismiss();
       this.isLoading = false;
-      
+
       let errorMessage = 'Error al crear la cuenta. Inténtalo nuevamente.';
-      
+
       if (error.status === 400) {
         errorMessage = 'El email ya está registrado. Intenta con otro email.';
       } else if (error.status === 0) {
         errorMessage = 'No se puede conectar al servidor. Verifica tu conexión.';
       }
-      
+
       await this.showAlert('Error en el registro', errorMessage);
     }
   }
@@ -144,21 +142,21 @@ export class RegistroPage implements OnInit {
     return partes.join(' ');
   }
 
-  private async showAlert(header: string, message: string) {
+  private async showAlert(header: string, message: string): Promise<void> {
     const alert = await this.alertController.create({
       header,
       message,
       buttons: ['OK']
     });
-    
+
     await alert.present();
   }
 
-  goBack() {
+  goBack(): void {
     this.router.navigate(['/welcome2']);
   }
 
-  irAIniciarSesion() {
+  irAIniciarSesion(): void {
     this.router.navigate(['/login']);
   }
 }

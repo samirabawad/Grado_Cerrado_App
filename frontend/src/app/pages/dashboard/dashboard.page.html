@@ -27,8 +27,8 @@
           </div>
           <div class="general-right">
             <div class="general-percentage">{{ getGeneralArea().successRate }}%</div>
-            <ion-icon 
-              [name]="isGeneralExpanded ? 'chevron-down' : 'chevron-forward'" 
+            <ion-icon
+              [name]="isGeneralExpanded ? 'chevron-down' : 'chevron-forward'"
               class="expand-icon">
             </ion-icon>
           </div>
@@ -43,15 +43,17 @@
         <!-- Expandible: Muestra Civil y Procesal -->
         <ng-container *ngIf="isGeneralExpanded">
           <div class="general-areas-list">
-            <div *ngFor="let area of getNonGeneralAreas()" 
+            <div *ngFor="let area of getNonGeneralAreas()"
                  class="general-area-item"
                  (click)="scrollToArea(area.area)">
               <div class="area-item-left">
-                <div class="area-item-emoji">{{ area.area === 'Derecho Civil' ? '⚖️' : '📖' }}</div>
+                <div class="area-item-emoji">
+                  {{ area.area === 'Derecho Civil' ? '⚖️' : '📖' }}
+                </div>
                 <span class="area-item-name">{{ area.area }}</span>
               </div>
               <div class="area-item-right">
-                <span class="area-item-percentage" 
+                <span class="area-item-percentage"
                       [class.civil]="area.area === 'Derecho Civil'"
                       [class.procesal]="area.area === 'Derecho Procesal'">
                   {{ area.successRate }}%
@@ -64,57 +66,55 @@
       </div>
     </div>
 
-<!-- Estadísticas Generales - SOLO SESIONES -->
-<div class="stats-overview">
-  <div class="stat-card sessions-card" (click)="navigateToAchievements()">
-    <h4 class="stat-title">Test Realizados</h4>
+    <!-- Estadísticas Generales - SOLO SESIONES -->
+    <div class="stats-overview">
+      <div class="stat-card sessions-card" (click)="navigateToAchievements()">
+        <h4 class="stat-title">Test Realizados</h4>
 
-    
-    <!-- Logro Actual -->
-    <div class="current-achievement">
-      <div class="achievement-left">
-        <div class="achievement-icon" [style.background]="getCurrentAchievementColor()">
-          <ion-icon [name]="getCurrentAchievementIcon()"></ion-icon>
+        <!-- Logro Actual -->
+        <div class="current-achievement">
+          <div class="achievement-left">
+            <div class="achievement-icon" [style.background]="getCurrentAchievementColor()">
+              <ion-icon [name]="getCurrentAchievementIcon()"></ion-icon>
+            </div>
+            <div class="achievement-info">
+              <p class="achievement-level">LOGRO {{ getCurrentAchievementLevel() }}</p>
+              <p class="achievement-name">{{ getCurrentAchievementName() }}</p>
+            </div>
+          </div>
+
+          <div class="achievement-right">
+            <p class="sessions-progress-inline">
+              <span class="sessions-current">{{ totalSessions }}</span>
+              <span class="sessions-de">de</span>
+              <span class="sessions-total">{{ getNextMilestone() }}</span>
+            </p>
+          </div>
         </div>
-        <div class="achievement-info">
-          <p class="achievement-level">LOGRO {{ getCurrentAchievementLevel() }}</p>
-          <p class="achievement-name">{{ getCurrentAchievementName() }}</p>
+
+        <!-- Círculos de progreso -->
+        <div class="sessions-progress-section">
+          <div class="progress-explanation">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <p>Completa 50 tests para desbloquear el siguiente logro</p>
+          </div>
+
+          <div class="sessions-badges">
+            <div class="session-badge"
+                 *ngFor="let milestone of [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]"
+                 [class.completed]="getSessionsInCurrentMilestone() >= milestone"
+                 [class.pending]="getSessionsInCurrentMilestone() < milestone">
+              <ion-icon *ngIf="getSessionsInCurrentMilestone() >= milestone" name="checkmark-circle"></ion-icon>
+              <ion-icon *ngIf="getSessionsInCurrentMilestone() < milestone" name="ellipse"></ion-icon>
+            </div>
+          </div>
+
+          <p class="progress-detail">
+            {{ getSessionsInCurrentMilestone() }}/50 tests en este nivel
+          </p>
         </div>
-      </div>
-      
-      <div class="achievement-right">
-        <p class="sessions-progress-inline">
-          <span class="sessions-current">{{ totalSessions }}</span>
-          <span class="sessions-de">de</span>
-          <span class="sessions-total">{{ getNextMilestone() }}</span>
-        </p>
       </div>
     </div>
-
-    <!-- Circulitos de progreso DINÁMICOS -->
-    <div class="sessions-progress-section">
-      <div class="progress-explanation">
-        <ion-icon name="information-circle-outline"></ion-icon>
-        <p>Completa 50 tests para desbloquear el siguiente logro</p>
-      </div>
-
-      <!-- Círculos originales -->
-      <div class="sessions-badges">
-        <div class="session-badge" 
-            *ngFor="let milestone of [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]"
-            [class.completed]="getSessionsInCurrentMilestone() >= milestone" 
-            [class.pending]="getSessionsInCurrentMilestone() < milestone">
-          <ion-icon *ngIf="getSessionsInCurrentMilestone() >= milestone" name="checkmark-circle"></ion-icon>
-          <ion-icon *ngIf="getSessionsInCurrentMilestone() < milestone" name="ellipse"></ion-icon>
-        </div>
-      </div>
-      
-      <p class="progress-detail">{{ getSessionsInCurrentMilestone() }}/50 tests en este nivel</p>
-    </div>
-  </div>
-</div>
-
-
 
     <!-- Gráfico Semanal/Mensual -->
     <div class="weekly-chart-container">
@@ -126,21 +126,21 @@
         </div>
       </div>
 
-    <!-- Navegación mensual (solo visible en vista mensual) -->
-    <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'week'">
-      <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
-        <ion-icon name="chevron-back"></ion-icon>
-      </button>
-      <span class="month-label">{{ currentMonthName }}</span>
-      <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
-        <ion-icon name="chevron-forward"></ion-icon>
-      </button>
-    </div>
+      <!-- Navegación mensual -->
+      <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'week'">
+        <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="currentSemester === 0">
+          <ion-icon name="chevron-back"></ion-icon>
+        </button>
+        <span class="month-label">{{ currentMonthName }}</span>
+        <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="currentSemester === 1">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </button>
+      </div>
 
-    <!-- Navegación semanal (solo visible en vista semanal) -->
-    <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'month'">
-      <span class="month-label">{{ currentWeekLabel }}</span>
-    </div>
+      <!-- Navegación semanal -->
+      <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'month'">
+        <span class="month-label">{{ currentWeekLabel }}</span>
+      </div>
 
       <div class="chart-legend">
         <div class="legend-item">
@@ -170,8 +170,7 @@
       </div>
     </div>
 
-
-    <!-- NUEVA SECCIÓN: PUNTOS MÁS DÉBILES -->
+    <!-- PUNTOS DÉBILES -->
     <div class="weak-points-section">
       <h2 class="section-title-weak">
         <ion-icon name="trending-down"></ion-icon>
@@ -185,7 +184,7 @@
           Derecho Civil
         </h3>
         <div class="weak-topics-list">
-          <div *ngFor="let topic of getTop3WeakTopicsCivil(); let i = index" 
+          <div *ngFor="let topic of getTop3WeakTopicsCivil(); let i = index"
                class="weak-topic-card civil"
                (click)="goToReforzarWithTopic('civil', topic)">
             <div class="weak-topic-rank">{{ i + 1 }}</div>
@@ -204,7 +203,7 @@
           Derecho Procesal
         </h3>
         <div class="weak-topics-list">
-          <div *ngFor="let topic of getTop3WeakTopicsProcesal(); let i = index" 
+          <div *ngFor="let topic of getTop3WeakTopicsProcesal(); let i = index"
                class="weak-topic-card procesal"
                (click)="goToReforzarWithTopic('procesal', topic)">
             <div class="weak-topic-rank">{{ i + 1 }}</div>
@@ -217,55 +216,56 @@
         </div>
       </div>
 
-      <!-- Mensaje si no hay puntos débiles -->
-      <div class="no-weak-points" *ngIf="getTop3WeakTopicsCivil().length === 0 && getTop3WeakTopicsProcesal().length === 0">
+      <!-- Si no hay puntos débiles -->
+      <div class="no-weak-points"
+           *ngIf="getTop3WeakTopicsCivil().length === 0 && getTop3WeakTopicsProcesal().length === 0">
         <ion-icon name="checkmark-circle"></ion-icon>
         <p>¡Excelente! No tienes puntos débiles en este momento</p>
       </div>
     </div>
-    
-    <!-- Estadísticas por Área - SOLO CIVIL Y PROCESAL -->
+
+    <!-- Estadísticas por Área -->
     <div class="area-stats-container" #areaStatsSection>
       <h2>Rendimiento por Área</h2>
-      
+
       <div class="area-cards">
-        <div *ngFor="let area of getNonGeneralAreas()" 
-          class="area-card-duolingo" 
-          [attr.data-area]="area.area"
-          [id]="'area-' + area.area">
-          
-     <div class="area-header-duo" (click)="toggleAreaExpansion(area.area)">
-      <div class="area-left-duo">
-        <div class="area-emoji">
-          <img *ngIf="area.area === 'Derecho Civil'" 
-              src="assets/image/law1.png" 
-              alt="Civil"
-              class="area-icon-img">
-          <img *ngIf="area.area === 'Derecho Procesal'" 
-              src="assets/image/law2.png" 
-              alt="Procesal"
-              class="area-icon-img">
-        </div>
-        <div class="area-title-info">
-          <h3>{{ area.area }}</h3>
-        </div>
-      </div>
+        <div *ngFor="let area of getNonGeneralAreas()"
+             class="area-card-duolingo"
+             [attr.data-area]="area.area"
+             [id]="'area-' + area.area">
+
+          <div class="area-header-duo" (click)="toggleAreaExpansion(area.area)">
+            <div class="area-left-duo">
+              <div class="area-emoji">
+                <img *ngIf="area.area === 'Derecho Civil'"
+                     src="assets/image/law1.png"
+                     alt="Civil"
+                     class="area-icon-img">
+                <img *ngIf="area.area === 'Derecho Procesal'"
+                     src="assets/image/law2.png"
+                     alt="Procesal"
+                     class="area-icon-img">
+              </div>
+              <div class="area-title-info">
+                <h3>{{ area.area }}</h3>
+              </div>
+            </div>
 
             <div class="area-right-duo">
               <div class="porcentaje-area">
                 {{ area.successRate }}%
               </div>
-              <ion-icon 
-                [name]="isAreaExpanded(area.area) ? 'chevron-down' : 'chevron-forward'" 
+              <ion-icon
+                [name]="isAreaExpanded(area.area) ? 'chevron-down' : 'chevron-forward'"
                 class="expand-icon-area">
               </ion-icon>
             </div>
           </div>
 
-          <!-- PROGRESO del área -->
+          <!-- Progreso del área -->
           <div class="progreso-area-duo">
             <div class="barra-progreso-area">
-              <div class="barra-fill-area" 
+              <div class="barra-fill-area"
                    [style.width.%]="area.successRate"
                    [class.civil]="area.area === 'Derecho Civil'"
                    [class.procesal]="area.area === 'Derecho Procesal'">
@@ -273,28 +273,26 @@
             </div>
           </div>
 
-          <!-- Expandible: muestra TEMAS -->
+          <!-- Expandible: TEMAS -->
           <ng-container *ngIf="isAreaExpanded(area.area)">
             <div class="temas-section">
-              
-              <div *ngFor="let tema of getTemasForArea(area.area)" 
+              <div *ngFor="let tema of getTemasForArea(area.area)"
                    class="tema-card-duolingo"
                    [class.expanded]="isTemaExpanded(tema.temaNombre)"
                    [attr.data-parent-area]="area.area">
-                
+
                 <div class="tema-main" (click)="toggleTemaExpansion(tema.temaNombre)">
                   <div class="tema-left">
                     <div class="tema-info-compact">
                       <h4 class="tema-nombre">{{ tema.temaNombre }}</h4>
                     </div>
                   </div>
-
                   <div class="tema-right">
                     <div class="porcentaje-grande" [attr.data-parent-area]="area.area">
                       {{ tema.porcentajeAcierto }}%
                     </div>
-                    <ion-icon 
-                      [name]="isTemaExpanded(tema.temaNombre) ? 'chevron-down' : 'chevron-forward'" 
+                    <ion-icon
+                      [name]="isTemaExpanded(tema.temaNombre) ? 'chevron-down' : 'chevron-forward'"
                       class="expand-icon-small">
                     </ion-icon>
                   </div>
@@ -302,7 +300,7 @@
 
                 <div class="progreso-visual">
                   <div class="barra-progreso">
-                    <div class="barra-fill" 
+                    <div class="barra-fill"
                          [style.width.%]="tema.porcentajeAcierto"
                          [attr.data-parent-area]="area.area">
                     </div>
@@ -325,22 +323,21 @@
                       <h5>Desglose por subtemas</h5>
                     </div>
 
-                    <div *ngFor="let subtema of getSubtemasForTema(tema)" 
-                        class="subtema-item-duolingo"
-                        [attr.data-parent-area]="area.area">
-                      
+                    <div *ngFor="let subtema of getSubtemasForTema(tema)"
+                         class="subtema-item-duolingo"
+                         [attr.data-parent-area]="area.area">
                       <div class="subtema-header-compact">
                         <span class="subtema-nombre">{{ subtema.subtemaNombre }}</span>
-                        <span class="subtema-porcentaje" [attr.data-parent-area]="area.area">{{ subtema.porcentajeAcierto }}%</span>
+                        <span class="subtema-porcentaje" [attr.data-parent-area]="area.area">
+                          {{ subtema.porcentajeAcierto }}%
+                        </span>
                       </div>
-
                       <div class="subtema-barra">
-                        <div class="subtema-fill" 
+                        <div class="subtema-fill"
                              [style.width.%]="subtema.porcentajeAcierto"
                              [attr.data-parent-area]="area.area">
                         </div>
                       </div>
-
                       <div class="subtema-stats">
                         <span class="subtema-stat">
                           {{ subtema.preguntasCorrectas }}/{{ subtema.totalPreguntas }} correctas
@@ -355,7 +352,7 @@
         </div>
       </div>
     </div>
-    </div>
+  </div>
 
   <app-bottom-nav></app-bottom-nav>
 </ion-content>

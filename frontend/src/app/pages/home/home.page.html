@@ -1,33 +1,32 @@
 <ion-content [fullscreen]="true" class="home-content">
   <div class="home-container">
-
-  <div class="scrollable-content">
-<!-- HERO con avatar a la izquierda -->
-  <div class="hero-header">
-    <button class="avatar-wrap" (click)="goToProfile()" aria-label="Perfil">
-      <img [src]="userAvatarUrl || defaultAvatar" alt="avatar" />
-    </button>
-    <div class="user-info">
-      <h1 class="hero-greeting">
-        <span class="hello-text">Hola,</span>
-        <span class="hero-name">{{ getFirstName() }}</span>
-      </h1>
-    </div>
-  </div>
-
-  <!-- 🔥 TARJETA DE RACHA GRANDE -->
-  <div class="streak-main-section">
-    <div class="streak-main-card" (click)="goToRacha()">
-      <div class="streak-header">
-        <h3 class="streak-title">Tu Racha</h3>
-        <div class="streak-icon-number">
-          <ion-icon name="flame" class="flame-icon-green"></ion-icon>
-          <span class="streak-number">{{ userStreak }}</span>
+    <div class="scrollable-content">
+      
+      <!-- 🧑‍🎓 HERO con avatar a la izquierda -->
+      <div class="hero-header">
+        <button class="avatar-wrap" (click)="goToProfile()" aria-label="Perfil">
+          <img [src]="userAvatarUrl || defaultAvatar" alt="avatar" />
+        </button>
+        <div class="user-info">
+          <h1 class="hero-greeting">
+            <span class="hello-text">Hola,</span>
+            <span class="hero-name">{{ getFirstName() }}</span>
+          </h1>
         </div>
       </div>
-    </div>
-  </div>
 
+      <!-- 🔥 TARJETA DE RACHA GRANDE -->
+      <div class="streak-main-section">
+        <div class="streak-main-card" (click)="goToRacha()">
+          <div class="streak-header">
+            <h3 class="streak-title">Tu Racha</h3>
+            <div class="streak-icon-number">
+              <ion-icon name="flame" class="flame-icon-green"></ion-icon>
+              <span class="streak-number">{{ userStreak }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- 📊 ESTADÍSTICAS RÁPIDAS -->
       <div class="quick-stats-section">
@@ -36,11 +35,13 @@
           <h3 class="stat-value">{{ totalSessions }}</h3>
           <p class="stat-label">sesiones</p>
         </div>
+
         <div class="stat-box">
           <ion-icon name="help-circle" class="stat-icon"></ion-icon>
           <h3 class="stat-value">{{ totalQuestions }}</h3>
           <p class="stat-label">preguntas</p>
         </div>
+
         <div class="stat-box">
           <ion-icon name="trophy" class="stat-icon"></ion-icon>
           <h3 class="stat-value">{{ overallSuccessRate }}%</h3>
@@ -48,27 +49,27 @@
         </div>
       </div>
 
-      <!-- Elige qué quieres aprender hoy -->
+      <!-- 📚 Elige qué quieres aprender hoy -->
       <div class="continue-section">
-      <h2 class="section-title-large">Elige qué quieres aprender hoy</h2>
+        <h2 class="section-title-large">Elige qué quieres aprender hoy</h2>
         <div class="area-cards">
           <div class="area-card civil" (click)="goToCivil()">
             <div class="area-icon">
-              <img src="assets/image/law1.png" alt="Civil">
+              <img src="assets/image/law1.png" alt="Civil" />
             </div>
             <h3>Derecho Civil</h3>
           </div>
-          
+
           <div class="area-card procesal" (click)="goToProcesal()">
             <div class="area-icon">
-              <img src="assets/image/law2.png" alt="Procesal">
+              <img src="assets/image/law2.png" alt="Procesal" />
             </div>
             <h3>Derecho Procesal</h3>
           </div>
         </div>
       </div>
 
-      <!-- Botón Historial Completo -->
+      <!-- 📖 Botón Historial Completo -->
       <div class="history-button-section">
         <div class="history-card" (click)="goToFullHistory()">
           <div class="history-icon">
@@ -77,10 +78,10 @@
           <h3>Ver Historial Completo</h3>
         </div>
       </div>
-    </div>
 
+    </div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <!-- 🔻 Bottom Navigation -->
   <app-bottom-nav></app-bottom-nav>
 </ion-content>

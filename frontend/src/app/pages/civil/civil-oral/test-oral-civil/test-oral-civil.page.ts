@@ -42,19 +42,18 @@ interface Question {
   ]
 })
 export class TestOralCivilPage implements OnInit, OnDestroy {
+
   questions: Question[] = [];
   currentQuestionNumber: number = 1;
   totalQuestions: number = 5;
   userAnswers: { [key: string]: string } = {};
-  questionEvaluations: {
-    [key: string]: { isCorrect: boolean; correctAnswer: string; explanation: string };
-  } = {};
-
+  questionEvaluations: { [key: string]: { isCorrect: boolean, correctAnswer: string, explanation: string } } = {};
+    
   isPlaying: boolean = false;
   audioCompleted: boolean = false;
   audioProgress: string = '00:02';
   currentAudio: HTMLAudioElement | null = null;
-
+  
   isRecording: boolean = false;
   hasRecording: boolean = false;
   recordingTime: string = '00:00';
@@ -70,17 +69,17 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   public questionReadyTime: number = 0;
   public responseStartTime: number = 0;
   public questionResponseTime: number = 0;
-
+  
   private responseTimer: any;
   public elapsedResponseTime: string = '00:00';
-
+  
   sessionId: string = '';
   testId: number = 0;
   private currentSession: any = null;
   isLoading: boolean = true;
   loadingError: boolean = false;
   currentTranscription: string = '';
-
+  
   showEvaluation: boolean = false;
   evaluationResult: any = null;
   isPlayingExplanation: boolean = false;
@@ -95,40 +94,38 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     private audioService: AudioService,
     private apiService: ApiService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
-  async ngOnInit() {
+async ngOnInit() {
     this.sessionId = 'session_' + Date.now();
-
-    // PRIMERO cargar la sesión para obtener el responseMethod
-    const session = this.apiService.getCurrentSession();
-    if (session) {
-      // Buscar responseMethod en TODOS los lugares posibles
-      this.responseMethod =
-        session.responseMethod ||
-        session.session?.responseMethod ||
-        session.data?.responseMethod ||
-        'voice';
-
-      console.log('📋 Método de respuesta detectado:', this.responseMethod);
-      console.log('📋 Objeto session completo:', JSON.stringify(session, null, 2));
-    }
-
+    
+// PRIMERO cargar la sesión para obtener el responseMethod
+const session = this.apiService.getCurrentSession();
+if (session) {
+  // Buscar responseMethod en TODOS los lugares posibles
+  this.responseMethod = session.responseMethod || 
+                        session.session?.responseMethod || 
+                        session.data?.responseMethod || 
+                        'voice';
+  console.log('📋 Método de respuesta detectado:', this.responseMethod);
+  console.log('📋 Objeto session completo:', JSON.stringify(session, null, 2));
+}
+    
     await this.loadQuestionsFromBackend();
-
+    
     // Solo inicializar grabación si el método es 'voice'
     if (this.responseMethod === 'voice') {
       if (!this.audioService.isRecordingSupported()) {
         await this.showUnsupportedAlert();
         return;
       }
-
+      
       const initialized = await this.audioService.initializeRecording();
       if (!initialized) {
         await this.showMicrophoneErrorAlert();
         return;
       }
-
+      
       this.recordingStateSubscription = this.audioService.recordingState$.subscribe(
         (state: AudioRecordingState) => {
           this.isRecording = state.isRecording;
@@ -136,11 +133,11 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
           this.audioBlob = state.audioBlob;
           this.audioUrl = state.audioUrl;
           this.hasRecording = state.audioBlob !== null && state.audioBlob.size > 0;
-
+          
           if (this.isRecording || this.hasRecording) {
             this.recordingTime = this.audioService.formatDuration(state.recordingDuration);
           }
-
+          
           this.cdr.detectChanges();
         }
       );
@@ -149,15 +146,15 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     }
   }
 
-  async loadQuestionsFromBackend() {
+async loadQuestionsFromBackend() {
     try {
       console.log('📥 Cargando preguntas desde el backend...');
       this.isLoading = true;
-
+      
       const session = this.apiService.getCurrentSession();
-
+      
       console.log('🔍 SESSION COMPLETA:', JSON.stringify(session, null, 2));
-
+      
       if (!session || !session.questions || session.questions.length === 0) {
         console.error('❌ No hay sesión activa o no tiene preguntas');
         this.loadingError = true;
@@ -166,43 +163,40 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       }
 
       console.log('✅ Sesión encontrada');
-
+      
       // ⚠️ CRÍTICO: Buscar responseMethod en TODOS los lugares posibles
-      this.responseMethod =
-        session.responseMethod ||
-        session.session?.responseMethod ||
-        session.data?.responseMethod ||
-        'voice';
-
+      this.responseMethod = session.responseMethod || 
+                            session.session?.responseMethod || 
+                            session.data?.responseMethod || 
+                            'voice';
+      
       console.log('📋 ResponseMethod detectado:', this.responseMethod);
       console.log('📋 Session keys:', Object.keys(session));
-
-      this.testId =
-        session.testId ||
-        session.test?.id ||
-        session.session?.testId ||
-        session.session?.id ||
-        session.id ||
-        0;
-
-      this.sessionId =
-        session.sessionId ||
-        session.session?.id?.toString() ||
-        session.id?.toString() ||
-        '';
-
+      
+      this.testId = session.testId || 
+                    session.test?.id || 
+                    session.session?.testId || 
+                    session.session?.id ||
+                    session.id ||
+                    0;
+      
+      this.sessionId = session.sessionId || 
+                       session.session?.id?.toString() || 
+                       session.id?.toString() || 
+                       '';
+      
       console.log('🆔 TestId FINAL extraído:', this.testId);
       console.log('🆔 SessionId FINAL extraído:', this.sessionId);
-
+      
       if (this.testId === 0) {
         console.error('⚠️⚠️⚠️ CRÍTICO: testId es 0');
         console.error('⚠️ La estructura de session es:', Object.keys(session));
       }
-
+      
       setTimeout(() => {
         try {
           this.questions = this.convertBackendQuestions(session.questions);
-
+          
           if (this.questions.length === 0) {
             console.error('❌ No se pudieron convertir las preguntas');
             this.loadingError = true;
@@ -212,22 +206,24 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
 
           this.totalQuestions = this.questions.length;
           this.currentQuestionNumber = 1;
-
+          
           console.log('✅ Preguntas cargadas:', this.questions.length);
           console.log('✅ Método de respuesta activo:', this.responseMethod);
-
+          
           this.isLoading = false;
           this.cdr.detectChanges();
-
+          
           setTimeout(() => {
             this.playAudio();
           }, 500);
+          
         } catch (error) {
           console.error('❌ Error procesando preguntas:', error);
           this.loadingError = true;
           this.isLoading = false;
         }
       }, 300);
+      
     } catch (error) {
       console.error('❌ Error en loadQuestionsFromBackend:', error);
       this.loadingError = true;
@@ -235,25 +231,26 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     }
   }
 
+
   ngOnDestroy() {
     if (this.recordingStateSubscription) {
       this.recordingStateSubscription.unsubscribe();
     }
-
+    
     if (this.currentAudio) {
       this.currentAudio.pause();
       this.currentAudio = null;
     }
-
+    
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
-
+    
     if (this.recordingAudio) {
       this.recordingAudio.pause();
       this.recordingAudio = null;
     }
-
+    
     this.audioService.clearRecording();
     this.stopResponseTimer();
   }
@@ -276,9 +273,11 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     if (question.options && Array.isArray(question.options)) {
       return question.options
         .map(opt => {
+          // Si la opción es un objeto, extraer el texto
           if (typeof opt === 'object' && opt !== null) {
             return opt.texto || opt.text || opt.option || '';
           }
+          // Si es un string, devolverlo directamente
           return String(opt);
         })
         .filter(opt => opt && opt.trim && opt.trim() !== '');
@@ -295,9 +294,11 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
     return String.fromCharCode(65 + index);
   }
 
-  isOptionSelected(option: string): boolean {
-    if (!this.showEvaluation) return false;
-
+isOptionSelected(option: string): boolean {
+    if (!this.showEvaluation) {
+      return false;
+    }
+    
     const question = this.getCurrentQuestion();
     if (!question) return false;
 
@@ -349,6 +350,7 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   isOptionIncorrect(option: string): boolean {
     const question = this.getCurrentQuestion();
     if (!question || !this.showCorrectAnswer) return false;
+    
     return this.isOptionSelected(option) && !this.isOptionCorrect(option);
   }
 
@@ -357,14 +359,22 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
   }
 
   getOptionIcon(option: string): string {
-    if (this.isOptionCorrect(option)) return 'checkmark-circle';
-    if (this.isOptionIncorrect(option)) return 'close-circle';
+    if (this.isOptionCorrect(option)) {
+      return 'checkmark-circle';
+    }
+    if (this.isOptionIncorrect(option)) {
+      return 'close-circle';
+    }
     return '';
   }
 
   getOptionIconColor(option: string): string {
-    if (this.isOptionCorrect(option)) return '#4CAF50';
-    if (this.isOptionIncorrect(option)) return '#F44336';
+    if (this.isOptionCorrect(option)) {
+      return '#4CAF50';
+    }
+    if (this.isOptionIncorrect(option)) {
+      return '#F44336';
+    }
     return '#64748b';
   }
 
@@ -391,13 +401,13 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
 
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-
+      
       this.isPlaying = true;
       this.audioCompleted = false;
       this.cdr.detectChanges();
 
       let fullText = question.questionText;
-
+      
       const options = this.getCurrentQuestionOptions();
       if (options.length > 0) {
         fullText += '. Las alternativas son: ';
@@ -423,12 +433,14 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
         console.log('✅ Audio completado');
         this.isPlaying = false;
         this.audioCompleted = true;
+        
         this.questionReadyTime = Date.now();
         console.log('⏱️ Pregunta lista en:', new Date(this.questionReadyTime).toLocaleTimeString());
+        
         this.cdr.detectChanges();
       };
 
-      utterance.onerror = event => {
+      utterance.onerror = (event) => {
         console.error('❌ Error en síntesis de voz:', event);
         this.isPlaying = false;
         this.audioCompleted = true;
@@ -437,36 +449,34 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
 
       const loadVoices = () => {
         const voices = window.speechSynthesis.getVoices();
-
-        let selectedVoice = voices.find(
-          voice =>
-            voice.lang.includes('es-CL') &&
-            (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
+        
+        let selectedVoice = voices.find(voice => 
+          voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
         );
-
+        
         if (!selectedVoice) {
-          selectedVoice = voices.find(
-            voice =>
-              voice.lang.includes('es') &&
-              (voice.name.toLowerCase().includes('female') ||
-                voice.name.toLowerCase().includes('femenina') ||
-                voice.name.toLowerCase().includes('mónica') ||
-                voice.name.toLowerCase().includes('monica') ||
-                voice.name.toLowerCase().includes('paulina') ||
-                voice.name.toLowerCase().includes('lucia') ||
-                voice.name.toLowerCase().includes('paloma'))
+          selectedVoice = voices.find(voice => 
+            voice.lang.includes('es') && (
+              voice.name.toLowerCase().includes('female') ||
+              voice.name.toLowerCase().includes('femenina') ||
+              voice.name.toLowerCase().includes('mónica') ||
+              voice.name.toLowerCase().includes('monica') ||
+              voice.name.toLowerCase().includes('paulina') ||
+              voice.name.toLowerCase().includes('lucia') ||
+              voice.name.toLowerCase().includes('paloma')
+            )
           );
         }
-
+        
         if (!selectedVoice) {
           selectedVoice = voices.find(voice => voice.lang.includes('es'));
         }
-
+        
         if (selectedVoice) {
           utterance.voice = selectedVoice;
           console.log('🎤 Voz seleccionada:', selectedVoice.name, selectedVoice.lang);
         }
-
+        
         window.speechSynthesis.speak(utterance);
       };
 
@@ -477,8 +487,6 @@ export class TestOralCivilPage implements OnInit, OnDestroy {
       }
     }
   }
-
-
 
   pauseAudio() {
     if ('speechSynthesis' in window && this.isPlaying) {

@@ -4,13 +4,14 @@
     <ion-icon name="chevron-back" class="back-icon" (click)="confirmExit()"></ion-icon>
     <h1 class="header-title">Derecho Civil Oral</h1>
   </div>
+  
 
   <!-- Contenido principal -->
   <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
     
     <!-- Puntitos de progreso -->
     <div class="progress-dots">
-      <div
+      <div 
         *ngFor="let q of questions; let i = index"
         class="dot"
         [class.completed]="i < (currentQuestionNumber - 1)"
@@ -18,7 +19,7 @@
       </div>
     </div>
 
-    <!-- Categoría y contador -->
+ <!-- Categoría y contador -->
     <div class="category-row">
       <div class="category-chip">
         {{ getCurrentQuestion()?.category || 'Derecho Civil' }}
@@ -27,24 +28,23 @@
         {{ currentQuestionNumber }} de {{ totalQuestions }}
       </div>
     </div>
-
     <!-- Texto de la pregunta -->
     <div class="question-text">
       <p><strong>{{ getCurrentQuestion()?.questionText }}</strong></p>
     </div>
 
-    <!-- Control de audio para escuchar pregunta -->
+   <!-- Control de audio para escuchar pregunta -->
     <div class="audio-section">
-      <div
-        class="audio-player"
+      <div 
+        class="audio-player" 
         [class.playing]="isPlaying"
         [class.completed]="audioCompleted"
         (click)="isPlaying ? pauseAudio() : playAudio()">
-
+        
         <div class="audio-icon-container">
           <ion-icon [name]="getAudioIcon()" class="audio-play-icon"></ion-icon>
         </div>
-
+        
         <div class="audio-text">
           <span class="audio-status">{{ getAudioStatus() }}</span>
           <span class="audio-duration">{{ audioProgress }}</span>
@@ -54,20 +54,20 @@
 
     <!-- Opciones de respuesta -->
     <div class="options-container">
-      <div
+      <div 
         *ngFor="let option of getCurrentQuestionOptions(); let i = index"
         class="option-button"
-        [class.selected]="isOptionSelected(option)"
+        [class.selected]="isOptionSelected(option)"        
         [class.correct]="isOptionCorrect(option)"
         [class.incorrect]="isOptionIncorrect(option)"
         [class.disabled]="hasAnsweredCurrentQuestion()"
         [class.clickable]="responseMethod === 'selection' && !hasAnsweredCurrentQuestion()"
         (click)="responseMethod === 'selection' && !hasAnsweredCurrentQuestion() ? selectOptionByClick(option) : null">
-
+        
         <div class="option-letter">{{ getOptionLetter(i) }}</div>
         <div class="option-text">{{ option }}</div>
 
-        <ion-icon
+        <ion-icon 
           *ngIf="shouldShowOptionIcon(option)"
           [name]="getOptionIcon(option)"
           [style.color]="getOptionIconColor(option)"
@@ -77,24 +77,24 @@
     </div>
 
     <!-- Sección de grabación con micrófono a la izquierda y reproducir a la derecha -->
-    <div class="recording-section" *ngIf="responseMethod === 'voice'">
+      <div class="recording-section" *ngIf="responseMethod === 'voice'">
       <div class="recording-controls-inline">
-
+        
         <!-- Botón de grabación (izquierda) -->
         <div class="recording-button-container">
-          <div
-            class="recording-button"
+          <div 
+            class="recording-button" 
             [class.recording]="isRecording"
             [class.has-recording]="hasRecording"
             (click)="toggleRecording()">
-
+            
             <div class="recording-circle">
               <ion-icon [name]="getRecordingIcon()" class="recording-icon"></ion-icon>
             </div>
-
+            
             <div class="recording-pulse" *ngIf="isRecording"></div>
           </div>
-
+          
           <div class="recording-text">
             <span class="recording-status">{{ getRecordingStatus() }}</span>
             <span class="recording-timer" *ngIf="isRecording || hasRecording">{{ recordingTime }}</span>
@@ -108,16 +108,14 @@
             <span>{{ getReplayButtonText() }}</span>
           </button>
         </div>
-
+        
       </div>
     </div>
 
-    <!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
+    
+<!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
     <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
-      <div
-        class="evaluation-header"
-        [class.correct]="evaluationResult?.isCorrect"
-        [class.incorrect]="!evaluationResult?.isCorrect">
+      <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
         <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
         <span>{{ evaluationResult?.isCorrect ? '¡Correcto!' : 'Incorrecto' }}</span>
       </div>
@@ -129,15 +127,13 @@
         </div>
 
         <div class="eval-section">
-          <button
-            class="explanation-play-button"
+          <button 
+            class="explanation-play-button" 
             (click)="isPlayingExplanation ? pauseExplanationAudio() : playExplanationAudio()">
             <ion-icon [name]="isPlayingExplanation ? 'pause-circle' : 'play-circle'"></ion-icon>
             <span>{{ isPlayingExplanation ? 'Pausar explicación' : 'Reproducir explicación' }}</span>
           </button>
-          <div class="eval-text explanation">
-            <strong>Explicación:</strong> {{ evaluationResult?.explanation }}
-          </div>
+          <div class="eval-text explanation"><strong>Explicación:</strong> {{ evaluationResult?.explanation }}</div>
         </div>
       </div>
     </div>
@@ -152,16 +148,16 @@
 
     <!-- Botones de navegación -->
     <div class="navigation-buttons">
-      <ion-button
+      <ion-button 
         *ngIf="currentQuestionNumber > 1"
-        fill="outline"
+        fill="outline" 
         (click)="previousQuestion()"
         class="nav-btn">
         <ion-icon name="chevron-back" slot="start"></ion-icon>
         Anterior
       </ion-button>
 
-      <ion-button
+      <ion-button 
         *ngIf="currentQuestionNumber < totalQuestions"
         (click)="nextQuestion()"
         [disabled]="!canGoToNext()"
@@ -170,7 +166,7 @@
         <ion-icon name="chevron-forward" slot="end"></ion-icon>
       </ion-button>
 
-      <ion-button
+      <ion-button 
         *ngIf="currentQuestionNumber === totalQuestions"
         (click)="nextQuestion()"
         [disabled]="!canGoToNext()"
@@ -202,4 +198,5 @@
     <p>Error al cargar las preguntas</p>
     <ion-button (click)="exitTest()">Volver</ion-button>
   </div>
+
 </ion-content>

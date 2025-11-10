@@ -10,22 +10,18 @@ import { ApiService } from '../../services/api.service';
   templateUrl: './historial.page.html',
   styleUrls: ['./historial.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, BottomNavComponent]
+  imports: [IonicModule, CommonModule, BottomNavComponent],
 })
 export class HistorialPage implements OnInit {
-
   recentSessions: any[] = [];
-  groupedSessions: { date: string, sessions: any[], expanded: boolean }[] = [];
+  groupedSessions: { date: string; sessions: any[]; expanded: boolean }[] = [];
   expandedSession: number | null = null;
   expandedQuestion: number | null = null;
   sessionDetails: any = null;
   isLoading: boolean = true;
   isLoadingDetails: boolean = false;
 
-  constructor(
-    private router: Router,
-    private apiService: ApiService
-  ) {}
+  constructor(private router: Router, private apiService: ApiService) {}
 
   ngOnInit() {
     this.loadRecentSessions();
@@ -36,7 +32,7 @@ export class HistorialPage implements OnInit {
 
     try {
       const currentUser = this.apiService.getCurrentUser();
-      
+
       if (!currentUser || !currentUser.id) {
         console.warn('No hay usuario logueado');
         this.isLoading = false;
@@ -47,16 +43,17 @@ export class HistorialPage implements OnInit {
       console.log('Cargando historial para estudiante:', studentId);
 
       try {
-      const response = await this.apiService.getRecentSessions(studentId, 250).toPromise();        
+        const response = await this.apiService.getRecentSessions(studentId, 250).toPromise();
+
         if (response && response.success && response.data) {
           this.recentSessions = response.data.map((session: any) => ({
             testId: session.testId,
             date: new Date(session.date),
             area: session.area || 'Derecho Civil',
-            questionsAnswered: session.totalQuestions || 0,            
+            questionsAnswered: session.totalQuestions || 0,
             correctAnswers: session.correctAnswers || 0,
             successRate: session.successRate || 0,
-            difficulty: session.difficulty || 'intermedio'
+            difficulty: session.difficulty || 'intermedio',
           }));
 
           // Agrupar sesiones por día
@@ -67,7 +64,6 @@ export class HistorialPage implements OnInit {
       } catch (error) {
         console.error('Error cargando sesiones:', error);
       }
-
     } catch (error) {
       console.error('Error general en loadRecentSessions:', error);
     } finally {
@@ -78,7 +74,7 @@ export class HistorialPage implements OnInit {
   groupSessionsByDate() {
     const grouped = new Map<string, any[]>();
 
-    this.recentSessions.forEach(session => {
+    this.recentSessions.forEach((session) => {
       const dateKey = this.getDateKey(session.date);
       if (!grouped.has(dateKey)) {
         grouped.set(dateKey, []);
@@ -96,7 +92,7 @@ export class HistorialPage implements OnInit {
       .map(([date, sessions]) => ({
         date,
         sessions,
-        expanded: false
+        expanded: false,
       }));
   }
 
@@ -106,13 +102,23 @@ export class HistorialPage implements OnInit {
 
   getDateKey(date: Date): string {
     const months = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
     ];
-    
+
     const today = new Date();
     const isCurrentYear = date.getFullYear() === today.getFullYear();
-    
+
     if (isCurrentYear) {
       return months[date.getMonth()];
     } else {
@@ -121,9 +127,11 @@ export class HistorialPage implements OnInit {
   }
 
   isSameDay(date1: Date, date2: Date): boolean {
-    return date1.getDate() === date2.getDate() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getFullYear() === date2.getFullYear();
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
   }
 
   viewSessionDetail(session: any) {
@@ -145,7 +153,7 @@ export class HistorialPage implements OnInit {
 
     try {
       const response = await this.apiService.getTestDetail(testId).toPromise();
-      
+
       if (response && response.success) {
         this.sessionDetails = response.data;
         console.log('Detalles del test cargados:', this.sessionDetails);
@@ -165,71 +173,82 @@ export class HistorialPage implements OnInit {
     }
   }
 
-getQuestionOptions(question: any): string[] {
-  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-    return ['Verdadero', 'Falso'];
-  }
-  
-  if (Array.isArray(question.answers) && question.answers.length > 0) {
-    return question.answers.map((answer: any) => answer.text);
-  }
-  
-  return [];
-}
-
-isOptionSelected(question: any, option: string): boolean {
-  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-    if (question.selectedAnswer === 'V' && option === 'Verdadero') return true;
-    if (question.selectedAnswer === 'F' && option === 'Falso') return true;
-    return false;
-  }
-  
-  // Buscar la opción en answers y comparar su letra con selectedAnswer
-  if (Array.isArray(question.answers)) {
-    const answer = question.answers.find((a: any) => a.text === option);
-    if (answer) {
-      return answer.letter === question.selectedAnswer;
+  getQuestionOptions(question: any): string[] {
+    if (
+      question.questionType === 'verdadero_falso' ||
+      question.questionType === 2 ||
+      question.questionType === '2'
+    ) {
+      return ['Verdadero', 'Falso'];
     }
-  }
-  
-  return false;
-}
 
-isOptionCorrect(question: any, option: string): boolean {
-  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-    // Para V/F, buscar en answers cuál tiene isCorrect = true
+    if (Array.isArray(question.answers) && question.answers.length > 0) {
+      return question.answers.map((answer: any) => answer.text);
+    }
+
+    return [];
+  }
+
+  isOptionSelected(question: any, option: string): boolean {
+    if (
+      question.questionType === 'verdadero_falso' ||
+      question.questionType === 2 ||
+      question.questionType === '2'
+    ) {
+      if (question.selectedAnswer === 'V' && option === 'Verdadero') return true;
+      if (question.selectedAnswer === 'F' && option === 'Falso') return true;
+      return false;
+    }
+
     if (Array.isArray(question.answers)) {
-      const correctAnswer = question.answers.find((a: any) => a.isCorrect);
-      if (correctAnswer) {
-        if (correctAnswer.letter === 'A' && option === 'Verdadero') return true;
-        if (correctAnswer.letter === 'B' && option === 'Falso') return true;
+      const answer = question.answers.find((a: any) => a.text === option);
+      if (answer) {
+        return answer.letter === question.selectedAnswer;
       }
     }
+
     return false;
   }
-  
-  // Para opciones múltiples, buscar en answers
-  if (Array.isArray(question.answers)) {
-    const answer = question.answers.find((a: any) => a.text === option);
-    if (answer) {
-      return answer.isCorrect === true;
+
+  isOptionCorrect(question: any, option: string): boolean {
+    if (
+      question.questionType === 'verdadero_falso' ||
+      question.questionType === 2 ||
+      question.questionType === '2'
+    ) {
+      if (Array.isArray(question.answers)) {
+        const correctAnswer = question.answers.find((a: any) => a.isCorrect);
+        if (correctAnswer) {
+          if (correctAnswer.letter === 'A' && option === 'Verdadero') return true;
+          if (correctAnswer.letter === 'B' && option === 'Falso') return true;
+        }
+      }
+      return false;
     }
+
+    if (Array.isArray(question.answers)) {
+      const answer = question.answers.find((a: any) => a.text === option);
+      if (answer) {
+        return answer.isCorrect === true;
+      }
+    }
+
+    return false;
   }
-  
-  return false;
-}
 
   getOptionLetter(index: number): string {
     return String.fromCharCode(65 + index);
   }
 
   formatDate(date: Date): string {
-    return date.toLocaleDateString('es-ES', { 
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).replace(',', ' ·');
+    return date
+      .toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+      .replace(',', ' ·');
   }
 
   getSuccessRateColor(rate: number): string {

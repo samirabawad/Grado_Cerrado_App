@@ -30,7 +30,7 @@ export class LogrosPage implements OnInit {
 
   // Secciones expandibles
   expandedSections: { [key: string]: boolean } = {
-    racha: false, 
+    racha: false,
     tests: false
   };
 
@@ -94,7 +94,7 @@ export class LogrosPage implements OnInit {
 
     try {
       const currentUser = this.apiService.getCurrentUser();
-      
+
       if (!currentUser || !currentUser.id) {
         console.warn('No hay usuario logueado');
         this.isLoading = false;
@@ -106,14 +106,15 @@ export class LogrosPage implements OnInit {
 
       try {
         const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
+
         if (statsResponse && statsResponse.success) {
           const stats = statsResponse.data;
           this.currentStreak = stats.streak || 0;
           this.totalTests = stats.totalTests || 0;
-          
+
           this.unlockAchievements(this.currentStreak);
           this.unlockTestAchievements(this.totalTests);
-          
+
           console.log('Logros cargados. Racha:', this.currentStreak, 'Tests:', this.totalTests);
         }
       } catch (error) {
@@ -128,14 +129,14 @@ export class LogrosPage implements OnInit {
   }
 
   unlockAchievements(streak: number) {
-    this.achievements.forEach(achievement => {
-      achievement.unlocked = streak >= achievement.daysRequired;
+    this.achievements.forEach(a => {
+      a.unlocked = streak >= a.daysRequired;
     });
   }
 
   unlockTestAchievements(totalTests: number) {
-    this.testAchievements.forEach(achievement => {
-      achievement.unlocked = totalTests >= achievement.daysRequired;
+    this.testAchievements.forEach(a => {
+      a.unlocked = totalTests >= a.daysRequired;
     });
   }
 

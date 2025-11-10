@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, style, transition, animate } from '@angular/animations';
 
 interface QuestionDetail {
   questionNumber: number;
@@ -41,7 +41,7 @@ export class ResumenTestProcesalOralPage implements OnInit {
   questionsDetails: QuestionDetail[] = [];
   expandedQuestionIndex: number | null = null;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.loadResults();

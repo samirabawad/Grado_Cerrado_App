@@ -9,7 +9,9 @@
 
       <!-- ¿Qué quieres practicar? -->
       <h2>¿Qué quieres practicar?</h2>
-      <p class="practice-subtitle">Elige todo el temario de Procesal o enfócate en un tema específico</p>
+      <p class="practice-subtitle">
+        Elige todo el temario de Procesal o enfócate en un tema específico
+      </p>
       
       <button 
         class="scope-btn"
@@ -27,7 +29,7 @@
         Un tema específico
       </button>
 
-            <!-- Estado dinámico -->
+      <!-- Estado dinámico -->
       <div class="practice-status" *ngIf="scopeType === 'all'">
         <ion-icon name="book"></ion-icon>
         <span>Practicarás con preguntas de todos los temas</span>
@@ -41,10 +43,11 @@
       <!-- Selector de temas -->
       <div *ngIf="showThemeSelector" class="theme-selector">
         <div class="theme-selector-header">Selecciona un tema</div>
-        <div *ngFor="let tema of temas"
-             class="tema-item"
-             [class.selected]="selectedTemaId === tema.id"
-             (click)="selectTema(tema.id)">
+        <div 
+          *ngFor="let tema of temas"
+          class="tema-item"
+          [class.selected]="selectedTemaId === tema.id"
+          (click)="selectTema(tema.id)">
           <div class="tema-header">
             <span class="tema-nombre">{{ tema.nombre }}</span>
             <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
@@ -52,7 +55,7 @@
         </div>
       </div>
 
-            <!-- Nivel de dificultad -->
+      <!-- Nivel de dificultad -->
       <h2>Nivel de dificultad</h2>
       
       <div class="inline-picker-container">
@@ -125,6 +128,7 @@
 
       <!-- ✅ Agregar espacio extra si es necesario -->
       <div style="height: 8px"></div>
+
       <!-- Validación -->
       <div class="validation-message" *ngIf="showThemeSelector && !selectedTemaId">
         <ion-icon name="alert-circle"></ion-icon>
