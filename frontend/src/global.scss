@@ -352,7 +352,18 @@ ion-alert.explanation-alert {
     }
   }
 }
-      }
+}
     }
   }
+}
+
+// ========================================
+// ✅ SAFE AREA PARA NOTCH/DYNAMIC ISLAND
+// ========================================
+.dashboard-header {
+  padding-top: max(env(safe-area-inset-top), 20px) !important;
+}
+
+.hero-header {
+  padding-top: max(env(safe-area-inset-top), 20px) !important;
 }
