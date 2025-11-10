@@ -215,6 +215,28 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     return question?.tema || question?.category || question?.legalArea || 'Sin categorÃ­a';
   }
 
+  getCurrentQuestionDifficulty(): string {
+    const question = this.getCurrentQuestion();
+    if (!question) return '';
+    
+    const difficulty = question['difficulty'] || question['level'];
+    
+    // Convertir número o string a texto
+    if (difficulty === 1 || difficulty === 'basico' || difficulty === 'basic') {
+      return 'Básico';
+    } else if (difficulty === 2 || difficulty === 'intermedio' || difficulty === 'intermediate') {
+      return 'Intermedio';
+    } else if (difficulty === 3 || difficulty === 'avanzado' || difficulty === 'advanced') {
+      return 'Avanzado';
+    }
+    
+    return 'Intermedio'; // Por defecto
+  }
+
+  shouldShowDifficultyLevel(): boolean {
+    return true;
+  }
+  
   getCurrentQuestionOptions(): string[] {
     const question = this.getCurrentQuestion();
     

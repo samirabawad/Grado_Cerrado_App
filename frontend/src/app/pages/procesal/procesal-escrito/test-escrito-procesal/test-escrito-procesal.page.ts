@@ -1,4 +1,4 @@
-// INICIO DEL ARCHIVO - Copiar desde aquÃ­
+// INICIO DEL ARCHIVO - Copiar desde aquÃƒÂ­
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
@@ -75,7 +75,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
   timer: any;
   isTestCompleted = false;
   
-  // Propiedades para panel de evaluación (como test-oral)
+  // Propiedades para panel de evaluaciÃ³n (como test-oral)
   showEvaluation: boolean = false;
   evaluationResult: any = null;
   isLoading = true;
@@ -113,32 +113,32 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
   async loadSessionFromBackend() {
     try {
-      console.log('Iniciando carga de sesiÃ³n...');
+      console.log('Iniciando carga de sesiÃƒÂ³n...');
       
       const session = this.apiService.getCurrentSession();
       
       if (!session || !session.questions || session.questions.length === 0) {
-        console.error('âŒ No hay sesiÃ³n activa o no tiene preguntas');
+        console.error('Ã¢ÂÅ’ No hay sesiÃƒÂ³n activa o no tiene preguntas');
         this.loadingError = true;
         this.isLoading = false;
         return;
       }
 
-      console.log('âœ… SesiÃ³n encontrada:', session);
+      console.log('Ã¢Å“â€¦ SesiÃƒÂ³n encontrada:', session);
       
       this.currentSession = session as BackendSession;
       this.testId = session.testId || session.session?.id || 0;
       this.sessionId = session.session?.id?.toString() || '';
       
-      console.log('ðŸ†” Test ID:', this.testId);
-      console.log('ðŸ†” Session ID:', this.sessionId);
+      console.log('Ã°Å¸â€ â€ Test ID:', this.testId);
+      console.log('Ã°Å¸â€ â€ Session ID:', this.sessionId);
       
       setTimeout(() => {
         try {
           this.questions = this.convertBackendQuestions(session.questions);
           
           if (this.questions.length === 0) {
-            console.error('âŒ No se pudieron convertir las preguntas');
+            console.error('Ã¢ÂÅ’ No se pudieron convertir las preguntas');
             this.loadingError = true;
             this.isLoading = false;
             return;
@@ -148,8 +148,8 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
           this.currentQuestionNumber = 1;
           this.currentQuestionIndex = 0;
           
-          console.log(`âœ… ${this.totalQuestions} preguntas cargadas correctamente`);
-          console.log('ðŸ“‹ Primera pregunta:', this.questions[0]);
+          console.log(`Ã¢Å“â€¦ ${this.totalQuestions} preguntas cargadas correctamente`);
+          console.log('Ã°Å¸â€œâ€¹ Primera pregunta:', this.questions[0]);
           
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -160,7 +160,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
           
         } catch (conversionError) {
-          console.error('Error en conversiÃ³n de preguntas:', conversionError);
+          console.error('Error en conversiÃƒÂ³n de preguntas:', conversionError);
           this.loadingError = true;
           this.isLoading = false;
         }
@@ -184,19 +184,19 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     });
   }
 
-  // âœ… NUEVO: Convertir una sola pregunta
+  // Ã¢Å“â€¦ NUEVO: Convertir una sola pregunta
   convertSingleQuestion(q: any, index: number): Question {
     return {
       id: q.id?.toString() || `temp-${index}`,
       text: q.questionText || q.text || 'Texto no disponible',
       questionText: q.questionText || q.text || 'Texto no disponible',
       type: q.type || 'seleccion_multiple',
-      category: q.tema || q.category || q.legalArea || 'Sin categorÃ­a',
-      tema: q.tema || q.category || q.legalArea || 'Sin categorÃ­a',
+      category: q.tema || q.category || q.legalArea || 'Sin categorÃƒÂ­a',
+      tema: q.tema || q.category || q.legalArea || 'Sin categorÃƒÂ­a',
       legalArea: q.legalArea || q.tema || q.category || 'General',
       difficulty: q.difficulty || q.level || 2,
       correctAnswer: q.correctAnswer || 'A',
-      explanation: q.explanation || 'ExplicaciÃ³n no disponible',
+      explanation: q.explanation || 'ExplicaciÃƒÂ³n no disponible',
       options: q.options || []
     };
   }
@@ -212,14 +212,36 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
 
   getCurrentQuestionCategory(): string {
     const question = this.getCurrentQuestion();
-    return question?.tema || question?.category || question?.legalArea || 'Sin categorÃ­a';
+    return question?.['tema'] || question?.['category'] || question?.['legalArea'] || 'Sin categorÃƒÂ­a';
+  }
+
+  getCurrentQuestionDifficulty(): string {
+    const question = this.getCurrentQuestion();
+    if (!question) return '';
+    
+    const difficulty = question['difficulty'] || question['level'];
+    
+    // Convertir número o string a texto
+    if (difficulty === 1 || difficulty === 'basico' || difficulty === 'basic') {
+      return 'Básico';
+    } else if (difficulty === 2 || difficulty === 'intermedio' || difficulty === 'intermediate') {
+      return 'Intermedio';
+    } else if (difficulty === 3 || difficulty === 'avanzado' || difficulty === 'advanced') {
+      return 'Avanzado';
+    }
+    
+    return 'Intermedio'; // Por defecto
+  }
+
+  shouldShowDifficultyLevel(): boolean {
+    return true;
   }
 
   getCurrentQuestionOptions(): string[] {
     const question = this.getCurrentQuestion();
     
     if (!question) {
-      console.warn('âš ï¸ No hay pregunta actual');
+      console.warn('Ã¢Å¡Â Ã¯Â¸Â No hay pregunta actual');
       return [];
     }
 
@@ -228,40 +250,40 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       return ['Verdadero', 'Falso'];
     }
 
-    // SelecciÃ³n mÃºltiple
+    // SelecciÃƒÂ³n mÃƒÂºltiple
     if (Array.isArray(question.options) && question.options.length > 0) {
       const firstOption = question.options[0];
       
-      // âœ… PRIORIDAD 1: Objeto con propiedad "Text" (backend)
+      // Ã¢Å“â€¦ PRIORIDAD 1: Objeto con propiedad "Text" (backend)
       if (typeof firstOption === 'object' && 'Text' in firstOption && firstOption.Text) {
-        console.log('âœ… Usando options[].Text del backend');
+        console.log('Ã¢Å“â€¦ Usando options[].Text del backend');
         return question.options.map((opt: any) => opt.Text);
       }
       
-      // âœ… PRIORIDAD 2: Objeto con propiedad "text" (minÃºscula)
+      // Ã¢Å“â€¦ PRIORIDAD 2: Objeto con propiedad "text" (minÃƒÂºscula)
       if (typeof firstOption === 'object' && 'text' in firstOption && firstOption.text) {
-        console.log('âœ… Usando options[].text');
+        console.log('Ã¢Å“â€¦ Usando options[].text');
         return question.options.map((opt: any) => opt.text);
       }
       
-      // âœ… PRIORIDAD 3: Array de strings directos
+      // Ã¢Å“â€¦ PRIORIDAD 3: Array de strings directos
       if (typeof firstOption === 'string') {
-        console.log('âœ… Usando options[] como strings');
+        console.log('Ã¢Å“â€¦ Usando options[] como strings');
         return question.options;
       }
       
-      // âœ… FALLBACK: Intentar extraer cualquier texto disponible
-      console.warn('âš ï¸ Formato de opciones no reconocido, intentando fallback...');
+      // Ã¢Å“â€¦ FALLBACK: Intentar extraer cualquier texto disponible
+      console.warn('Ã¢Å¡Â Ã¯Â¸Â Formato de opciones no reconocido, intentando fallback...');
       return question.options.map((opt: any) => {
         if (typeof opt === 'string') return opt;
         if (opt.Text) return opt.Text;
         if (opt.text) return opt.text;
-        return 'OpciÃ³n sin texto';
+        return 'OpciÃƒÂ³n sin texto';
       });
     }
 
-    // SI NO TIENE OPCIONES VÃLIDAS
-    console.error('âŒ Pregunta sin opciones vÃ¡lidas:', question);
+    // SI NO TIENE OPCIONES VÃƒÂLIDAS
+    console.error('Ã¢ÂÅ’ Pregunta sin opciones vÃƒÂ¡lidas:', question);
     
     if (!question.userAnswer) {
       question.userAnswer = 'SKIP';
@@ -270,24 +292,24 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
     return [];
   }
 
-  // âœ… NUEVO MÃ‰TODO: Obtener la letra (Id) de una opciÃ³n por su texto
+  // Ã¢Å“â€¦ NUEVO MÃƒâ€°TODO: Obtener la letra (Id) de una opciÃƒÂ³n por su texto
   getOptionLetterByText(optionText: string): string | null {
     const question = this.getCurrentQuestion();
     if (!question || !Array.isArray(question.options)) return null;
 
     const option = question.options.find((opt: any) => {
       if (typeof opt === 'object') {
-        // âœ… Comparar con Text (mayÃºscula) primero
+        // Ã¢Å“â€¦ Comparar con Text (mayÃƒÂºscula) primero
         if (opt.Text === optionText) return true;
-        // âœ… Luego con text (minÃºscula)
+        // Ã¢Å“â€¦ Luego con text (minÃƒÂºscula)
         if (opt.text === optionText) return true;
       }
-      // âœ… String directo
+      // Ã¢Å“â€¦ String directo
       return opt === optionText;
     });
 
     if (option && typeof option === 'object') {
-      // âœ… Devolver Id (mayÃºscula) primero, luego id (minÃºscula)
+      // Ã¢Å“â€¦ Devolver Id (mayÃƒÂºscula) primero, luego id (minÃƒÂºscula)
       const id = option.Id || option.id;
       if (id) return id.toString().toUpperCase();
     }
@@ -333,10 +355,10 @@ async selectAnswer(optionText: string) {
       question.wasAnswered = true;
       question.wasCorrect = isCorrect;
       
-      // âœ… Log solo aquÃ­
-      console.log(`${isCorrect ? 'âœ…' : 'âŒ'} V/F: "${optionText}" â†’ ${answerForBackend} (correcta: ${question.correctAnswer})`);
+      // Ã¢Å“â€¦ Log solo aquÃƒÂ­
+      console.log(`${isCorrect ? 'Ã¢Å“â€¦' : 'Ã¢ÂÅ’'} V/F: "${optionText}" Ã¢â€ â€™ ${answerForBackend} (correcta: ${question.correctAnswer})`);
       
-      // Mostrar panel de evaluación
+      // Mostrar panel de evaluaciÃ³n
       this.showEvaluationPanel(question, optionText, isCorrect);
     } else {
       question.wasAnswered = true;
@@ -348,7 +370,7 @@ async selectAnswer(optionText: string) {
     return;
   }
   
-  // SelecciÃ³n mÃºltiple
+  // SelecciÃƒÂ³n mÃƒÂºltiple
   const letterFromBackend = this.getOptionLetterByText(optionText);
   
   if (letterFromBackend) {
@@ -360,7 +382,7 @@ async selectAnswer(optionText: string) {
     if (optionIndex !== -1) {
       normalizedAnswer = String.fromCharCode(65 + optionIndex);
     } else {
-      console.error('âŒ No se encontrÃ³ la opciÃ³n en el array');
+      console.error('Ã¢ÂÅ’ No se encontrÃƒÂ³ la opciÃƒÂ³n en el array');
       return;
     }
   }
@@ -378,10 +400,10 @@ async selectAnswer(optionText: string) {
     question.wasAnswered = true;
     question.wasCorrect = isCorrect;
     
-    // âœ… Log solo aquÃ­
-    console.log(`${isCorrect ? 'âœ…' : 'âŒ'} OpciÃ³n ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
+    // Ã¢Å“â€¦ Log solo aquÃƒÂ­
+    console.log(`${isCorrect ? 'Ã¢Å“â€¦' : 'Ã¢ÂÅ’'} OpciÃƒÂ³n ${normalizedAnswer}: "${optionText}" (correcta: ${question.correctAnswer})`);
       
-      // Mostrar panel de evaluación
+      // Mostrar panel de evaluaciÃ³n
       this.showEvaluationPanel(question, optionText, isCorrect);
   } else {
     question.wasAnswered = true;
@@ -394,7 +416,7 @@ async selectAnswer(optionText: string) {
 
   async showExplanationAlert(explanation: string) {
     const alert = await this.alertController.create({
-      header: 'ðŸ’¡ ExplicaciÃ³n',
+      header: 'Ã°Å¸â€™Â¡ ExplicaciÃƒÂ³n',
       message: explanation,
       cssClass: 'explanation-alert',
       backdropDismiss: false,
@@ -501,13 +523,13 @@ async selectAnswer(optionText: string) {
         isCorrect: this.compareAnswers(answer, question.correctAnswer)
       };
       
-      console.log('ðŸ“¤ Enviando respuesta al backend:', answerData);
+      console.log('Ã°Å¸â€œÂ¤ Enviando respuesta al backend:', answerData);
       
       await this.apiService.submitAnswer(answerData).toPromise();
-      console.log('âœ… Respuesta enviada correctamente');
+      console.log('Ã¢Å“â€¦ Respuesta enviada correctamente');
       
     } catch (error) {
-      console.error('âŒ Error enviando respuesta:', error);
+      console.error('Ã¢ÂÅ’ Error enviando respuesta:', error);
     }
   }
 
@@ -516,7 +538,7 @@ async selectAnswer(optionText: string) {
     const normalizedCorrect = correctAnswer.trim().toLowerCase();
   
     
-    // ComparaciÃ³n directa
+    // ComparaciÃƒÂ³n directa
     if (normalizedUser === normalizedCorrect) return true;
     
     // Mapeo de variantes de Verdadero
@@ -546,10 +568,10 @@ async selectAnswer(optionText: string) {
       this.selectedAnswer = '';
       this.questionStartTime = new Date();
       
-      // Ocultar panel de evaluación al cambiar de pregunta
+      // Ocultar panel de evaluaciÃ³n al cambiar de pregunta
       this.closeEvaluation();
       
-      console.log(`âž¡ï¸ Avanzando a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
+      console.log(`Ã¢Å¾Â¡Ã¯Â¸Â Avanzando a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
     } else {
       this.finishTest();
     }
@@ -561,10 +583,10 @@ async selectAnswer(optionText: string) {
       this.currentQuestionNumber--;
       this.selectedAnswer = '';
       
-      // Ocultar panel de evaluación al cambiar de pregunta
+      // Ocultar panel de evaluaciÃ³n al cambiar de pregunta
       this.closeEvaluation();
       
-      console.log(`â¬…ï¸ Retrocediendo a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
+      console.log(`Ã¢Â¬â€¦Ã¯Â¸Â Retrocediendo a pregunta ${this.currentQuestionNumber} de ${this.totalQuestions}`);
     }
   }
 
@@ -588,7 +610,7 @@ async selectAnswer(optionText: string) {
     if (!question || !question.userAnswer) return false;
     
     if (this.isTrueFalseQuestion()) {
-      // âœ… CORREGIDO: Usar la letra del backend tambiÃ©n para V/F
+      // Ã¢Å“â€¦ CORREGIDO: Usar la letra del backend tambiÃƒÂ©n para V/F
       const letterFromBackend = this.getOptionLetterByText(optionText);
       if (letterFromBackend) {
         return question.userAnswer === letterFromBackend;
@@ -600,13 +622,13 @@ async selectAnswer(optionText: string) {
       return false;
     }
     
-    // âœ… CORREGIDO: Usar la letra del backend en lugar del Ã­ndice
+    // Ã¢Å“â€¦ CORREGIDO: Usar la letra del backend en lugar del ÃƒÂ­ndice
     const letterFromBackend = this.getOptionLetterByText(optionText);
     if (letterFromBackend) {
       return question.userAnswer === letterFromBackend;
     }
     
-    // Fallback al mÃ©todo anterior
+    // Fallback al mÃƒÂ©todo anterior
     const options = this.getCurrentQuestionOptions();
     const optionIndex = options.indexOf(optionText);
     if (optionIndex !== -1) {
@@ -711,15 +733,15 @@ async selectAnswer(optionText: string) {
     try {
       const results = this.calculateResults();
       
-      console.log('ðŸ“Š Resultados calculados:', results);
+      console.log('Ã°Å¸â€œÅ  Resultados calculados:', results);
       
       const currentSession = this.apiService.getCurrentSession();
       if (currentSession && currentSession.testId) {
         try {
           const response = await this.apiService.finishTest(currentSession.testId).toPromise();
-          console.log('âœ… Test guardado en BD:', response);
+          console.log('Ã¢Å“â€¦ Test guardado en BD:', response);
         } catch (error) {
-          console.error('âŒ Error guardando test en BD:', error);
+          console.error('Ã¢ÂÅ’ Error guardando test en BD:', error);
         }
       }
       
@@ -729,16 +751,16 @@ async selectAnswer(optionText: string) {
       
       this.apiService.clearCurrentSession();
       
-      console.log('ðŸŽ¯ Navegando a resumen...');
+      console.log('Ã°Å¸Å½Â¯ Navegando a resumen...');
       await this.router.navigate(['/procesal/procesal-escrito/resumen-test-procesal']);
       
     } catch (error) {
-      console.error('âŒ Error finalizando test:', error);
+      console.error('Ã¢ÂÅ’ Error finalizando test:', error);
       await loading.dismiss();
       
       const alert = await this.alertController.create({
         header: 'Error',
-        message: 'Hubo un problema al guardar los resultados. Â¿Deseas intentar de nuevo?',
+        message: 'Hubo un problema al guardar los resultados. Ã‚Â¿Deseas intentar de nuevo?',
         buttons: [
           {
             text: 'Cancelar',
@@ -766,7 +788,7 @@ async selectAnswer(optionText: string) {
 
     this.questions.forEach((question, index) => {
       if (question.userAnswer === 'SKIP') {
-        console.log(`â­ï¸ Pregunta ${index + 1} saltada (sin opciones), no se incluye en resultados`);
+        console.log(`Ã¢ÂÂ­Ã¯Â¸Â Pregunta ${index + 1} saltada (sin opciones), no se incluye en resultados`);
         return;
       }
 
@@ -801,7 +823,7 @@ async selectAnswer(optionText: string) {
       ? Math.round((correctAnswers / totalAnswered) * 100) 
       : 0;
 
-    console.log('ðŸ“Š Resultados finales:', {
+    console.log('Ã°Å¸â€œÅ  Resultados finales:', {
       correctAnswers,
       incorrectAnswers,
       percentage,
@@ -833,7 +855,7 @@ async selectAnswer(optionText: string) {
   getLevelFromPercentage(percentage: number): string {
     if (percentage >= 80) return 'Avanzado';
     if (percentage >= 60) return 'Intermedio';
-    return 'BÃ¡sico';
+    return 'BÃƒÂ¡sico';
   }
 
   exitTest() {
@@ -848,12 +870,12 @@ async selectAnswer(optionText: string) {
     this.loadSessionFromBackend();
   }
 
-  // âœ… ACTUALIZADO: Reemplazar preguntas invÃ¡lidas
+  // Ã¢Å“â€¦ ACTUALIZADO: Reemplazar preguntas invÃƒÂ¡lidas
   async skipInvalidQuestions() {
     const options = this.getCurrentQuestionOptions();
     
     if (options.length === 0) {
-      console.log('â­ï¸ Pregunta sin opciones detectada, solicitando reemplazo...');
+      console.log('Ã¢ÂÂ­Ã¯Â¸Â Pregunta sin opciones detectada, solicitando reemplazo...');
       
       const question = this.getCurrentQuestion();
       if (!question) return;
@@ -864,7 +886,7 @@ async selectAnswer(optionText: string) {
         const newQuestion = await this.requestReplacementQuestion();
         
         if (newQuestion) {
-          console.log('âœ… Pregunta de reemplazo recibida:', newQuestion);
+          console.log('Ã¢Å“â€¦ Pregunta de reemplazo recibida:', newQuestion);
           
           this.questions[this.currentQuestionIndex] = this.convertSingleQuestion(newQuestion, this.currentQuestionIndex);
           
@@ -872,19 +894,19 @@ async selectAnswer(optionText: string) {
           
           this.cdr.detectChanges();
           
-          console.log('âœ… Pregunta reemplazada exitosamente');
+          console.log('Ã¢Å“â€¦ Pregunta reemplazada exitosamente');
         } else {
-          console.warn('âš ï¸ No se pudo obtener pregunta de reemplazo, saltando...');
+          console.warn('Ã¢Å¡Â Ã¯Â¸Â No se pudo obtener pregunta de reemplazo, saltando...');
           this.autoSkipQuestion();
         }
       } catch (error) {
-        console.error('âŒ Error obteniendo pregunta de reemplazo:', error);
+        console.error('Ã¢ÂÅ’ Error obteniendo pregunta de reemplazo:', error);
         this.autoSkipQuestion();
       }
     }
   }
 
-  // âœ… NUEVO: MÃ©todo para solicitar pregunta de reemplazo
+  // Ã¢Å“â€¦ NUEVO: MÃƒÂ©todo para solicitar pregunta de reemplazo
   async requestReplacementQuestion(): Promise<any> {
     try {
       const response = await this.apiService.getReplacementQuestion(this.testId).toPromise();
@@ -900,7 +922,7 @@ async selectAnswer(optionText: string) {
     }
   }
 
-  // âœ… NUEVO: Saltar automÃ¡ticamente si no hay reemplazo
+  // Ã¢Å“â€¦ NUEVO: Saltar automÃƒÂ¡ticamente si no hay reemplazo
   autoSkipQuestion() {
     setTimeout(() => {
       if (this.currentQuestionIndex < this.questions.length - 1) {
@@ -914,7 +936,7 @@ async selectAnswer(optionText: string) {
   }
 
   // =====================
-  // PANEL DE EVALUACIÓN (como test-oral)
+  // PANEL DE EVALUACIÃ“N (como test-oral)
   // =====================
   
   showEvaluationPanel(question: Question, userAnswerText: string, isCorrect: boolean) {
@@ -922,11 +944,11 @@ async selectAnswer(optionText: string) {
       isCorrect: isCorrect,
       userAnswer: userAnswerText,
       correctAnswer: question.correctAnswer,
-      explanation: question.explanation || 'Explicación no disponible'
+      explanation: question.explanation || 'ExplicaciÃ³n no disponible'
     };
     
     this.showEvaluation = true;
-    console.log('📊 Mostrando panel de evaluación:', this.evaluationResult);
+    console.log('ðŸ“Š Mostrando panel de evaluaciÃ³n:', this.evaluationResult);
   }
 
   closeEvaluation() {

@@ -99,19 +99,19 @@ export class TestOralProcesalPage implements OnInit, OnDestroy {
 async ngOnInit() {
     this.sessionId = 'session_' + Date.now();
     
-    // PRIMERO cargar la sesión para obtener el responseMethod
+    // PRIMERO cargar la sesiÃ³n para obtener el responseMethod
     const session = this.apiService.getCurrentSession();
     if (session) {
       this.responseMethod = session.responseMethod || 
                             session.session?.responseMethod || 
                             session.data?.responseMethod || 
                             'voice';
-      console.log('📋 Método de respuesta detectado:', this.responseMethod);
+      console.log('ðŸ“‹ MÃ©todo de respuesta detectado:', this.responseMethod);
     }
     
     await this.loadQuestionsFromBackend();
     
-    // Solo inicializar grabación si el método es 'voice'
+    // Solo inicializar grabaciÃ³n si el mÃ©todo es 'voice'
     if (this.responseMethod === 'voice') {
       if (!this.audioService.isRecordingSupported()) {
         await this.showUnsupportedAlert();
@@ -140,25 +140,25 @@ async ngOnInit() {
         }
       );
     } else {
-      console.log('✅ Modo selección: micrófono NO inicializado');
+      console.log('âœ… Modo selecciÃ³n: micrÃ³fono NO inicializado');
     }
   }
 
   async loadQuestionsFromBackend() {
     try {
-      console.log('📥 Cargando preguntas desde el backend...');
+      console.log('ðŸ“¥ Cargando preguntas desde el backend...');
       this.isLoading = true;
       
       const session = this.apiService.getCurrentSession();
       
       if (!session || !session.questions || session.questions.length === 0) {
-        console.error('❌ No hay sesión activa o no tiene preguntas');
+        console.error('âŒ No hay sesiÃ³n activa o no tiene preguntas');
         this.loadingError = true;
         this.isLoading = false;
         return;
       }
 
-      console.log('✅ Sesión encontrada:', session);
+      console.log('âœ… SesiÃ³n encontrada:', session);
       
       this.testId = session.testId || session.session?.id || 0;
       this.sessionId = session.session?.id?.toString() || '';
@@ -168,7 +168,7 @@ async ngOnInit() {
           this.questions = this.convertBackendQuestions(session.questions);
           
           if (this.questions.length === 0) {
-            console.error('❌ No se pudieron convertir las preguntas');
+            console.error('âŒ No se pudieron convertir las preguntas');
             this.loadingError = true;
             this.isLoading = false;
             return;
@@ -177,8 +177,8 @@ async ngOnInit() {
           this.totalQuestions = this.questions.length;
           this.currentQuestionNumber = 1;
           
-          console.log('✅ Preguntas cargadas:', this.questions.length);
-          console.log('🔎 Primera pregunta:', this.questions[0]);
+          console.log('âœ… Preguntas cargadas:', this.questions.length);
+          console.log('ðŸ”Ž Primera pregunta:', this.questions[0]);
           
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -188,7 +188,7 @@ async ngOnInit() {
           }, 500);
           
         } catch (error) {
-          console.error('❌ Error procesando preguntas:', error);
+          console.error('âŒ Error procesando preguntas:', error);
           this.loadingError = true;
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -196,7 +196,7 @@ async ngOnInit() {
       }, 100);
       
     } catch (error) {
-      console.error('❌ Error cargando preguntas:', error);
+      console.error('âŒ Error cargando preguntas:', error);
       this.loadingError = true;
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -248,7 +248,7 @@ async ngOnInit() {
   async confirmExit() {
     const alert = await this.alertController.create({
       header: 'Abandonar Test',
-      message: '¿Estás seguro que deseas abandonar el test? Se perderá tu progreso.',
+      message: 'Â¿EstÃ¡s seguro que deseas abandonar el test? Se perderÃ¡ tu progreso.',
       buttons: [
         {
           text: 'Cancelar',
@@ -282,7 +282,7 @@ async ngOnInit() {
       legalArea: q.legalArea || 'Derecho Procesal',
       difficulty: q.nivel || q.difficulty || 2,
       correctAnswer: q.respuesta_correcta || q.correctAnswer || '',
-      explanation: q.explicacion || q.explanation || 'Sin explicación disponible',
+      explanation: q.explicacion || q.explanation || 'Sin explicaciÃ³n disponible',
       options: q.opciones || q.options || [],
       userAnswer: '',
       isAnswered: false
@@ -292,7 +292,7 @@ async ngOnInit() {
   playAudio() {
     const question = this.getCurrentQuestion();
     if (!question || !question.questionText) {
-      console.warn('⚠️ No hay pregunta para reproducir');
+      console.warn('âš ï¸ No hay pregunta para reproducir');
       return;
     }
 
@@ -321,27 +321,27 @@ async ngOnInit() {
       utterance.volume = 1.0;
 
       utterance.onstart = () => {
-        console.log('🔊 Iniciando reproducción de audio');
+        console.log('ðŸ”Š Iniciando reproducciÃ³n de audio');
         this.isPlaying = true;
         this.cdr.detectChanges();
       };
 
       utterance.onend = () => {
-        console.log('✅ Audio completado');
+        console.log('âœ… Audio completado');
         this.isPlaying = false;
         this.audioCompleted = true;
         this.cdr.detectChanges();
       };
 
       utterance.onerror = (event) => {
-        console.error('❌ Error en síntesis de voz:', event);
+        console.error('âŒ Error en sÃ­ntesis de voz:', event);
         this.isPlaying = false;
         this.cdr.detectChanges();
       };
 
       const loadVoices = () => {
         const voices = window.speechSynthesis.getVoices();
-        console.log('🔊 Voces disponibles:', voices.map(v => `${v.name} (${v.lang})`));
+        console.log('ðŸ”Š Voces disponibles:', voices.map(v => `${v.name} (${v.lang})`));
         
         let selectedVoice = voices.find(voice => 
           voice.name.toLowerCase().includes('catalina')
@@ -352,7 +352,7 @@ async ngOnInit() {
             voice.lang.includes('es') && (
               voice.name.toLowerCase().includes('female') ||
               voice.name.toLowerCase().includes('femenina') ||
-              voice.name.toLowerCase().includes('mónica') ||
+              voice.name.toLowerCase().includes('mÃ³nica') ||
               voice.name.toLowerCase().includes('monica') ||
               voice.name.toLowerCase().includes('paulina')
             )
@@ -361,9 +361,9 @@ async ngOnInit() {
         
         if (selectedVoice) {
           utterance.voice = selectedVoice;
-          console.log('✅ Voz seleccionada:', selectedVoice.name);
+          console.log('âœ… Voz seleccionada:', selectedVoice.name);
         } else {
-          console.log('⚠️ Usando voz por defecto del sistema');
+          console.log('âš ï¸ Usando voz por defecto del sistema');
         }
         
         window.speechSynthesis.speak(utterance);
@@ -413,10 +413,10 @@ async ngOnInit() {
       
       await this.audioService.startRecording();
       
-      console.log('🎤 Grabación iniciada');
+      console.log('ðŸŽ¤ GrabaciÃ³n iniciada');
       this.startResponseTimer();
     } catch (error) {
-      console.error('❌ Error al iniciar grabación:', error);
+      console.error('âŒ Error al iniciar grabaciÃ³n:', error);
     }
   }
 
@@ -424,9 +424,9 @@ async ngOnInit() {
     try {
       await this.audioService.stopRecording();
       this.stopResponseTimer();
-      console.log('⏹️ Grabación detenida');
+      console.log('â¹ï¸ GrabaciÃ³n detenida');
     } catch (error) {
-      console.error('❌ Error al detener grabación:', error);
+      console.error('âŒ Error al detener grabaciÃ³n:', error);
     }
   }
 
@@ -438,13 +438,13 @@ async ngOnInit() {
 
   getRecordingStatus(): string {
     if (this.isRecording) return 'Grabando...';
-    if (this.hasRecording) return 'Grabación completada';
-    return 'Mantén presionado para grabar';
+    if (this.hasRecording) return 'GrabaciÃ³n completada';
+    return 'MantÃ©n presionado para grabar';
   }
 
 async replayRecording() {
     if (!this.audioBlob) {
-      console.warn('⚠️ No hay audio para reproducir');
+      console.warn('âš ï¸ No hay audio para reproducir');
       return;
     }
 
@@ -478,16 +478,16 @@ async replayRecording() {
         };
 
         this.recordingAudio.onerror = (error) => {
-          console.error('❌ Error reproduciendo grabación:', error);
+          console.error('âŒ Error reproduciendo grabaciÃ³n:', error);
           this.isPlayingRecording = false;
           this.cdr.detectChanges();
         };
 
         await this.recordingAudio.play();
-        console.log('▶️ Reproduciendo grabación');
+        console.log('â–¶ï¸ Reproduciendo grabaciÃ³n');
       };
     } catch (error) {
-      console.error('❌ Error al reproducir:', error);
+      console.error('âŒ Error al reproducir:', error);
       this.isPlayingRecording = false;
       this.cdr.detectChanges();
     }
@@ -585,7 +585,7 @@ async replayRecording() {
   }
 
   stopAllAudio() {
-    // Detener síntesis de voz (pregunta o explicación)
+    // Detener sÃ­ntesis de voz (pregunta o explicaciÃ³n)
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -615,26 +615,26 @@ async replayRecording() {
     await loading.present();
 
     try {
-      console.log('🎤 Preparando audio para transcripción...');
-      console.log('📊 Tamaño del blob:', this.audioBlob.size, 'bytes');
-      console.log('🎵 Tipo de blob:', this.audioBlob.type);
+      console.log('ðŸŽ¤ Preparando audio para transcripciÃ³n...');
+      console.log('ðŸ“Š TamaÃ±o del blob:', this.audioBlob.size, 'bytes');
+      console.log('ðŸŽµ Tipo de blob:', this.audioBlob.type);
 
       const wavBlob = await this.convertToWav(this.audioBlob);
-      console.log('✅ Audio convertido a WAV:', wavBlob.size, 'bytes');
+      console.log('âœ… Audio convertido a WAV:', wavBlob.size, 'bytes');
 
       const formData = new FormData();
       formData.append('audioFile', wavBlob, 'recording.wav');
 
-      console.log('📤 Enviando audio WAV al backend');
+      console.log('ðŸ“¤ Enviando audio WAV al backend');
 
 try {
         const transcriptionResponse = await this.apiService.transcribeAudioDirect(formData).toPromise();
         
-        console.log('📥 Respuesta del backend:', transcriptionResponse);
+        console.log('ðŸ“¥ Respuesta del backend:', transcriptionResponse);
         
         await loading.dismiss();
 
-        // Intentar extraer transcripción de múltiples lugares
+        // Intentar extraer transcripciÃ³n de mÃºltiples lugares
         let transcription = '';
         
         if (transcriptionResponse) {
@@ -645,14 +645,14 @@ try {
                          '';
         }
         
-        console.log('✅ Transcripción extraída:', transcription);
+        console.log('âœ… TranscripciÃ³n extraÃ­da:', transcription);
         
         if (!transcription || transcription.trim() === '') {
-          console.error('❌ Transcripción vacía. Respuesta completa:', JSON.stringify(transcriptionResponse));
+          console.error('âŒ TranscripciÃ³n vacÃ­a. Respuesta completa:', JSON.stringify(transcriptionResponse));
           
           const alert = await this.alertController.create({
-            header: 'No te escuché',
-            message: 'El sistema no pudo transcribir tu audio. Asegúrate de:\n• Hablar más fuerte y claro\n• Estar en un lugar silencioso\n• Mantener presionado mientras hablas',
+            header: 'No te escuchÃ©',
+            message: 'El sistema no pudo transcribir tu audio. AsegÃºrate de:\nâ€¢ Hablar mÃ¡s fuerte y claro\nâ€¢ Estar en un lugar silencioso\nâ€¢ Mantener presionado mientras hablas',
             buttons: ['OK']
           });
           await alert.present();
@@ -670,15 +670,15 @@ try {
           await this.selectAnswer(detectedOption);
         } else {
           const alert = await this.alertController.create({
-            header: 'No entendí tu respuesta',
-            message: `Dijiste: "${transcription}". Di una opción clara como: A, B, C, Verdadero o Falso.`,
+            header: 'No entendÃ­ tu respuesta',
+            message: `Dijiste: "${transcription}". Di una opciÃ³n clara como: A, B, C, Verdadero o Falso.`,
             buttons: ['OK']
           });
           await alert.present();
         }
 
       } catch (error: any) {
-        console.error('❌ Error transcribiendo:', error);
+        console.error('âŒ Error transcribiendo:', error);
         await loading.dismiss();
         
         if (!this.showEvaluation) {
@@ -692,7 +692,7 @@ try {
       }
       
     } catch (error) {
-      console.error('❌ Error preparando audio:', error);
+      console.error('âŒ Error preparando audio:', error);
       await loading.dismiss();
       const alert = await this.alertController.create({
         header: 'Error',
@@ -789,31 +789,31 @@ detectOptionFromTranscription(transcription: string): string | null {
     const question = this.getCurrentQuestion();
     if (!question) return null;
 
-    console.log('🔍 Analizando transcripción:', text);
+    console.log('ðŸ” Analizando transcripciÃ³n:', text);
 
     // Para Verdadero/Falso
     if (question.type == 2 || question.type == '2') {
-      // Buscar "verdadero" o sinónimos
+      // Buscar "verdadero" o sinÃ³nimos
       if (/verdadero|true|correcto|afirmativo|si(?![a-z])|exacto/i.test(text)) {
-        console.log('✅ Detectado: Verdadero');
+        console.log('âœ… Detectado: Verdadero');
         return 'Verdadero';
       }
       
-      // Buscar "falso" o sinónimos
+      // Buscar "falso" o sinÃ³nimos
       if (/falso|false|incorrecto|negativo|no(?![a-z])/i.test(text)) {
-        console.log('✅ Detectado: Falso');
+        console.log('âœ… Detectado: Falso');
         return 'Falso';
       }
 
       // Buscar letra A o variantes (para Verdadero)
       if (/\bah\b|\ba\b|\bla a\b|\bletra a\b|\bopcion a\b|\balternativa a\b/i.test(text)) {
-        console.log('✅ Detectado: Verdadero (por letra A)');
+        console.log('âœ… Detectado: Verdadero (por letra A)');
         return 'Verdadero';
       }
 
       // Buscar letra B o variantes (para Falso)  
       if (/\bbe\b|\bb\b|\bla b\b|\bletra b\b|\bopcion b\b|\balternativa b\b/i.test(text)) {
-        console.log('✅ Detectado: Falso (por letra B)');
+        console.log('âœ… Detectado: Falso (por letra B)');
         return 'Falso';
       }
 
@@ -821,11 +821,11 @@ detectOptionFromTranscription(transcription: string): string | null {
       const words = text.split(/\s+/);
       for (const word of words) {
         if (/^v[e]?$/i.test(word)) {
-          console.log('✅ Detectado: Verdadero (letra V)');
+          console.log('âœ… Detectado: Verdadero (letra V)');
           return 'Verdadero';
         }
         if (/^f[e]?$/i.test(word)) {
-          console.log('✅ Detectado: Falso (letra F)');
+          console.log('âœ… Detectado: Falso (letra F)');
           return 'Falso';
         }
       }
@@ -833,7 +833,7 @@ detectOptionFromTranscription(transcription: string): string | null {
 
     const options = this.getCurrentQuestionOptions();
     
-    // Detectar letras A, B, C, D con más flexibilidad
+    // Detectar letras A, B, C, D con mÃ¡s flexibilidad
     const letterDetection = [
       { patterns: [/\bah\b/, /\ba\b/, /\bla a\b/, /\bletra a\b/, /\bopcion a\b/, /\balternativa a\b/], index: 0 },
       { patterns: [/\bbe\b/, /\bb\b/, /\bla b\b/, /\bletra b\b/, /\bopcion b\b/, /\balternativa b\b/], index: 1 },
@@ -846,42 +846,42 @@ detectOptionFromTranscription(transcription: string): string | null {
       
       for (const pattern of detection.patterns) {
         if (pattern.test(text)) {
-          console.log(`✅ Detectado: Opción ${String.fromCharCode(65 + detection.index)}`);
+          console.log(`âœ… Detectado: OpciÃ³n ${String.fromCharCode(65 + detection.index)}`);
           return options[detection.index];
         }
       }
     }
 
-    // Si la transcripción es muy corta (1-3 palabras), intentar detectar letra al final
+    // Si la transcripciÃ³n es muy corta (1-3 palabras), intentar detectar letra al final
     const words = text.split(/\s+/).filter(w => w.length > 0);
     if (words.length <= 3) {
       const lastWord = words[words.length - 1];
       
       if (/^ah?$/i.test(lastWord) && options.length > 0) {
-        console.log('✅ Detectado: Opción A (al final)');
+        console.log('âœ… Detectado: OpciÃ³n A (al final)');
         return options[0];
       }
       if (/^be?$/i.test(lastWord) && options.length > 1) {
-        console.log('✅ Detectado: Opción B (al final)');
+        console.log('âœ… Detectado: OpciÃ³n B (al final)');
         return options[1];
       }
       if (/^ce?$/i.test(lastWord) && options.length > 2) {
-        console.log('✅ Detectado: Opción C (al final)');
+        console.log('âœ… Detectado: OpciÃ³n C (al final)');
         return options[2];
       }
       if (/^de?$/i.test(lastWord) && options.length > 3) {
-        console.log('✅ Detectado: Opción D (al final)');
+        console.log('âœ… Detectado: OpciÃ³n D (al final)');
         return options[3];
       }
     }
 
-    // Buscar por contenido de la opción
+    // Buscar por contenido de la opciÃ³n
     for (let i = 0; i < options.length; i++) {
       const option = options[i];
       const optionWords = option
         .toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[.,;:!?¿¡]/g, ' ')
+        .replace(/[.,;:!?Â¿Â¡]/g, ' ')
         .split(/\s+/)
         .filter((w: string) => w.length > 3);
       
@@ -893,12 +893,12 @@ detectOptionFromTranscription(transcription: string): string | null {
       }
       
       if (matches >= 2 || (optionWords.length > 0 && matches / optionWords.length > 0.5)) {
-        console.log(`✅ Detectado por contenido: Opción ${String.fromCharCode(65 + i)} (${matches} coincidencias)`);
+        console.log(`âœ… Detectado por contenido: OpciÃ³n ${String.fromCharCode(65 + i)} (${matches} coincidencias)`);
         return option;
       }
     }
 
-    console.warn('❌ No se detectó ninguna opción en:', text);
+    console.warn('âŒ No se detectÃ³ ninguna opciÃ³n en:', text);
     return null;
   }
 
@@ -916,7 +916,7 @@ detectOptionFromTranscription(transcription: string): string | null {
 
 nextQuestion() {
     if (!this.canGoToNext()) {
-      console.warn('⚠️ No se puede avanzar sin respuesta guardada');
+      console.warn('âš ï¸ No se puede avanzar sin respuesta guardada');
       return;
     }
     
@@ -972,18 +972,18 @@ nextQuestion() {
     this.questionResponseTime = 0;
     this.elapsedResponseTime = '00:00';
     
-    console.log('🔄 Estado reseteado para pregunta', this.currentQuestionNumber);
+    console.log('ðŸ”„ Estado reseteado para pregunta', this.currentQuestionNumber);
     
     this.cdr.detectChanges();
     
     setTimeout(() => {
       this.playAudio();
-      console.log('🔊 Reproduciendo automáticamente pregunta', this.currentQuestionNumber);
+      console.log('ðŸ”Š Reproduciendo automÃ¡ticamente pregunta', this.currentQuestionNumber);
     }, 300);
   }
 
   async completeTest() {
-    console.log('🏁 Completando test oral procesal');
+    console.log('ðŸ Completando test oral procesal');
     
     const loading = await this.loadingController.create({
       message: 'Guardando resultados...',
@@ -1042,18 +1042,18 @@ nextQuestion() {
         questionDetails: questionDetails
       };
       
-      console.log('📊 Resultados calculados:', results);
+      console.log('ðŸ“Š Resultados calculados:', results);
       
       const currentSession = this.apiService.getCurrentSession();
       if (currentSession && currentSession.testId) {
         try {
           const response = await this.apiService.finishTest(currentSession.testId).toPromise();
-          console.log('✅ Test oral guardado en BD:', response);
+          console.log('âœ… Test oral guardado en BD:', response);
         } catch (error) {
-          console.error('❌ Error guardando test en BD:', error);
+          console.error('âŒ Error guardando test en BD:', error);
         }
       } else {
-        console.error('⚠️ No hay testId en currentSession:', currentSession);
+        console.error('âš ï¸ No hay testId en currentSession:', currentSession);
       }
       
       localStorage.setItem('current_oral_test_results', JSON.stringify(results));
@@ -1062,11 +1062,11 @@ nextQuestion() {
       
       this.apiService.clearCurrentSession();
       
-      console.log('🎯 Navegando a resumen...');
+      console.log('ðŸŽ¯ Navegando a resumen...');
       await this.router.navigate(['/procesal/procesal-oral/resumen-test-procesal-oral']);
       
     } catch (error) {
-      console.error('❌ Error completando test:', error);
+      console.error('âŒ Error completando test:', error);
       await loading.dismiss();
       
       const alert = await this.alertController.create({
@@ -1080,8 +1080,8 @@ nextQuestion() {
 
   async showUnsupportedAlert() {
     const alert = await this.alertController.create({
-      header: 'Grabación no disponible',
-      message: 'Tu navegador no soporta la grabación de audio. Por favor, usa Chrome, Firefox o Safari.',
+      header: 'GrabaciÃ³n no disponible',
+      message: 'Tu navegador no soporta la grabaciÃ³n de audio. Por favor, usa Chrome, Firefox o Safari.',
       buttons: [{
         text: 'OK',
         handler: () => {
@@ -1094,8 +1094,8 @@ nextQuestion() {
 
   async showMicrophoneErrorAlert() {
     const alert = await this.alertController.create({
-      header: 'Permiso de micrófono',
-      message: 'No se pudo acceder al micrófono. Por favor, permite el acceso al micrófono en la configuración de tu navegador.',
+      header: 'Permiso de micrÃ³fono',
+      message: 'No se pudo acceder al micrÃ³fono. Por favor, permite el acceso al micrÃ³fono en la configuraciÃ³n de tu navegador.',
       buttons: [{
         text: 'OK',
         handler: () => {
@@ -1139,6 +1139,34 @@ nextQuestion() {
 
   getOptionLetter(index: number): string {
     return String.fromCharCode(65 + index);
+  }
+
+  getCurrentQuestionCategory(): string {
+    const question = this.getCurrentQuestion();
+    if (!question) return '';
+    return question['tema'] || question['category'] || question['legalArea'] || 'Sin categoría';
+  }
+
+  getCurrentQuestionDifficulty(): string {
+    const question = this.getCurrentQuestion();
+    if (!question) return '';
+    
+    const difficulty = question['difficulty'] || question['level'];
+    
+    // Convertir número o string a texto
+    if (difficulty === 1 || difficulty === 'basico' || difficulty === 'basic') {
+      return 'Básico';
+    } else if (difficulty === 2 || difficulty === 'intermedio' || difficulty === 'intermediate') {
+      return 'Intermedio';
+    } else if (difficulty === 3 || difficulty === 'avanzado' || difficulty === 'advanced') {
+      return 'Avanzado';
+    }
+    
+    return 'Intermedio'; // Por defecto
+  }
+
+  shouldShowDifficultyLevel(): boolean {
+    return true;
   }
 
   isOptionSelected(option: string): boolean {
@@ -1265,7 +1293,7 @@ async selectAnswer(optionText: string) {
       explanation: question.explanation
     };
     
-    // 🆕 GUARDAR LA RESPUESTA EN EL BACKEND
+    // ðŸ†• GUARDAR LA RESPUESTA EN EL BACKEND
     await this.saveAnswerToBackend(question, normalizedAnswer, isCorrect);
     
     this.showCorrectAnswer = true;
@@ -1281,7 +1309,7 @@ async selectAnswer(optionText: string) {
     try {
       const currentSession = this.apiService.getCurrentSession();
       if (!currentSession || !currentSession.testId) {
-        console.warn('⚠️ No hay testId para guardar respuesta');
+        console.warn('âš ï¸ No hay testId para guardar respuesta');
         return;
       }
 
@@ -1303,23 +1331,23 @@ async selectAnswer(optionText: string) {
         isCorrect: isCorrect
       };
       
-      console.log('📤 Guardando respuesta oral en BD:', answerData);
+      console.log('ðŸ“¤ Guardando respuesta oral en BD:', answerData);
       
       await this.apiService.submitAnswer(answerData).toPromise();
-      console.log('✅ Respuesta oral guardada correctamente');
+      console.log('âœ… Respuesta oral guardada correctamente');
       
     } catch (error) {
-      console.error('❌ Error guardando respuesta oral:', error);
+      console.error('âŒ Error guardando respuesta oral:', error);
     }
   }
 
   async selectOptionByClick(optionText: string) {
     if (this.hasAnsweredCurrentQuestion()) {
-      console.warn('⚠️ Ya se respondió esta pregunta');
+      console.warn('âš ï¸ Ya se respondiÃ³ esta pregunta');
       return;
     }
     
-    console.log('🖱️ Opción seleccionada por click:', optionText);
+    console.log('ðŸ–±ï¸ OpciÃ³n seleccionada por click:', optionText);
     
     const question = this.getCurrentQuestion();
     if (!question) return;
