@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { 
+  Component, 
+  OnInit, 
+  OnDestroy, 
+  ViewChild, 
+  ElementRef, 
+  AfterViewInit 
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, LoadingController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -14,7 +21,7 @@ import { ApiService } from '../../../services/api.service';
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
-  
+
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
@@ -28,23 +35,25 @@ export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   get infiniteLevels() {
-    return [...this.difficultyLevels,...this.difficultyLevels,...this.difficultyLevels];
+    return [
+      ...this.difficultyLevels,
+      ...this.difficultyLevels,
+      ...this.difficultyLevels
+    ];
   }
 
   @ViewChild('pickerWheel') pickerWheel?: ElementRef;
   private scrollTimeout: any;
 
   constructor(
-    private router: Router, 
+    private router: Router,
     private loadingController: LoadingController,
     private apiService: ApiService
   ) { }
 
-  ngOnInit() {
-  }
-  
-  ngAfterViewInit() {
-  }
+  ngOnInit() { }
+
+  ngAfterViewInit() { }
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
@@ -115,82 +124,95 @@ export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
       this.selectDifficulty(level);
     }
   }
-  
-scrollDifficultyUp() {
-  const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
-  if (currentIndex > 0) {
-    const newIndex = currentIndex - 1;
-    this.scrollToOption(newIndex);
-  } else {
-    this.scrollToOption(this.difficultyLevels.length - 1);
-  }
-}
 
-scrollDifficultyDown() {
-  const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
-  if (currentIndex < this.difficultyLevels.length - 1) {
-    const newIndex = currentIndex + 1;
-    this.scrollToOption(newIndex);
-  } else {
-    this.scrollToOption(0);
-  }
-}
-  
-async startVoicePractice() {
-  const loading = await this.loadingController.create({
-    message: this.selectedQuantity === 1 ? 'Preparando tu pregunta...' : 'Preparando tu test...',
-    spinner: 'crescent',
-    cssClass: 'custom-loading'
-  });
-  
-  await loading.present();
-  
-  try {
-    const currentUser = this.apiService.getCurrentUser();
+  scrollDifficultyUp() {
+    const currentIndex = this.difficultyLevels.findIndex(
+      l => l.value === this.selectedDifficulty
+    );
 
-    if (!currentUser || !currentUser.id) {
-      await loading.dismiss();
-      alert('Debes iniciar sesión para hacer un test');
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    const difficultyToSend = this.selectedDifficulty;
-    
-    // SIEMPRE usar startStudySession para obtener preguntas CON opciones
-    const sessionData: any = {
-      studentId: Number(currentUser.id),
-      legalAreas: ["Derecho Civil"],
-      questionCount: Number(this.selectedQuantity),
-      difficulty: difficultyToSend,
-      testMode: "Oral"
-    };
-    
-    console.log('📤 Enviando request para CIVIL con opciones:', sessionData);
-    console.log('📤 Método de respuesta:', this.responseMethod);
-    
-    const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
-    
-    console.log('🔥 Respuesta del servidor CIVIL:', sessionResponse);
-    
-    if (sessionResponse && sessionResponse.success) {
-      console.log('✅ Preguntas de CIVIL recibidas:', sessionResponse.totalQuestions);
-      
-      // CRÍTICO: Agregar responseMethod a la sesión
-      sessionResponse.responseMethod = this.responseMethod;
-      
-      this.apiService.setCurrentSession(sessionResponse);
-      await this.router.navigate(['/civil/civil-oral/test-oral-civil']);
-      await loading.dismiss();
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      this.scrollToOption(newIndex);
     } else {
-      await loading.dismiss();
-      alert('No se pudo iniciar el test. Intenta nuevamente.');
+      this.scrollToOption(this.difficultyLevels.length - 1);
     }
-    
-  } catch (error) {
-    await loading.dismiss();
-    console.error('❌ Error al iniciar test CIVIL:', error);
-    alert('Hubo un error al iniciar el test. Intenta nuevamente.');
   }
-}
+
+  scrollDifficultyDown() {
+    const currentIndex = this.difficultyLevels.findIndex(
+      l => l.value === this.selectedDifficulty
+    );
+
+    if (currentIndex < this.difficultyLevels.length - 1) {
+      const newIndex = currentIndex + 1;
+      this.scrollToOption(newIndex);
+    } else {
+      this.scrollToOption(0);
+    }
+  }
+
+  async startVoicePractice() {
+    const loading = await this.loadingController.create({
+      message:
+        this.selectedQuantity === 1
+          ? 'Preparando tu pregunta...'
+          : 'Preparando tu test...',
+      spinner: 'crescent',
+      cssClass: 'custom-loading'
+    });
+
+    await loading.present();
+
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+
+      if (!currentUser || !currentUser.id) {
+        await loading.dismiss();
+        alert('Debes iniciar sesión para hacer un test');
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      const difficultyToSend = this.selectedDifficulty;
+
+      // SIEMPRE usar startStudySession para obtener preguntas CON opciones
+      const sessionData: any = {
+        studentId: Number(currentUser.id),
+        legalAreas: ['Derecho Civil'],
+        questionCount: Number(this.selectedQuantity),
+        difficulty: difficultyToSend,
+        testMode: 'Oral'
+      };
+
+      console.log('📤 Enviando request para CIVIL con opciones:', sessionData);
+      console.log('📤 Método de respuesta:', this.responseMethod);
+
+      const sessionResponse = await this.apiService
+        .startStudySession(sessionData)
+        .toPromise();
+
+      console.log('🔥 Respuesta del servidor CIVIL:', sessionResponse);
+
+      if (sessionResponse && sessionResponse.success) {
+        console.log(
+          '✅ Preguntas de CIVIL recibidas:',
+          sessionResponse.totalQuestions
+        );
+
+        // CRÍTICO: Agregar responseMethod a la sesión
+        sessionResponse.responseMethod = this.responseMethod;
+
+        this.apiService.setCurrentSession(sessionResponse);
+        await this.router.navigate(['/civil/civil-oral/test-oral-civil']);
+        await loading.dismiss();
+      } else {
+        await loading.dismiss();
+        alert('No se pudo iniciar el test. Intenta nuevamente.');
+      }
+    } catch (error) {
+      await loading.dismiss();
+      console.error('❌ Error al iniciar test CIVIL:', error);
+      alert('Hubo un error al iniciar el test. Intenta nuevamente.');
+    }
+  }
 }

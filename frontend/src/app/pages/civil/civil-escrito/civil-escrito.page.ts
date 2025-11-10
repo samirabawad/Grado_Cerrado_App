@@ -1,6 +1,13 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  AfterViewInit
+} from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule, LoadingController, IonContent } from '@ionic/angular'; // ✅ Importar IonContent
+import { IonicModule, LoadingController, IonContent } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../../shared/components/bottom-nav/bottom-nav.component';
@@ -14,7 +21,6 @@ import { ApiService } from '../../../services/api.service';
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
-  
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
@@ -37,29 +43,27 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     return [...this.difficultyLevels, ...this.difficultyLevels, ...this.difficultyLevels];
   }
 
-  @ViewChild(IonContent) content!: IonContent; // ✅ Agregar ViewChild
-
+  @ViewChild(IonContent) content!: IonContent;
   @ViewChild('pickerWheel') pickerWheel?: ElementRef;
   private scrollTimeout: any;
 
   constructor(
-    private router: Router, 
+    private router: Router,
     private loadingController: LoadingController,
     private apiService: ApiService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.loadTemas();
   }
 
-  // ✅ Mover el scroll aquí
   ionViewWillEnter() {
     setTimeout(() => {
-      this.content?.scrollToTop(300); // 300ms de animación suave
+      this.content?.scrollToTop(300);
     }, 50);
   }
-  ngAfterViewInit() {
-  }
+
+  ngAfterViewInit() {}
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
@@ -67,78 +71,75 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-async loadTemas() {
-  this.isLoading = true;
-
-  try {
-    const currentUser = this.apiService.getCurrentUser();
-    
-    if (!currentUser || !currentUser.id) {
-      console.warn('No hay usuario logueado');
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    const studentId = currentUser.id;
+  async loadTemas() {
+    this.isLoading = true;
 
     try {
-      const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
-      
-      if (statsResponse && statsResponse.success && statsResponse.data) {
-        const civilArea = statsResponse.data.find((item: any) => 
-          item.type === 'area' && item.area === 'Derecho Civil'
-        );
-        
-        if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
-          this.temas = civilArea.temas
-            .map((tema: any) => ({
-              id: tema.temaId,
-              nombre: tema.temaNombre,
-              cantidadPreguntas: tema.totalPreguntas || 0
-            }))
-            .filter((tema: any) => tema.cantidadPreguntas > 0); // ✅ Solo temas con preguntas
+      const currentUser = this.apiService.getCurrentUser();
 
-          console.log('✅ Temas cargados para selector:', this.temas);
-        } else {
-          console.log('⚠️ No hay temas en civil');
-          this.temas = [];
+      if (!currentUser || !currentUser.id) {
+        console.warn('No hay usuario logueado');
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      const studentId = currentUser.id;
+
+      try {
+        const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+
+        if (statsResponse && statsResponse.success && statsResponse.data) {
+          const civilArea = statsResponse.data.find(
+            (item: any) => item.type === 'area' && item.area === 'Derecho Civil'
+          );
+
+          if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
+            this.temas = civilArea.temas
+              .map((tema: any) => ({
+                id: tema.temaId,
+                nombre: tema.temaNombre,
+                cantidadPreguntas: tema.totalPreguntas || 0
+              }))
+              .filter((tema: any) => tema.cantidadPreguntas > 0);
+
+            console.log('✅ Temas cargados para selector:', this.temas);
+          } else {
+            console.log('⚠️ No hay temas en civil');
+            this.temas = [];
+          }
         }
+      } catch (error) {
+        console.error('Error cargando temas:', error);
+        this.temas = [];
       }
     } catch (error) {
-      console.error('Error cargando temas:', error);
-      this.temas = [];
+      console.error('Error general cargando temas:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  getMaxQuestionsForSelectedTema(): number {
+    if (this.scopeType === 'all') {
+      return 7;
     }
 
-  } catch (error) {
-    console.error('Error general cargando temas:', error);
-  } finally {
-    this.isLoading = false;
-  }
-}
+    if (this.selectedTemaId) {
+      const tema = this.temas.find(t => t.id === this.selectedTemaId);
+      return tema ? tema.cantidadPreguntas : 0;
+    }
 
-// ✅ Método para saber cuántas preguntas permite el tema seleccionado
-getMaxQuestionsForSelectedTema(): number {
-  if (this.scopeType === 'all') {
-    return 7; // Sin límite para "todo el temario"
+    return 0;
   }
-  
-  if (this.selectedTemaId) {
-    const tema = this.temas.find(t => t.id === this.selectedTemaId);
-    return tema ? tema.cantidadPreguntas : 0;
-  }
-  
-  return 0;
-}
 
-// ✅ Validar si una cantidad está disponible
-canSelectQuantity(quantity: number): boolean {
-  const max = this.getMaxQuestionsForSelectedTema();
-  return quantity <= max;
-}
+  canSelectQuantity(quantity: number): boolean {
+    const max = this.getMaxQuestionsForSelectedTema();
+    return quantity <= max;
+  }
 
   selectScope(type: 'all' | 'tema') {
     this.scopeType = type;
-    
+
     if (type === 'all') {
       this.selectedTemaId = null;
       this.showThemeSelector = false;
@@ -155,15 +156,15 @@ canSelectQuantity(quantity: number): boolean {
   selectTema(temaId: number) {
     this.selectedTemaId = temaId;
     this.scopeType = 'tema';
-    
-    // ✅ Ajustar cantidad seleccionada si excede el límite
+
     const maxQuestions = this.getMaxQuestionsForSelectedTema();
     if (this.selectedQuantity > maxQuestions) {
       this.selectedQuantity = Math.min(maxQuestions, 1);
     }
-    
+
     console.log('✅ Tema seleccionado:', temaId, 'Máx preguntas:', maxQuestions);
   }
+
   getSelectedTemaName(): string {
     const tema = this.temas.find(t => t.id === this.selectedTemaId);
     return tema ? tema.nombre : '';
@@ -259,9 +260,9 @@ canSelectQuantity(quantity: number): boolean {
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
-    
+
     await loading.present();
-    
+
     try {
       const currentUser = this.apiService.getCurrentUser();
 
@@ -276,24 +277,23 @@ canSelectQuantity(quantity: number): boolean {
 
       const sessionData: any = {
         studentId: Number(currentUser.id),
-        difficulty: difficultyToSend, 
-        legalAreas: ["Derecho Civil"],
+        difficulty: difficultyToSend,
+        legalAreas: ['Derecho Civil'],
         questionCount: Number(this.selectedQuantity)
       };
 
-      // Agregar TemaId si está seleccionado
       if (this.scopeType === 'tema' && this.selectedTemaId) {
         sessionData.TemaId = this.selectedTemaId;
         console.log('📚 Test con tema específico:', this.selectedTemaId);
       } else {
         console.log('📚 Test con TODO Derecho Civil');
       }
-      
+
       console.log('📤 Enviando request:', sessionData);
-      
+
       const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
       console.log('📥 Respuesta del servidor:', sessionResponse);
-      
+
       if (sessionResponse && sessionResponse.success) {
         console.log('✅ Preguntas recibidas:', sessionResponse.totalQuestions);
         this.apiService.setCurrentSession(sessionResponse);
@@ -303,7 +303,6 @@ canSelectQuantity(quantity: number): boolean {
         await loading.dismiss();
         alert('No se pudo iniciar el test. Intenta nuevamente.');
       }
-      
     } catch (error) {
       await loading.dismiss();
       console.error('❌ Error al iniciar test:', error);

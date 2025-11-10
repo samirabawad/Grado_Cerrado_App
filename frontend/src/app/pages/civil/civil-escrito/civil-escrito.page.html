@@ -1,6 +1,10 @@
 <ion-content class="civil-content">
   <div class="dashboard-header">
-    <ion-icon name="chevron-back-outline" class="back-icon" (click)="goBack()"></ion-icon>
+    <ion-icon
+      name="chevron-back-outline"
+      class="back-icon"
+      (click)="goBack()"
+    ></ion-icon>
     <h1 class="header-title">Derecho Civil Escrito</h1>
   </div>
 
@@ -9,42 +13,55 @@
 
       <!-- ¿Qué quieres practicar? -->
       <h2>¿Qué quieres practicar?</h2>
-      <p class="practice-subtitle">Elige todo el temario de Civil o enfócate en un tema específico</p>
-      
-      <button 
+      <p class="practice-subtitle">
+        Elige todo el temario de Civil o enfócate en un tema específico
+      </p>
+
+      <button
         class="scope-btn"
         [class.active]="scopeType === 'all'"
-        (click)="selectScope('all')">
+        (click)="selectScope('all')"
+      >
         <ion-icon name="globe"></ion-icon>
         Todo el temario de Civil
       </button>
 
-      <button 
+      <button
         class="scope-btn"
         [class.active]="showThemeSelector"
-        (click)="selectScope('tema')">
+        (click)="selectScope('tema')"
+      >
         <ion-icon name="list"></ion-icon>
         Un tema específico
       </button>
 
-            <!-- Estado dinámico -->
+      <!-- Estado dinámico -->
       <div class="practice-status" *ngIf="scopeType === 'all'">
         <ion-icon name="book"></ion-icon>
         <span>Practicarás con preguntas de todos los temas</span>
       </div>
 
-      <div class="practice-status selected" *ngIf="scopeType === 'tema' && selectedTemaId">
+      <div
+        class="practice-status selected"
+        *ngIf="scopeType === 'tema' && selectedTemaId"
+      >
         <ion-icon name="bookmark"></ion-icon>
-        <span>Practicarás solo: <strong>{{ getSelectedTemaName() }}</strong></span>
+        <span>
+          Practicarás solo:
+          <strong>{{ getSelectedTemaName() }}</strong>
+        </span>
       </div>
 
       <!-- Selector de temas -->
       <div *ngIf="showThemeSelector" class="theme-selector">
         <div class="theme-selector-header">Selecciona un tema</div>
-        <div *ngFor="let tema of temas"
-             class="tema-item"
-             [class.selected]="selectedTemaId === tema.id"
-             (click)="selectTema(tema.id)">
+
+        <div
+          *ngFor="let tema of temas"
+          class="tema-item"
+          [class.selected]="selectedTemaId === tema.id"
+          (click)="selectTema(tema.id)"
+        >
           <div class="tema-header">
             <span class="tema-nombre">{{ tema.nombre }}</span>
             <span class="tema-count">{{ tema.cantidadPreguntas }} preguntas</span>
@@ -52,66 +69,72 @@
         </div>
       </div>
 
-            <!-- Nivel de dificultad -->
+      <!-- Nivel de dificultad -->
       <h2>Nivel de dificultad</h2>
-      
+
       <div class="inline-picker-container">
         <div class="picker-wheel" #pickerWheel (scroll)="onPickerScroll()">
-          <div 
+          <div
             class="picker-option"
             *ngFor="let level of infiniteLevels; let i = index"
             [class.selected]="selectedDifficulty === level.value"
             [attr.data-value]="level.value"
-            (click)="selectDifficulty(level)">
+            (click)="selectDifficulty(level)"
+          >
             {{ level.label }}
           </div>
         </div>
+
         <div class="picker-arrows">
           <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
           <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
         </div>
       </div>
-      
+
       <!-- Cantidad de preguntas -->
       <h2>¿Cuántas preguntas?</h2>
-      
+
       <div class="quantity-selector">
-        <button 
-          class="quantity-option" 
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 1"
           [class.disabled]="!canSelectQuantity(1)"
           [disabled]="!canSelectQuantity(1)"
-          (click)="canSelectQuantity(1) && (selectedQuantity = 1)">
+          (click)="canSelectQuantity(1) && (selectedQuantity = 1)"
+        >
           <span class="number">1</span>
           <span class="label">Pregunta</span>
         </button>
-        
-        <button 
-          class="quantity-option" 
+
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 3"
           [class.disabled]="!canSelectQuantity(3)"
           [disabled]="!canSelectQuantity(3)"
-          (click)="canSelectQuantity(3) && (selectedQuantity = 3)">
+          (click)="canSelectQuantity(3) && (selectedQuantity = 3)"
+        >
           <span class="number">3</span>
           <span class="label">Preguntas</span>
         </button>
-        
-        <button 
-          class="quantity-option" 
+
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 5"
           [class.disabled]="!canSelectQuantity(5)"
           [disabled]="!canSelectQuantity(5)"
-          (click)="canSelectQuantity(5) && (selectedQuantity = 5)">
+          (click)="canSelectQuantity(5) && (selectedQuantity = 5)"
+        >
           <span class="number">5</span>
           <span class="label">Preguntas</span>
         </button>
-        
-        <button 
-          class="quantity-option" 
+
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 7"
           [class.disabled]="!canSelectQuantity(7)"
           [disabled]="!canSelectQuantity(7)"
-          (click)="canSelectQuantity(7) && (selectedQuantity = 7)">
+          (click)="canSelectQuantity(7) && (selectedQuantity = 7)"
+        >
           <span class="number">7</span>
           <span class="label">Preguntas</span>
         </button>
@@ -120,26 +143,33 @@
       <!-- ✅ Mensaje informativo sobre límite -->
       <div class="info-message" *ngIf="scopeType === 'tema' && selectedTemaId">
         <ion-icon name="information-circle"></ion-icon>
-        <span>Este tema tiene {{ getMaxQuestionsForSelectedTema() }} pregunta(s) disponible(s)</span>
+        <span>
+          Este tema tiene {{ getMaxQuestionsForSelectedTema() }}
+          pregunta(s) disponible(s)
+        </span>
       </div>
 
-      <!-- ✅ Agregar espacio extra si es necesario -->
+      <!-- Espacio extra -->
       <div style="height: 8px"></div>
+
       <!-- Validación -->
-      <div class="validation-message" *ngIf="showThemeSelector && !selectedTemaId">
+      <div
+        class="validation-message"
+        *ngIf="showThemeSelector && !selectedTemaId"
+      >
         <ion-icon name="alert-circle"></ion-icon>
         <span>Selecciona un tema para continuar</span>
       </div>
 
-      <ion-button 
-        expand="block" 
+      <ion-button
+        expand="block"
         class="start-button"
         [disabled]="showThemeSelector && !selectedTemaId"
-        (click)="startQuickPractice()">
+        (click)="startQuickPractice()"
+      >
         <ion-icon name="play-outline" slot="start"></ion-icon>
         Empezar Test
       </ion-button>
-
     </div>
   </div>
 

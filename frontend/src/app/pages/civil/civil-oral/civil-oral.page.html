@@ -1,26 +1,30 @@
 <ion-content class="civil-content">
   <div class="dashboard-header">
-    <ion-icon name="chevron-back-outline" class="back-icon" (click)="goBack()"></ion-icon>
+    <ion-icon 
+      name="chevron-back-outline" 
+      class="back-icon" 
+      (click)="goBack()">
+    </ion-icon>
     <h1 class="header-title">Test Oral</h1>
   </div>
 
   <div class="content-area">
     <div class="selector-card">
-      
+
       <!-- 1️⃣ MÉTODO DE RESPUESTA (PRIMERO) -->
       <h2>¿Cómo quieres aprender hoy?</h2>
-      
+
       <div class="response-method-selector">
-        <button 
-          class="method-option" 
+        <button
+          class="method-option"
           [class.selected]="responseMethod === 'voice'"
           (click)="responseMethod = 'voice'">
           <ion-icon name="mic-outline"></ion-icon>
           <span>Por voz</span>
         </button>
-        
-        <button 
-          class="method-option" 
+
+        <button
+          class="method-option"
           [class.selected]="responseMethod === 'selection'"
           (click)="responseMethod = 'selection'">
           <ion-icon name="list-outline"></ion-icon>
@@ -30,20 +34,26 @@
 
       <div class="method-explanation" *ngIf="responseMethod === 'voice'">
         <ion-icon name="information-circle-outline"></ion-icon>
-        <p>Escucha la pregunta y responde hablando. El sistema transcribirá tu respuesta automáticamente.</p>
+        <p>
+          Escucha la pregunta y responde hablando. El sistema transcribirá tu
+          respuesta automáticamente.
+        </p>
       </div>
 
       <div class="method-explanation" *ngIf="responseMethod === 'selection'">
         <ion-icon name="information-circle-outline"></ion-icon>
-        <p>Escucha la pregunta y selecciona la alternativa correcta haciendo clic en ella.</p>
+        <p>
+          Escucha la pregunta y selecciona la alternativa correcta haciendo clic
+          en ella.
+        </p>
       </div>
 
       <!-- 2️⃣ NIVEL DE DIFICULTAD (SEGUNDO) -->
       <h2>Nivel de dificultad</h2>
-      
+
       <div class="inline-picker-container">
         <div class="picker-wheel" #pickerWheel (scroll)="onPickerScroll()">
-          <div 
+          <div
             class="picker-option"
             *ngFor="let level of infiniteLevels; let i = index"
             [class.selected]="selectedDifficulty === level.value"
@@ -52,42 +62,43 @@
             {{ level.label }}
           </div>
         </div>
-          <div class="picker-arrows">
-            <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
-            <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
-          </div>
+
+        <div class="picker-arrows">
+          <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
+          <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
+        </div>
       </div>
 
       <!-- 3️⃣ CANTIDAD DE PREGUNTAS (TERCERO) -->
       <h2>¿Cuántas preguntas?</h2>
-      
+
       <div class="quantity-selector">
-        <button 
-          class="quantity-option" 
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 1"
           (click)="selectedQuantity = 1">
           <span class="number">1</span>
           <span class="label">Pregunta</span>
         </button>
-        
-        <button 
-          class="quantity-option" 
+
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 3"
           (click)="selectedQuantity = 3">
           <span class="number">3</span>
           <span class="label">Preguntas</span>
         </button>
-        
-        <button 
-          class="quantity-option" 
+
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 5"
           (click)="selectedQuantity = 5">
           <span class="number">5</span>
           <span class="label">Preguntas</span>
         </button>
-        
-        <button 
-          class="quantity-option" 
+
+        <button
+          class="quantity-option"
           [class.selected]="selectedQuantity === 7"
           (click)="selectedQuantity = 7">
           <span class="number">7</span>
@@ -95,8 +106,8 @@
         </button>
       </div>
 
-      <ion-button 
-        expand="block" 
+      <ion-button
+        expand="block"
         class="start-button"
         (click)="startVoicePractice()">
         <ion-icon name="mic-outline" slot="start"></ion-icon>
