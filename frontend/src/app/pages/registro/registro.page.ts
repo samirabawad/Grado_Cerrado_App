@@ -4,6 +4,7 @@ import { LoadingController, AlertController, IonicModule } from '@ionic/angular'
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
+import { NONE_TYPE } from '@angular/compiler';
 
 @Component({
   selector: 'app-registro',
@@ -83,10 +84,14 @@ export class RegistroPage implements OnInit {
     await loading.present();
     this.isLoading = true;
 
+    //VARIABLE QUE GUARDA EL NOMBRE COMPLETO DEL USUARIO. LLEGAR Y USAR.
     const nombreCompleto = this.buildNombreCompleto();
 
     const registerData = {
-      name: nombreCompleto,
+      name: this.nombre,
+      segundoNombre: this.segundoNombre,
+      apellidoPaterno: this.apellidoPaterno,
+      apellidoMaterno: this.apellidoMaterno,
       email: this.correoElectronico.toLowerCase().trim(),
       password: this.contrasena
     };
