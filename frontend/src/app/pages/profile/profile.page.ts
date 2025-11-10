@@ -44,6 +44,24 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
 // ======== NUEVO: configuración de avatares ========
 defaultAvatar = 'assets/image/msombra.png';
+
+getInitialAvatar(): string {
+  const name = this.user.nombre || this.user.nombreCompleto || 'U';
+  const initial = name.charAt(0).toUpperCase();
+  
+  // SVG con inicial
+  const svg = `
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="50" fill="#9CA3AF"/>
+      <text x="50" y="50" font-family="Arial, sans-serif" font-size="48" 
+            font-weight="bold" fill="white" text-anchor="middle" 
+            dominant-baseline="central">${initial}</text>
+    </svg>
+  `;
+  
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
 raccoonAvatars: { id: number; url: string }[] = [
   { id: 1, url: 'assets/avatars/racoon1.svg' },
   { id: 2, url: 'assets/avatars/racoon2.svg' },
@@ -169,8 +187,12 @@ pendingAvatar: { id: number; url: string } | null = null;
       this.user.email = currentUser.email || 'usuario@example.com';
 
       // ======== NUEVO: setear avatarUrl desde localStorage o default ========
-      this.user.avatarUrl = currentUser.avatarUrl || currentUser.avatar || this.user.avatar || this.defaultAvatar;
-
+      const rawAvatar = currentUser.avatarUrl || currentUser.avatar || this.user.avatar;
+      if (rawAvatar && rawAvatar !== this.defaultAvatar && !rawAvatar.includes('msombra')) {
+        this.user.avatarUrl = rawAvatar;
+      } else {
+        this.user.avatarUrl = this.getInitialAvatar();
+      }
       console.log('✅ Usuario cargado desde localStorage:', this.user);
 
       await this.loadDashboardStats(studentId);
@@ -936,10 +958,10 @@ pendingAvatar: { id: number; url: string } | null = null;
       const current = this.apiService.getCurrentUser();
       await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
 
-      // Volver al default
-      this.user.avatarUrl = this.defaultAvatar;
-      current.avatarUrl = this.defaultAvatar;
-      current.avatar = this.defaultAvatar;
+      // Volver al avatar con inicial
+      this.user.avatarUrl = this.getInitialAvatar();
+      current.avatarUrl = '';
+      current.avatar = '';
       localStorage.setItem('currentUser', JSON.stringify(current));
 
       await this.showToast('Avatar quitado', 'success');
