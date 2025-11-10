@@ -6,6 +6,59 @@
 
   <div class="content-area">
     <div class="selector-card">
+      
+      <!-- 1️⃣ MÉTODO DE RESPUESTA (PRIMERO) -->
+      <h2>¿Cómo quieres aprender hoy?</h2>
+      
+      <div class="response-method-selector">
+        <button 
+          class="method-option" 
+          [class.selected]="responseMethod === 'voice'"
+          (click)="responseMethod = 'voice'">
+          <ion-icon name="mic-outline"></ion-icon>
+          <span>Por voz</span>
+        </button>
+        
+        <button 
+          class="method-option" 
+          [class.selected]="responseMethod === 'selection'"
+          (click)="responseMethod = 'selection'">
+          <ion-icon name="list-outline"></ion-icon>
+          <span>Por selección</span>
+        </button>
+      </div>
+
+      <div class="method-explanation" *ngIf="responseMethod === 'voice'">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <p>Escucha la pregunta y responde hablando. El sistema transcribirá tu respuesta automáticamente.</p>
+      </div>
+
+      <div class="method-explanation" *ngIf="responseMethod === 'selection'">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <p>Escucha la pregunta y selecciona la alternativa correcta haciendo clic en ella.</p>
+      </div>
+
+      <!-- 2️⃣ NIVEL DE DIFICULTAD (SEGUNDO) -->
+      <h2>Nivel de dificultad</h2>
+      
+      <div class="inline-picker-container">
+        <div class="picker-wheel" #pickerWheel (scroll)="onPickerScroll()">
+          <div 
+            class="picker-option"
+            *ngFor="let level of infiniteLevels; let i = index"
+            [class.selected]="selectedDifficulty === level.value"
+            [attr.data-value]="level.value"
+            (click)="selectDifficulty(level)">
+            {{ level.label }}
+          </div>
+        </div>
+          <div class="picker-arrows">
+            <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
+            <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
+          </div>
+      </div>
+
+      <!-- 3️⃣ CANTIDAD DE PREGUNTAS (TERCERO) -->
       <h2>¿Cuántas preguntas?</h2>
       
       <div class="quantity-selector">
@@ -40,55 +93,6 @@
           <span class="number">7</span>
           <span class="label">Preguntas</span>
         </button>
-      </div>
-
-      <h2>Método de respuesta</h2>
-      
-      <div class="response-method-selector">
-        <button 
-          class="method-option" 
-          [class.selected]="responseMethod === 'voice'"
-          (click)="responseMethod = 'voice'">
-          <ion-icon name="mic-outline"></ion-icon>
-          <span>Por voz</span>
-        </button>
-        
-        <button 
-          class="method-option" 
-          [class.selected]="responseMethod === 'selection'"
-          (click)="responseMethod = 'selection'">
-          <ion-icon name="list-outline"></ion-icon>
-          <span>Por selección</span>
-        </button>
-      </div>
-
-      <div class="method-explanation" *ngIf="responseMethod === 'voice'">
-        <ion-icon name="information-circle-outline"></ion-icon>
-        <p>Escucha la pregunta y responde hablando. El sistema transcribirá tu respuesta automáticamente.</p>
-      </div>
-
-      <div class="method-explanation" *ngIf="responseMethod === 'selection'">
-        <ion-icon name="information-circle-outline"></ion-icon>
-        <p>Escucha la pregunta y selecciona la alternativa correcta haciendo clic en ella.</p>
-      </div>
-
-      <h2>Nivel de dificultad</h2>
-      
-      <div class="inline-picker-container">
-        <div class="picker-wheel" #pickerWheel (scroll)="onPickerScroll()">
-          <div 
-            class="picker-option"
-            *ngFor="let level of infiniteLevels; let i = index"
-            [class.selected]="selectedDifficulty === level.value"
-            [attr.data-value]="level.value"
-            (click)="selectDifficulty(level)">
-            {{ level.label }}
-          </div>
-        </div>
-      <div class="picker-arrows">
-          <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
-          <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
-        </div>
       </div>
 
       <ion-button 

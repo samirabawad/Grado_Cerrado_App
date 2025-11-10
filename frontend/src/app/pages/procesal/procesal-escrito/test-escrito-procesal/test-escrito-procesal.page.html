@@ -1,5 +1,5 @@
 <ion-content class="test-content">
-  <!-- âœ… HEADER IGUAL QUE CIVIL.PAGE -->
+  <!-- Ã¢Å“â€¦ HEADER IGUAL QUE CIVIL.PAGE -->
   <div class="dashboard-header">
     <ion-icon name="chevron-back" class="back-icon" (click)="exitTest()"></ion-icon>
     <h1 class="header-title">Derecho Procesal</h1>
@@ -8,7 +8,7 @@
   <!-- Contenido principal -->
   <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
     
-    <!-- âœ… PUNTITOS DE PROGRESO -->
+    <!-- Ã¢Å“â€¦ PUNTITOS DE PROGRESO -->
     <div class="progress-dots">
       <div 
         *ngFor="let q of questions; let i = index"
@@ -18,10 +18,13 @@
       </div>
     </div>
 
-    <!-- CategorÃ­a y contador -->
+    <!-- CategorÃƒÂ­a y contador -->
     <div class="category-row">
       <div class="category-chip">
         {{ getCurrentQuestionCategory() }}
+        <span *ngIf="shouldShowDifficultyLevel()" class="difficulty-badge">
+          {{ getCurrentQuestionDifficulty() }}
+        </span>
       </div>
       <div class="question-counter">
         {{ currentQuestionNumber }} de {{ totalQuestions }}
@@ -56,13 +59,13 @@
       </div>
     </div>
 
-    <!-- Botones de navegaciÃ³n -->
+    <!-- Botones de navegaciÃƒÂ³n -->
 
-    <!-- PANEL DE EVALUACIÓN (como test-oral) -->
+    <!-- PANEL DE EVALUACIÃ“N (como test-oral) -->
     <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
       <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
         <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-        <span>{{ evaluationResult?.isCorrect ? '¡Correcto!' : 'Incorrecto' }}</span>
+        <span>{{ evaluationResult?.isCorrect ? 'Â¡Correcto!' : 'Incorrecto' }}</span>
       </div>
 
       <div class="evaluation-body">
@@ -72,7 +75,7 @@
         </div>
 
         <div class="eval-section">
-          <div class="eval-label">Explicación:</div>
+          <div class="eval-label">ExplicaciÃ³n:</div>
           <div class="eval-text explanation">{{ evaluationResult?.explanation }}</div>
         </div>
       </div>
@@ -106,7 +109,7 @@
       </ion-button>
     </div>
 
-    <!-- BotÃ³n para abandonar -->
+    <!-- BotÃƒÂ³n para abandonar -->
     <div class="exit-button-container">
       <button class="exit-btn" (click)="exitTest()">
         <ion-icon name="exit-outline"></ion-icon>

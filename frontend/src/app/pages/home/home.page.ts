@@ -20,6 +20,23 @@ export class HomePage implements OnInit {
   defaultAvatar = 'assets/avatars/racoon1.svg';
   userAvatarUrl = this.defaultAvatar;
 
+  getInitialAvatar(): string {
+  const name = this.userName || 'U';
+  const initial = name.charAt(0).toUpperCase();
+  
+  // SVG con inicial
+  const svg = `
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="50" fill="#9CA3AF"/>
+      <text x="50" y="50" font-family="Arial, sans-serif" font-size="48" 
+            font-weight="bold" fill="white" text-anchor="middle" 
+            dominant-baseline="central">${initial}</text>
+    </svg>
+  `;
+  
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
   userName: string = 'Estudiante';
   userCoins: number = 0;
   
@@ -41,13 +58,17 @@ export class HomePage implements OnInit {
 
   }
 
-  private loadUserAvatar() {
-    // ⬇️ usar apiService (no existe this.api)
-    const current = this.apiService.getCurrentUser();
-    const raw = current?.avatarUrl || current?.avatar || '';
+private loadUserAvatar() {
+  const current = this.apiService.getCurrentUser();
+  const raw = current?.avatarUrl || current?.avatar || '';
+  
+  if (raw && raw !== this.defaultAvatar) {
     const resolved = this.buildAvatarUrl(raw);
-    this.userAvatarUrl = resolved || this.defaultAvatar;
+    this.userAvatarUrl = resolved || this.getInitialAvatar();
+  } else {
+    this.userAvatarUrl = this.getInitialAvatar();
   }
+}
 
 
   // Convierte '/avatars/...' a 'http://host:puerto/avatars/...'

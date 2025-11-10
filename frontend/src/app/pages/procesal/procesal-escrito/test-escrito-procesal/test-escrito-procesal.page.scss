@@ -1,5 +1,5 @@
- // ========================================
-// CONFIGURACIÃ“N BÃSICA
+// ========================================
+// CONFIGURACIÃƒâ€œN BÃƒÂSICA
 // ========================================
 .procesal-content {
   --background: #ffffff !important;
@@ -15,7 +15,7 @@ ion-content {
 }
 
 // ========================================
-// âœ… HEADER IGUAL QUE PROCESAL.PAGE
+// Ã¢Å“â€¦ HEADER IGUAL QUE PROCESAL.PAGE
 // ========================================
 .dashboard-header {
   position: fixed;
@@ -58,7 +58,7 @@ ion-content {
 }
 
 // ========================================
-// âœ… PUNTITOS DE PROGRESO
+// Ã¢Å“â€¦ PUNTITOS DE PROGRESO
 // ========================================
 .progress-dots {
   display: flex;
@@ -90,7 +90,7 @@ ion-content {
 }
 
 // ========================================
-// CATEGORÃA Y CONTADOR
+// CATEGORÃƒÂA Y CONTADOR
 // ========================================
 .category-row {
   display: flex;
@@ -233,7 +233,7 @@ ion-content {
 }
 
 // ========================================
-// BOTONES DE NAVEGACIÃ“N
+// BOTONES DE NAVEGACIÃƒâ€œN
 // ========================================
 .navigation-buttons {
   display: flex;
@@ -263,7 +263,7 @@ ion-content {
 }
 
 // ========================================
-// BOTÃ“N DE ABANDONAR
+// BOTÃƒâ€œN DE ABANDONAR
 // ========================================
 .exit-button-container {
   display: flex;
@@ -345,7 +345,7 @@ ion-content {
 }
 
 // ========================================
-// âœ… ESTILO DEL POP-UP DE EXPLICACIÃ“N
+// Ã¢Å“â€¦ ESTILO DEL POP-UP DE EXPLICACIÃƒâ€œN
 // ========================================
 :global(.explanation-alert) {
   --background: rgba(59, 130, 246, 0.95);
@@ -421,7 +421,7 @@ ion-content {
   }
 }
 // ========================================
-// PANEL DE EVALUACIÓN (como test-oral)
+// PANEL DE EVALUACIÃ“N (como test-oral)
 // ========================================
 .evaluation-panel {
   background: white;
@@ -501,4 +501,17 @@ ion-content {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+// ========================================
+// BADGE DE NIVEL DE DIFICULTAD
+// ========================================
+.difficulty-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.9;
 }

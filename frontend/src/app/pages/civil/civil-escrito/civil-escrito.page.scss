@@ -10,25 +10,26 @@ ion-content.civil-content {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  height: 60px;
   background: #FF6F00;
-  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   .back-icon {
-    font-size: 28px;
-    color: #ffffff;
+    font-size: 24px;
+    color: white;
     cursor: pointer;
+    margin-right: 12px;
   }
 
   .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #ffffff;
   }
 }
 
@@ -160,7 +161,7 @@ ion-content.civil-content {
     }
   }
 
-  // Subtítulo de práctica
+  // SubtÃ­tulo de prÃ¡ctica
   .practice-subtitle {
     margin: -12px 0 20px 0;
     font-size: 14px;
@@ -201,7 +202,7 @@ ion-content.civil-content {
     }
   }
 
-  // Estado dinámico de práctica
+  // Estado dinÃ¡mico de prÃ¡ctica
   .practice-status {
     display: flex;
     align-items: center;
@@ -325,7 +326,7 @@ ion-content.civil-content {
   }
 }
 
-// Mensaje de validación
+// Mensaje de validaciÃ³n
 .validation-message {
   display: flex;
   align-items: center;
@@ -344,7 +345,7 @@ ion-content.civil-content {
   }
 }
 
-// Botón deshabilitado
+// BotÃ³n deshabilitado
 ion-button.start-button[disabled] {
   --background: #e5e7eb;
   --color: #9ca3af;
@@ -369,7 +370,7 @@ ion-button.start-button[disabled] {
   border-left: 3px solid #FF6F00;
   border-radius: 8px;
   margin-top: 12px;
-  margin-bottom: 20px; // ✅ Agregar margen inferior
+  margin-bottom: 20px; // âœ… Agregar margen inferior
   font-size: 14px;
   color: #FF6F00;
   

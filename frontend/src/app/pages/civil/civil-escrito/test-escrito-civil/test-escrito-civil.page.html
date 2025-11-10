@@ -18,17 +18,20 @@
       </div>
     </div>
 
-    <!-- CategorÃ­a y contador -->
+  <!-- Categoría y contador -->
     <div class="category-row">
       <div class="category-chip">
         {{ getCurrentQuestionCategory() }}
+        <span *ngIf="shouldShowDifficultyLevel()" class="difficulty-badge">
+          {{ getCurrentQuestionDifficulty() }}
+        </span>
       </div>
       <div class="question-counter">
         {{ currentQuestionNumber }} de {{ totalQuestions }}
       </div>
-    </div>      
+    </div>
 
-    <!-- Texto de la pregunta -->
+    <!-- Texto de la pregunta --> 
     <div class="question-text">
       <p><strong>{{ getCurrentQuestionText() }}</strong></p>
     </div>

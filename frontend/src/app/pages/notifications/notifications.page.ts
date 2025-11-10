@@ -206,11 +206,24 @@ export class NotificationsPage implements OnInit {
     this.unreadCount = 0;
   }
 
-  // ========================================
+// ========================================
   // SECCIONES EXPANDIBLES
   // ========================================
   toggleSection(section: string) {
-    this.expandedSections[section] = !this.expandedSections[section];
+    // Si la sección ya está abierta, la cerramos
+    if (this.expandedSections[section]) {
+      this.expandedSections[section] = false;
+    } else {
+      // Cerrar todas las secciones principales
+      Object.keys(this.expandedSections).forEach(key => {
+        // Solo cerrar secciones principales
+        if (['lastNotifications', 'notificationTypes', 'reminders', 'channels', 'advanced'].includes(key)) {
+          this.expandedSections[key] = false;
+        }
+      });
+      // Abrir la sección clickeada
+      this.expandedSections[section] = true;
+    }
   }
 
   isSectionExpanded(section: string): boolean {

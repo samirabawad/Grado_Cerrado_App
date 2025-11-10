@@ -47,8 +47,7 @@ export class HistorialPage implements OnInit {
       console.log('Cargando historial para estudiante:', studentId);
 
       try {
-        const response = await this.apiService.getRecentSessions(studentId, 100).toPromise();
-        
+      const response = await this.apiService.getRecentSessions(studentId, 250).toPromise();        
         if (response && response.success && response.data) {
           this.recentSessions = response.data.map((session: any) => ({
             testId: session.testId,
@@ -225,10 +224,12 @@ isOptionCorrect(question: any, option: string): boolean {
   }
 
   formatDate(date: Date): string {
-    return date.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    return date.toLocaleDateString('es-ES', { 
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(',', ' ·');
   }
 
   getSuccessRateColor(rate: number): string {
