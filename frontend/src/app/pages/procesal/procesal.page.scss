@@ -21,25 +21,26 @@ ion-content.procesal-content {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  background: #3b82f6;
-  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
+  height: 60px;
+  background: #3b82f6; 
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   .back-icon {
-    font-size: 28px;
-    color: #ffffff;
+    font-size: 24px;
+    color: white;
     cursor: pointer;
+    margin-right: 12px;
   }
 
   .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #ffffff;
   }
 }
 

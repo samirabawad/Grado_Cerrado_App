@@ -32,14 +32,15 @@
 // ========================================
 // CONFIGURACIÓN BÁSICA
 // ========================================
-.civil-content {
+.procesal-content {
   --background: #ffffff;
-  background-color: #ffffff;
+  --ion-background-color: #ffffff;
+  background: #ffffff;
   background-image: none;
   min-height: 100vh;
 }
 
-ion-content.civil-content {
+ion-content.procesal-content {
   --overflow: auto;
   height: 100%;
 }
