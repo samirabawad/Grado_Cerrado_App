@@ -31,6 +31,17 @@ export class HistorialPage implements OnInit {
     this.loadRecentSessions();
   }
 
+    convertUTCToChileTime(utcDateString: string): Date {
+      // Convertir string UTC a Date
+      const utcDate = new Date(utcDateString);
+      
+      // Chile está en UTC-3 (horario de verano) o UTC-4 (horario normal)
+      // Ajustar 3 horas hacia atrás
+      const chileDate = new Date(utcDate.getTime() - (3 * 60 * 60 * 1000));
+      
+      return chileDate;
+    }
+
   async loadRecentSessions() {
     this.isLoading = true;
 
@@ -47,11 +58,11 @@ export class HistorialPage implements OnInit {
       console.log('Cargando historial para estudiante:', studentId);
 
       try {
-      const response = await this.apiService.getRecentSessions(studentId, 250).toPromise();        
+        const response = await this.apiService.getRecentSessions(studentId, 250).toPromise();        
         if (response && response.success && response.data) {
           this.recentSessions = response.data.map((session: any) => ({
             testId: session.testId,
-            date: new Date(session.date),
+            date: this.convertUTCToChileTime(session.date),
             area: session.area || 'Derecho Civil',
             questionsAnswered: session.totalQuestions || 0,            
             correctAnswers: session.correctAnswers || 0,

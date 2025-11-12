@@ -140,6 +140,13 @@ export class CivilReforzarPage implements OnInit {
   // CARGA DE DATOS
   // =====================
 
+    convertUTCToChileTime(utcDateString: string): Date {
+      const utcDate = new Date(utcDateString);
+      // Chile horario de verano = UTC-3, restamos 3 horas
+      const chileDate = new Date(utcDate.getTime() - (3 * 60 * 60 * 1000));
+      return chileDate;
+    }
+
   async loadData() {
     this.isLoading = true;
 
@@ -205,23 +212,24 @@ export class CivilReforzarPage implements OnInit {
 
           const base = soloCivil.length > 0 ? soloCivil : raw;
 
-          this.recentSessions = base
-            .slice(0, 5)
-            .map((s: any) => {
-              const totalPreg = s.totalQuestions ?? s.totalquestions ?? s.questions ?? s.numeroPreguntas ?? 0;
-              const correctas = s.correctAnswers ?? s.correct ?? s.correctas ?? s.totalCorrectas ?? 0;
+      this.recentSessions = base
+        .slice(0, 5)
+        .map((s: any) => {
+          const totalPreg = s.totalQuestions ?? s.totalquestions ?? s.questions ?? s.numeroPreguntas ?? 0;
+          const correctas = s.correctAnswers ?? s.correct ?? s.correctas ?? s.totalCorrectas ?? 0;
+          const fechaOriginal = s.date ?? s.fecha_test ?? s.fechaCreacion;
 
-              return {
-                id: s.id ?? s.testId,
-                testId: s.testId ?? s.id,
-                date: s.date ?? s.fecha_test ?? s.fechaCreacion,
-                area: s.area || s.areaNombre || 'Derecho Civil',
-                durationSeconds: s.durationSeconds ?? s.duration ?? 0,
-                totalQuestions: totalPreg,
-                correctAnswers: correctas,
-                successRate: totalPreg > 0 ? Math.round((correctas / totalPreg) * 100) : 0
-              };
-            });
+          return {
+            id: s.id ?? s.testId,
+            testId: s.testId ?? s.id,
+            date: this.convertUTCToChileTime(fechaOriginal),
+            area: s.area || s.areaNombre || 'Derecho Civil',
+            durationSeconds: s.durationSeconds ?? s.duration ?? 0,
+            totalQuestions: totalPreg,
+            correctAnswers: correctas,
+            successRate: totalPreg > 0 ? Math.round((correctas / totalPreg) * 100) : 0
+          };
+        });
 
           console.log('âœ… Sesiones que se van a mostrar en Civil:', this.recentSessions);
         }
