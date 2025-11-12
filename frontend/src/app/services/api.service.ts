@@ -106,7 +106,7 @@ export class ApiService {
   // AUTENTICACIÓN
   // ========================================
 
-  registerUser(userData: { name: string, email: string, password: string }): Observable<any> {
+  registerUser(userData: { name: string, segundoNombre: string, apellidoPaterno: string, apellidoMaterno: string, email: string, password: string }): Observable<any> {
     const url = `${this.API_URL}/Auth/register`;
     
     if (!userData.name || !userData.email || !userData.password) {
@@ -116,6 +116,9 @@ export class ApiService {
     
     console.log('Enviando registro a:', url, { 
       name: userData.name, 
+      segundoNombre: userData.segundoNombre,
+      apellidoPaterno: userData.apellidoPaterno,
+      apellidoMaterno: userData.apellidoMaterno,
       email: userData.email, 
       password: '***'
     });
@@ -1075,7 +1078,7 @@ changePassword(userId: number, passwords: any): Observable<any> {
 }
 
 deleteAccount(userId: number, password: string): Observable<any> {
-  return this.http.delete(`${this.API_URL}/students/${userId}`, { body: { password } });
+  return this.http.delete(`${this.API_URL}/auth/delete-account/${userId}`, { body: { password } });
 }
 
 transcribeAudioDirect(formData: FormData): Observable<any> {

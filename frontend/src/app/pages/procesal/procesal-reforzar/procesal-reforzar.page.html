@@ -8,9 +8,7 @@
   <!-- Contenido principal -->
   <div class="content-area">
 
-    <!-- ========================================
-         RECOMENDACIÓN DE ESTUDIO (BANNER SIEMPRE VISIBLE)
-         ======================================== -->
+    <!-- RECOMENDACIÓN DE ESTUDIO (BANNER SIEMPRE VISIBLE) -->
     <div class="recommendation-banner" *ngIf="!isLoading && getMainRecommendation()">
       <div class="banner-icon">
         <ion-icon name="bulb-outline"></ion-icon>
@@ -27,9 +25,7 @@
       </button>
     </div>
 
-    <!-- ========================================
-         PRINCIPALES TEMAS A REFORZAR (SIEMPRE VISIBLE)
-         ======================================== -->
+    <!-- PRINCIPALES TEMAS A REFORZAR (SIEMPRE VISIBLE) -->
     <div class="section">
       <h2 class="section-title" style="display: flex; align-items: center; gap: 12px;">
         <ion-icon name="trending-down" style="font-size: 24px;"></ion-icon>
@@ -45,18 +41,12 @@
 
       <!-- Lista de temas débiles -->
       <div *ngIf="!isLoading && weakTopics.length > 0" class="weak-topics-list-new">
-        <div *ngFor="let topic of weakTopics"
-             class="topic-card-new"
-             (click)="selectWeakTopic(topic)">
-
-          <!-- Indicador de prioridad (círculo izquierda) -->
+        <div *ngFor="let topic of weakTopics" class="topic-card-new" (click)="selectWeakTopic(topic)">
           <div class="priority-indicator"
                [class.priority-high]="topic.tasaError >= 70"
                [class.priority-medium]="topic.tasaError >= 40 && topic.tasaError < 70"
                [class.priority-low]="topic.tasaError < 40">
           </div>
-
-          <!-- Contenido del card -->
           <div class="topic-content-new">
             <div class="topic-main">
               <h3 class="topic-title-new">{{ topic.nombre }}</h3>
@@ -64,7 +54,6 @@
                 {{ topic.totalErrores }} de {{ topic.totalIntentos }} incorrectas
               </p>
             </div>
-
             <div class="topic-right">
               <div class="error-badge"
                    [class.badge-high]="topic.tasaError >= 70"
@@ -86,9 +75,7 @@
       </div>
     </div>
 
-    <!-- ========================================
-         SESIONES RECIENTES (DESPLEGABLE)
-         ======================================== -->
+    <!-- SESIONES RECIENTES (DESPLEGABLE) -->
     <div class="section">
       <h2 class="section-title"
           (click)="toggleSection('recentSessions')"
@@ -103,89 +90,60 @@
       <div *ngIf="isSectionExpanded('recentSessions')">
         <div *ngIf="!isLoading && recentSessions.length > 0" class="sessions-list-new">
           <div *ngFor="let session of recentSessions" class="session-wrapper">
-            
-            <!-- Tarjeta de sesión -->
-            <div 
-              class="session-card-clean"
-              [class.active]="expandedSession === (session.testId || session.id)"
-              (click)="viewSession(session)">
-
-              <!-- Contenido principal -->
+            <div class="session-card-clean"
+                 [class.active]="expandedSession === (session.testId || session.id)"
+                 (click)="viewSession(session)">
               <div class="session-info">
                 <h3 class="session-title">Test procesal</h3>
                 <p class="session-subtitle">{{ session.area || 'Derecho Procesal' }}</p>
                 <p class="session-date">{{ session.date | date: 'dd/MM/yyyy HH:mm' }}</p>
               </div>
-
-              <!-- Badge naranja -->
               <div class="stat-badge">
                 <ion-icon name="checkmark-circle"></ion-icon>
                 <span>{{ session.correctAnswers || 0 }}/{{ session.totalQuestions || 0 }}</span>
               </div>
-
-              <!-- Flecha que cambia según expansión -->
-              <ion-icon 
-                [name]="expandedSession === (session.testId || session.id) ? 'chevron-up' : 'chevron-down'" 
-                class="session-arrow">
-              </ion-icon>
+              <ion-icon [name]="expandedSession === (session.testId || session.id) ? 'chevron-up' : 'chevron-down'" 
+                        class="session-arrow"></ion-icon>
             </div>
 
-            <!-- Detalles de la sesión (desplegable) -->
             <div *ngIf="expandedSession === (session.testId || session.id)" class="session-details">
-              
-              <!-- Loading -->
               <div *ngIf="isLoadingDetails" class="details-loading">
                 <ion-spinner name="circular"></ion-spinner>
                 <p>Cargando preguntas...</p>
               </div>
-
-              <!-- Pelotitas de preguntas -->
               <div *ngIf="!isLoadingDetails && sessionDetails" class="questions-dots">
-                <div 
-                  *ngFor="let question of sessionDetails.questions; let i = index"
-                  class="question-dot"
-                  [class.correct]="question.isCorrect"
-                  [class.incorrect]="!question.isCorrect"
-                  (click)="toggleQuestion(i)">
+                <div *ngFor="let question of sessionDetails.questions; let i = index"
+                     class="question-dot"
+                     [class.correct]="question.isCorrect"
+                     [class.incorrect]="!question.isCorrect"
+                     (click)="toggleQuestion(i)">
                   {{ i + 1 }}
                 </div>
               </div>
 
-              <!-- Pregunta expandida -->
               <div *ngIf="expandedQuestion !== null && sessionDetails" class="question-detail">
                 <div class="question-card">
                   <div class="question-header">
                     <span class="question-number">Pregunta {{ expandedQuestion + 1 }}</span>
-                    <ion-icon 
-                      name="close-circle" 
-                      class="close-icon"
-                      (click)="expandedQuestion = null">
-                    </ion-icon>
+                    <ion-icon name="close-circle" class="close-icon" (click)="expandedQuestion = null"></ion-icon>
                   </div>
 
                   <p class="question-text">{{ sessionDetails.questions[expandedQuestion].questionText }}</p>
 
                   <div class="options-list">
-                    <div 
-                      *ngFor="let option of getQuestionOptions(sessionDetails.questions[expandedQuestion]); let i = index"
-                      class="option-item"
-                      [class.selected]="isOptionSelected(sessionDetails.questions[expandedQuestion], option)"
-                      [class.correct]="isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
-                      [class.incorrect]="isOptionSelected(sessionDetails.questions[expandedQuestion], option) && !isOptionCorrect(sessionDetails.questions[expandedQuestion], option)">
-                      
+                    <div *ngFor="let option of getQuestionOptions(sessionDetails.questions[expandedQuestion]); let i = index"
+                         class="option-item"
+                         [class.selected]="isOptionSelected(sessionDetails.questions[expandedQuestion], option)"
+                         [class.correct]="isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
+                         [class.incorrect]="isOptionSelected(sessionDetails.questions[expandedQuestion], option) && !isOptionCorrect(sessionDetails.questions[expandedQuestion], option)">
                       <div class="option-letter">{{ getOptionLetter(i) }}</div>
                       <div class="option-text">{{ option }}</div>
-                      
-                      <ion-icon 
-                        *ngIf="isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
-                        name="checkmark-circle"
-                        class="option-icon correct-icon">
-                      </ion-icon>
-                      <ion-icon 
-                        *ngIf="isOptionSelected(sessionDetails.questions[expandedQuestion], option) && !isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
-                        name="close-circle"
-                        class="option-icon incorrect-icon">
-                      </ion-icon>
+                      <ion-icon *ngIf="isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
+                                name="checkmark-circle"
+                                class="option-icon correct-icon"></ion-icon>
+                      <ion-icon *ngIf="isOptionSelected(sessionDetails.questions[expandedQuestion], option) && !isOptionCorrect(sessionDetails.questions[expandedQuestion], option)"
+                                name="close-circle"
+                                class="option-icon incorrect-icon"></ion-icon>
                     </div>
                   </div>
 
@@ -208,9 +166,7 @@
       </div>
     </div>
 
-    <!-- ========================================
-         PRACTICA TUS ERRORES
-         ======================================== -->
+    <!-- PRACTICA TUS ERRORES -->
     <div class="section test-section">
       <h2 class="section-title" style="display: flex; align-items: center; gap: 12px;">
         <ion-icon name="fitness" style="font-size: 24px;"></ion-icon>
@@ -218,30 +174,19 @@
       </h2>
 
       <div class="test-config-card">
-
-        <!-- Tipo de práctica -->
         <div class="config-section">
           <h3>¿Qué quieres practicar?</h3>
-          
-          <!-- Botón "Mix de tus errores" -->
-          <button 
-            class="scope-btn"
-            [class.active]="practiceMode === 'mix'"
-            (click)="selectPracticeMode('mix')">
+
+          <button class="scope-btn" [class.active]="practiceMode === 'mix'" (click)="selectPracticeMode('mix')">
             <ion-icon name="shuffle"></ion-icon>
             <span>Mix de tus errores</span>
           </button>
 
-          <!-- Botón "Seleccionar tema" -->
-          <button 
-            class="scope-btn"
-            [class.active]="practiceMode === 'tema'"
-            (click)="selectPracticeMode('tema')">
+          <button class="scope-btn" [class.active]="practiceMode === 'tema'" (click)="selectPracticeMode('tema')">
             <ion-icon name="list"></ion-icon>
             <span>Seleccionar tema específico</span>
           </button>
 
-          <!-- Selector de temas (solo temas con errores) -->
           <div *ngIf="practiceMode === 'tema'" class="theme-selector">
             <div class="theme-selector-header">Temas con errores</div>
             <div *ngFor="let tema of getTemasWithErrors()"
@@ -252,11 +197,7 @@
                 <span class="tema-name">{{ tema.nombre }}</span>
                 <span class="tema-errors">{{ tema.totalErrores }} errores</span>
               </div>
-              <ion-icon 
-                *ngIf="selectedTemaId === tema.id" 
-                name="checkmark-circle" 
-                class="selected-icon">
-              </ion-icon>
+              <ion-icon *ngIf="selectedTemaId === tema.id" name="checkmark-circle" class="selected-icon"></ion-icon>
             </div>
             <div *ngIf="getTemasWithErrors().length === 0" class="empty-state-small">
               <p>No hay temas con errores</p>
@@ -264,76 +205,43 @@
           </div>
         </div>
 
-      <!-- Cantidad de preguntas -->
-      <div class="config-section" *ngIf="!practiceMode || (practiceMode === 'mix') || (practiceMode === 'tema' && selectedTemaId)">
-        <h3>Cantidad de preguntas</h3>
-        <div class="quantity-chips">
-          <div class="chip"
-              [class.selected]="selectedQuantity === 1"
-              [class.disabled]="practiceMode && !canSelectQuantity(1)"
-              (click)="(!practiceMode || canSelectQuantity(1)) && selectQuantity(1)">
-            1
+        <div class="config-section" *ngIf="!practiceMode || (practiceMode === 'mix') || (practiceMode === 'tema' && selectedTemaId)">
+          <h3>Cantidad de preguntas</h3>
+          <div class="quantity-chips">
+            <div class="chip" [class.selected]="selectedQuantity === 1" [class.disabled]="practiceMode && !canSelectQuantity(1)"
+                 (click)="(!practiceMode || canSelectQuantity(1)) && selectQuantity(1)">1</div>
+            <div class="chip" [class.selected]="selectedQuantity === 3" [class.disabled]="practiceMode && !canSelectQuantity(3)"
+                 (click)="(!practiceMode || canSelectQuantity(3)) && selectQuantity(3)">3</div>
+            <div class="chip" [class.selected]="selectedQuantity === 5" [class.disabled]="practiceMode && !canSelectQuantity(5)"
+                 (click)="(!practiceMode || canSelectQuantity(5)) && selectQuantity(5)">5</div>
+            <div class="chip" [class.selected]="selectedQuantity === 7" [class.disabled]="practiceMode && !canSelectQuantity(7)"
+                 (click)="(!practiceMode || canSelectQuantity(7)) && selectQuantity(7)">7</div>
           </div>
-          <div class="chip"
-              [class.selected]="selectedQuantity === 3"
-              [class.disabled]="practiceMode && !canSelectQuantity(3)"
-              (click)="(!practiceMode || canSelectQuantity(3)) && selectQuantity(3)">
-            3
-          </div>
-          <div class="chip"
-              [class.selected]="selectedQuantity === 5"
-              [class.disabled]="practiceMode && !canSelectQuantity(5)"
-              (click)="(!practiceMode || canSelectQuantity(5)) && selectQuantity(5)">
-            5
-          </div>
-          <div class="chip"
-              [class.selected]="selectedQuantity === 7"
-              [class.disabled]="practiceMode && !canSelectQuantity(7)"
-              (click)="(!practiceMode || canSelectQuantity(7)) && selectQuantity(7)">
-            7
-          </div>
+
+          <p class="available-errors" *ngIf="practiceMode && getMaxAvailableQuestions() > 0">
+            <ion-icon name="information-circle"></ion-icon>
+            <span *ngIf="practiceMode === 'mix'">{{ getMaxAvailableQuestions() }} preguntas con error disponibles (todos los temas)</span>
+            <span *ngIf="practiceMode === 'tema' && selectedTemaId">{{ getMaxAvailableQuestions() }} preguntas con error en este tema</span>
+          </p>
+
+          <p class="no-errors-message" *ngIf="practiceMode && getMaxAvailableQuestions() === 0">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span *ngIf="practiceMode === 'mix'">¡Excelente! No tienes errores para practicar</span>
+            <span *ngIf="practiceMode === 'tema' && selectedTemaId">No tienes errores en este tema</span>
+          </p>
         </div>
-        
-        <!-- ✅ Mensaje solo si se seleccionó un modo -->
-        <p class="available-errors" *ngIf="practiceMode && getMaxAvailableQuestions() > 0">
-          <ion-icon name="information-circle"></ion-icon>
-          <span *ngIf="practiceMode === 'mix'">
-            {{ getMaxAvailableQuestions() }} preguntas con error disponibles (todos los temas)
-          </span>
-          <span *ngIf="practiceMode === 'tema' && selectedTemaId">
-            {{ getMaxAvailableQuestions() }} preguntas con error en este tema
-          </span>
-        </p>
-        
-        <!-- ✅ Mensaje de no errores solo si se seleccionó un modo -->
-        <p class="no-errors-message" *ngIf="practiceMode && getMaxAvailableQuestions() === 0">
-          <ion-icon name="checkmark-circle"></ion-icon>
-          <span *ngIf="practiceMode === 'mix'">
-            ¡Excelente! No tienes errores para practicar
-          </span>
-          <span *ngIf="practiceMode === 'tema' && selectedTemaId">
-            No tienes errores en este tema
-          </span>
-        </p>
-      </div>
 
-      <!-- ✅ Mensaje de ayuda cuando está en modo tema pero no ha seleccionado -->
-      <div class="helper-message" *ngIf="practiceMode === 'tema' && !selectedTemaId">
-        <ion-icon name="arrow-up-circle"></ion-icon>
-        <p>Selecciona un tema de la lista para continuar</p>
-      </div>
+        <div class="helper-message" *ngIf="practiceMode === 'tema' && !selectedTemaId">
+          <ion-icon name="arrow-up-circle"></ion-icon>
+          <p>Selecciona un tema de la lista para continuar</p>
+        </div>
 
-        <!-- Botón iniciar test -->
-        <button 
-          class="start-test-btn" 
-          [disabled]="!canStartTest()"
-          (click)="startErrorPractice()">
+        <button class="start-test-btn" [disabled]="!canStartTest()" (click)="startErrorPractice()">
           <ion-icon name="play-circle-outline"></ion-icon>
           Empezar Práctica
         </button>
       </div>
     </div>
-
   </div>
 
   <!-- Bottom Navigation -->

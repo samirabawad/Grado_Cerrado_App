@@ -82,10 +82,7 @@ export class RachaPage implements OnInit {
           const stats = statsResponse.data;
           this.currentStreak = stats.streak || 0;
           this.unlockAchievements(this.currentStreak);
-          
-          console.log('Datos de racha cargados:', {
-            current: this.currentStreak
-          });
+          console.log('Datos de racha cargados:', { current: this.currentStreak });
         }
 
         const sessionsResponse = await this.apiService.getRecentSessions(studentId, 100).toPromise();
@@ -109,7 +106,6 @@ export class RachaPage implements OnInit {
       this.isLoading = false;
     }
   }
-
 
   unlockAchievements(streak: number) {
     this.achievements.forEach(achievement => {
@@ -135,7 +131,6 @@ export class RachaPage implements OnInit {
 
     const firstDay = new Date(year, month, 1);
     const firstDayOfWeek = firstDay.getDay();
-
     const lastDay = new Date(year, month + 1, 0);
     const totalDaysInMonth = lastDay.getDate();
 

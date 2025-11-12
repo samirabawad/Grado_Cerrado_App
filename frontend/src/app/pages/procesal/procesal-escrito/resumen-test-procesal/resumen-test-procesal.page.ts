@@ -6,13 +6,13 @@ import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bot
 import { trigger, transition, style, animate } from '@angular/animations';
 
 // ----------------------
-// Tipos/Interfaces
+// Tipos / Interfaces
 // ----------------------
 type QuestionType = 'verdadero_falso' | string | number;
 
 interface OptionObj {
-  text?: string;   // { text: '...' }
-  Text?: string;   // { Text: '...' }
+  text?: string;  // { text: '...' }
+  Text?: string;  // { Text: '...' }
 }
 
 interface QuestionResult {
@@ -45,30 +45,27 @@ interface StoredResults {
     trigger('slideDown', [
       transition(':enter', [
         style({ height: '0', opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
+        animate('300ms ease-out', style({ height: '*', opacity: 1 })),
       ]),
       transition(':leave', [
-        animate('300ms ease-in', style({ height: '0', opacity: 0 }))
-      ])
-    ])
-  ]
+        animate('300ms ease-in', style({ height: '0', opacity: 0 })),
+      ]),
+    ]),
+  ],
 })
 export class ResumenTestProcesalPage implements OnInit {
-
-  // Totales
+  // ----------------------
+  // Propiedades principales
+  // ----------------------
   correctAnswers = 0;
   incorrectAnswers = 0;
   totalQuestions = 5;
   percentage = 0;
 
-  // Mensaje motivacional
   motivationalMessage = '¡Sigue practicando!';
 
-  // Listados
   questionResults: QuestionResult[] = [];
   incorrectQuestions: QuestionResult[] = [];
-
-  // Control del desplegable
   expandedQuestionIndex: number | null = null;
 
   private readonly LS_RESULTS_KEY = 'current_test_results';
@@ -94,7 +91,6 @@ export class ResumenTestProcesalPage implements OnInit {
       }
 
       const results: StoredResults = JSON.parse(resultsString);
-
       console.log('📊 Resultados cargados:', results);
 
       this.correctAnswers = results.correctAnswers ?? 0;
@@ -111,6 +107,7 @@ export class ResumenTestProcesalPage implements OnInit {
         for (let i = 0; i < this.totalQuestions; i++) {
           const num = i + 1;
           const incorrect = this.incorrectQuestions.find(q => q.questionNumber === num);
+
           this.questionResults.push({
             questionNumber: num,
             questionText: incorrect?.questionText ?? 'Pregunta respondida correctamente',
@@ -119,7 +116,7 @@ export class ResumenTestProcesalPage implements OnInit {
             explanation: incorrect?.explanation ?? '',
             isCorrect: !incorrect,
             options: incorrect?.options,
-            type: incorrect?.type
+            type: incorrect?.type,
           });
         }
       }
@@ -157,7 +154,7 @@ export class ResumenTestProcesalPage implements OnInit {
     if (this.percentage >= 60) return 'Buen intento';
     if (this.percentage >= 40) return 'Sigue adelante';
     return 'No te rindas';
-    }
+  }
 
   getLargeMessage(): string {
     if (this.percentage >= 90) return '¡Dominas el tema!';
@@ -199,20 +196,18 @@ export class ResumenTestProcesalPage implements OnInit {
   }
 
   // ----------------------
-  // Helpers de preguntas/opciones
+  // Helpers de preguntas / opciones
   // ----------------------
   getQuestionOptions(question: QuestionResult): string[] {
-    // Verdadero / Falso
     if (this.isTrueFalse(question.type)) {
       return ['Verdadero', 'Falso'];
     }
 
-    // Selección múltiple
     const opts = question.options ?? [];
     if (opts.length === 0) return [];
 
     const first = opts[0];
-    // Objetos con { text } o { Text }
+
     if (typeof first === 'object' && first !== null) {
       if ('text' in first && (first as OptionObj).text) {
         return (opts as OptionObj[]).map(o => o.text ?? '');
@@ -221,7 +216,7 @@ export class ResumenTestProcesalPage implements OnInit {
         return (opts as OptionObj[]).map(o => o.Text ?? '');
       }
     }
-    // Strings directos
+
     if (typeof first === 'string') {
       return opts as string[];
     }
@@ -230,13 +225,11 @@ export class ResumenTestProcesalPage implements OnInit {
   }
 
   isOptionSelected(question: QuestionResult, option: string): boolean {
-    // Verdadero / Falso
     if (this.isTrueFalse(question.type)) {
       const ua = this.normTF(question.userAnswer);
       return (option === 'Verdadero' && ua === true) || (option === 'Falso' && ua === false);
     }
 
-    // Selección múltiple por letra
     const options = this.getQuestionOptions(question);
     const optionIndex = options.indexOf(option);
     if (optionIndex === -1) return false;
@@ -246,14 +239,12 @@ export class ResumenTestProcesalPage implements OnInit {
   }
 
   isOptionCorrect(question: QuestionResult, option: string): boolean {
-    // Verdadero / Falso
     if (this.isTrueFalse(question.type)) {
       const ca = this.normTF(question.correctAnswer);
-      if (ca === null) return false; // no interpretable
+      if (ca === null) return false;
       return (option === 'Verdadero' && ca === true) || (option === 'Falso' && ca === false);
     }
 
-    // Selección múltiple por letra
     const options = this.getQuestionOptions(question);
     const optionIndex = options.indexOf(option);
     if (optionIndex === -1) return false;
@@ -270,17 +261,13 @@ export class ResumenTestProcesalPage implements OnInit {
   // Normalizadores
   // ----------------------
   private isTrueFalse(type: QuestionType | undefined): boolean {
-    return (
-      type === 'verdadero_falso' ||
-      type === 2 ||
-      type === '2'
-    );
+    return type === 'verdadero_falso' || type === 2 || type === '2';
   }
 
   /**
    * Normaliza valores de V/F:
-   * - true/verdadero/v -> true
-   * - false/falso/f    -> false
+   * - true / verdadero / v / sí -> true
+   * - false / falso / f / no -> false
    * - otro/no interpretable -> null
    */
   private normTF(value: string | undefined | null): boolean | null {
