@@ -639,7 +639,7 @@
       margin-bottom: 0;
     }
 
-    .weak-area-title {
+  .weak-area-title {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -658,7 +658,7 @@
       &.procesal {
         color: #3b82f6;
       }
-    }
+    } 
 
     .weak-topics-list {
       display: flex;
@@ -666,7 +666,7 @@
       gap: 10px;
     }
 
-    .weak-topic-card {
+.weak-topic-card {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -674,41 +674,35 @@
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
-      border: 2px solid transparent;
+      background: white;
+      border: 1.5px solid #e5e7eb;
 
-      &.civil {
-        background: #fff7ed;
-        border-color: #fed7aa;
-
-        &:active {
-          background: #ffedd5;
-          transform: scale(0.98);
-        }
-      }
-
-      &.procesal {
-        background: #eff6ff;
-        border-color: #bfdbfe;
-
-        &:active {
-          background: #dbeafe;
-          transform: scale(0.98);
-        }
+      &:active {
+        background: #f9fafb;
+        transform: scale(0.98);
       }
 
       .weak-topic-rank {
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: white;
+        background: #f3f4f6;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 16px;
         font-weight: 700;
-        color: #64748b;
         flex-shrink: 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      &.civil .weak-topic-rank {
+        color: #f97316;
+        background: #fff7ed;
+      }
+      
+      &.procesal .weak-topic-rank {
+        color: #3b82f6;
+        background: #eff6ff;
       }
 
       .weak-topic-content {
@@ -728,27 +722,9 @@
         }
       }
 
-      .weak-topic-badge {
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 700;
-        flex-shrink: 0;
-
-        &.civil {
-          background: #f97316;
-          color: white;
-        }
-
-        &.procesal {
-          background: #3b82f6;
-          color: white;
-        }
-      }
-
       .weak-topic-arrow {
         font-size: 20px;
-        color: #94a3b8;
+        color: #cbd5e1;
         flex-shrink: 0;
       }
     }

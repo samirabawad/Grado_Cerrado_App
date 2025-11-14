@@ -32,10 +32,18 @@
       </div>
     </div>
 
-    <!-- CALENDARIO MENSUAL -->
+<!-- CALENDARIO MENSUAL -->
     <div class="calendar-card">
-      <h3 class="calendar-title">{{ currentMonthName }}</h3>
-      
+      <div class="month-navigation">
+        <button class="nav-arrow" (click)="navigateMonth(-1)" [disabled]="!canNavigateBack()">
+          <ion-icon name="chevron-back"></ion-icon>
+        </button>
+        <h3 class="calendar-title">{{ currentMonthName }}</h3>
+        <button class="nav-arrow" (click)="navigateMonth(1)" [disabled]="isCurrentMonth">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </button>
+      </div>
+
       <div class="calendar-weekdays">
         <div class="weekday">D</div>
         <div class="weekday">L</div>

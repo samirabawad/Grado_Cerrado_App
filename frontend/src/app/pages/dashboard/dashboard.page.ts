@@ -19,7 +19,11 @@ export class DashboardPage implements OnInit {
   userName: string = 'Estudiante';
   userLevel: string = 'Intermedio';
   userStreak: number = 0;
-  currentWeekLabel: string = '';
+currentWeekLabel: string = '';
+  currentWeekOffset: number = 0;
+  currentWeekStart: Date = new Date();
+  currentWeekEnd: Date = new Date();
+  isCurrentWeek: boolean = true;
 
   totalSessions: number = 0;
   totalQuestions: number = 0;
@@ -348,12 +352,69 @@ async generateChartData() {
 
     const progressResponse = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
     if (progressResponse && progressResponse.success) {
-      this.chartData = progressResponse.data;
+      this.filterWeeklyData(progressResponse.data);
     }
   } catch (error) {
     console.error('Error generando datos del gráfico:', error);
     this.chartData = [];
   }
+}
+
+filterWeeklyData(allData: any[]) {
+  // Mapeo de días para convertir de backend
+  const dayMap: { [key: string]: number } = {
+    'Dom': 0, 'Lun': 1, 'Mar': 2, 'Mié': 3, 'Jue': 4, 'Vie': 5, 'Sáb': 6
+  };
+
+  // Crear un mapa con todos los datos por día de la semana
+  const dataByDay = new Map<number, any>();
+  allData.forEach(item => {
+    const dayNum = dayMap[item.date];
+    if (dayNum !== undefined) {
+      dataByDay.set(dayNum, item);
+    }
+  });
+
+  // Generar array de lunes (1) a domingo (0), pero solo para la semana seleccionada
+  const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const weekDayNumbers = [1, 2, 3, 4, 5, 6, 0];
+  
+  this.chartData = [];
+  
+  for (let i = 0; i < weekDayNumbers.length; i++) {
+    const dayNum = weekDayNumbers[i];
+    const currentDate = new Date(this.currentWeekStart);
+    currentDate.setDate(currentDate.getDate() + i);
+    
+    // Solo incluir días hasta hoy si es la semana actual
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    currentDate.setHours(0, 0, 0, 0);
+    
+    if (this.isCurrentWeek && currentDate > today) {
+      continue; // No mostrar días futuros en la semana actual
+    }
+    
+    // Solo incluir datos si la fecha está dentro de la semana seleccionada
+    const dayData = dataByDay.get(dayNum);
+    if (dayData && this.isDateInCurrentWeek(currentDate)) {
+      this.chartData.push({
+        date: weekDays[i],
+        civil: dayData.civil || 0,
+        procesal: dayData.procesal || 0
+      });
+    } else {
+      this.chartData.push({
+        date: weekDays[i],
+        civil: 0,
+        procesal: 0
+      });
+    }
+  }
+}
+
+isDateInCurrentWeek(date: Date): boolean {
+  return date >= this.currentWeekStart && date <= this.currentWeekEnd;
 }
 
 async changeTimeFrame(timeFrame: string) {
@@ -397,12 +458,21 @@ updateMonthName() {
 
 updateWeekLabel() {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Calcular lunes de la semana actual + offset
   const dayOfWeek = today.getDay();
   const monday = new Date(today);
-  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + (this.currentWeekOffset * 7));
+  monday.setHours(0, 0, 0, 0);
   
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  
+  this.currentWeekStart = monday;
+  this.currentWeekEnd = sunday;
+  this.isCurrentWeek = this.currentWeekOffset === 0;
   
   const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -414,7 +484,7 @@ updateWeekLabel() {
   const year = sunday.getFullYear();
   
   if (monday.getMonth() === sunday.getMonth()) {
-    this.currentWeekLabel = `Semana del ${mondayDay} al ${sundayDay} de ${sundayMonth} ${year}`;
+    this.currentWeekLabel = `Semana del ${mondayDay} al ${sundayDay} de ${mondayMonth} ${year}`;
   } else {
     this.currentWeekLabel = `Semana del ${mondayDay} de ${mondayMonth} al ${sundayDay} de ${sundayMonth} ${year}`;
   }
@@ -428,6 +498,12 @@ async navigateMonth(direction: number) {
     this.currentSemester = 0;
   }
   await this.loadMonthlyData();
+}
+
+async navigateWeek(direction: number) {
+  this.currentWeekOffset += direction;
+  this.updateWeekLabel();
+  await this.generateChartData();
 }
 
 goBack() {

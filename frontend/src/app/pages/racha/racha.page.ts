@@ -38,6 +38,11 @@ export class RachaPage implements OnInit {
   calendarDays: CalendarDay[] = [];
   currentMonthName: string = '';
   studiedDates: Set<string> = new Set();
+  currentDisplayYear: number;
+  currentDisplayMonth: number;
+  isCurrentMonth: boolean = true;
+  oldestYear: number;
+  oldestMonth: number;
 
   achievements: Achievement[] = [
     { id: '1day', title: 'Primer Día', description: '1 día de racha', daysRequired: 1, icon: 'star', unlocked: false, color: '#10b981' },
@@ -55,7 +60,13 @@ export class RachaPage implements OnInit {
   constructor(
     private router: Router,
     private apiService: ApiService
-  ) {}
+  ) {
+    const today = new Date();
+    this.currentDisplayYear = today.getFullYear();
+    this.currentDisplayMonth = today.getMonth();
+    this.oldestYear = today.getFullYear();
+    this.oldestMonth = today.getMonth();
+  }
 
   ngOnInit() {
     this.loadStreakData();
@@ -85,13 +96,24 @@ export class RachaPage implements OnInit {
           console.log('Datos de racha cargados:', { current: this.currentStreak });
         }
 
-        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 100).toPromise();
-        if (sessionsResponse && sessionsResponse.success && sessionsResponse.data) {
+const sessionsResponse = await this.apiService.getRecentSessions(studentId, 250).toPromise();
+        if (sessionsResponse && sessionsResponse.success && sessionsResponse.data && sessionsResponse.data.length > 0) {
+          const dates: Date[] = [];
+          
           sessionsResponse.data.forEach((session: any) => {
-            const date = new Date(session.date);
-            const dateStr = this.formatDateKey(date);
+            const utcDate = new Date(session.date);
+            const chileDate = new Date(utcDate.getTime() - (3 * 60 * 60 * 1000));
+            const dateStr = this.formatDateKey(chileDate);
             this.studiedDates.add(dateStr);
+            dates.push(chileDate);
           });
+          
+          // Encontrar la fecha más antigua
+          if (dates.length > 0) {
+            const oldestDate = new Date(Math.min(...dates.map(d => d.getTime())));
+            this.oldestYear = oldestDate.getFullYear();
+            this.oldestMonth = oldestDate.getMonth();
+          }
         }
 
         this.generateCalendar();
@@ -120,10 +142,12 @@ export class RachaPage implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  generateCalendar() {
+generateCalendar() {
     const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const year = this.currentDisplayYear;
+    const month = this.currentDisplayMonth;
+    
+    this.isCurrentMonth = (year === today.getFullYear() && month === today.getMonth());
     
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -168,6 +192,37 @@ export class RachaPage implements OnInit {
     return date.getDate() === today.getDate() &&
            date.getMonth() === today.getMonth() &&
            date.getFullYear() === today.getFullYear();
+  }
+navigateMonth(direction: number) {
+    const newMonth = this.currentDisplayMonth + direction;
+    const newYear = newMonth > 11 ? this.currentDisplayYear + 1 : 
+                    newMonth < 0 ? this.currentDisplayYear - 1 : 
+                    this.currentDisplayYear;
+    const adjustedMonth = newMonth > 11 ? 0 : newMonth < 0 ? 11 : newMonth;
+    
+    // Verificar si la nueva fecha está dentro del rango permitido
+    if (!this.canNavigateToMonth(newYear, adjustedMonth)) {
+      return;
+    }
+    
+    this.currentDisplayMonth = adjustedMonth;
+    this.currentDisplayYear = newYear;
+    this.generateCalendar();
+  }
+
+  canNavigateToMonth(year: number, month: number): boolean {
+    const targetDate = new Date(year, month);
+    const oldestDate = new Date(this.oldestYear, this.oldestMonth);
+    const currentDate = new Date(new Date().getFullYear(), new Date().getMonth());
+    
+    return targetDate >= oldestDate && targetDate <= currentDate;
+  }
+
+  canNavigateBack(): boolean {
+    return this.canNavigateToMonth(
+      this.currentDisplayMonth === 0 ? this.currentDisplayYear - 1 : this.currentDisplayYear,
+      this.currentDisplayMonth === 0 ? 11 : this.currentDisplayMonth - 1
+    );
   }
 
   goBack() {

@@ -137,9 +137,15 @@
         </button>
       </div>
 
-      <!-- Navegación semanal -->
+<!-- Navegación semanal -->
       <div class="month-navigation" [class.hidden]="selectedTimeFrame === 'month'">
+        <button class="nav-arrow" (click)="navigateWeek(-1)">
+          <ion-icon name="chevron-back"></ion-icon>
+        </button>
         <span class="month-label">{{ currentWeekLabel }}</span>
+        <button class="nav-arrow" (click)="navigateWeek(1)" [disabled]="isCurrentWeek">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </button>
       </div>
 
       <div class="chart-legend">
