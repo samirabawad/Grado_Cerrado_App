@@ -73,20 +73,13 @@ export class ProcesalPage implements OnInit, OnDestroy {
           item.type === 'area' && item.area === 'Derecho Procesal'
         );
         
-        if (procesalArea) {
+      if (procesalArea) {
+          // Calcular successRate igual que el Dashboard: promedio de subtemas
           const temasConPorcentaje = procesalArea.temas.map((tema: any) => {
-            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
-              const porcentaje = subtema.totalPreguntas > 0 
-                ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
-                : 0;
-              return porcentaje;
-            });
-            
-            const porcentajeTema = subtemasConPorcentaje.length > 0
+            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => subtema.porcentajeAcierto || 0);
+            return subtemasConPorcentaje.length > 0
               ? Math.round(subtemasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / subtemasConPorcentaje.length)
               : 0;
-            
-            return porcentajeTema;
           });
           
           const successRate = temasConPorcentaje.length > 0
@@ -100,8 +93,6 @@ export class ProcesalPage implements OnInit, OnDestroy {
           };
           
           console.log('✅ Estadísticas de Derecho Procesal:', this.procesalStats);
-        } else {
-          console.log('⚠️ No se encontró Derecho Procesal');
         }
       }
       

@@ -71,31 +71,17 @@ export class CivilPage implements OnInit, OnDestroy {
           (item: any) => item.type === 'area' && item.area === 'Derecho Civil'
         );
 
-        if (civilArea) {
-          // Calcular successRate desde los temas
+      if (civilArea) {
+          // Calcular successRate igual que el Dashboard: promedio de subtemas
           const temasConPorcentaje = civilArea.temas.map((tema: any) => {
-            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
-              const porcentaje = subtema.totalPreguntas > 0
-                ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
-                : 0;
-              return porcentaje;
-            });
-
-            const porcentajeTema = subtemasConPorcentaje.length > 0
-              ? Math.round(
-                  subtemasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) /
-                  subtemasConPorcentaje.length
-                )
+            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => subtema.porcentajeAcierto || 0);
+            return subtemasConPorcentaje.length > 0
+              ? Math.round(subtemasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / subtemasConPorcentaje.length)
               : 0;
-
-            return porcentajeTema;
           });
-
+          
           const successRate = temasConPorcentaje.length > 0
-            ? Math.round(
-                temasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) /
-                temasConPorcentaje.length
-              )
+            ? Math.round(temasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / temasConPorcentaje.length)
             : 0;
 
           this.civilStats = {
@@ -105,8 +91,6 @@ export class CivilPage implements OnInit, OnDestroy {
           };
 
           console.log('✅ Estadísticas de Derecho Civil:', this.civilStats);
-        } else {
-          console.log('⚠️ No se encontró Derecho Civil');
         }
       }
 
