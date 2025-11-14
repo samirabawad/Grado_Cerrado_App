@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://10.0.2.2:5183/api'  // URL correcta del backend .NET
+  apiUrl: 'https://gradocerrado-api-linux-agejfxg9d2ahgvgh.brazilsouth-01.azurewebsites.net/api'
 };
