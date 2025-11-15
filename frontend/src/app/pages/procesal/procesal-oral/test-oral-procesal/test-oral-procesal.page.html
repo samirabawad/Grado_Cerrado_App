@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <!-- CategorÃ­a y contador -->
+    <!-- Categoría y contador -->
     <div class="category-row">
       <div class="category-chip">
         {{ getCurrentQuestionCategory() }}
@@ -36,7 +36,7 @@
       <p><strong>{{ getCurrentQuestion()?.questionText }}</strong></p>
     </div>
 
-   <!-- Control de audio para escuchar pregunta -->
+    <!-- Control de audio para escuchar pregunta -->
     <div class="audio-section">
       <div 
         class="audio-player" 
@@ -79,11 +79,11 @@
       </div>
     </div>
 
-    <!-- SecciÃ³n de grabaciÃ³n con micrÃ³fono a la izquierda y reproducir a la derecha -->
-      <div class="recording-section" *ngIf="responseMethod === 'voice'">
+    <!-- Sección de grabación con micrófono a la izquierda y reproducir a la derecha -->
+    <div class="recording-section" *ngIf="responseMethod === 'voice'">
       <div class="recording-controls-inline">
         
-        <!-- BotÃ³n de grabaciÃ³n (izquierda) -->
+        <!-- Botón de grabación (izquierda) -->
         <div class="recording-button-container">
           <div 
             class="recording-button" 
@@ -104,7 +104,7 @@
           </div>
         </div>
 
-        <!-- BotÃ³n de reproducir (derecha) -->
+        <!-- Botón de reproducir (derecha) -->
         <div class="replay-button-container" *ngIf="hasRecording">
           <button class="action-button replay" (click)="replayRecording()">
             <ion-icon [name]="isPlayingRecording ? 'pause' : 'play'"></ion-icon>
@@ -115,11 +115,11 @@
       </div>
     </div>
 
-<!-- âœ… PANEL DE EVALUACIÃ“N DESPLEGABLE -->
+    <!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
     <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
       <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
         <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
-        <span>{{ evaluationResult?.isCorrect ? 'Â¡Correcto!' : 'Incorrecto' }}</span>
+        <span>{{ evaluationResult?.isCorrect ? '¡Correcto!' : 'Incorrecto' }}</span>
       </div>
 
       <div class="evaluation-body">
@@ -133,14 +133,14 @@
             class="explanation-play-button" 
             (click)="isPlayingExplanation ? pauseExplanationAudio() : playExplanationAudio()">
             <ion-icon [name]="isPlayingExplanation ? 'pause-circle' : 'play-circle'"></ion-icon>
-            <span>{{ isPlayingExplanation ? 'Pausar explicaciÃ³n' : 'Reproducir explicaciÃ³n' }}</span>
+            <span>{{ isPlayingExplanation ? 'Pausar explicación' : 'Reproducir explicación' }}</span>
           </button>
-          <div class="eval-text explanation"><strong>ExplicaciÃ³n:</strong> {{ evaluationResult?.explanation }}</div>
+          <div class="eval-text explanation"><strong>Explicación:</strong> {{ evaluationResult?.explanation }}</div>
         </div>
       </div>
     </div>
 
-    <!-- BotÃ³n para enviar respuesta -->
+    <!-- Botón para enviar respuesta -->
     <div class="submit-section" *ngIf="hasRecording && !showEvaluation">
       <button class="submit-voice-button" (click)="submitVoiceAnswer()">
         <ion-icon name="send"></ion-icon>
@@ -148,7 +148,7 @@
       </button>
     </div>
 
-    <!-- Botones de navegaciÃ³n -->
+    <!-- Botones de navegación -->
     <div class="navigation-buttons">
       <ion-button 
         *ngIf="currentQuestionNumber > 1"
@@ -178,7 +178,7 @@
       </ion-button>
     </div>
 
-    <!-- BotÃ³n para abandonar -->
+    <!-- Botón para abandonar -->
     <div class="exit-button-container">
       <button class="exit-btn" (click)="confirmExit()">
         <ion-icon name="exit-outline"></ion-icon>

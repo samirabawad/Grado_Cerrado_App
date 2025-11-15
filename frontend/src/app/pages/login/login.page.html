@@ -1,11 +1,11 @@
 <ion-content [fullscreen]="true" class="login-content">
   <div class="login-container">
-    
+
     <!-- Logo Principal -->
     <div class="logo-section">
       <img src="assets/image/logo_grado_cerrado.png" alt="Grado Cerrado" class="main-logo">
     </div>
-    
+
     <!-- Contenido del formulario -->
     <div class="content-section">
       <h1 class="main-title">Iniciar Sesión</h1>
@@ -13,16 +13,16 @@
         Ingresa tus credenciales para continuar<br>
         con tu preparación
       </p>
-      
+
       <!-- Formulario -->
       <div class="form-content">
-        
+
         <!-- Campo Correo Electrónico -->
         <div class="form-field">
           <label class="field-label">Correo Electrónico</label>
-          <ion-input 
+          <ion-input
             class="custom-input"
-            type="email" 
+            type="email"
             placeholder="ejemplo@correo.com"
             [(ngModel)]="correoElectronico"
             [class.error]="correoElectronico.length > 0 && !isEmailValid()">
@@ -36,14 +36,14 @@
         <!-- Campo Contraseña -->
         <div class="form-field">
           <label class="field-label">Contraseña</label>
-          <ion-input 
+          <ion-input
             class="custom-input"
             [type]="showPassword ? 'text' : 'password'"
             placeholder="Ingresa tu contraseña"
             [(ngModel)]="contrasena"
             [class.error]="contrasena.length > 0 && !isPasswordValid()">
             <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-            <ion-icon 
+            <ion-icon
               [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
               slot="end"
               class="password-toggle"
@@ -59,16 +59,16 @@
         <div class="forgot-password-link">
           <span class="link-text" (click)="forgotPassword()">¿Olvidaste tu contraseña?</span>
         </div>
-        
+
         <!-- Botones -->
         <div class="button-container">
-          <button 
+          <button
             class="action-button secondary"
             (click)="goBack()">
             Volver
           </button>
-          
-          <button 
+
+          <button
             class="action-button primary"
             [disabled]="!isFormValid() || isLoading"
             (click)="iniciarSesion()">
@@ -82,8 +82,9 @@
           <span>¿No tienes cuenta? </span>
           <span class="link-text" (click)="irARegistro()">Regístrate</span>
         </div>
+
       </div>
     </div>
-    
+
   </div>
 </ion-content>

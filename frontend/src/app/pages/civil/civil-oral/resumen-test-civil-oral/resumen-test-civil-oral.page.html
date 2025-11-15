@@ -1,13 +1,17 @@
 <ion-content class="results-content">
   <!-- HEADER -->
   <div class="dashboard-header">
-    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <ion-icon
+      name="chevron-back"
+      class="back-icon"
+      (click)="goBack()">
+    </ion-icon>
     <h1 class="header-title">Derecho Civil</h1>
   </div>
 
-  <!-- Contenido principal -->
+  <!-- CONTENIDO PRINCIPAL -->
   <div class="content-area">
-    
+
     <!-- MENSAJE MOTIVACIONAL DINÁMICO -->
     <div class="motivational-section" [class.success]="percentage >= 70">
       <p class="message-small">{{ getSmallMessage() }}</p>
@@ -40,13 +44,14 @@
     <!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
     <div class="questions-section">
       <h3 class="section-title">Resumen de preguntas</h3>
+
       <div class="questions-container">
-        <div 
+        <div
           *ngFor="let question of questionsDetails; let i = index"
           class="question-wrapper">
-          
-          <!-- Círculo -->
-          <div 
+
+          <!-- CÍRCULO -->
+          <div
             class="question-circle"
             [class.correct]="question.correct"
             [class.incorrect]="!question.correct"
@@ -57,32 +62,42 @@
         </div>
       </div>
 
-      <!-- Desplegable FUERA del loop -->
-      <div 
+      <!-- DESPLEGABLE FUERA DEL LOOP -->
+      <div
         class="question-dropdown-global"
         *ngIf="expandedQuestionIndex !== null"
         [@slideDown]>
-        
+
         <div class="dropdown-content">
           <!-- TEXTO DE LA PREGUNTA -->
-          <p class="question-text">{{ questionsDetails[expandedQuestionIndex].questionText }}</p>
-          
+          <p class="question-text">
+            {{ questionsDetails[expandedQuestionIndex].questionText }}
+          </p>
+
           <!-- TU RESPUESTA -->
           <div class="answer-detail your-answer">
             <p class="label">Tu respuesta:</p>
-            <p class="content">{{ questionsDetails[expandedQuestionIndex].userAnswer }}</p>
+            <p class="content">
+              {{ questionsDetails[expandedQuestionIndex].userAnswer }}
+            </p>
           </div>
 
           <!-- RESPUESTA ESPERADA -->
           <div class="answer-detail expected-answer">
             <p class="label">Respuesta esperada:</p>
-            <p class="content">{{ questionsDetails[expandedQuestionIndex].expectedAnswer }}</p>
+            <p class="content">
+              {{ questionsDetails[expandedQuestionIndex].expectedAnswer }}
+            </p>
           </div>
 
           <!-- EXPLICACIÓN -->
-          <div class="explanation-detail" *ngIf="questionsDetails[expandedQuestionIndex].explanation">
+          <div
+            class="explanation-detail"
+            *ngIf="questionsDetails[expandedQuestionIndex].explanation">
             <p class="label">Explicación:</p>
-            <p class="content">{{ questionsDetails[expandedQuestionIndex].explanation }}</p>
+            <p class="content">
+              {{ questionsDetails[expandedQuestionIndex].explanation }}
+            </p>
           </div>
         </div>
       </div>
@@ -92,16 +107,16 @@
     <div class="action-buttons">
       <!-- Primera fila: Reforzar y Nuevo Test -->
       <div class="buttons-row">
-        <ion-button 
-          expand="block" 
+        <ion-button
+          expand="block"
           class="btn-reforzar"
           (click)="reviewIncorrect()">
           <ion-icon name="fitness-outline" slot="start"></ion-icon>
           Reforzar
         </ion-button>
 
-        <ion-button 
-          expand="block" 
+        <ion-button
+          expand="block"
           class="btn-nuevo-test"
           (click)="takeNewTest()">
           <ion-icon name="refresh-outline" slot="start"></ion-icon>
@@ -110,8 +125,8 @@
       </div>
 
       <!-- Segunda fila: Volver al inicio -->
-      <ion-button 
-        expand="block" 
+      <ion-button
+        expand="block"
         fill="outline"
         class="btn-home"
         (click)="goBack()">
@@ -119,10 +134,8 @@
         Volver a Civil
       </ion-button>
     </div>
-
   </div>
 
   <!-- Bottom Navigation -->
   <app-bottom-nav></app-bottom-nav>
-
 </ion-content>

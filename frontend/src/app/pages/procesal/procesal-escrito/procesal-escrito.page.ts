@@ -38,7 +38,6 @@ export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   @ViewChild(IonContent) content!: IonContent; // ✅ Agregar ViewChild
-
   @ViewChild('pickerWheel') pickerWheel?: ElementRef;
   private scrollTimeout: any;
 
@@ -58,8 +57,8 @@ export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
       this.content?.scrollToTop(300); // 300ms de animación suave
     }, 50);
   }
-  ngAfterViewInit() {
-  }
+
+  ngAfterViewInit() {}
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
@@ -67,74 +66,74 @@ export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-async loadTemas() {
-  this.isLoading = true;
-
-  try {
-    const currentUser = this.apiService.getCurrentUser();
-    
-    if (!currentUser || !currentUser.id) {
-      console.warn('No hay usuario logueado');
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    const studentId = currentUser.id;
+  async loadTemas() {
+    this.isLoading = true;
 
     try {
-      const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+      const currentUser = this.apiService.getCurrentUser();
       
-      if (statsResponse && statsResponse.success && statsResponse.data) {
-        const procesalArea = statsResponse.data.find((item: any) => 
-          item.type === 'area' && item.area === 'Derecho Procesal'
-        );
-        
-        if (procesalArea && procesalArea.temas && procesalArea.temas.length > 0) {
-          this.temas = procesalArea.temas
-            .map((tema: any) => ({
-              id: tema.temaId,
-              nombre: tema.temaNombre,
-              cantidadPreguntas: tema.totalPreguntas || 0
-            }))
-            .filter((tema: any) => tema.cantidadPreguntas > 0); // ✅ Solo temas con preguntas
-
-          console.log('✅ Temas cargados para selector:', this.temas);
-        } else {
-          console.log('⚠️ No hay temas en Procesal');
-          this.temas = [];
-        }
+      if (!currentUser || !currentUser.id) {
+        console.warn('No hay usuario logueado');
+        this.router.navigate(['/login']);
+        return;
       }
+
+      const studentId = currentUser.id;
+
+      try {
+        const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+        
+        if (statsResponse && statsResponse.success && statsResponse.data) {
+          const procesalArea = statsResponse.data.find((item: any) => 
+            item.type === 'area' && item.area === 'Derecho Procesal'
+          );
+          
+          if (procesalArea && procesalArea.temas && procesalArea.temas.length > 0) {
+            this.temas = procesalArea.temas
+              .map((tema: any) => ({
+                id: tema.temaId,
+                nombre: tema.temaNombre,
+                cantidadPreguntas: tema.totalPreguntas || 0
+              }))
+              .filter((tema: any) => tema.cantidadPreguntas > 0); // ✅ Solo temas con preguntas
+
+            console.log('✅ Temas cargados para selector:', this.temas);
+          } else {
+            console.log('⚠️ No hay temas en Procesal');
+            this.temas = [];
+          }
+        }
+      } catch (error) {
+        console.error('Error cargando temas:', error);
+        this.temas = [];
+      }
+
     } catch (error) {
-      console.error('Error cargando temas:', error);
-      this.temas = [];
+      console.error('Error general cargando temas:', error);
+    } finally {
+      this.isLoading = false;
     }
-
-  } catch (error) {
-    console.error('Error general cargando temas:', error);
-  } finally {
-    this.isLoading = false;
   }
-}
 
-// ✅ Método para saber cuántas preguntas permite el tema seleccionado
-getMaxQuestionsForSelectedTema(): number {
-  if (this.scopeType === 'all') {
-    return 7; // Sin límite para "todo el temario"
+  // ✅ Método para saber cuántas preguntas permite el tema seleccionado
+  getMaxQuestionsForSelectedTema(): number {
+    if (this.scopeType === 'all') {
+      return 7; // Sin límite para "todo el temario"
+    }
+    
+    if (this.selectedTemaId) {
+      const tema = this.temas.find(t => t.id === this.selectedTemaId);
+      return tema ? tema.cantidadPreguntas : 0;
+    }
+    
+    return 0;
   }
-  
-  if (this.selectedTemaId) {
-    const tema = this.temas.find(t => t.id === this.selectedTemaId);
-    return tema ? tema.cantidadPreguntas : 0;
-  }
-  
-  return 0;
-}
 
-// ✅ Validar si una cantidad está disponible
-canSelectQuantity(quantity: number): boolean {
-  const max = this.getMaxQuestionsForSelectedTema();
-  return quantity <= max;
-}
+  // ✅ Validar si una cantidad está disponible
+  canSelectQuantity(quantity: number): boolean {
+    const max = this.getMaxQuestionsForSelectedTema();
+    return quantity <= max;
+  }
 
   selectScope(type: 'all' | 'tema') {
     this.scopeType = type;
@@ -164,6 +163,7 @@ canSelectQuantity(quantity: number): boolean {
     
     console.log('✅ Tema seleccionado:', temaId, 'Máx preguntas:', maxQuestions);
   }
+
   getSelectedTemaName(): string {
     const tema = this.temas.find(t => t.id === this.selectedTemaId);
     return tema ? tema.nombre : '';

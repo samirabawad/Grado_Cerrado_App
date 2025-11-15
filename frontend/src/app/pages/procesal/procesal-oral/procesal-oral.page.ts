@@ -14,7 +14,7 @@ import { ApiService } from '../../../services/api.service';
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
-  
+
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
@@ -40,11 +40,9 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
     private apiService: ApiService
   ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
-ngAfterViewInit() {
-}
+  ngAfterViewInit() {}
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
@@ -116,14 +114,11 @@ ngAfterViewInit() {
     }
   }
 
-
   scrollDifficultyUp() {
     const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
     if (currentIndex > 0) {
-      const newIndex = currentIndex - 1;
-      this.scrollToOption(newIndex);
+      this.scrollToOption(currentIndex - 1);
     } else {
-      // Si está en el primero, ir al último
       this.scrollToOption(this.difficultyLevels.length - 1);
     }
   }
@@ -131,15 +126,12 @@ ngAfterViewInit() {
   scrollDifficultyDown() {
     const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
     if (currentIndex < this.difficultyLevels.length - 1) {
-      const newIndex = currentIndex + 1;
-      this.scrollToOption(newIndex);
+      this.scrollToOption(currentIndex + 1);
     } else {
-      // Si está en el último, ir al primero
       this.scrollToOption(0);
     }
   }
 
-  
   async startVoicePractice() {
     const loading = await this.loadingController.create({
       message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
@@ -178,7 +170,7 @@ ngAfterViewInit() {
       if (sessionResponse && sessionResponse.success) {
         console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
         
-        // ⚠️ CRÍTICO: Agregar responseMethod ANTES de guardar la sesión
+        // ⚠️ Agregar responseMethod ANTES de guardar la sesión
         sessionResponse.responseMethod = this.responseMethod;
         
         this.apiService.setCurrentSession(sessionResponse);

@@ -1,32 +1,41 @@
 <ion-content class="civil-content">
   <!-- Header estilo dashboard -->
   <div class="dashboard-header">
-    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
+    <ion-icon 
+      name="chevron-back" 
+      class="back-icon" 
+      (click)="goBack()">
+    </ion-icon>
     <h1 class="header-title">Derecho Civil</h1>
   </div>
 
   <!-- Resto del contenido -->
   <div class="content-area">
 
-   <!-- Progreso Civil - ESTILO DASHBOARD -->
+    <!-- Progreso Civil - ESTILO DASHBOARD -->
     <div class="progreso-card-dashboard">
       <div class="progreso-header">
         <div class="progreso-left">
           <div class="progreso-emoji">
-            <img src="assets/image/law1.png" alt="Civil">
+            <img src="assets/image/law1.png" alt="Civil" />
           </div>
           <div class="progreso-info">
             <h3>Tu avance en Civil</h3>
           </div>
         </div>
         <div class="progreso-right">
-          <div class="progreso-percentage">{{ civilStats?.successRate || 0 }}%</div>
+          <div class="progreso-percentage">
+            {{ civilStats?.successRate || 0 }}%
+          </div>
         </div>
       </div>
 
       <div class="progreso-progress">
         <div class="progreso-bar">
-          <div class="progreso-fill civil" [style.width.%]="civilStats?.successRate || 0"></div>
+          <div 
+            class="progreso-fill civil" 
+            [style.width.%]="civilStats?.successRate || 0">
+          </div>
         </div>
       </div>
     </div>
@@ -45,14 +54,14 @@
         </div>
         <h3>Escrito</h3>
       </div>
-      
+
       <div class="study-card" (click)="goToConversacion()">
         <div class="study-emoji">
           <ion-icon name="mic"></ion-icon>
         </div>
         <h3>Conversación</h3>
       </div>
-      
+
       <!-- Fila 2 -->
       <div class="study-card" (click)="goToReforzar()">
         <div class="study-emoji">
@@ -60,13 +69,13 @@
         </div>
         <h3>Reforzar</h3>
       </div>
-      
+
       <div class="study-card disabled">
         <div class="study-emoji">
           <ion-icon name="folder-open"></ion-icon>
         </div>
         <h3>Material</h3>
-        <span class="badge-proximamente">Proximamente</span>
+        <span class="badge-proximamente">Próximamente</span>
       </div>
     </div>
   </div>

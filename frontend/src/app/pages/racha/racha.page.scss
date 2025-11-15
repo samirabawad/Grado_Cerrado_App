@@ -122,11 +122,54 @@ ion-content.racha-content {
   margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 
+  .month-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .nav-arrow {
+      background: transparent;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      ion-icon {
+        font-size: 20px;
+        color: #6b7280;
+      }
+
+      &:hover:not(:disabled) {
+        border-color: #10b981;
+        background: #f0fdf4;
+
+        ion-icon {
+          color: #10b981;
+        }
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+    }
+
+    .calendar-title {
+      margin: 0;
+      flex: 1;
+    }
+  }
+  
   .calendar-title {
     font-size: 20px;
     font-weight: 700;
     color: #1f2937;
-    margin: 0 0 16px 0;
     text-align: center;
   }
 

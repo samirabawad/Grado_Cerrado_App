@@ -10,26 +10,26 @@ import { ApiService } from '../../services/api.service';
   templateUrl: './civil.page.html',
   styleUrls: ['./civil.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, BottomNavComponent]
+  imports: [IonicModule, CommonModule, BottomNavComponent],
 })
 export class CivilPage implements OnInit, OnDestroy {
-  
+
   civilStats: any = null;
   isLoading: boolean = true;
-  
+
   carouselImages: string[] = [
     'assets/image/bannerhome.png',
     'assets/image/banner-2.png',
-    'assets/image/banner-3.png'
+    'assets/image/banner-3.png',
   ];
   currentImageIndex: number = 0;
   carouselInterval: any;
-  
+
   constructor(
     private router: Router,
     private apiService: ApiService
-  ) { }
-  
+  ) {}
+
   ngOnInit() {
     this.loadCivilStats();
     this.startCarousel();
@@ -50,10 +50,10 @@ export class CivilPage implements OnInit, OnDestroy {
 
   async loadCivilStats() {
     this.isLoading = true;
-    
+
     try {
       const currentUser = this.apiService.getCurrentUser();
-      
+
       if (!currentUser || !currentUser.id) {
         console.warn('No hay usuario logueado');
         this.isLoading = false;
@@ -65,47 +65,35 @@ export class CivilPage implements OnInit, OnDestroy {
 
       const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
       console.log('Respuesta completa del API:', areaResponse);
-      
+
       if (areaResponse && areaResponse.success && areaResponse.data) {
-        console.log('Datos jerárquicos recibidos:', areaResponse.data);
-        
-        const civilArea = areaResponse.data.find((item: any) => 
-          item.type === 'area' && item.area === 'Derecho Civil'
+        const civilArea = areaResponse.data.find(
+          (item: any) => item.type === 'area' && item.area === 'Derecho Civil'
         );
-        
-        if (civilArea) {
-          // Calcular successRate desde los temas
+
+      if (civilArea) {
+          // Calcular successRate igual que el Dashboard: promedio de subtemas
           const temasConPorcentaje = civilArea.temas.map((tema: any) => {
-            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => {
-              const porcentaje = subtema.totalPreguntas > 0 
-                ? Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100)
-                : 0;
-              return porcentaje;
-            });
-            
-            const porcentajeTema = subtemasConPorcentaje.length > 0
+            const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => subtema.porcentajeAcierto || 0);
+            return subtemasConPorcentaje.length > 0
               ? Math.round(subtemasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / subtemasConPorcentaje.length)
               : 0;
-            
-            return porcentajeTema;
           });
           
           const successRate = temasConPorcentaje.length > 0
             ? Math.round(temasConPorcentaje.reduce((sum: number, p: number) => sum + p, 0) / temasConPorcentaje.length)
             : 0;
-          
+
           this.civilStats = {
             area: civilArea.area,
-            successRate: successRate,
-            temas: civilArea.temas
+            successRate,
+            temas: civilArea.temas,
           };
-          
+
           console.log('✅ Estadísticas de Derecho Civil:', this.civilStats);
-        } else {
-          console.log('⚠️ No se encontró Derecho Civil');
         }
       }
-      
+
     } catch (error) {
       console.error('❌ Error cargando estadísticas de Civil:', error);
     } finally {
@@ -126,7 +114,8 @@ export class CivilPage implements OnInit, OnDestroy {
   }
 
   nextSlide() {
-    this.currentImageIndex = (this.currentImageIndex + 1) % this.carouselImages.length;
+    this.currentImageIndex =
+      (this.currentImageIndex + 1) % this.carouselImages.length;
   }
 
   goToSlide(index: number) {

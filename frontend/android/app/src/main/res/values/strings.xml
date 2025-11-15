@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">GradoCerrado</string>
     <string name="title_activity_main">GradoCerrado</string>
-    <string name="package_name">com.gradocerrado.app</string>
-    <string name="custom_url_scheme">com.gradocerrado.app</string>
+    <string name="package_name">gradocerrado.app</string>
+    <string name="custom_url_scheme">gradocerrado.app</string>
 </resources>

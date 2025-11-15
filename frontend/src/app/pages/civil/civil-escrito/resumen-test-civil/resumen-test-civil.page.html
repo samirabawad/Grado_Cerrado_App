@@ -65,22 +65,31 @@
         
         <div class="dropdown-content">
           <!-- TEXTO DE LA PREGUNTA -->
-          <p class="question-text">{{ questionResults[expandedQuestionIndex].questionText }}</p>
+          <p class="question-text">
+            {{ questionResults[expandedQuestionIndex].questionText }}
+          </p>
           
           <!-- ALTERNATIVAS -->
           <div class="alternatives-list">
-            <div *ngFor="let option of getQuestionOptions(questionResults[expandedQuestionIndex]); let optIndex = index"
-                 class="alternative-item"
-                 [class.alt-selected]="isOptionSelected(questionResults[expandedQuestionIndex], option)"
-                 [class.alt-correct]="isOptionCorrect(questionResults[expandedQuestionIndex], option)">
+            <div 
+              *ngFor="let option of getQuestionOptions(questionResults[expandedQuestionIndex]); let optIndex = index"
+              class="alternative-item"
+              [class.alt-selected]="isOptionSelected(questionResults[expandedQuestionIndex], option)"
+              [class.alt-correct]="isOptionCorrect(questionResults[expandedQuestionIndex], option)">
               
               <div class="alt-icon">
-                <ion-icon *ngIf="isOptionCorrect(questionResults[expandedQuestionIndex], option)" 
-                          name="checkmark-circle"></ion-icon>
-                <ion-icon *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && isOptionSelected(questionResults[expandedQuestionIndex], option)" 
-                          name="close-circle"></ion-icon>
-                <ion-icon *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && !isOptionSelected(questionResults[expandedQuestionIndex], option)" 
-                          name="ellipse-outline"></ion-icon>
+                <ion-icon 
+                  *ngIf="isOptionCorrect(questionResults[expandedQuestionIndex], option)" 
+                  name="checkmark-circle">
+                </ion-icon>
+                <ion-icon 
+                  *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && isOptionSelected(questionResults[expandedQuestionIndex], option)" 
+                  name="close-circle">
+                </ion-icon>
+                <ion-icon 
+                  *ngIf="!isOptionCorrect(questionResults[expandedQuestionIndex], option) && !isOptionSelected(questionResults[expandedQuestionIndex], option)" 
+                  name="ellipse-outline">
+                </ion-icon>
               </div>
               
               <div class="alt-text">
@@ -90,9 +99,13 @@
           </div>
 
           <!-- EXPLICACIÓN -->
-          <div class="explanation-detail" *ngIf="questionResults[expandedQuestionIndex].explanation">
+          <div 
+            class="explanation-detail" 
+            *ngIf="questionResults[expandedQuestionIndex].explanation">
             <p class="label">Explicación:</p>
-            <p class="content">{{ questionResults[expandedQuestionIndex].explanation }}</p>
+            <p class="content">
+              {{ questionResults[expandedQuestionIndex].explanation }}
+            </p>
           </div>
         </div>
       </div>
@@ -129,10 +142,8 @@
         Volver a Civil
       </ion-button>
     </div>
-
   </div>
 
   <!-- Bottom Navigation Component -->
   <app-bottom-nav></app-bottom-nav>
-
 </ion-content>

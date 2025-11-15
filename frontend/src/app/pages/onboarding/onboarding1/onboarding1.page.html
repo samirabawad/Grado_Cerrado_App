@@ -1,33 +1,37 @@
 <ion-content [fullscreen]="true" class="onboarding-content">
   <div class="onboarding-container">
-    
+
     <!-- Logo Principal -->
     <div class="logo-section">
-      <img src="assets/image/logo_grado_cerrado.png" alt="Grado Cerrado" class="main-logo">
+      <img 
+        src="assets/image/logo_grado_cerrado.png" 
+        alt="Grado Cerrado" 
+        class="main-logo"
+      />
     </div>
-    
+
     <!-- Ícono central grande -->
     <div class="icon-section">
       <div class="icon-circle">
         <ion-icon name="school-outline"></ion-icon>
       </div>
     </div>
-    
+
     <!-- Contenido de bienvenida -->
     <div class="content-section">
       <h1 class="main-title">Bienvenido</h1>
       <p class="main-description">
-        Tu APP inteligente para preparar<br>
+        Tu APP inteligente para preparar<br />
         tu examen de grado de Derecho
       </p>
-      
+
       <!-- Indicador de páginas -->
       <div class="page-indicator">
         <div class="indicator-dot active"></div>
         <div class="indicator-dot"></div>
         <div class="indicator-dot"></div>
       </div>
-      
+
       <!-- Botones -->
       <div class="button-container">
         <button 
@@ -35,6 +39,7 @@
           (click)="selectAction('salir')">
           Salir
         </button>
+
         <button 
           class="action-button primary" 
           (click)="selectAction('continuar')">
@@ -42,6 +47,6 @@
         </button>
       </div>
     </div>
-    
+
   </div>
 </ion-content>

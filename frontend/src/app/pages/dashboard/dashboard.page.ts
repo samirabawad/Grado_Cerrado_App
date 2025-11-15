@@ -19,7 +19,11 @@ export class DashboardPage implements OnInit {
   userName: string = 'Estudiante';
   userLevel: string = 'Intermedio';
   userStreak: number = 0;
-  currentWeekLabel: string = '';
+currentWeekLabel: string = '';
+  currentWeekOffset: number = 0;
+  currentWeekStart: Date = new Date();
+  currentWeekEnd: Date = new Date();
+  isCurrentWeek: boolean = true;
 
   totalSessions: number = 0;
   totalQuestions: number = 0;
@@ -31,7 +35,6 @@ export class DashboardPage implements OnInit {
   chartData: any[] = [];
   areaStats: any[] = [];
   allWeakTopics: any[] = [];
-  
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -83,20 +86,20 @@ export class DashboardPage implements OnInit {
           this.overallSuccessRate = Math.round(stats.successRate || 0);
           this.userStreak = stats.streak || 0;
           
-          console.log('EstadÃ­sticas cargadas:', stats);
+          console.log('Estadísticas cargadas:', stats);
         }
       } catch (error) {
-        console.error('Error cargando estadÃ­sticas:', error);
+        console.error('Error cargando estadísticas:', error);
       }
 
       try {
         const areaResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();        
         if (areaResponse && areaResponse.success) {
-          console.log('Datos jerÃ¡rquicos:', areaResponse.data);
+          console.log('Datos jerárquicos:', areaResponse.data);
           
           this.areaStats = [];
           
-          // PRIMERO procesamos las Ã¡reas (Civil y Procesal)
+          // PRIMERO procesamos las áreas (Civil y Procesal)
           const areasNoGenerales: any[] = [];
           
           areaResponse.data.forEach((item: any) => {
@@ -107,7 +110,8 @@ export class DashboardPage implements OnInit {
                   subtemaNombre: subtema.subtemaNombre,
                   totalPreguntas: subtema.totalPreguntas,
                   preguntasCorrectas: subtema.preguntasCorrectas,
-                  porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema)                }));
+                  porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema)
+                }));
 
                 const porcentajeTema = this.calculateTemaSuccessRate(subtemasConPorcentaje);
 
@@ -165,7 +169,7 @@ export class DashboardPage implements OnInit {
             ? Math.round((civilArea.successRate + procesalArea.successRate) / 2)
             : 0;
 
-          // Agregar el Ã¡rea General CON EL PROMEDIO CALCULADO
+          // Agregar el área General CON EL PROMEDIO CALCULADO
           this.areaStats.push({
             area: 'General',
             sessions: 0,
@@ -177,13 +181,13 @@ export class DashboardPage implements OnInit {
             temas: []
           });
 
-          // Agregar las Ã¡reas no generales
+          // Agregar las áreas no generales
           this.areaStats = [...this.areaStats, ...areasNoGenerales];
           
-          console.log('EstadÃ­sticas procesadas:', this.areaStats);
+          console.log('Estadísticas procesadas:', this.areaStats);
         }
       } catch (error) {
-        console.error('Error cargando estadÃ­sticas por Ã¡rea:', error);
+        console.error('Error cargando estadísticas por área:', error);
       }
 
       // Cargar temas débiles desde el backend
@@ -191,10 +195,10 @@ export class DashboardPage implements OnInit {
         const weakResponse = await this.apiService.getWeakTopics(studentId).toPromise();
         if (weakResponse && weakResponse.success) {
           this.allWeakTopics = weakResponse.data || [];
-          console.log('âœ… Temas dÃ©biles cargados:', this.allWeakTopics);
+          console.log('✅ Temas débiles cargados:', this.allWeakTopics);
         }
       } catch (error) {
-        console.error('Error cargando temas dÃ©biles:', error);
+        console.error('Error cargando temas débiles:', error);
         this.allWeakTopics = [];
       }
 
@@ -210,151 +214,208 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  getDefaultProcesalTemas(): any[] {
-    const temasBase = [
-      { id: 1, nombre: 'JurisdicciÃ³n' },
-      { id: 2, nombre: 'AcciÃ³n procesal' },
-      { id: 3, nombre: 'Proceso' },
-      { id: 4, nombre: 'Competencia' },
-      { id: 5, nombre: 'Prueba' },
-      { id: 6, nombre: 'Cosa juzgada' },
-      { id: 7, nombre: 'OrganizaciÃ³n judicial' },
-      { id: 8, nombre: 'Procedimientos' },
-      { id: 9, nombre: 'Medidas cautelares e incidentes' },
-      { id: 10, nombre: 'RepresentaciÃ³n procesal' },
-      { id: 11, nombre: 'Recursos' }
-    ];
+getDefaultProcesalTemas(): any[] {
+  const temasBase = [
+    { id: 1, nombre: 'Jurisdicción' },
+    { id: 2, nombre: 'Acción procesal' },
+    { id: 3, nombre: 'Proceso' },
+    { id: 4, nombre: 'Competencia' },
+    { id: 5, nombre: 'Prueba' },
+    { id: 6, nombre: 'Cosa juzgada' },
+    { id: 7, nombre: 'Organización judicial' },
+    { id: 8, nombre: 'Procedimientos' },
+    { id: 9, nombre: 'Medidas cautelares e incidentes' },
+    { id: 10, nombre: 'Representación procesal' },
+    { id: 11, nombre: 'Recursos' }
+  ];
 
-    return temasBase.map(tema => ({
-      temaId: tema.id,
-      temaNombre: tema.nombre,
-      totalPreguntas: 0,
-      preguntasCorrectas: 0,
-      porcentajeAcierto: 0,
-      subtemas: [
-        {
-          subtemaId: tema.id * 100 + 1,
-          subtemaNombre: 'Conceptos bÃ¡sicos',
-          totalPreguntas: 0,
-          preguntasCorrectas: 0,
-          porcentajeAcierto: 0
-        },
-        {
-          subtemaId: tema.id * 100 + 2,
-          subtemaNombre: 'AplicaciÃ³n prÃ¡ctica',
-          totalPreguntas: 0,
-          preguntasCorrectas: 0,
-          porcentajeAcierto: 0
-        },
-        {
-          subtemaId: tema.id * 100 + 3,
-          subtemaNombre: 'Casos especiales',
-          totalPreguntas: 0,
-          preguntasCorrectas: 0,
-          porcentajeAcierto: 0
-        }
-      ]
-    }));
-  }
-
-  calculateAreaSuccessRate(temas: any[]): number {
-    if (!temas || temas.length === 0) return 0;
-    
-    const totalPorcentaje = temas.reduce((sum: number, tema: any) => {
-      return sum + tema.porcentajeAcierto;
-    }, 0);
-    
-    return Math.round(totalPorcentaje / temas.length);
-  }
-
-  calculateTemaSuccessRate(subtemas: any[]): number {
-    if (!subtemas || subtemas.length === 0) return 0;
-    
-    const totalPorcentaje = subtemas.reduce((sum: number, subtema: any) => {
-      return sum + subtema.porcentajeAcierto;
-    }, 0);
-    
-    return Math.round(totalPorcentaje / subtemas.length);
-  }
-
-  calculateSubtemaSuccessRate(subtema: any): number {
-    if (subtema.porcentajeAcierto !== undefined) {
-      return Math.round(subtema.porcentajeAcierto);
-    }
-    
-    if (subtema.totalPreguntas === 0) return 0;
-    return Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100);
-  }
-
-  toggleGeneralExpansion() {
-    this.isGeneralExpanded = !this.isGeneralExpanded;
-  }
-
-  toggleAreaExpansion(areaName: string) {
-    if (this.expandedArea === areaName) {
-      this.expandedArea = null;
-    } else {
-      this.expandedArea = areaName;
-    }
-  }
-
-  isAreaExpanded(areaName: string): boolean {
-    return this.expandedArea === areaName;
-  }
-
-  toggleTemaExpansion(temaNombre: string) {
-    if (this.expandedTema === temaNombre) {
-      this.expandedTema = null;
-    } else {
-      this.expandedTema = temaNombre;
-    }
-  }
-
-  isTemaExpanded(temaNombre: string): boolean {
-    return this.expandedTema === temaNombre;
-  }
-
-  getTemasForArea(areaName: string): any[] {
-    const area = this.areaStats.find(a => a.area === areaName && !a.isGeneral);
-    return area && area.temas ? area.temas : [];
-  }
-
-  getSubtemasForTema(tema: any): any[] {
-    return tema && tema.subtemas ? tema.subtemas : [];
-  }
-
-  getGeneralArea(): any {
-    return this.areaStats.find(a => a.isGeneral);
-  }
-
-  getNonGeneralAreas(): any[] {
-    return this.areaStats.filter(a => !a.isGeneral);
-  }
-
-  scrollToArea(areaName: string) {
-    const element = document.getElementById('area-' + areaName);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setTimeout(() => {
-        this.toggleAreaExpansion(areaName);
-      }, 500);
-    }
-  }
-
-  async generateChartData() {
-    try {
-      const currentUser = this.apiService.getCurrentUser();
-      if (!currentUser || !currentUser.id) return;
-
-      const progressResponse = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
-      if (progressResponse && progressResponse.success) {
-        this.chartData = progressResponse.data;
+  return temasBase.map(tema => ({
+    temaId: tema.id,
+    temaNombre: tema.nombre,
+    totalPreguntas: 0,
+    preguntasCorrectas: 0,
+    porcentajeAcierto: 0,
+    subtemas: [
+      {
+        subtemaId: tema.id * 100 + 1,
+        subtemaNombre: 'Conceptos básicos',
+        totalPreguntas: 0,
+        preguntasCorrectas: 0,
+        porcentajeAcierto: 0
+      },
+      {
+        subtemaId: tema.id * 100 + 2,
+        subtemaNombre: 'Aplicación práctica',
+        totalPreguntas: 0,
+        preguntasCorrectas: 0,
+        porcentajeAcierto: 0
+      },
+      {
+        subtemaId: tema.id * 100 + 3,
+        subtemaNombre: 'Casos especiales',
+        totalPreguntas: 0,
+        preguntasCorrectas: 0,
+        porcentajeAcierto: 0
       }
-    } catch (error) {
-      console.error('Error generando datos del grÃ¡fico:', error);
-      this.chartData = [];
+    ]
+  }));
+}
+
+calculateAreaSuccessRate(temas: any[]): number {
+  if (!temas || temas.length === 0) return 0;
+  
+  const totalPorcentaje = temas.reduce((sum: number, tema: any) => {
+    return sum + tema.porcentajeAcierto;
+  }, 0);
+  
+  return Math.round(totalPorcentaje / temas.length);
+}
+
+calculateTemaSuccessRate(subtemas: any[]): number {
+  if (!subtemas || subtemas.length === 0) return 0;
+  
+  const totalPorcentaje = subtemas.reduce((sum: number, subtema: any) => {
+    return sum + subtema.porcentajeAcierto;
+  }, 0);
+  
+  return Math.round(totalPorcentaje / subtemas.length);
+}
+
+calculateSubtemaSuccessRate(subtema: any): number {
+  if (subtema.porcentajeAcierto !== undefined) {
+    return Math.round(subtema.porcentajeAcierto);
+  }
+  
+  if (subtema.totalPreguntas === 0) return 0;
+  return Math.round((subtema.preguntasCorrectas / subtema.totalPreguntas) * 100);
+}
+
+toggleGeneralExpansion() {
+  this.isGeneralExpanded = !this.isGeneralExpanded;
+}
+
+toggleAreaExpansion(areaName: string) {
+  if (this.expandedArea === areaName) {
+    this.expandedArea = null;
+  } else {
+    this.expandedArea = areaName;
+  }
+}
+
+isAreaExpanded(areaName: string): boolean {
+  return this.expandedArea === areaName;
+}
+
+toggleTemaExpansion(temaNombre: string) {
+  if (this.expandedTema === temaNombre) {
+    this.expandedTema = null;
+  } else {
+    this.expandedTema = temaNombre;
+  }
+}
+
+isTemaExpanded(temaNombre: string): boolean {
+  return this.expandedTema === temaNombre;
+}
+
+getTemasForArea(areaName: string): any[] {
+  const area = this.areaStats.find(a => a.area === areaName && !a.isGeneral);
+  return area && area.temas ? area.temas : [];
+}
+
+getSubtemasForTema(tema: any): any[] {
+  return tema && tema.subtemas ? tema.subtemas : [];
+}
+
+getGeneralArea(): any {
+  return this.areaStats.find(a => a.isGeneral);
+}
+
+getNonGeneralAreas(): any[] {
+  return this.areaStats.filter(a => !a.isGeneral);
+}
+
+scrollToArea(areaName: string) {
+  const element = document.getElementById('area-' + areaName);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => {
+      this.toggleAreaExpansion(areaName);
+    }, 500);
+  }
+}
+
+async generateChartData() {
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    if (!currentUser || !currentUser.id) return;
+
+    const progressResponse = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
+    if (progressResponse && progressResponse.success) {
+      this.filterWeeklyData(progressResponse.data);
+    }
+  } catch (error) {
+    console.error('Error generando datos del gráfico:', error);
+    this.chartData = [];
+  }
+}
+
+filterWeeklyData(allData: any[]) {
+  // Mapeo de días para convertir de backend
+  const dayMap: { [key: string]: number } = {
+    'Dom': 0, 'Lun': 1, 'Mar': 2, 'Mié': 3, 'Jue': 4, 'Vie': 5, 'Sáb': 6
+  };
+
+  // Crear un mapa con todos los datos por día de la semana
+  const dataByDay = new Map<number, any>();
+  allData.forEach(item => {
+    const dayNum = dayMap[item.date];
+    if (dayNum !== undefined) {
+      dataByDay.set(dayNum, item);
+    }
+  });
+
+  // Generar array de lunes (1) a domingo (0), pero solo para la semana seleccionada
+  const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const weekDayNumbers = [1, 2, 3, 4, 5, 6, 0];
+  
+  this.chartData = [];
+  
+  for (let i = 0; i < weekDayNumbers.length; i++) {
+    const dayNum = weekDayNumbers[i];
+    const currentDate = new Date(this.currentWeekStart);
+    currentDate.setDate(currentDate.getDate() + i);
+    
+    // Solo incluir días hasta hoy si es la semana actual
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    currentDate.setHours(0, 0, 0, 0);
+    
+    if (this.isCurrentWeek && currentDate > today) {
+      continue; // No mostrar días futuros en la semana actual
+    }
+    
+    // Solo incluir datos si la fecha está dentro de la semana seleccionada
+    const dayData = dataByDay.get(dayNum);
+    if (dayData && this.isDateInCurrentWeek(currentDate)) {
+      this.chartData.push({
+        date: weekDays[i],
+        civil: dayData.civil || 0,
+        procesal: dayData.procesal || 0
+      });
+    } else {
+      this.chartData.push({
+        date: weekDays[i],
+        civil: 0,
+        procesal: 0
+      });
     }
   }
+}
+
+isDateInCurrentWeek(date: Date): boolean {
+  return date >= this.currentWeekStart && date <= this.currentWeekEnd;
+}
 
 async changeTimeFrame(timeFrame: string) {
   this.selectedTimeFrame = timeFrame;
@@ -397,12 +458,21 @@ updateMonthName() {
 
 updateWeekLabel() {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Calcular lunes de la semana actual + offset
   const dayOfWeek = today.getDay();
   const monday = new Date(today);
-  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + (this.currentWeekOffset * 7));
+  monday.setHours(0, 0, 0, 0);
   
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  
+  this.currentWeekStart = monday;
+  this.currentWeekEnd = sunday;
+  this.isCurrentWeek = this.currentWeekOffset === 0;
   
   const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -414,7 +484,7 @@ updateWeekLabel() {
   const year = sunday.getFullYear();
   
   if (monday.getMonth() === sunday.getMonth()) {
-    this.currentWeekLabel = `Semana del ${mondayDay} al ${sundayDay} de ${sundayMonth} ${year}`;
+    this.currentWeekLabel = `Semana del ${mondayDay} al ${sundayDay} de ${mondayMonth} ${year}`;
   } else {
     this.currentWeekLabel = `Semana del ${mondayDay} de ${mondayMonth} al ${sundayDay} de ${sundayMonth} ${year}`;
   }
@@ -430,41 +500,47 @@ async navigateMonth(direction: number) {
   await this.loadMonthlyData();
 }
 
-  goBack() {
-    this.router.navigate(['/home']);
-  }
+async navigateWeek(direction: number) {
+  this.currentWeekOffset += direction;
+  this.updateWeekLabel();
+  await this.generateChartData();
+}
 
-  goToSession(sessionId: number) {
-    console.log('Navegando a sesiÃ³n:', sessionId);
-  }
+goBack() {
+  this.router.navigate(['/home']);
+}
 
-  startNewSession() {
-    this.router.navigate(['/civil']);
-  }
+goToSession(sessionId: number) {
+  console.log('Navegando a sesión:', sessionId);
+}
 
-  navigateToHome() {
-    this.router.navigate(['/home']);
-  }
+startNewSession() {
+  this.router.navigate(['/civil']);
+}
 
-  getMaxValue(): number {
-    if (this.chartData.length === 0) return 10;
-    
-    // Si estamos en vista mensual, el mÃ¡ximo siempre es 100
-    if (this.selectedTimeFrame === 'month') {
-      return 100;
-    }
-    
-    // Si estamos en vista semanal, calculamos el mÃ¡ximo dinÃ¡micamente
-    const maxCivil = Math.max(...this.chartData.map(d => d.civil || 0));
-    const maxProcesal = Math.max(...this.chartData.map(d => d.procesal || 0));
-    const maxTotal = Math.max(maxCivil, maxProcesal);
-    return maxTotal === 0 ? 10 : maxTotal + 2;
-  }
+navigateToHome() {
+  this.router.navigate(['/home']);
+}
 
-  getBarHeight(value: number, type: 'civil' | 'procesal'): number {
+getMaxValue(): number {
+  if (this.chartData.length === 0) return 10;
+  
+  // Si estamos en vista mensual, el máximo siempre es 100
+  if (this.selectedTimeFrame === 'month') {
+    return 100;
+  }
+  
+  // Si estamos en vista semanal, calculamos el máximo dinámicamente
+  const maxCivil = Math.max(...this.chartData.map(d => d.civil || 0));
+  const maxProcesal = Math.max(...this.chartData.map(d => d.procesal || 0));
+  const maxTotal = Math.max(maxCivil, maxProcesal);
+  return maxTotal === 0 ? 10 : maxTotal + 2;
+}
+
+getBarHeight(value: number, type: 'civil' | 'procesal'): number {
   if (!value || value === 0) return 0;
   
-  // Encuentra el valor mÃ¡ximo en todo el chartData
+  // Encuentra el valor máximo en todo el chartData
   const maxValue = Math.max(
     ...this.chartData.map(day => Math.max(day.civil, day.procesal))
   );
@@ -472,277 +548,276 @@ async navigateMonth(direction: number) {
   // Si no hay datos, retorna 0
   if (maxValue === 0) return 0;
   
-  // Calcula el porcentaje basado en el mÃ¡ximo
+  // Calcula el porcentaje basado en el máximo
   // Multiplicamos por 100 para obtener porcentaje
   return (value / maxValue) * 100;
 }
 
-  getDonutOffset(): number {
-    const circumference = 219.8;
-    if (this.totalQuestions === 0) {
-      return circumference;
-    }
-    const progress = Math.min(this.totalQuestions / this.currentGoal, 1);
-    return circumference * (1 - progress);
+getDonutOffset(): number {
+  const circumference = 219.8;
+  if (this.totalQuestions === 0) {
+    return circumference;
   }
+  const progress = Math.min(this.totalQuestions / this.currentGoal, 1);
+  return circumference * (1 - progress);
+}
 
-  getGaugeOffset(): number {
-    const maxDash = 157;
-    const progress = Math.min(this.overallSuccessRate / 100, 1);
-    return maxDash * (1 - progress);
+getGaugeOffset(): number {
+  const maxDash = 157;
+  const progress = Math.min(this.overallSuccessRate / 100, 1);
+  return maxDash * (1 - progress);
+}
+
+getGaugeOffsetLarge(): number {
+  const maxDash = 125.6;
+  if (this.overallSuccessRate === 0) {
+    return maxDash;
   }
+  const progress = Math.min(this.overallSuccessRate / 100, 1);
+  return maxDash * (1 - progress);
+}
 
-  getGaugeOffsetLarge(): number {
-    const maxDash = 125.6;
-    if (this.overallSuccessRate === 0) {
-      return maxDash;
-    }
-    const progress = Math.min(this.overallSuccessRate / 100, 1);
-    return maxDash * (1 - progress);
-  }
-
-  calculateSessionGoal(sessions: number): number {
-    if (sessions < 50) return 50;
-    if (sessions < 100) return 100;
-    if (sessions < 150) return 150;
-    if (sessions < 200) return 200;
-    if (sessions < 250) return 250;
-    
-    return Math.ceil(sessions / 50) * 50;
-  }
-
-  calculateProgressiveGoal(questions: number): number {
-    if (questions < 200) return 200;
-    if (questions < 250) return 250;
-    if (questions < 300) return 300;
-    if (questions < 350) return 350;
-    if (questions < 400) return 400;
-    if (questions < 450) return 450;
-    if (questions < 500) return 500;
-    
-    return Math.ceil(questions / 50) * 50;
-  }
-
-  // ========================================
-  // MÃ‰TODOS PARA SISTEMA DE LOGROS
-  // ========================================
+calculateSessionGoal(sessions: number): number {
+  if (sessions < 50) return 50;
+  if (sessions < 100) return 100;
+  if (sessions < 150) return 150;
+  if (sessions < 200) return 200;
+  if (sessions < 250) return 250;
   
-  // Obtener sesiones dentro del milestone actual (de 0 a 50)
-  getSessionsInCurrentMilestone(): number {
-    return this.totalSessions % 50;
-  }
+  return Math.ceil(sessions / 50) * 50;
+}
 
-  // Obtener el siguiente milestone (mÃºltiplo de 50)
-  getNextMilestone(): number {
-    return Math.ceil((this.totalSessions + 1) / 50) * 50;
-  }
+calculateProgressiveGoal(questions: number): number {
+  if (questions < 200) return 200;
+  if (questions < 250) return 250;
+  if (questions < 300) return 300;
+  if (questions < 350) return 350;
+  if (questions < 400) return 400;
+  if (questions < 450) return 450;
+  if (questions < 500) return 500;
+  
+  return Math.ceil(questions / 50) * 50;
+}
 
-  // Obtener el nivel del logro actual (cuÃ¡ntos milestones de 50 has completado)
-  // Obtener el nivel del logro actual (cuÃ¡ntos logros has desbloqueado)
-  getCurrentAchievementLevel(): number {
-    // Si no has completado ningÃºn logro, estÃ¡s en nivel 0
-    if (this.totalSessions < 50) return 0;
-    
-    // Calcular cuÃ¡ntos logros de 50 tests has completado
-    return Math.floor(this.totalSessions / 50);
-  }
-
-  // Obtener el nombre del logro actual
-  getCurrentAchievementName(): string {
-    const level = this.getCurrentAchievementLevel();
-    
-    // Si no has completado el primer logro
-    if (level === 0) {
-      return 'En progreso';
-    }
-    
-    const names = [
-      'Principiante',      // 50
-      'Aprendiz',          // 100
-      'Estudiante',        // 150
-      'Dedicado',          // 200
-      'Perseverante',      // 250
-      'Comprometido',      // 300
-      'Avanzado',          // 350
-      'Experto',           // 400
-      'Maestro',           // 450
-      'Sabio',             // 500
-      'Erudito',           // 550
-      'Virtuoso',          // 600
-      'Prodigio',          // 650
-      'Genio',             // 700
-      'Leyenda',           // 750
-      'TitÃ¡n',             // 800
-      'CampeÃ³n',           // 850
-      'HÃ©roe',             // 900
-      'Inmortal',          // 950
-      'Supremo',           // 1000
-      'Trascendental',     // 1050
-      'Divino',            // 1100
-      'Omnisciente',       // 1150
-      'Absoluto',          // 1200
-      'Infinito',          // 1250
-      'Eterno',            // 1300
-      'Celestial',         // 1350
-      'Ilimitado',         // 1400
-      'Perfecto',          // 1450
-      'Definitivo'         // 1500
-    ];
-    
-    return names[level - 1] || 'Maestro Supremo';
-  }
-
-  // ========================================
-// MÃ‰TODO PARA GENERAR BADGES DINÃMICOS
 // ========================================
-  getSessionBadges(): { completed: boolean }[] {
-    const sessionsInMilestone = this.getSessionsInCurrentMilestone();
-    const badges: { completed: boolean }[] = [];
-    
-    // Siempre mostrar 10 cÃ­rculos
-    const totalBadges = 10;
-    const testsPerBadge = 5; // Cada cÃ­rculo representa 5 tests
-    
-    for (let i = 1; i <= totalBadges; i++) {
-      badges.push({
-        completed: sessionsInMilestone >= i * testsPerBadge
-      });
-    }
-    
-    return badges;
+// MÉTODOS PARA SISTEMA DE LOGROS
+// ========================================
+
+// Obtener sesiones dentro del milestone actual (de 0 a 50)
+getSessionsInCurrentMilestone(): number {
+  return this.totalSessions % 50;
+}
+
+// Obtener el siguiente milestone (múltiplo de 50)
+getNextMilestone(): number {
+  return Math.ceil((this.totalSessions + 1) / 50) * 50;
+}
+
+// Obtener el nivel del logro actual (cuántos logros has desbloqueado)
+getCurrentAchievementLevel(): number {
+  // Si no has completado ningún logro, estás en nivel 0
+  if (this.totalSessions < 50) return 0;
+  
+  // Calcular cuántos logros de 50 tests has completado
+  return Math.floor(this.totalSessions / 50);
+}
+
+// Obtener el nombre del logro actual
+getCurrentAchievementName(): string {
+  const level = this.getCurrentAchievementLevel();
+  
+  // Si no has completado el primer logro
+  if (level === 0) {
+    return 'En progreso';
   }
+  
+  const names = [
+    'Principiante',      // 50
+    'Aprendiz',          // 100
+    'Estudiante',        // 150
+    'Dedicado',          // 200
+    'Perseverante',      // 250
+    'Comprometido',      // 300
+    'Avanzado',          // 350
+    'Experto',           // 400
+    'Maestro',           // 450
+    'Sabio',             // 500
+    'Erudito',           // 550
+    'Virtuoso',          // 600
+    'Prodigio',          // 650
+    'Genio',             // 700
+    'Leyenda',           // 750
+    'Titán',             // 800
+    'Campeón',           // 850
+    'Héroe',             // 900
+    'Inmortal',          // 950
+    'Supremo',           // 1000
+    'Trascendental',     // 1050
+    'Divino',            // 1100
+    'Omnisciente',       // 1150
+    'Absoluto',          // 1200
+    'Infinito',          // 1250
+    'Eterno',            // 1300
+    'Celestial',         // 1350
+    'Ilimitado',         // 1400
+    'Perfecto',          // 1450
+    'Definitivo'         // 1500
+  ];
+  
+  return names[level - 1] || 'Maestro Supremo';
+}
 
-  // Obtener el Ã­cono del logro actual
-  getCurrentAchievementIcon(): string {
-    const level = this.getCurrentAchievementLevel();
-    
-    // Si no has completado ningÃºn logro, mostrar un Ã­cono de "en progreso"
-    if (level === 0) {
-      return 'time-outline';
-    }
-    
-    const icons = [
-      'ribbon',          // 50 Principiante
-      'school',          // 100 Aprendiz
-      'book',            // 150 Estudiante
-      'heart',           // 200 Dedicado
-      'fitness',         // 250 Perseverante
-      'medal',           // 300 Comprometido
-      'trending-up',     // 350 Avanzado
-      'star',            // 400 Experto
-      'trophy',          // 450 Maestro
-      'diamond',         // 500 Sabio
-      'bulb',            // 550 Erudito
-      'musical-notes',   // 600 Virtuoso
-      'sparkles',        // 650 Prodigio
-      'flash',           // 700 Genio
-      'rocket',          // 750 Leyenda
-      'shield',          // 800 TitÃ¡n
-      'flag',            // 850 CampeÃ³n
-      'star-half',       // 900 HÃ©roe
-      'infinite',        // 950 Inmortal
-      'diamond',         // 1000 Supremo
-      'prism',           // 1050 Trascendental
-      'sunny',           // 1100 Divino
-      'eye',             // 1150 Omnisciente
-      'nuclear',         // 1200 Absoluto
-      'infinite',        // 1250 Infinito
-      'time',            // 1300 Eterno
-      'planet',          // 1350 Celestial
-      'expand',          // 1400 Ilimitado
-      'checkmark-circle',// 1450 Perfecto
-      'star'             // 1500 Definitivo
-    ];
-    
-    return icons[level - 1] || 'trophy';
-  }
-
-  // Obtener el color del logro actual
-  getCurrentAchievementColor(): string {
-    const level = this.getCurrentAchievementLevel();
-    
-    // Si no has completado ningÃºn logro
-    if (level === 0) {
-      return '#9ca3af';
-    }
-    
-    const colors = [
-      '#10b981', '#059669', '#047857', '#065f46', '#064e3b',
-      '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e',
-      '#7c2d12', '#78350f', '#10b981', '#059669', '#047857',
-      '#065f46', '#064e3b', '#fbbf24', '#f59e0b', '#d97706',
-      '#b45309', '#92400e', '#7c2d12', '#78350f', '#10b981',
-      '#059669', '#047857', '#065f46', '#064e3b', '#fbbf24'
-    ];
-    
-    return colors[level - 1] || '#10b981';
-  }
-
-  // Navegar a pÃ¡gina de logros
-  navigateToAchievements() {
-    this.router.navigate(['/logros']);
-  }
-
-  // Obtener mensaje motivacional
-  getSessionMessage(): string {
-    const remaining = this.getNextMilestone() - this.totalSessions;
-    
-    if (this.totalSessions === 0) {
-      return 'Â¡Empieza a aprender!';
-    }
-    
-    if (remaining === 0) {
-      return 'Â¡Logro desbloqueado! ðŸŽ‰';
-    }
-    
-    if (remaining <= 5) {
-      return `Â¡Solo ${remaining} para el logro!`;
-    }
-    
-    if (this.totalSessions >= 30) {
-      return 'Â¡Vas excelente!';
-    }
-    
-    if (this.totalSessions >= 10) {
-      return 'Â¡TÃº puedes mÃ¡s!';
-    }
-    
-    return 'Â¡Sigue asÃ­!';
-  }
-
-  // =====================
-  // PUNTOS DÃ‰BILES
-  // =====================
-
-  getTop3WeakTopicsCivil(): any[] {
-    if (!this.allWeakTopics || this.allWeakTopics.length === 0) return [];
-    
-    // Filtrar solo temas de Derecho Civil y tomar los primeros 3
-    const civilWeakTopics = this.allWeakTopics
-      .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('civil'))
-      .slice(0, 3);
-
-    return civilWeakTopics;
-  }
-
-  getTop3WeakTopicsProcesal(): any[] {
-    if (!this.allWeakTopics || this.allWeakTopics.length === 0) return [];
-    
-    // Filtrar solo temas de Derecho Procesal y tomar los primeros 3
-    const procesalWeakTopics = this.allWeakTopics
-      .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('procesal'))
-      .slice(0, 3);
-
-    return procesalWeakTopics;
-  }
-
-  goToReforzarWithTopic(area: 'civil' | 'procesal', topic: any) {
-    const route = area === 'civil' ? '/civil/civil-reforzar' : '/procesal/procesal-reforzar';
-    this.router.navigate([route], {
-      queryParams: { 
-        temaId: topic.temaId,
-        fromDashboard: 'true'
-      }
+// ========================================
+// MÉTODO PARA GENERAR BADGES DINÁMICOS
+// ========================================
+getSessionBadges(): { completed: boolean }[] {
+  const sessionsInMilestone = this.getSessionsInCurrentMilestone();
+  const badges: { completed: boolean }[] = [];
+  
+  // Siempre mostrar 10 círculos
+  const totalBadges = 10;
+  const testsPerBadge = 5; // Cada círculo representa 5 tests
+  
+  for (let i = 1; i <= totalBadges; i++) {
+    badges.push({
+      completed: sessionsInMilestone >= i * testsPerBadge
     });
   }
+  
+  return badges;
+}
+
+// Obtener el ícono del logro actual
+getCurrentAchievementIcon(): string {
+  const level = this.getCurrentAchievementLevel();
+  
+  // Si no has completado ningún logro, mostrar un ícono de "en progreso"
+  if (level === 0) {
+    return 'time-outline';
+  }
+  
+  const icons = [
+    'ribbon',          // 50 Principiante
+    'school',          // 100 Aprendiz
+    'book',            // 150 Estudiante
+    'heart',           // 200 Dedicado
+    'fitness',         // 250 Perseverante
+    'medal',           // 300 Comprometido
+    'trending-up',     // 350 Avanzado
+    'star',            // 400 Experto
+    'trophy',          // 450 Maestro
+    'diamond',         // 500 Sabio
+    'bulb',            // 550 Erudito
+    'musical-notes',   // 600 Virtuoso
+    'sparkles',        // 650 Prodigio
+    'flash',           // 700 Genio
+    'rocket',          // 750 Leyenda
+    'shield',          // 800 Titán
+    'flag',            // 850 Campeón
+    'star-half',       // 900 Héroe
+    'infinite',        // 950 Inmortal
+    'diamond',         // 1000 Supremo
+    'prism',           // 1050 Trascendental
+    'sunny',           // 1100 Divino
+    'eye',             // 1150 Omnisciente
+    'nuclear',         // 1200 Absoluto
+    'infinite',        // 1250 Infinito
+    'time',            // 1300 Eterno
+    'planet',          // 1350 Celestial
+    'expand',          // 1400 Ilimitado
+    'checkmark-circle',// 1450 Perfecto
+    'star'             // 1500 Definitivo
+  ];
+  
+  return icons[level - 1] || 'trophy';
+}
+
+// Obtener el color del logro actual
+getCurrentAchievementColor(): string {
+  const level = this.getCurrentAchievementLevel();
+  
+  // Si no has completado ningún logro
+  if (level === 0) {
+    return '#9ca3af';
+  }
+  
+  const colors = [
+    '#10b981', '#059669', '#047857', '#065f46', '#064e3b',
+    '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e',
+    '#7c2d12', '#78350f', '#10b981', '#059669', '#047857',
+    '#065f46', '#064e3b', '#fbbf24', '#f59e0b', '#d97706',
+    '#b45309', '#92400e', '#7c2d12', '#78350f', '#10b981',
+    '#059669', '#047857', '#065f46', '#064e3b', '#fbbf24'
+  ];
+  
+  return colors[level - 1] || '#10b981';
+}
+
+// Navegar a página de logros
+navigateToAchievements() {
+  this.router.navigate(['/logros']);
+}
+
+// Obtener mensaje motivacional
+getSessionMessage(): string {
+  const remaining = this.getNextMilestone() - this.totalSessions;
+  
+  if (this.totalSessions === 0) {
+    return '¡Empieza a aprender!';
+  }
+  
+  if (remaining === 0) {
+    return '¡Logro desbloqueado! 🎉';
+  }
+  
+  if (remaining <= 5) {
+    return `¡Solo ${remaining} para el logro!`;
+  }
+  
+  if (this.totalSessions >= 30) {
+    return '¡Vas excelente!';
+  }
+  
+  if (this.totalSessions >= 10) {
+    return '¡Tú puedes más!';
+  }
+  
+  return '¡Sigue así!';
+}
+
+// =====================
+// PUNTOS DÉBILES
+// =====================
+
+getTop3WeakTopicsCivil(): any[] {
+  if (!this.allWeakTopics || this.allWeakTopics.length === 0) return [];
+  
+  // Filtrar solo temas de Derecho Civil y tomar los primeros 3
+  const civilWeakTopics = this.allWeakTopics
+    .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('civil'))
+    .slice(0, 3);
+
+  return civilWeakTopics;
+}
+
+getTop3WeakTopicsProcesal(): any[] {
+  if (!this.allWeakTopics || this.allWeakTopics.length === 0) return [];
+  
+  // Filtrar solo temas de Derecho Procesal y tomar los primeros 3
+  const procesalWeakTopics = this.allWeakTopics
+    .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('procesal'))
+    .slice(0, 3);
+
+  return procesalWeakTopics;
+}
+
+goToReforzarWithTopic(area: 'civil' | 'procesal', topic: any) {
+  const route = area === 'civil' ? '/civil/civil-reforzar' : '/procesal/procesal-reforzar';
+  this.router.navigate([route], {
+    queryParams: { 
+      temaId: topic.temaId,
+      fromDashboard: 'true'
+    }
+  });
+}
 }

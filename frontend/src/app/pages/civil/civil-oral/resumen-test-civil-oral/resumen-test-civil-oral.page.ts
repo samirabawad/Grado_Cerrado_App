@@ -30,18 +30,18 @@ interface QuestionDetail {
   ]
 })
 export class ResumenTestCivilOralPage implements OnInit {
-  
+
   correctAnswers: number = 0;
   incorrectAnswers: number = 0;
   totalQuestions: number = 5;
   percentage: number = 0;
-  
+
   motivationalMessage: string = '¡Sigue practicando!';
-  
+
   questionsDetails: QuestionDetail[] = [];
   expandedQuestionIndex: number | null = null;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.loadResults();
@@ -50,7 +50,7 @@ export class ResumenTestCivilOralPage implements OnInit {
   loadResults() {
     try {
       const resultsString = localStorage.getItem('current_oral_test_results');
-      
+
       if (!resultsString) {
         console.warn('No hay resultados guardados');
         this.router.navigate(['/civil/civil-oral']);
@@ -58,7 +58,7 @@ export class ResumenTestCivilOralPage implements OnInit {
       }
 
       const results = JSON.parse(resultsString);
-      
+
       console.log('📊 Resultados cargados:', results);
 
       this.correctAnswers = results.correctAnswers || 0;

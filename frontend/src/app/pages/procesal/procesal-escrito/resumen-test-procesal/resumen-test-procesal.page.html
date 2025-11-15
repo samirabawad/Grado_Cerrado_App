@@ -5,15 +5,16 @@
     <h1 class="header-title">Derecho Procesal</h1>
   </div>
 
-  <!-- Contenido principal -->
+  <!-- CONTENIDO PRINCIPAL -->
   <div class="content-area">
-    <!-- MENSAJE MOTIVACIONAL DINÁMICO -->
+
+    <!-- MENSAJE MOTIVACIONAL -->
     <div class="motivational-section" [class.success]="percentage >= 70">
       <p class="message-small">{{ getSmallMessage() }}</p>
       <h1 class="message-large">{{ getLargeMessage() }}</h1>
     </div>
 
-    <!-- BLOQUES DE CORRECTAS E INCORRECTAS -->
+    <!-- BLOQUES DE RESULTADOS -->
     <div class="stats-grid">
       <div class="stat-item correct">
         <div class="stat-icon">
@@ -36,7 +37,7 @@
       </div>
     </div>
 
-    <!-- CÍRCULOS DE PREGUNTAS CON DESPLEGABLE -->
+    <!-- SECCIÓN DE PREGUNTAS -->
     <div class="questions-section">
       <h3 class="section-title">Resumen de preguntas</h3>
 
@@ -45,7 +46,6 @@
           *ngFor="let question of questionResults; let i = index"
           class="question-wrapper">
 
-          <!-- Círculo -->
           <div
             class="question-circle"
             [class.correct]="question.isCorrect"
@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <!-- Desplegable FUERA del loop -->
+      <!-- DESPLEGABLE GLOBAL -->
       <div
         class="question-dropdown-global"
         *ngIf="expandedQuestionIndex !== null && questionResults[expandedQuestionIndex]"
@@ -99,9 +99,13 @@
           </div>
 
           <!-- EXPLICACIÓN -->
-          <div class="explanation-detail" *ngIf="questionResults[expandedQuestionIndex].explanation">
+          <div
+            class="explanation-detail"
+            *ngIf="questionResults[expandedQuestionIndex].explanation">
             <p class="label">Explicación:</p>
-            <p class="content">{{ questionResults[expandedQuestionIndex].explanation }}</p>
+            <p class="content">
+              {{ questionResults[expandedQuestionIndex].explanation }}
+            </p>
           </div>
         </div>
       </div>
@@ -109,7 +113,6 @@
 
     <!-- BOTONES DE ACCIÓN -->
     <div class="action-buttons">
-      <!-- Primera fila: Reforzar y Nuevo Test -->
       <div class="buttons-row">
         <ion-button
           expand="block"
@@ -128,7 +131,6 @@
         </ion-button>
       </div>
 
-      <!-- Segunda fila: Volver a Procesal -->
       <ion-button
         expand="block"
         fill="outline"
@@ -140,6 +142,6 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation Component -->
+  <!-- NAVEGACIÓN INFERIOR -->
   <app-bottom-nav></app-bottom-nav>
 </ion-content>
