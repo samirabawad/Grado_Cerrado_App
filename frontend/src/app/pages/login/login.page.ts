@@ -34,6 +34,13 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {}
 
+  ionViewWillEnter() {
+    this.correoElectronico = '';
+    this.contrasena = '';
+    this.showPassword = false;
+    this.isLoading = false;
+  }
+
   // ✅ Validación de email
   isEmailValid(): boolean {
     return this.emailPattern.test(this.correoElectronico);

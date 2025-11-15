@@ -38,6 +38,19 @@ export class RegistroPage implements OnInit {
 
   ngOnInit(): void {}
 
+  ionViewWillEnter() {
+    this.nombre = '';
+    this.segundoNombre = '';
+    this.apellidoPaterno = '';
+    this.apellidoMaterno = '';
+    this.correoElectronico = '';
+    this.contrasena = '';
+    this.confirmarContrasena = '';
+    this.showPassword = false;
+    this.showConfirmPassword = false;
+    this.isLoading = false;
+  }
+
   isNombreValid(): boolean {
     return this.nombre.trim().length > 0;
   }
