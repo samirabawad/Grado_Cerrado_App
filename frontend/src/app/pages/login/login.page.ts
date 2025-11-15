@@ -4,6 +4,7 @@ import { LoadingController, AlertController, IonicModule } from '@ionic/angular'
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
+import { PushNotificationService } from '../../services/push-notification.service';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +30,8 @@ export class LoginPage implements OnInit {
     private router: Router,
     private loadingController: LoadingController,
     private alertController: AlertController,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private pushNotificationService: PushNotificationService
   ) {}
 
   ngOnInit() {}
@@ -90,6 +92,7 @@ export class LoginPage implements OnInit {
 
       if (response.success) {
         localStorage.setItem('currentUser', JSON.stringify(response.user));
+        
         this.router.navigate(['/home']);
       } else {
         await this.showAlert('Error en el login', response.message || 'Error desconocido');
