@@ -4,7 +4,7 @@
       
       <!-- 🧑‍🎓 HERO con avatar a la izquierda -->
       <div class="hero-header">
-        <button class="avatar-wrap" (click)="goToProfile()" aria-label="Perfil">
+        <button class="avatar-wrap" (click)="openAvatarPicker()" aria-label="Perfil">
           <img [src]="userAvatarUrl || defaultAvatar" alt="avatar" />
         </button>
         <div class="user-info">
@@ -84,4 +84,71 @@
 
   <!-- 🔻 Bottom Navigation -->
   <app-bottom-nav></app-bottom-nav>
+
+  <!-- ============================================ -->
+  <!-- MODAL DE SELECCIÓN DE AVATAR -->
+  <!-- ============================================ -->
+  <div class="avatar-picker-modal" *ngIf="avatarPickerOpen">
+    <div class="modal-backdrop" (click)="closeAvatarPicker()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Cambiar avatar</h2>
+        <button class="close-btn" (click)="closeAvatarPicker()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Input oculto para subir archivo -->
+        <input 
+          #fileInput 
+          type="file" 
+          accept="image/*" 
+          style="display: none;" 
+          (change)="onFileSelected($event)"
+        />
+
+        <!-- Botón para subir foto -->
+        <div class="upload-section">
+          <button class="upload-btn" (click)="triggerFile()">
+            <ion-icon name="camera"></ion-icon>
+            <span>Subir foto personalizada</span>
+          </button>
+        </div>
+
+        <!-- Avatares predefinidos -->
+        <div class="avatars-grid">
+          <div 
+            *ngFor="let avatar of raccoonAvatars" 
+            class="avatar-option"
+            [class.selected]="pendingAvatar?.id === avatar.id"
+            (click)="selectAvatar(avatar)"
+          >
+            <img [src]="avatar.url" [alt]="'Avatar ' + avatar.id" />
+          </div>
+        </div>
+
+        <!-- Botón para remover avatar -->
+        <div class="remove-section">
+          <button class="remove-btn" (click)="removeAvatar(); closeAvatarPicker()">
+            <ion-icon name="trash"></ion-icon>
+            <span>Remover avatar</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="closeAvatarPicker()">
+          Cancelar
+        </button>
+        <button 
+          class="save-btn" 
+          [disabled]="!pendingAvatar"
+          (click)="saveSelectedAvatar()"
+        >
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
 </ion-content>
