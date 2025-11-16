@@ -88,9 +88,9 @@ export class HomePage implements OnInit {
       const currentUser = this.apiService.getCurrentUser();
 
       if (!currentUser || !currentUser.id) {
-        console.warn('⚠️ No hay usuario logueado');
-        this.userName = 'Estudiante';
+        console.warn('⚠️ No hay usuario logueado, redirigiendo a login');
         this.isLoading = false;
+        await this.router.navigate(['/login']);
         return;
       }
 
