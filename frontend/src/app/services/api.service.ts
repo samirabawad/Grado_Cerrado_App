@@ -82,25 +82,28 @@ export class ApiService {
   }
 
 
-  // ========================================
+// ========================================
   // TEMAS Y SUBTEMAS
   // ========================================
-
 
   getTemasByArea(areaId: number) {
     return this.http.get<any>(`${this.API_URL}/study/areas/${areaId}/temas-subtemas`);
   }
 
-  // (Opcional) helpers para no estar recordando el número de área
   getTemasCivil() {
-    // area_id = 1 → Derecho Civil
     return this.getTemasByArea(1);
   }
 
   getTemasProcesal() {
-    // area_id = 2 → Derecho Procesal
     return this.getTemasByArea(2);
   }
+
+  getQuestionCountByLevel(temaId: number, modalidadId: number): Observable<any> {
+    const url = `${this.API_URL}/api/questions/count-by-level/${temaId}/${modalidadId}`;
+    console.log('🔍 Llamando a:', url);
+    return this.http.get(url);
+  }
+    
 
   // ========================================
   // AUTENTICACIÓN
