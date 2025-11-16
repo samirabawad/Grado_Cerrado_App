@@ -57,6 +57,52 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     this.loadTemas();
   }
 
+  async loadQuestionCountByLevel(temaId: number) {
+    try {
+      // Consultar la base de datos para obtener cantidad por nivel
+      const currentUser = this.apiService.getCurrentUser();
+      if (!currentUser) return;
+
+      // Usar el endpoint de stats jerárquicas que ya existe
+      const statsResponse = await this.apiService.getHierarchicalStats(currentUser.id).toPromise();
+      
+      if (statsResponse && statsResponse.success && statsResponse.data) {
+        const civilArea = statsResponse.data.find((item: any) => 
+          item.type === 'area' && item.area === 'Derecho Civil'
+        );
+        
+        if (civilArea && civilArea.temas) {
+          const temaData = civilArea.temas.find((t: any) => t.temaId === temaId);
+          
+          if (temaData && temaData.subtemas) {
+            // Contar preguntas por nivel desde los subtemas
+            const tema = this.temas.find(t => t.id === temaId);
+            if (tema) {
+              tema.preguntasPorNivel = {
+                basico: 0,
+                intermedio: 0,
+                avanzado: 0
+              };
+              
+              // Sumar desde subtemas
+              temaData.subtemas.forEach((subtema: any) => {
+                if (subtema.porNivel) {
+                  tema.preguntasPorNivel.basico += subtema.porNivel.basico || 0;
+                  tema.preguntasPorNivel.intermedio += subtema.porNivel.intermedio || 0;
+                  tema.preguntasPorNivel.avanzado += subtema.porNivel.avanzado || 0;
+                }
+              });
+              
+              console.log('📊 Preguntas por nivel para tema', temaId, ':', tema.preguntasPorNivel);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando cantidad de preguntas por nivel:', error);
+    }
+  }
+
   ionViewWillEnter() {
     setTimeout(() => {
       this.content?.scrollToTop(300);
@@ -119,16 +165,31 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+// ✅ Método para saber cuántas preguntas permite el tema seleccionado Y nivel
   getMaxQuestionsForSelectedTema(): number {
     if (this.scopeType === 'all') {
-      return 7;
+      return 7; // Sin límite para "todo el temario"
     }
-
+    
     if (this.selectedTemaId) {
       const tema = this.temas.find(t => t.id === this.selectedTemaId);
-      return tema ? tema.cantidadPreguntas : 0;
+      if (!tema) return 0;
+      
+      // ✅ NUEVO: Si hay información por nivel, usarla
+      if (tema.preguntasPorNivel) {
+        const nivel = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
+        
+        if (nivel && tema.preguntasPorNivel[nivel] !== undefined) {
+          return tema.preguntasPorNivel[nivel];
+        }
+        
+        // Si es mixto, retornar el total
+        return tema.cantidadPreguntas || 0;
+      }
+      
+      return tema.cantidadPreguntas || 0;
     }
-
+    
     return 0;
   }
 
@@ -153,15 +214,19 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  selectTema(temaId: number) {
+  async selectTema(temaId: number) {
     this.selectedTemaId = temaId;
     this.scopeType = 'tema';
-
+    
+    // ✅ NUEVO: Cargar cantidad de preguntas por nivel
+    await this.loadQuestionCountByLevel(temaId);
+    
+    // ✅ Ajustar cantidad seleccionada si excede el límite
     const maxQuestions = this.getMaxQuestionsForSelectedTema();
     if (this.selectedQuantity > maxQuestions) {
       this.selectedQuantity = Math.min(maxQuestions, 1);
     }
-
+    
     console.log('✅ Tema seleccionado:', temaId, 'Máx preguntas:', maxQuestions);
   }
 
@@ -177,6 +242,12 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   selectDifficulty(level: any) {
     this.selectedDifficulty = level.value;
     this.selectedDifficultyLabel = level.label;
+    
+    // ✅ NUEVO: Ajustar cantidad si excede el máximo del nivel seleccionado
+    const maxQuestions = this.getMaxQuestionsForSelectedTema();
+    if (this.selectedQuantity > maxQuestions && maxQuestions > 0) {
+      this.selectedQuantity = Math.min(maxQuestions, 1);
+    }
   }
 
   onPickerScroll() {
