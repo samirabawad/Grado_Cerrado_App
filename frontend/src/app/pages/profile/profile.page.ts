@@ -889,19 +889,23 @@ pendingAvatar: { id: number; url: string } | null = null;
   closeAvatarPicker() { this.avatarPickerOpen = false; this.pendingAvatar = null; }
   selectAvatar(a: { id: number; url: string }) { this.pendingAvatar = a; }
 
+  triggerFile() {
+  if (this.fileInput?.nativeElement) {
+    this.fileInput.nativeElement.click();
+  }
+}
   async saveSelectedAvatar() {
     if (!this.pendingAvatar) return;
     try {
       const current = this.apiService.getCurrentUser();
       await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
 
-      // Refresca UI (el back mapeará id->url pública si aplica). Para assets locales, queda igual.
       this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
-
-      // Sincroniza localStorage
       current.avatarUrl = this.user.avatarUrl;
       current.avatar = this.user.avatarUrl;
       localStorage.setItem('currentUser', JSON.stringify(current));
+
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
 
       await this.showToast('✅ Avatar actualizado', 'success');
     } catch (e) {
@@ -910,10 +914,6 @@ pendingAvatar: { id: number; url: string } | null = null;
     } finally {
       this.closeAvatarPicker();
     }
-  }
-
-  triggerFile() {
-    if (this.fileInput?.nativeElement) this.fileInput.nativeElement.click();
   }
 
   async onFileSelected(ev: any) {
@@ -929,20 +929,19 @@ pendingAvatar: { id: number; url: string } | null = null;
     try {
       const current = this.apiService.getCurrentUser();
 
-      // Subir al backend
       const form = new FormData();
       form.append('file', file);
       const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
 
-      // El back responde { data: { url: "/avatars/xxxxx.png" } }
       const rawUrl = resp?.data?.url as string;
       const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
 
-      // Refrescar UI / localStorage
       this.user.avatarUrl = absoluteUrl;
       current.avatarUrl = absoluteUrl;
       current.avatar = absoluteUrl;
       localStorage.setItem('currentUser', JSON.stringify(current));
+
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
 
       await this.showToast('✅ Foto de perfil actualizada', 'success');
     } catch (e) {
@@ -958,11 +957,12 @@ pendingAvatar: { id: number; url: string } | null = null;
       const current = this.apiService.getCurrentUser();
       await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
 
-      // Volver al avatar con inicial
       this.user.avatarUrl = this.getInitialAvatar();
       current.avatarUrl = '';
       current.avatar = '';
       localStorage.setItem('currentUser', JSON.stringify(current));
+
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
 
       await this.showToast('Avatar quitado', 'success');
     } catch (e) {

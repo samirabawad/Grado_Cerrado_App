@@ -20,12 +20,10 @@ export class HomePage implements OnInit {
 
   userName: string = 'Estudiante';
   userCoins: number = 0;
-
   userStreak: number = 0;
   totalSessions: number = 0;
   totalQuestions: number = 0;
   overallSuccessRate: number = 0;
-
   isLoading: boolean = true;
 
   constructor(
@@ -33,7 +31,17 @@ export class HomePage implements OnInit {
     private apiService: ApiService
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
+    this.loadUserData();
+    this.loadUserAvatar();
+    
+    window.addEventListener('avatarUpdated', () => {
+      console.log('🔄 Avatar actualizado, recargando...');
+      this.loadUserAvatar();
+    });
+  }
+
+  ionViewWillEnter() {
     this.loadUserData();
     this.loadUserAvatar();
   }
@@ -42,21 +50,38 @@ export class HomePage implements OnInit {
     const current = this.apiService.getCurrentUser();
     const raw = current?.avatarUrl || current?.avatar || '';
 
+    console.log('🔄 Cargando avatar en home:', raw);
+
     if (raw && raw !== this.defaultAvatar) {
       const resolved = this.buildAvatarUrl(raw);
       this.userAvatarUrl = resolved || this.getInitialAvatar();
     } else {
       this.userAvatarUrl = this.getInitialAvatar();
     }
+
+    console.log('✅ Avatar cargado en home:', this.userAvatarUrl);
   }
 
-  // Convierte '/avatars/...' a 'http://host:puerto/avatars/...'
   private buildAvatarUrl(url?: string): string {
     if (!url) return '';
+    
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    if (url.startsWith('assets/')) {
+      return url;
+    }
+    
+    if (url.startsWith('data:')) {
+      return url;
+    }
+    
     if (url.startsWith('/avatars/')) {
       const filesBase = environment.apiUrl.replace(/\/api\/?$/, '');
       return `${filesBase}${url}`;
     }
+    
     return url;
   }
 
@@ -64,7 +89,6 @@ export class HomePage implements OnInit {
     const name = this.userName || 'U';
     const initial = name.charAt(0).toUpperCase();
 
-    // SVG con inicial
     const svg = `
       <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
         <circle cx="50" cy="50" r="50" fill="#9CA3AF"/>
@@ -75,10 +99,6 @@ export class HomePage implements OnInit {
     `;
 
     return 'data:image/svg+xml;base64,' + btoa(svg);
-  }
-
-  ionViewWillEnter() {
-    this.loadUserData();
   }
 
   async loadUserData() {
@@ -95,13 +115,10 @@ export class HomePage implements OnInit {
       }
 
       const studentId = currentUser.id;
-
-      // Usar el nombre del usuario almacenado en localStorage
       this.userName = currentUser.name || 'Estudiante';
 
       console.log('📊 Cargando estadísticas para:', studentId, this.userName);
 
-      // Cargar estadísticas del dashboard
       try {
         const statsResponse = await this.apiService.getDashboardStats(studentId).toPromise();
 
@@ -123,7 +140,6 @@ export class HomePage implements OnInit {
         }
       } catch (error) {
         console.error('❌ Error cargando estadísticas:', error);
-        // Mantener valores por defecto (0)
       }
 
     } catch (error) {
