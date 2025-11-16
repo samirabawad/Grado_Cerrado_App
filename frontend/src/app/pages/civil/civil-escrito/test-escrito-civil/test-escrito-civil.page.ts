@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../services/api.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { SoundService } from '../../../../services/sound.service';
+
 
 interface Question {
   id: string;
@@ -95,7 +97,8 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
     private apiService: ApiService,
     private alertController: AlertController,
     private loadingController: LoadingController,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private soundService: SoundService
   ) { 
     console.log('TestEscritoCivilPage constructor inicializado');
   }
@@ -918,6 +921,7 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
   // =====================
   
   showEvaluationPanel(question: Question, userAnswerText: string, isCorrect: boolean) {
+    this.soundService.play(isCorrect ? 'correct' : 'incorrect');
     this.evaluationResult = {
       isCorrect: isCorrect,
       userAnswer: userAnswerText,
