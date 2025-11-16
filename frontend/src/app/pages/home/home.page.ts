@@ -31,15 +31,19 @@ export class HomePage implements OnInit {
     private apiService: ApiService
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.loadUserData();
     this.loadUserAvatar();
+    
+    window.addEventListener('avatarUpdated', () => {
+      console.log('🔄 Avatar actualizado, recargando...');
+      this.loadUserAvatar();
+    });
   }
 
-  // ✅ SE EJECUTA CADA VEZ QUE ENTRAS AL HOME
   ionViewWillEnter() {
     this.loadUserData();
-    this.loadUserAvatar(); // ← RECARGA EL AVATAR
+    this.loadUserAvatar();
   }
 
   private loadUserAvatar() {
@@ -61,22 +65,18 @@ export class HomePage implements OnInit {
   private buildAvatarUrl(url?: string): string {
     if (!url) return '';
     
-    // Si ya es una URL completa, devolverla tal cual
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
     
-    // Si es una ruta de assets local
     if (url.startsWith('assets/')) {
       return url;
     }
     
-    // Si es un data URI (SVG base64)
     if (url.startsWith('data:')) {
       return url;
     }
     
-    // Si es una ruta del servidor (/avatars/...)
     if (url.startsWith('/avatars/')) {
       const filesBase = environment.apiUrl.replace(/\/api\/?$/, '');
       return `${filesBase}${url}`;
