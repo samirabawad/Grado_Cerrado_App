@@ -165,6 +165,69 @@ ion-content.civil-content {
 }
 
 // ========================================
+// SECCIONES FIJAS CON BLOQUE VISIBLE
+// ========================================
+.section-block {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .section-block-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f1f5f9;
+
+    .section-block-icon {
+      font-size: 24px;
+      color: #FF6F00;
+    }
+
+    .section-block-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+  }
+}
+
+// Bloque especial para Practica tus Errores con borde naranja
+.section-block-primary {
+  background: white;
+  border: 3px solid #f6ba8c;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.15);
+
+  .section-block-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #FF6F00;
+
+    .section-block-icon {
+      font-size: 24px;
+      color: #FF6F00;
+    }
+
+    .section-block-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #FF6F00;
+    }
+  }
+}
+
+// ========================================
 // TEMAS A REFORZAR
 // ========================================
 .weak-topics-list-new {
