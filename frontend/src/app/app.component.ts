@@ -26,17 +26,6 @@ export class AppComponent {
     // Llamar SIEMPRE acá, apenas inicia la app
     await this.pushNotificationService.initPushNotifications();
 
-    // luego revisar la sesión
-    this.checkSession();
-  }
-
-  checkSession() {
-    const currentUser = localStorage.getItem('currentUser');
-    
-    if (currentUser) {
-      this.router.navigate(['/home']);
-    } else {
-      this.router.navigate(['/welcome']);
-    }
+    // ✅ Ya no redirigimos aquí, dejamos que el routing y cada página manejen la sesión
   }
 }

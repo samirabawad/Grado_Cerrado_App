@@ -13,18 +13,17 @@ export class PushNotificationService {
   async initPushNotifications() {
     console.log("🚀 Iniciando servicio de notificaciones…");
 
-    // 1️⃣ Verificar permisos en Android 13+
+    // 1️⃣ Verificar permisos
     let permStatus = await PushNotifications.checkPermissions();
     console.log("🔎 Permiso inicial:", permStatus);
 
-    // Android 13 usa "display" en lugar de "receive"
-    if (permStatus.receive === 'prompt-with-rationale') {
+    if (permStatus.receive === 'prompt') {
       permStatus = await PushNotifications.requestPermissions();
       console.log("🔎 Permiso luego de solicitud:", permStatus);
     }
 
     // Si no se otorgaron permisos → cortar
-    if (permStatus.receive === 'granted') {
+    if (permStatus.receive !== 'granted') {
       console.warn("❌ Notificaciones bloqueadas. No se puede continuar.");
       return;
     }
