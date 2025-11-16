@@ -65,6 +65,10 @@ getInitialAvatar(): string {
 raccoonAvatars: { id: number; url: string }[] = [
   { id: 1, url: 'assets/avatars/racoon1.svg' },
   { id: 2, url: 'assets/avatars/racoon2.svg' },
+  { id: 3, url: 'assets/avatars/pizza.svg' },
+  { id: 4, url: 'assets/avatars/gavel.svg' },
+  { id: 5, url: 'assets/avatars/egg.svg' },
+  { id: 5, url: 'assets/avatars/flower.svg' },
 ];
 avatarPickerOpen = false;
 pendingAvatar: { id: number; url: string } | null = null;
