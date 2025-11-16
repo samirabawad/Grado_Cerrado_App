@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -98,12 +98,14 @@ export class ApiService {
     return this.getTemasByArea(2);
   }
 
-  getQuestionCountByLevel(temaId: number, modalidadId: number): Observable<any> {
-    const url = `${this.API_URL}/api/questions/count-by-level/${temaId}/${modalidadId}`;
-    console.log('🔍 Llamando a:', url);
-    return this.http.get(url);
-  }
+  getQuestionCountByLevel(temaId?: number, areaId?: number, modalidadId?: number): Observable<any> {
+    let params = new HttpParams();
+    if (temaId) params = params.set('temaId', temaId.toString());
+    if (areaId) params = params.set('areaId', areaId.toString());
+    if (modalidadId) params = params.set('modalidadId', modalidadId.toString());
     
+    return this.http.get(`${this.API_URL}/study/questions/count-by-level`, { params });
+  }
 
   // ========================================
   // AUTENTICACIÓN
@@ -384,6 +386,7 @@ public toAbsoluteFileUrl(url?: string): string {
         })
       );
   }
+
 
   getCurrentSession(): any {
     return this.currentSession$.value;

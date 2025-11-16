@@ -33,11 +33,12 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   isLoading: boolean = false;
 
   difficultyLevels = [
-    { value: 'basico', label: 'Básico' },
-    { value: 'intermedio', label: 'Intermedio' },
-    { value: 'avanzado', label: 'Avanzado' },
-    { value: 'mixto', label: 'Mixto (Todos)' }
+    { index: 0, value: 'basico', label: 'Básico' },
+    { index: 1, value: 'intermedio', label: 'Intermedio' },
+    { index: 2, value: 'avanzado', label: 'Avanzado' },
+    { index: 3, value: 'mixto', label: 'Mixto (Todos)' }
   ];
+
 
   get infiniteLevels() {
     return [...this.difficultyLevels, ...this.difficultyLevels, ...this.difficultyLevels];
@@ -58,38 +59,38 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
 async loadQuestionCountByLevel(temaId: number) {
-    try {
-      const tema = this.temas.find(t => t.id === temaId);
-      if (!tema) return;
+  try {
+    const tema = this.temas.find(t => t.id === temaId);
+    if (!tema) return;
 
-      tema.preguntasPorNivel = {
-        basico: 0,
-        intermedio: 0,
-        avanzado: 0
-      };
+    console.log('🔍 Cargando preguntas activas por nivel para tema:', temaId);
 
-      // Datos de Civil (area_id = 1)
-      if (temaId === 136) { // Derechos Reales
-        tema.preguntasPorNivel = { basico: 24, intermedio: 19, avanzado: 4 };
-      } else if (temaId === 137) { // Obligaciones y Contratos
-        tema.preguntasPorNivel = { basico: 17, intermedio: 6, avanzado: 3 };
-      } else if (temaId === 135) { // Parte General
-        tema.preguntasPorNivel = { basico: 4, intermedio: 6, avanzado: 2 };
-      } else if (temaId === 140) { // Prescripción
-        tema.preguntasPorNivel = { basico: 0, intermedio: 1, avanzado: 0 };
-      } else if (temaId === 141) { // Responsabilidad Civil
-        tema.preguntasPorNivel = { basico: 0, intermedio: 1, avanzado: 0 };
-      } else if (temaId === 138) { // Derecho de Familia
-        tema.preguntasPorNivel = { basico: 0, intermedio: 0, avanzado: 0 };
-      } else if (temaId === 139) { // Derecho Sucesorio
-        tema.preguntasPorNivel = { basico: 0, intermedio: 0, avanzado: 0 };
+    const response = await this.apiService.getQuestionCountByLevel(temaId).toPromise();
+    console.log('📥 Respuesta del servidor:', response);
+
+    if (response?.success) {
+      tema.preguntasPorNivel = response.data;
+
+      // ⭐ NUEVO: calcular total basado SOLO en preguntas activas
+      tema.cantidadPreguntas =
+        (tema.preguntasPorNivel.basico || 0) +
+        (tema.preguntasPorNivel.intermedio || 0) +
+        (tema.preguntasPorNivel.avanzado || 0);
+
+      console.log('✨ Total de preguntas activas:', tema.cantidadPreguntas);
+
+      // ⭐ NUEVO: si NO hay preguntas activas, eliminar el tema
+      if (tema.cantidadPreguntas === 0) {
+        console.warn('❌ Tema sin preguntas activas, removiendo:', tema.nombre);
+        this.temas = this.temas.filter(t => t.id !== temaId);
+        this.selectedTemaId = null;
       }
-
-      console.log('📊 Preguntas por nivel para tema', temaId, ':', tema.preguntasPorNivel);
-    } catch (error) {
-      console.error('Error cargando cantidad de preguntas por nivel:', error);
     }
+  } catch (error) {
+    console.error('❌ Error cargando preguntas por nivel:', error);
   }
+}
+
 
   ionViewWillEnter() {
     setTimeout(() => {
@@ -119,75 +120,76 @@ async loadQuestionCountByLevel(temaId: number) {
 
       const studentId = currentUser.id;
 
-      try {
-        const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+      const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
 
-        if (statsResponse && statsResponse.success && statsResponse.data) {
-          const civilArea = statsResponse.data.find(
-            (item: any) => item.type === 'area' && item.area === 'Derecho Civil'
-          );
+      if (statsResponse?.success && statsResponse.data) {
+        const civilArea = statsResponse.data.find(
+          (item: any) => item.type === 'area' && item.area === 'Derecho Civil'
+        );
 
-          if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
-            this.temas = civilArea.temas
-              .map((tema: any) => ({
-                id: tema.temaId,
-                nombre: tema.temaNombre,
-                cantidadPreguntas: tema.totalPreguntas || 0
-              }))
-              .filter((tema: any) => tema.cantidadPreguntas > 0);
+        if (civilArea?.temas) {
+          // Cargar lista base
+          this.temas = civilArea.temas.map((tema: any) => ({
+            id: tema.temaId,
+            nombre: tema.temaNombre,
+            cantidadPreguntas: 0,     // este se reemplaza luego con preguntas activas
+            preguntasPorNivel: null   // lo llenaremos abajo
+          }));
 
-            console.log('✅ Temas cargados para selector:', this.temas);
-          } else {
-            console.log('⚠️ No hay temas en civil');
-            this.temas = [];
+          console.log('🟡 Temas iniciales (sin filtro activo):', this.temas);
+
+          // ⭐ AGREGADO CRÍTICO: para cada tema cargamos su conteo REAL (solo activas)
+          for (let tema of this.temas) {
+            const levelData = await this.apiService.getQuestionCountByLevel(tema.id).toPromise();
+
+            if (levelData?.success) {
+              tema.preguntasPorNivel = levelData.data;
+
+              // Calcular cantidad total de preguntas activas
+              tema.cantidadPreguntas =
+                (tema.preguntasPorNivel.basico ?? 0) +
+                (tema.preguntasPorNivel.intermedio ?? 0) +
+                (tema.preguntasPorNivel.avanzado ?? 0);
+            }
           }
+
+          // ⭐ FILTRAR SOLO LOS TEMAS CON ≥ 1 PREGUNTA ACTIVA
+          this.temas = this.temas.filter(t => t.cantidadPreguntas > 0);
+
+          console.log('🟢 Temas finales (solo activos):', this.temas);
         }
-      } catch (error) {
-        console.error('Error cargando temas:', error);
-        this.temas = [];
       }
     } catch (error) {
-      console.error('Error general cargando temas:', error);
+      console.error('❌ Error cargando temas:', error);
+      this.temas = [];
     } finally {
       this.isLoading = false;
     }
   }
 
 // ✅ Método para saber cuántas preguntas permite el tema seleccionado Y nivel
+
   getMaxQuestionsForSelectedTema(): number {
-    if (this.scopeType === 'all') {
-      return 7; // Sin límite para "todo el temario"
-    }
-    
-    if (this.selectedTemaId) {
-      const tema = this.temas.find(t => t.id === this.selectedTemaId);
-      if (!tema) return 0;
-      
-      // ✅ Si hay información por nivel, usarla
-      if (tema.preguntasPorNivel) {
-        // Si el nivel es mixto, retornar el total
-        if (this.selectedDifficulty === 'mixto') {
-          return tema.cantidadPreguntas || 0;
-        }
-        
-        // Si es un nivel específico (basico, intermedio, avanzado)
-        const nivel = this.selectedDifficulty;
-        if (tema.preguntasPorNivel[nivel] !== undefined) {
-          return tema.preguntasPorNivel[nivel];
-        }
-      }
-      
-      // Si no hay información por nivel, retornar el total
+    if (this.scopeType === 'all') return 7;
+
+    if (!this.selectedTemaId) return 0;
+
+    const tema = this.temas.find(t => t.id === this.selectedTemaId);
+    if (!tema || !tema.preguntasPorNivel) return 0;
+
+    if (this.selectedDifficulty === 'mixto') {
       return tema.cantidadPreguntas || 0;
     }
-    
-    return 0;
+
+    return tema.preguntasPorNivel[this.selectedDifficulty] || 0;
   }
 
-  canSelectQuantity(quantity: number): boolean {
-    const max = this.getMaxQuestionsForSelectedTema();
-    return quantity <= max;
+
+  canSelectQuantity(q: number) {
+    const disponibles = this.getMaxQuestionsForSelectedTema();
+    return q <= disponibles;
   }
+
 
   selectScope(type: 'all' | 'tema') {
     this.scopeType = type;
@@ -208,17 +210,16 @@ async loadQuestionCountByLevel(temaId: number) {
   async selectTema(temaId: number) {
     this.selectedTemaId = temaId;
     this.scopeType = 'tema';
-    
-    // ✅ NUEVO: Cargar cantidad de preguntas por nivel
+
     await this.loadQuestionCountByLevel(temaId);
-    
-    // ✅ Ajustar cantidad seleccionada si excede el límite
+
+    // recalcular después de cargar
     const maxQuestions = this.getMaxQuestionsForSelectedTema();
-    if (this.selectedQuantity > maxQuestions) {
-      this.selectedQuantity = Math.min(maxQuestions, 1);
+    console.log('📊 Máximo disponible:', maxQuestions);
+
+    if (this.selectedQuantity > maxQuestions && maxQuestions > 0) {
+      this.selectedQuantity = 1;
     }
-    
-    console.log('✅ Tema seleccionado:', temaId, 'Máx preguntas:', maxQuestions);
   }
 
   getSelectedTemaName(): string {
@@ -231,23 +232,15 @@ async loadQuestionCountByLevel(temaId: number) {
   }
 
   selectDifficulty(level: any) {
-    console.log('🔄 Cambiando nivel de:', this.selectedDifficulty, 'a:', level.value);
-    
     this.selectedDifficulty = level.value;
     this.selectedDifficultyLabel = level.label;
     
-    // ✅ Obtener tema actual
-    const tema = this.temas.find(t => t.id === this.selectedTemaId);
-    console.log('📚 Tema actual:', tema?.nombre, 'Preguntas por nivel:', tema?.preguntasPorNivel);
-    
-    // ✅ Ajustar cantidad si excede el máximo del nivel seleccionado
+    // ✅ Ajustar cantidad inmediatamente
     const maxQuestions = this.getMaxQuestionsForSelectedTema();
-    console.log('📊 Máximo de preguntas para nivel', level.value, ':', maxQuestions);
+    console.log('🔄 Nivel:', level.value, '| Máximo:', maxQuestions);
     
     if (this.selectedQuantity > maxQuestions && maxQuestions > 0) {
-      console.log('⚠️ Cantidad seleccionada', this.selectedQuantity, 'excede el máximo', maxQuestions);
-      this.selectedQuantity = Math.min(maxQuestions, 1);
-      console.log('✅ Nueva cantidad ajustada:', this.selectedQuantity);
+      this.selectedQuantity = 1;
     }
   }
 
@@ -284,11 +277,13 @@ async loadQuestionCountByLevel(temaId: number) {
     });
 
     if (closestOption) {
-      const value = closestOption.getAttribute('data-value');
-      const level = this.difficultyLevels.find(l => l.value === value);
-      if (level) {
-        this.selectDifficulty(level);
-      }
+    const index = parseInt(closestOption.getAttribute('data-index'));
+    const level = this.difficultyLevels[index];
+
+    if (level) {
+      this.selectDifficulty(level);
+    }
+
 
       closestOption.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
