@@ -65,6 +65,10 @@ getInitialAvatar(): string {
 raccoonAvatars: { id: number; url: string }[] = [
   { id: 1, url: 'assets/avatars/racoon1.svg' },
   { id: 2, url: 'assets/avatars/racoon2.svg' },
+  { id: 3, url: 'assets/avatars/pizza.svg' },
+  { id: 4, url: 'assets/avatars/gavel.svg' },
+  { id: 5, url: 'assets/avatars/egg.svg' },
+  { id: 5, url: 'assets/avatars/flower.svg' },
 ];
 avatarPickerOpen = false;
 pendingAvatar: { id: number; url: string } | null = null;
@@ -894,81 +898,93 @@ pendingAvatar: { id: number; url: string } | null = null;
     this.fileInput.nativeElement.click();
   }
 }
-  async saveSelectedAvatar() {
-    if (!this.pendingAvatar) return;
-    try {
-      const current = this.apiService.getCurrentUser();
-      await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
 
-      this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
-      current.avatarUrl = this.user.avatarUrl;
-      current.avatar = this.user.avatarUrl;
-      localStorage.setItem('currentUser', JSON.stringify(current));
+async saveSelectedAvatar() {
+  if (!this.pendingAvatar) return;
+  try {
+    const current = this.apiService.getCurrentUser();
+    await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
 
+    this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
+    current.avatarUrl = this.user.avatarUrl;
+    current.avatar = this.user.avatarUrl;
+    localStorage.setItem('currentUser', JSON.stringify(current));
+
+    await this.showToast('✅ Avatar actualizado', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
       window.dispatchEvent(new CustomEvent('avatarUpdated'));
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('No se pudo actualizar el avatar', 'danger');
+  } finally {
+    this.closeAvatarPicker();
+  }
+}
 
-      await this.showToast('✅ Avatar actualizado', 'success');
-    } catch (e) {
-      console.error(e);
-      await this.showToast('No se pudo actualizar el avatar', 'danger');
-    } finally {
-      this.closeAvatarPicker();
-    }
+async onFileSelected(ev: any) {
+  const file: File | undefined = ev?.target?.files?.[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    await this.showToast('La imagen excede 2MB', 'danger');
+    ev.target.value = '';
+    return;
   }
 
-  async onFileSelected(ev: any) {
-    const file: File | undefined = ev?.target?.files?.[0];
-    if (!file) return;
+  try {
+    const current = this.apiService.getCurrentUser();
+    const form = new FormData();
+    form.append('file', file);
+    const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
 
-    if (file.size > 2 * 1024 * 1024) {
-      await this.showToast('La imagen excede 2MB', 'danger');
-      ev.target.value = '';
-      return;
-    }
+    const rawUrl = resp?.data?.url as string;
+    const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
 
-    try {
-      const current = this.apiService.getCurrentUser();
+    this.user.avatarUrl = absoluteUrl;
+    current.avatarUrl = absoluteUrl;
+    current.avatar = absoluteUrl;
+    localStorage.setItem('currentUser', JSON.stringify(current));
 
-      const form = new FormData();
-      form.append('file', file);
-      const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
-
-      const rawUrl = resp?.data?.url as string;
-      const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
-
-      this.user.avatarUrl = absoluteUrl;
-      current.avatarUrl = absoluteUrl;
-      current.avatar = absoluteUrl;
-      localStorage.setItem('currentUser', JSON.stringify(current));
-
+    await this.showToast('✅ Foto de perfil actualizada', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
       window.dispatchEvent(new CustomEvent('avatarUpdated'));
-
-      await this.showToast('✅ Foto de perfil actualizada', 'success');
-    } catch (e) {
-      console.error(e);
-      await this.showToast('Error subiendo la imagen', 'danger');
-    } finally {
-      ev.target.value = '';
-    }
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('Error subiendo la imagen', 'danger');
+  } finally {
+    ev.target.value = '';
   }
+}
 
-  async removeAvatar() {
-    try {
-      const current = this.apiService.getCurrentUser();
-      await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
+async removeAvatar() {
+  try {
+    const current = this.apiService.getCurrentUser();
+    await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
 
-      this.user.avatarUrl = this.getInitialAvatar();
-      current.avatarUrl = '';
-      current.avatar = '';
-      localStorage.setItem('currentUser', JSON.stringify(current));
+    this.user.avatarUrl = this.getInitialAvatar();
+    current.avatarUrl = '';
+    current.avatar = '';
+    localStorage.setItem('currentUser', JSON.stringify(current));
 
+    await this.showToast('Avatar quitado', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
       window.dispatchEvent(new CustomEvent('avatarUpdated'));
-
-      await this.showToast('Avatar quitado', 'success');
-    } catch (e) {
-      console.error(e);
-      await this.showToast('No se pudo quitar el avatar', 'danger');
-    }
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('No se pudo quitar el avatar', 'danger');
   }
+}
 
 }
