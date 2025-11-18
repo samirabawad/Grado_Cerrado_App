@@ -6,8 +6,8 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AudioService, AudioRecordingState } from '../../../../services/audio';
-import { ApiService } from '../../../../services/api.service';
 import { VoiceRecorder, VoiceRecorderPlugin, RecordingData, GenericResponse } from 'capacitor-voice-recorder';
+import { ApiService } from '../../../../services/api.service';
 
 interface Question {
   id: string;
