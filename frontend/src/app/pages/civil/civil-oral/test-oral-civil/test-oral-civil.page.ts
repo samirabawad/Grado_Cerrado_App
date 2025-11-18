@@ -5,7 +5,9 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AudioService, AudioRecordingState } from '../../../../services/audio';
+import { VoiceRecorder, VoiceRecorderPlugin, RecordingData, GenericResponse } from 'capacitor-voice-recorder';
 import { ApiService } from '../../../../services/api.service';
+
 
 interface Question {
   id: string;
@@ -523,6 +525,13 @@ isOptionSelected(option: string): boolean {
       await this.startRecording();
     }
   }
+
+  // Pedir permisos
+  async requestPermissions() {
+    const result = await VoiceRecorder.requestAudioRecordingPermission();
+    return result.value;
+  }
+
 
   async startRecording() {
     console.log('🎤 Iniciando grabación...');
