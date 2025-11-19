@@ -211,13 +211,9 @@ async loadQuestionsFromBackend() {
           
           console.log('✅ Preguntas cargadas:', this.questions.length);
           console.log('✅ Método de respuesta activo:', this.responseMethod);
-          
+                    
           this.isLoading = false;
           this.cdr.detectChanges();
-          
-          setTimeout(() => {
-            this.playAudio();
-          }, 500);
           
         } catch (error) {
           console.error('❌ Error procesando preguntas:', error);
@@ -394,101 +390,80 @@ isOptionSelected(option: string): boolean {
     return this.currentQuestionNumber === this.totalQuestions;
   }
 
-  playAudio() {
-    const question = this.getCurrentQuestion();
-    if (!question || !question.questionText) {
-      console.warn('⚠️ No hay pregunta para reproducir');
-      return;
-    }
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
-      this.isPlaying = true;
-      this.audioCompleted = false;
-      this.cdr.detectChanges();
-
-      let fullText = question.questionText;
-      
-      const options = this.getCurrentQuestionOptions();
-      if (options.length > 0) {
-        fullText += '. Las alternativas son: ';
-        options.forEach((option, index) => {
-          const letter = this.getOptionLetter(index);
-          fullText += `${letter}, ${option}. `;
-        });
-      }
-
-      const utterance = new SpeechSynthesisUtterance(fullText);
-      utterance.lang = 'es-CL';
-      utterance.rate = 1.0;
-      utterance.pitch = 1.2;
-      utterance.volume = 1.0;
-
-      utterance.onstart = () => {
-        console.log('🎙️ Iniciando reproducción de audio');
-        this.isPlaying = true;
-        this.cdr.detectChanges();
-      };
-
-      utterance.onend = () => {
-        console.log('✅ Audio completado');
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        
-        this.questionReadyTime = Date.now();
-        console.log('⏱️ Pregunta lista en:', new Date(this.questionReadyTime).toLocaleTimeString());
-        
-        this.cdr.detectChanges();
-      };
-
-      utterance.onerror = (event) => {
-        console.error('❌ Error en síntesis de voz:', event);
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.cdr.detectChanges();
-      };
-
-      const loadVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        
-        let selectedVoice = voices.find(voice => 
-          voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
-        );
-        
-        if (!selectedVoice) {
-          selectedVoice = voices.find(voice => 
-            voice.lang.includes('es') && (
-              voice.name.toLowerCase().includes('female') ||
-              voice.name.toLowerCase().includes('femenina') ||
-              voice.name.toLowerCase().includes('mónica') ||
-              voice.name.toLowerCase().includes('monica') ||
-              voice.name.toLowerCase().includes('paulina') ||
-              voice.name.toLowerCase().includes('lucia') ||
-              voice.name.toLowerCase().includes('paloma')
-            )
-          );
-        }
-        
-        if (!selectedVoice) {
-          selectedVoice = voices.find(voice => voice.lang.includes('es'));
-        }
-        
-        if (selectedVoice) {
-          utterance.voice = selectedVoice;
-          console.log('🎤 Voz seleccionada:', selectedVoice.name, selectedVoice.lang);
-        }
-        
-        window.speechSynthesis.speak(utterance);
-      };
-
-      if (window.speechSynthesis.getVoices().length > 0) {
-        loadVoices();
-      } else {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-      }
-    }
+ async playAudio() {
+  const question = this.getCurrentQuestion();
+  if (!question || !question.questionText) {
+    console.warn('⚠️ No hay pregunta para reproducir');
+    return;
   }
+
+  this.isPlaying = true;
+  this.audioCompleted = false;
+
+  if (this.currentAudio) {
+    this.currentAudio.pause();
+    this.currentAudio = null;
+  }
+
+  // Cancelar speechSynthesis si está activo
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  try {
+    // Construir texto completo con opciones
+    let fullText = question.questionText;
+    
+    const options = this.getCurrentQuestionOptions();
+    if (options.length > 0) {
+      fullText += '. Las alternativas son: ';
+      options.forEach((option, index) => {
+        const letter = this.getOptionLetter(index);
+        fullText += `${letter}, ${option}. `;
+      });
+    }
+
+    console.log('🎵 Solicitando audio a Azure para:', fullText.substring(0, 50) + '...');
+
+    // Llamar a Azure TTS
+    const response = await this.apiService.textToSpeech(fullText).toPromise();
+
+    if (!response) {
+      throw new Error('No se recibió respuesta del servidor');
+    }
+
+    const audioBlob = new Blob([response], { type: 'audio/mp3' });
+    const audioUrl = URL.createObjectURL(audioBlob);
+    
+    this.currentAudio = new Audio(audioUrl);
+    this.currentAudio.loop = false;
+    
+    this.currentAudio.onended = () => {
+      console.log('✅ Audio completado');
+      this.isPlaying = false;
+      this.audioCompleted = true;
+      this.questionReadyTime = Date.now();
+      console.log('⏱️ Pregunta lista en:', new Date(this.questionReadyTime).toLocaleTimeString());
+      this.cdr.detectChanges();
+    };
+
+    this.currentAudio.onerror = (error) => {
+      console.error('❌ Error reproduciendo audio:', error);
+      this.isPlaying = false;
+      this.audioCompleted = true;
+      this.cdr.detectChanges();
+    };
+
+    await this.currentAudio.play();
+    console.log('✅ Reproduciendo audio de Azure');
+    
+  } catch (error) {
+    console.error('❌ Error obteniendo audio de Azure:', error);
+    this.isPlaying = false;
+    this.audioCompleted = true;
+    this.cdr.detectChanges();
+  }
+}
 
   pauseAudio() {
     if ('speechSynthesis' in window && this.isPlaying) {
@@ -1108,11 +1083,6 @@ detectOptionFromTranscription(transcription: string): string | null {
     console.log('🔄 Estado reseteado para pregunta', this.currentQuestionNumber);
     
     this.cdr.detectChanges();
-    
-    setTimeout(() => {
-      this.playAudio();
-      console.log('🔊 Reproduciendo automáticamente pregunta', this.currentQuestionNumber);
-    }, 300);
   }
 
 async completeTest() {

@@ -228,6 +228,14 @@ private getFilesBase(): string {
   return this.API_URL.replace(/\/api\/?$/, '');
 }
 
+//Audio TTS
+
+textToSpeech(text: string): Observable<ArrayBuffer> {
+  return this.http.post(`${this.API_URL}/Speech/text-to-speech`,  // ✅ SIN /api extra
+    { text }, 
+    { responseType: 'arraybuffer' }
+  );
+}
 // Convierte rutas relativas del backend a absolutas con el host del API
 public toAbsoluteFileUrl(url?: string): string {
   if (!url) return '';

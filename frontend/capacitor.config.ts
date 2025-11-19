@@ -11,6 +11,9 @@ const config: CapacitorConfig = {
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
+    },
+        VoiceRecorder: {
+      audioSource: 'MIC'
     }
   },
   ios: {
@@ -22,6 +25,7 @@ const config: CapacitorConfig = {
       keystoreAlias: undefined
     }
   }
+  
 };
 
 export default config;
