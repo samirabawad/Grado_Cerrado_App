@@ -390,84 +390,79 @@ isOptionSelected(option: string): boolean {
     return this.currentQuestionNumber === this.totalQuestions;
   }
 
- async playAudio() {
-  const question = this.getCurrentQuestion();
-  if (!question || !question.questionText) {
-    console.warn('⚠️ No hay pregunta para reproducir');
-    return;
-  }
-
-  this.isPlaying = true;
-  this.audioCompleted = false;
-
-  if (this.currentAudio) {
-    this.currentAudio.pause();
-    this.currentAudio = null;
-  }
-
-  // Cancelar speechSynthesis si está activo
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
-
-  try {
-    // Construir texto completo con opciones
-    let fullText = question.questionText;
-    
-    const options = this.getCurrentQuestionOptions();
-    if (options.length > 0) {
-      fullText += '. Las alternativas son: ';
-      options.forEach((option, index) => {
-        const letter = this.getOptionLetter(index);
-        fullText += `${letter}, ${option}. `;
-      });
+  async playAudio() {
+    const question = this.getCurrentQuestion();
+    if (!question || !question.questionText) {
+      console.warn('⚠️ No hay pregunta');
+      return;
     }
 
-    console.log('🎵 Solicitando audio a Azure para:', fullText.substring(0, 50) + '...');
+    // ✅ CRÍTICO PARA ANDROID: Crear Audio ANTES de la llamada async
+    const dummyAudio = new Audio();
+    
+    this.isPlaying = true;
+    this.audioCompleted = false;
 
-    // Llamar a Azure TTS
-    const response = await this.apiService.textToSpeech(fullText).toPromise();
-
-    if (!response) {
-      throw new Error('No se recibió respuesta del servidor');
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
     }
 
-    const audioBlob = new Blob([response], { type: 'audio/mp3' });
-    const audioUrl = URL.createObjectURL(audioBlob);
-    
-    this.currentAudio = new Audio(audioUrl);
-    this.currentAudio.loop = false;
-    
-    this.currentAudio.onended = () => {
-      console.log('✅ Audio completado');
+    try {
+      let fullText = question.questionText;
+      
+      const options = this.getCurrentQuestionOptions();
+      if (options.length > 0) {
+        fullText += '. Las alternativas son: ';
+        options.forEach((option, index) => {
+          const letter = this.getOptionLetter(index);
+          fullText += `${letter}, ${option}. `;
+        });
+      }
+
+      console.log('📝 Solicitando audio...');
+
+      const response = await this.apiService.textToSpeech(fullText).toPromise();
+
+      if (!response) {
+        throw new Error('Sin respuesta');
+      }
+
+      const audioBlob = new Blob([response], { type: 'audio/mp3' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // ✅ Reusar el Audio creado antes
+      dummyAudio.src = audioUrl;
+      this.currentAudio = dummyAudio;
+      this.currentAudio.loop = false;
+      
+      this.currentAudio.onended = () => {
+        this.isPlaying = false;
+        this.audioCompleted = true;
+        this.cdr.detectChanges();
+      };
+
+      this.currentAudio.onerror = (error) => {
+        console.error('❌ Error:', error);
+        this.isPlaying = false;
+        this.audioCompleted = true;
+        this.cdr.detectChanges();
+      };
+
+      await this.currentAudio.play();
+      console.log('✅ Reproduciendo');
+      
+    } catch (error) {
+      console.error('❌ Error:', error);
       this.isPlaying = false;
       this.audioCompleted = true;
-      this.questionReadyTime = Date.now();
-      console.log('⏱️ Pregunta lista en:', new Date(this.questionReadyTime).toLocaleTimeString());
       this.cdr.detectChanges();
-    };
-
-    this.currentAudio.onerror = (error) => {
-      console.error('❌ Error reproduciendo audio:', error);
-      this.isPlaying = false;
-      this.audioCompleted = true;
-      this.cdr.detectChanges();
-    };
-
-    await this.currentAudio.play();
-    console.log('✅ Reproduciendo audio de Azure');
-    
-  } catch (error) {
-    console.error('❌ Error obteniendo audio de Azure:', error);
-    this.isPlaying = false;
-    this.audioCompleted = true;
-    this.cdr.detectChanges();
+    }
   }
-}
 
   pauseAudio() {
-    if ('speechSynthesis' in window && this.isPlaying) {
-      window.speechSynthesis.cancel();
+    if (this.currentAudio && this.isPlaying) {
+      this.currentAudio.pause();
       this.isPlaying = false;
       this.cdr.detectChanges();
     }
