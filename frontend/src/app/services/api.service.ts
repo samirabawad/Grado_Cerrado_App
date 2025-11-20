@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 
 // ========================================
 // INTERFACES 
@@ -228,14 +229,7 @@ private getFilesBase(): string {
   return this.API_URL.replace(/\/api\/?$/, '');
 }
 
-//Audio TTS
 
-textToSpeech(text: string): Observable<ArrayBuffer> {
-  return this.http.post(`${this.API_URL}/Speech/text-to-speech`,  // ✅ SIN /api extra
-    { text }, 
-    { responseType: 'arraybuffer' }
-  );
-}
 // Convierte rutas relativas del backend a absolutas con el host del API
 public toAbsoluteFileUrl(url?: string): string {
   if (!url) return '';
@@ -252,6 +246,41 @@ public toAbsoluteFileUrl(url?: string): string {
   return url;
 }
 
+
+//Audio TTS
+async playTextToSpeech(text: string): Promise<void> {
+  try {
+    console.log('🎵 Solicitando TTS:', text.substring(0, 50));
+    
+    const response = await fetch(`${this.API_URL}/Speech/text-to-speech`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const blob = await response.blob();
+    console.log('✅ Blob recibido:', blob.size, 'bytes');
+
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    
+    console.log('▶️ Reproduciendo...');
+    await audio.play();
+    
+    audio.onended = () => {
+      console.log('✅ Terminado');
+      URL.revokeObjectURL(url);
+    };
+    
+  } catch (error: any) {
+    console.error('❌ Error TTS:', error);
+    throw error;
+  }
+}
 
 
   logout(): void {

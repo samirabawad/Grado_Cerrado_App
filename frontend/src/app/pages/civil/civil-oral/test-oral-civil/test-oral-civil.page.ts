@@ -9,6 +9,7 @@ import { VoiceRecorder, VoiceRecorderPlugin, RecordingData, GenericResponse } fr
 import { ApiService } from '../../../../services/api.service';
 
 
+
 interface Question {
   id: string;
   text: string;
@@ -391,72 +392,43 @@ isOptionSelected(option: string): boolean {
   }
 
   async playAudio() {
-    const question = this.getCurrentQuestion();
-    if (!question || !question.questionText) {
-      console.warn('⚠️ No hay pregunta');
-      return;
-    }
-
-    // ✅ CRÍTICO PARA ANDROID: Crear Audio ANTES de la llamada async
-    const dummyAudio = new Audio();
+    if (this.isPlaying) return;
     
-    this.isPlaying = true;
-    this.audioCompleted = false;
-
-    if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio = null;
-    }
-
     try {
-      let fullText = question.questionText;
+      this.isPlaying = true;
+      this.audioCompleted = false;
       
-      const options = this.getCurrentQuestionOptions();
-      if (options.length > 0) {
-        fullText += '. Las alternativas son: ';
-        options.forEach((option, index) => {
-          const letter = this.getOptionLetter(index);
-          fullText += `${letter}, ${option}. `;
-        });
+      const pregunta = this.getCurrentQuestion();
+      if (!pregunta) {
+        console.error('❌ No hay pregunta actual');
+        return;
       }
 
-      console.log('📝 Solicitando audio...');
+      console.log('📖 Pregunta completa:', pregunta);
 
-      const response = await this.apiService.textToSpeech(fullText).toPromise();
-
-      if (!response) {
-        throw new Error('Sin respuesta');
+      // Obtener opciones correctamente
+      const opciones = pregunta['options'] || pregunta['opciones'] || [];
+      
+      if (opciones.length === 0) {
+        console.error('❌ No hay opciones disponibles');
+        return;
       }
 
-      const audioBlob = new Blob([response], { type: 'audio/mp3' });
-      const audioUrl = URL.createObjectURL(audioBlob);
+      const textoCompleto = `
+        ${pregunta['questionText'] || pregunta['pregunta']}. 
+        Las opciones son: 
+        ${opciones.map((o: any, i: number) => `${i + 1}. ${o.text || o}`).join('. ')}
+      `;
       
-      // ✅ Reusar el Audio creado antes
-      dummyAudio.src = audioUrl;
-      this.currentAudio = dummyAudio;
-      this.currentAudio.loop = false;
+      console.log('🎵 Texto a reproducir:', textoCompleto);
+      await this.apiService.playTextToSpeech(textoCompleto);
       
-      this.currentAudio.onended = () => {
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.cdr.detectChanges();
-      };
-
-      this.currentAudio.onerror = (error) => {
-        console.error('❌ Error:', error);
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.cdr.detectChanges();
-      };
-
-      await this.currentAudio.play();
-      console.log('✅ Reproduciendo');
-      
-    } catch (error) {
-      console.error('❌ Error:', error);
       this.isPlaying = false;
       this.audioCompleted = true;
-      this.cdr.detectChanges();
+      
+    } catch (error: any) {
+      console.error('❌ Error reproduciendo:', error.message || error);
+      this.isPlaying = false;
     }
   }
 
@@ -698,6 +670,8 @@ isOptionSelected(option: string): boolean {
       this.cdr.detectChanges();
     }
   }
+
+  
 
   stopAllAudio() {
     // Detener síntesis de voz (pregunta o explicación)
