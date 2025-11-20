@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { Capacitor } from '@capacitor/core';
 
 // ========================================
 // INTERFACES 
@@ -229,13 +230,23 @@ private getFilesBase(): string {
 }
 
 //Audio TTS
-
-textToSpeech(text: string): Observable<ArrayBuffer> {
-  return this.http.post(`${this.API_URL}/Speech/text-to-speech`,  // ✅ SIN /api extra
+textToSpeech(text: string): Promise<ArrayBuffer> {
+  return this.http.post(`${this.API_URL}/Speech/text-to-speech`, 
     { text }, 
     { responseType: 'arraybuffer' }
+  ).toPromise() as Promise<ArrayBuffer>;
+}
+
+getAzureTTS(text: string) {
+  return this.http.post(
+    `${environment.apiUrl}/api/speech/tts`,
+    { text },
+    { responseType: 'blob' }  // ⭐ muy importante
   );
 }
+
+
+
 // Convierte rutas relativas del backend a absolutas con el host del API
 public toAbsoluteFileUrl(url?: string): string {
   if (!url) return '';

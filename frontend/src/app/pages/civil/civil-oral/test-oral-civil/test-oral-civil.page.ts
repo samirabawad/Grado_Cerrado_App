@@ -390,75 +390,65 @@ isOptionSelected(option: string): boolean {
     return this.currentQuestionNumber === this.totalQuestions;
   }
 
-  async playAudio() {
-    const question = this.getCurrentQuestion();
-    if (!question || !question.questionText) {
-      console.warn('⚠️ No hay pregunta');
-      return;
-    }
+  async playAzureAudio(text: string) {
+  try {
+    const audioBlob = await this.apiService.getAzureTTS(text).toPromise();
+    if (!audioBlob) {
+  console.error("❌ No se recibió audio desde Azure.");
+  return;
+}
 
-    // ✅ CRÍTICO PARA ANDROID: Crear Audio ANTES de la llamada async
-    const dummyAudio = new Audio();
-    
+const url = URL.createObjectURL(audioBlob);
+
+
+    this.currentAudio = new Audio(url);
+
     this.isPlaying = true;
     this.audioCompleted = false;
+    this.cdr.detectChanges();
 
-    if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio = null;
-    }
-
-    try {
-      let fullText = question.questionText;
-      
-      const options = this.getCurrentQuestionOptions();
-      if (options.length > 0) {
-        fullText += '. Las alternativas son: ';
-        options.forEach((option, index) => {
-          const letter = this.getOptionLetter(index);
-          fullText += `${letter}, ${option}. `;
-        });
-      }
-
-      console.log('📝 Solicitando audio...');
-
-      const response = await this.apiService.textToSpeech(fullText).toPromise();
-
-      if (!response) {
-        throw new Error('Sin respuesta');
-      }
-
-      const audioBlob = new Blob([response], { type: 'audio/mp3' });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // ✅ Reusar el Audio creado antes
-      dummyAudio.src = audioUrl;
-      this.currentAudio = dummyAudio;
-      this.currentAudio.loop = false;
-      
-      this.currentAudio.onended = () => {
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.cdr.detectChanges();
-      };
-
-      this.currentAudio.onerror = (error) => {
-        console.error('❌ Error:', error);
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.cdr.detectChanges();
-      };
-
-      await this.currentAudio.play();
-      console.log('✅ Reproduciendo');
-      
-    } catch (error) {
-      console.error('❌ Error:', error);
+    this.currentAudio.onended = () => {
       this.isPlaying = false;
       this.audioCompleted = true;
       this.cdr.detectChanges();
-    }
+    };
+
+    this.currentAudio.onerror = (err) => {
+      console.error("❌ Error reproduciendo audio TTS:", err);
+      this.isPlaying = false;
+      this.cdr.detectChanges();
+    };
+
+    await this.currentAudio.play();
+  } catch (error) {
+    console.error("❌ Error en TTS Azure:", error);
   }
+}
+
+
+async playAudio() {
+  const question = this.getCurrentQuestion();
+  if (!question || !question.questionText) {
+    console.warn("⚠️ No hay pregunta para reproducir.");
+    return;
+  }
+
+  // Armar texto completo
+  let fullText = question.questionText;
+
+  const options = this.getCurrentQuestionOptions();
+  if (options.length > 0) {
+    fullText += ". Las alternativas son: ";
+    options.forEach((option, index) => {
+      const letter = this.getOptionLetter(index);
+      fullText += `${letter}, ${option}. `;
+    });
+  }
+
+  console.log("🔊 Reproduciendo TTS Azure...");
+
+  await this.playAzureAudio(fullText);
+}
 
   pauseAudio() {
     if (this.currentAudio && this.isPlaying) {
@@ -629,75 +619,24 @@ isOptionSelected(option: string): boolean {
     }
   }
 
-  playExplanationAudio() {
-      if (!this.evaluationResult?.explanation) return;
+async playExplanationAudio() {
+  if (!this.evaluationResult?.explanation) return;
 
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-        utterance.lang = 'es-CL';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.2;
-        utterance.volume = 1.0;
+  console.log("🔊 Reproduciendo explicación con Azure TTS...");
 
-        utterance.onstart = () => {
-          this.isPlayingExplanation = true;
-          this.cdr.detectChanges();
-        };
+  await this.playAzureAudio(this.evaluationResult.explanation);
+  this.isPlayingExplanation = true;
+}
 
-        utterance.onend = () => {
-          this.isPlayingExplanation = false;
-          this.cdr.detectChanges();
-        };
 
-        const loadVoices = () => {
-          const voices = window.speechSynthesis.getVoices();
-          
-          let selectedVoice = voices.find(voice => 
-            voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
-          );
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => 
-              voice.lang.includes('es') && (
-                voice.name.toLowerCase().includes('female') ||
-                voice.name.toLowerCase().includes('femenina') ||
-                voice.name.toLowerCase().includes('mónica') ||
-                voice.name.toLowerCase().includes('monica') ||
-                voice.name.toLowerCase().includes('paulina') ||
-                voice.name.toLowerCase().includes('lucia') ||
-                voice.name.toLowerCase().includes('paloma')
-              )
-            );
-          }
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => voice.lang.includes('es'));
-          }
-          
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-          }
-          
-          window.speechSynthesis.speak(utterance);
-        };
-
-        if (window.speechSynthesis.getVoices().length > 0) {
-          loadVoices();
-        } else {
-          window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
-      }
-    }
-
-  pauseExplanationAudio() {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      this.isPlayingExplanation = false;
-      this.cdr.detectChanges();
-    }
+pauseExplanationAudio() {
+  if (this.currentAudio) {
+    this.currentAudio.pause();
+    this.isPlayingExplanation = false;
+    this.cdr.detectChanges();
   }
+}
+
 
   stopAllAudio() {
     // Detener síntesis de voz (pregunta o explicación)
