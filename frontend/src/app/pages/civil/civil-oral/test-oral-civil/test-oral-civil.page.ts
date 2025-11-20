@@ -395,6 +395,8 @@ isOptionSelected(option: string): boolean {
     const audioBlob = await this.apiService.getAzureTTS(text).toPromise();
     if (!audioBlob) {
   console.error("❌ No se recibió audio desde Azure.");
+  console.log("🟣 Llamando al endpoint Azure TTS…");
+
   return;
 }
 
@@ -446,6 +448,8 @@ async playAudio() {
   }
 
   console.log("🔊 Reproduciendo TTS Azure...");
+  console.log("🔵 playAudio() fue llamado");
+
 
   await this.playAzureAudio(fullText);
 }
