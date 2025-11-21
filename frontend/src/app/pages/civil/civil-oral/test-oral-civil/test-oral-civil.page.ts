@@ -406,7 +406,6 @@ isOptionSelected(option: string): boolean {
 
       console.log('📖 Pregunta completa:', pregunta);
 
-      // Obtener opciones correctamente
       const opciones = pregunta['options'] || pregunta['opciones'] || [];
       
       if (opciones.length === 0) {
@@ -414,11 +413,8 @@ isOptionSelected(option: string): boolean {
         return;
       }
 
-      const textoCompleto = `
-        ${pregunta['questionText'] || pregunta['pregunta']}. 
-        Las opciones son: 
-        ${opciones.map((o: any, i: number) => `${i + 1}. ${o.text || o}`).join('. ')}
-      `;
+      // ⭐ CONSTRUIR TEXTO LIMPIO (SIN template literals con \n)
+      const textoCompleto = `${pregunta['questionText'] || pregunta['pregunta']}. Las opciones son: ${opciones.map((o: any, i: number) => `${i + 1}. ${o.text || o}`).join('. ')}`;
       
       console.log('🎵 Texto a reproducir:', textoCompleto);
       await this.apiService.playTextToSpeech(textoCompleto);

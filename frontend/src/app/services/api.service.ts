@@ -64,6 +64,8 @@ export interface CumplimientoResponse {
 export class ApiService {
   private API_URL = environment.apiUrl;
   private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
+
+  private ttsAudio: HTMLAudioElement | null = null;
   
   // ✅ NUEVO: BehaviorSubject para manejar la sesión actual
   private currentSession$ = new BehaviorSubject<any>(null);
@@ -247,40 +249,66 @@ public toAbsoluteFileUrl(url?: string): string {
 }
 
 
-//Audio TTS
-async playTextToSpeech(text: string): Promise<void> {
-  try {
-    console.log('🎵 Solicitando TTS:', text.substring(0, 50));
-    
-    const response = await fetch(`${this.API_URL}/Speech/text-to-speech`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ text })
-    });
+  //Audio TTS
+  async playTextToSpeech(text: string): Promise<void> {
+    try {
+      console.log('🎵 Solicitando TTS (BASE64):', text.substring(0, 50));
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      // Limpiar texto
+      const cleanText = text
+        .trim()
+        .replace(/\s+/g, ' ')
+        .replace(/\n/g, ' ')
+        .replace(/\r/g, '');
 
-    const blob = await response.blob();
-    console.log('✅ Blob recibido:', blob.size, 'bytes');
+      console.log('🧹 Texto limpio:', cleanText.substring(0, 50));
 
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    
-    console.log('▶️ Reproduciendo...');
-    await audio.play();
-    
-    audio.onended = () => {
-      console.log('✅ Terminado');
-      URL.revokeObjectURL(url);
-    };
-    
-  } catch (error: any) {
-    console.error('❌ Error TTS:', error);
-    throw error;
+      const response = await fetch(`${this.API_URL}/Speech/text-to-speech-base64`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: cleanText })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('📥 Respuesta TTS base64:', data);
+
+      const base64 =
+        data.audioBase64 ||
+        data.audio ||
+        data.data?.audioBase64 ||
+        '';
+
+      if (!base64) {
+        console.error('❌ No se encontró audioBase64 en la respuesta');
+        return;
+      }
+
+      // Construir data URL
+      const src = `data:audio/mpeg;base64,${base64}`;
+
+      const audio = new Audio(src);
+      console.log('▶️ Reproduciendo audio base64...');
+
+      audio.oncanplaythrough = () => {
+        audio.play().catch(err => {
+          console.error('❌ Error reproduciendo audio TTS:', err);
+        });
+      };
+
+      audio.onerror = (ev) => {
+        console.error('❌ Error TTS (onerror):', ev);
+      };
+    } catch (error) {
+      console.error('❌ Error TTS (try/catch):', error);
+      throw error;
+    }
   }
-}
 
 
   logout(): void {
