@@ -21,7 +21,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
   responseMethod: 'voice' | 'selection' = 'voice';
 
   difficultyLevels = [
-    { value: 'basico', label: 'Básico' },
+    { value: 'basico', label: 'BÃ¡sico' },
     { value: 'intermedio', label: 'Intermedio' },
     { value: 'avanzado', label: 'Avanzado' },
     { value: 'mixto', label: 'Mixto (Todos)' }
@@ -134,7 +134,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
 
   async startVoicePractice() {
     const loading = await this.loadingController.create({
-      message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
+      message: this.selectedQuantity === 1 ? 'Preparando tu pregunta...' : 'Preparando tu test...',
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
@@ -146,31 +146,33 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
 
       if (!currentUser || !currentUser.id) {
         await loading.dismiss();
-        alert('Debes iniciar sesión para hacer un test');
+        alert('Debes iniciar sesiÃ³n para hacer un test');
         this.router.navigate(['/login']);
         return;
       }
 
-      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
-
+      const difficultyToSend = this.selectedDifficulty;
+      
+      // SIEMPRE usar startStudySession para obtener preguntas CON opciones
       const sessionData: any = {
         studentId: Number(currentUser.id),
-        difficulty: difficultyToSend,
         legalAreas: ["Derecho Procesal"],
         questionCount: Number(this.selectedQuantity),
-        responseMethod: this.responseMethod
+        difficulty: difficultyToSend,
+        testMode: "Oral"
       };
       
-      console.log('📤 Enviando request ORAL:', sessionData);
+      console.log('📤 Enviando request para PROCESAL con opciones:', sessionData);
+      console.log('📤 Método de respuesta:', this.responseMethod);
       
       const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
       
-      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
+      console.log('📥 Respuesta del servidor PROCESAL:', sessionResponse);
       
       if (sessionResponse && sessionResponse.success) {
-        console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
+        console.log('✅ Preguntas de PROCESAL recibidas:', sessionResponse.totalQuestions);
         
-        // ⚠️ Agregar responseMethod ANTES de guardar la sesión
+        // CRÍTICO: Agregar responseMethod a la sesión
         sessionResponse.responseMethod = this.responseMethod;
         
         this.apiService.setCurrentSession(sessionResponse);
@@ -178,13 +180,13 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
         await loading.dismiss();
       } else {
         await loading.dismiss();
-        alert('No se pudo iniciar el test oral. Intenta nuevamente.');
+        alert('No se pudo iniciar el test. Intenta nuevamente.');
       }
       
     } catch (error) {
       await loading.dismiss();
-      console.error('❌ Error al iniciar test oral:', error);
-      alert('Hubo un error al iniciar el test oral. Intenta nuevamente.');
+      console.error('❌ Error al iniciar test PROCESAL:', error);
+      alert('Hubo un error al iniciar el test. Intenta nuevamente.');
     }
   }
 }
