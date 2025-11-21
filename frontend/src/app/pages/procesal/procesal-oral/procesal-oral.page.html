@@ -1,6 +1,10 @@
 <ion-content class="procesal-content">
   <div class="dashboard-header">
-    <ion-icon name="chevron-back-outline" class="back-icon" (click)="goBack()"></ion-icon>
+    <ion-icon
+      name="chevron-back-outline"
+      class="back-icon"
+      (click)="goBack()">
+    </ion-icon>
     <h1 class="header-title">Test Oral</h1>
   </div>
 
@@ -52,10 +56,10 @@
             {{ level.label }}
           </div>
         </div>
-        <div class="picker-arrows">
-          <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
-          <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
-        </div>
+          <div class="picker-arrows">
+            <ion-icon name="chevron-up" (click)="scrollDifficultyUp()"></ion-icon>
+            <ion-icon name="chevron-down" (click)="scrollDifficultyDown()"></ion-icon>
+          </div>
       </div>
 
       <!-- 3️⃣ CANTIDAD DE PREGUNTAS (TERCERO) -->

@@ -428,13 +428,6 @@ isOptionSelected(option: string): boolean {
     }
   }
 
-  console.log("🔊 Reproduciendo TTS Azure...");
-  console.log("🔵 playAudio() fue llamado");
-
-
-  await this.playAzureAudio(fullText);
-}
-
   pauseAudio() {
     if (this.currentAudio && this.isPlaying) {
       this.currentAudio.pause();
@@ -609,8 +602,7 @@ async playExplanationAudio() {
 
   console.log("🔊 Reproduciendo explicación con Azure TTS...");
 
-  await this.playAzureAudio(this.evaluationResult.explanation);
-  this.isPlayingExplanation = true;
+  await this.apiService.playTextToSpeech(this.evaluationResult.explanation);  this.isPlayingExplanation = true;
 }
 
 

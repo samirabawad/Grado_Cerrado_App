@@ -27,16 +27,22 @@ export class HistorialPage implements OnInit {
     this.loadRecentSessions();
   }
 
-    convertUTCToChileTime(utcDateString: string): Date {
-      // Convertir string UTC a Date
+  // ✅ MÉTODO CORRECTO: Convertir UTC a hora chilena usando Intl API
+  convertUTCToChileTime(utcDateString: string): Date {
+    try {
       const utcDate = new Date(utcDateString);
       
-      // Chile está en UTC-3 (horario de verano) o UTC-4 (horario normal)
-      // Ajustar 3 horas hacia atrás
-      const chileDate = new Date(utcDate.getTime() - (3 * 60 * 60 * 1000));
+      // Usar Intl API para manejar automáticamente UTC-3/UTC-4
+      const chileDate = new Date(utcDate.toLocaleString('en-US', { 
+        timeZone: 'America/Santiago' 
+      }));
       
       return chileDate;
+    } catch (error) {
+      console.error('Error convirtiendo fecha a hora chilena:', error);
+      return new Date(utcDateString);
     }
+  }
 
   async loadRecentSessions() {
     this.isLoading = true;
@@ -54,7 +60,6 @@ export class HistorialPage implements OnInit {
       console.log('Cargando historial para estudiante:', studentId);
 
       try {
-
         const response = await this.apiService.getRecentSessions(studentId, 250).toPromise();        
 
         if (response && response.success && response.data) {
@@ -128,7 +133,12 @@ export class HistorialPage implements OnInit {
       'Diciembre',
     ];
 
-    const today = new Date();
+    // ✅ Obtener año actual en hora chilena
+    const nowUTC = new Date();
+    const today = new Date(nowUTC.toLocaleString('en-US', { 
+      timeZone: 'America/Santiago' 
+    }));
+    
     const isCurrentYear = date.getFullYear() === today.getFullYear();
 
     if (isCurrentYear) {
@@ -252,15 +262,20 @@ export class HistorialPage implements OnInit {
     return String.fromCharCode(65 + index);
   }
 
+  // ✅ MÉTODO CORRECTO: Formatear fecha en hora chilena
   formatDate(date: Date): string {
-    return date
-      .toLocaleDateString('es-ES', {
+    try {
+      return date.toLocaleString('es-CL', {
         day: 'numeric',
         month: 'short',
         hour: '2-digit',
         minute: '2-digit',
-      })
-      .replace(',', ' ·');
+        timeZone: 'America/Santiago'
+      }).replace(',', ' ·');
+    } catch (error) {
+      console.error('Error formateando fecha:', error);
+      return 'Fecha inválida';
+    }
   }
 
   getSuccessRateColor(rate: number): string {

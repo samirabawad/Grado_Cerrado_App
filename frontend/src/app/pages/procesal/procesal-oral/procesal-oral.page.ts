@@ -14,7 +14,7 @@ import { ApiService } from '../../../services/api.service';
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
-
+  
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
@@ -28,7 +28,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   get infiniteLevels() {
-    return [...this.difficultyLevels, ...this.difficultyLevels, ...this.difficultyLevels];
+    return [...this.difficultyLevels,...this.difficultyLevels,...this.difficultyLevels];
   }
 
   @ViewChild('pickerWheel') pickerWheel?: ElementRef;
@@ -40,9 +40,11 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
     private apiService: ApiService
   ) { }
 
-  ngOnInit() {}
-
-  ngAfterViewInit() {}
+  ngOnInit() {
+  }
+  
+  ngAfterViewInit() {
+  }
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
@@ -113,7 +115,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
       this.selectDifficulty(level);
     }
   }
-
+  
   scrollDifficultyUp() {
     const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
     if (currentIndex > 0) {
@@ -131,10 +133,10 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
       this.scrollToOption(0);
     }
   }
-
+  
   async startVoicePractice() {
     const loading = await this.loadingController.create({
-      message: this.selectedQuantity === 1 ? 'Preparando tu pregunta oral...' : 'Preparando tu test oral...',
+      message: this.selectedQuantity === 1 ? 'Preparando tu pregunta...' : 'Preparando tu test...',
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
@@ -151,26 +153,28 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      const difficultyToSend = this.selectedDifficulty === 'mixto' ? null : this.selectedDifficulty;
-
+      const difficultyToSend = this.selectedDifficulty;
+      
+      // SIEMPRE usar startStudySession para obtener preguntas CON opciones
       const sessionData: any = {
         studentId: Number(currentUser.id),
-        difficulty: difficultyToSend,
         legalAreas: ["Derecho Procesal"],
         questionCount: Number(this.selectedQuantity),
-        responseMethod: this.responseMethod
+        difficulty: difficultyToSend,
+        testMode: "Oral"
       };
       
-      console.log('📤 Enviando request ORAL:', sessionData);
+      console.log('📤 Enviando request para PROCESAL con opciones:', sessionData);
+      console.log('📤 Método de respuesta:', this.responseMethod);
       
       const sessionResponse = await this.apiService.startStudySession(sessionData).toPromise();
       
-      console.log('📥 Respuesta del servidor ORAL:', sessionResponse);
+      console.log('📥 Respuesta del servidor PROCESAL:', sessionResponse);
       
       if (sessionResponse && sessionResponse.success) {
-        console.log('✅ Preguntas orales recibidas:', sessionResponse.totalQuestions);
+        console.log('✅ Preguntas de PROCESAL recibidas:', sessionResponse.totalQuestions);
         
-        // ⚠️ Agregar responseMethod ANTES de guardar la sesión
+        // CRÍTICO: Agregar responseMethod a la sesión
         sessionResponse.responseMethod = this.responseMethod;
         
         this.apiService.setCurrentSession(sessionResponse);
@@ -178,13 +182,13 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
         await loading.dismiss();
       } else {
         await loading.dismiss();
-        alert('No se pudo iniciar el test oral. Intenta nuevamente.');
+        alert('No se pudo iniciar el test. Intenta nuevamente.');
       }
       
     } catch (error) {
       await loading.dismiss();
-      console.error('❌ Error al iniciar test oral:', error);
-      alert('Hubo un error al iniciar el test oral. Intenta nuevamente.');
+      console.error('❌ Error al iniciar test PROCESAL:', error);
+      alert('Hubo un error al iniciar el test. Intenta nuevamente.');
     }
   }
 }

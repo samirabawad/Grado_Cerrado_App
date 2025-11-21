@@ -139,9 +139,15 @@ export class NotificationsPage implements OnInit {
   }
 
   formatNotificationTime(fecha: string): string {
+    // ✅ Convertir fecha UTC del servidor a hora chilena
     const date = new Date(fecha);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    
+    // Chile está en UTC-3 (horario estándar) o UTC-4 (horario de verano)
+    // Usamos Intl para manejar automáticamente el cambio de horario
+    const chileDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+    
+    const diffMs = now.getTime() - chileDate.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
@@ -152,7 +158,12 @@ export class NotificationsPage implements OnInit {
     if (diffDays === 1) return 'Hace 1 día';
     if (diffDays < 7) return `Hace ${diffDays} días`;
     
-    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    // Formatear fecha en español de Chile
+    return chileDate.toLocaleDateString('es-CL', { 
+      day: 'numeric', 
+      month: 'short',
+      timeZone: 'America/Santiago'
+    });
   }
 
   // ========================================
