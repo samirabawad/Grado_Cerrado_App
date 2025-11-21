@@ -9,6 +9,7 @@ import { VoiceRecorder, VoiceRecorderPlugin, RecordingData, GenericResponse } fr
 import { ApiService } from '../../../../services/api.service';
 
 
+
 interface Question {
   id: string;
   text: string;
@@ -390,61 +391,41 @@ isOptionSelected(option: string): boolean {
     return this.currentQuestionNumber === this.totalQuestions;
   }
 
-  async playAzureAudio(text: string) {
-  try {
-    const audioBlob = await this.apiService.getAzureTTS(text).toPromise();
-    if (!audioBlob) {
-  console.error("❌ No se recibió audio desde Azure.");
-  console.log("🟣 Llamando al endpoint Azure TTS…");
+  async playAudio() {
+    if (this.isPlaying) return;
+    
+    try {
+      this.isPlaying = true;
+      this.audioCompleted = false;
+      
+      const pregunta = this.getCurrentQuestion();
+      if (!pregunta) {
+        console.error('❌ No hay pregunta actual');
+        return;
+      }
 
-  return;
-}
+      console.log('📖 Pregunta completa:', pregunta);
 
-const url = URL.createObjectURL(audioBlob);
+      const opciones = pregunta['options'] || pregunta['opciones'] || [];
+      
+      if (opciones.length === 0) {
+        console.error('❌ No hay opciones disponibles');
+        return;
+      }
 
-
-    this.currentAudio = new Audio(url);
-
-    this.isPlaying = true;
-    this.audioCompleted = false;
-    this.cdr.detectChanges();
-
-    this.currentAudio.onended = () => {
+      // ⭐ CONSTRUIR TEXTO LIMPIO (SIN template literals con \n)
+      const textoCompleto = `${pregunta['questionText'] || pregunta['pregunta']}. Las opciones son: ${opciones.map((o: any, i: number) => `${i + 1}. ${o.text || o}`).join('. ')}`;
+      
+      console.log('🎵 Texto a reproducir:', textoCompleto);
+      await this.apiService.playTextToSpeech(textoCompleto);
+      
       this.isPlaying = false;
       this.audioCompleted = true;
-      this.cdr.detectChanges();
-    };
-
-    this.currentAudio.onerror = (err) => {
-      console.error("❌ Error reproduciendo audio TTS:", err);
+      
+    } catch (error: any) {
+      console.error('❌ Error reproduciendo:', error.message || error);
       this.isPlaying = false;
-      this.cdr.detectChanges();
-    };
-
-    await this.currentAudio.play();
-  } catch (error) {
-    console.error("❌ Error en TTS Azure:", error);
-  }
-}
-
-
-async playAudio() {
-  const question = this.getCurrentQuestion();
-  if (!question || !question.questionText) {
-    console.warn("⚠️ No hay pregunta para reproducir.");
-    return;
-  }
-
-  // Armar texto completo
-  let fullText = question.questionText;
-
-  const options = this.getCurrentQuestionOptions();
-  if (options.length > 0) {
-    fullText += ". Las alternativas son: ";
-    options.forEach((option, index) => {
-      const letter = this.getOptionLetter(index);
-      fullText += `${letter}, ${option}. `;
-    });
+    }
   }
 
   console.log("🔊 Reproduciendo TTS Azure...");
@@ -641,6 +622,8 @@ pauseExplanationAudio() {
   }
 }
 
+
+  
 
   stopAllAudio() {
     // Detener síntesis de voz (pregunta o explicación)
