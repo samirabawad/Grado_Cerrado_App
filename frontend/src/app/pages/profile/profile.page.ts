@@ -468,11 +468,16 @@ pendingAvatar: { id: number; url: string } | null = null;
   }
 
   getFechaRegistroFormatted(): string {
-    return this.user.fecha_registro.toLocaleDateString('es-ES', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    });
+    try {
+      return this.user.fecha_registro.toLocaleDateString('es-CL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Santiago'
+      });
+    } catch (error) {
+      return 'Fecha no disponible';
+    }
   }
 
   canEditProfile(): boolean {
@@ -498,12 +503,17 @@ pendingAvatar: { id: number; url: string } | null = null;
   getLastUpdateFormatted(): string {
     if (!this.user.last_profile_update) return 'Nunca';
 
-    const lastUpdate = new Date(this.user.last_profile_update);
-    return lastUpdate.toLocaleDateString('es-ES', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    });
+    try {
+      const lastUpdate = new Date(this.user.last_profile_update);
+      return lastUpdate.toLocaleDateString('es-CL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Santiago'
+      });
+    } catch (error) {
+      return 'Fecha no disponible';
+    }
   }
 
   async editName() {
