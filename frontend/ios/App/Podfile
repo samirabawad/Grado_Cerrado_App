@@ -10,6 +10,7 @@ def capacitor_pods
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorHaptics', :path => '../../node_modules/@capacitor/haptics'
+  pod 'CapacitorHttp', :path => '../../node_modules/@capacitor/http'
   pod 'CapacitorKeyboard', :path => '../../node_modules/@capacitor/keyboard'
   pod 'CapacitorPushNotifications', :path => '../../node_modules/@capacitor/push-notifications'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'

@@ -428,6 +428,13 @@ isOptionSelected(option: string): boolean {
     }
   }
 
+  console.log("🔊 Reproduciendo TTS Azure...");
+  console.log("🔵 playAudio() fue llamado");
+
+
+  await this.playAzureAudio(fullText);
+}
+
   pauseAudio() {
     if (this.currentAudio && this.isPlaying) {
       this.currentAudio.pause();
@@ -597,75 +604,24 @@ isOptionSelected(option: string): boolean {
     }
   }
 
-  playExplanationAudio() {
-      if (!this.evaluationResult?.explanation) return;
+async playExplanationAudio() {
+  if (!this.evaluationResult?.explanation) return;
 
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-        utterance.lang = 'es-CL';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.2;
-        utterance.volume = 1.0;
+  console.log("🔊 Reproduciendo explicación con Azure TTS...");
 
-        utterance.onstart = () => {
-          this.isPlayingExplanation = true;
-          this.cdr.detectChanges();
-        };
+  await this.playAzureAudio(this.evaluationResult.explanation);
+  this.isPlayingExplanation = true;
+}
 
-        utterance.onend = () => {
-          this.isPlayingExplanation = false;
-          this.cdr.detectChanges();
-        };
 
-        const loadVoices = () => {
-          const voices = window.speechSynthesis.getVoices();
-          
-          let selectedVoice = voices.find(voice => 
-            voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
-          );
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => 
-              voice.lang.includes('es') && (
-                voice.name.toLowerCase().includes('female') ||
-                voice.name.toLowerCase().includes('femenina') ||
-                voice.name.toLowerCase().includes('mónica') ||
-                voice.name.toLowerCase().includes('monica') ||
-                voice.name.toLowerCase().includes('paulina') ||
-                voice.name.toLowerCase().includes('lucia') ||
-                voice.name.toLowerCase().includes('paloma')
-              )
-            );
-          }
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => voice.lang.includes('es'));
-          }
-          
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-          }
-          
-          window.speechSynthesis.speak(utterance);
-        };
-
-        if (window.speechSynthesis.getVoices().length > 0) {
-          loadVoices();
-        } else {
-          window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
-      }
-    }
-
-  pauseExplanationAudio() {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      this.isPlayingExplanation = false;
-      this.cdr.detectChanges();
-    }
+pauseExplanationAudio() {
+  if (this.currentAudio) {
+    this.currentAudio.pause();
+    this.isPlayingExplanation = false;
+    this.cdr.detectChanges();
   }
+}
+
 
   
 
