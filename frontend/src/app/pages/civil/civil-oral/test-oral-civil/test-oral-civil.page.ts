@@ -413,8 +413,16 @@ isOptionSelected(option: string): boolean {
         return;
       }
 
-      // ⭐ CONSTRUIR TEXTO LIMPIO (SIN template literals con \n)
-      const textoCompleto = `${pregunta['questionText'] || pregunta['pregunta']}. Las opciones son: ${opciones.map((o: any, i: number) => `${i + 1}. ${o.text || o}`).join('. ')}`;
+      // 👇 Aquí cambiamos 1,2,3... por A,B,C...
+      const textoOpciones = opciones
+        .map((o: any, i: number) => {
+          const letra = String.fromCharCode(65 + i); // 65 = 'A'
+          const textoOpcion = o.text || o.texto || o.option || o;
+          return `Opción ${letra}: ${textoOpcion}`;
+        })
+        .join('. ');
+
+      const textoCompleto = `${pregunta['questionText'] || pregunta['pregunta']}. Las opciones son: ${textoOpciones}.`;
       
       console.log('🎵 Texto a reproducir:', textoCompleto);
       await this.apiService.playTextToSpeech(textoCompleto);
