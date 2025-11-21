@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 
 // ========================================
 // INTERFACES 
@@ -63,6 +64,8 @@ export interface CumplimientoResponse {
 export class ApiService {
   private API_URL = environment.apiUrl;
   private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
+
+  private ttsAudio: HTMLAudioElement | null = null;
   
   // ✅ NUEVO: BehaviorSubject para manejar la sesión actual
   private currentSession$ = new BehaviorSubject<any>(null);
@@ -228,6 +231,7 @@ private getFilesBase(): string {
   return this.API_URL.replace(/\/api\/?$/, '');
 }
 
+
 // Convierte rutas relativas del backend a absolutas con el host del API
 public toAbsoluteFileUrl(url?: string): string {
   if (!url) return '';
@@ -244,6 +248,67 @@ public toAbsoluteFileUrl(url?: string): string {
   return url;
 }
 
+
+  //Audio TTS
+  async playTextToSpeech(text: string): Promise<void> {
+    try {
+      console.log('🎵 Solicitando TTS (BASE64):', text.substring(0, 50));
+
+      // Limpiar texto
+      const cleanText = text
+        .trim()
+        .replace(/\s+/g, ' ')
+        .replace(/\n/g, ' ')
+        .replace(/\r/g, '');
+
+      console.log('🧹 Texto limpio:', cleanText.substring(0, 50));
+
+      const response = await fetch(`${this.API_URL}/Speech/text-to-speech-base64`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: cleanText })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('📥 Respuesta TTS base64:', data);
+
+      const base64 =
+        data.audioBase64 ||
+        data.audio ||
+        data.data?.audioBase64 ||
+        '';
+
+      if (!base64) {
+        console.error('❌ No se encontró audioBase64 en la respuesta');
+        return;
+      }
+
+      // Construir data URL
+      const src = `data:audio/mpeg;base64,${base64}`;
+
+      const audio = new Audio(src);
+      console.log('▶️ Reproduciendo audio base64...');
+
+      audio.oncanplaythrough = () => {
+        audio.play().catch(err => {
+          console.error('❌ Error reproduciendo audio TTS:', err);
+        });
+      };
+
+      audio.onerror = (ev) => {
+        console.error('❌ Error TTS (onerror):', ev);
+      };
+    } catch (error) {
+      console.error('❌ Error TTS (try/catch):', error);
+      throw error;
+    }
+  }
 
 
   logout(): void {

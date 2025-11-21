@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { VoiceRecorder } from 'capacitor-voice-recorder';
+import { Capacitor } from '@capacitor/core';
 
 export interface AudioRecordingState {
   isRecording: boolean;
@@ -19,6 +21,7 @@ export class AudioService {
   private audioChunks: Blob[] = [];
   private recordingTimer: any;
   private startTime: number = 0;
+  private isMobile = Capacitor.isNativePlatform();
   
   private recordingStateSubject = new BehaviorSubject<AudioRecordingState>({
     isRecording: false,
@@ -34,16 +37,16 @@ export class AudioService {
 
   async initializeRecording(): Promise<boolean> {
     try {
-      if (!navigator.mediaDevices) {
-        throw new Error('navigator.mediaDevices no esta disponible');
+      // MÓVIL: Usar Capacitor Voice Recorder
+      if (this.isMobile) {
+        const hasPermission = await VoiceRecorder.requestAudioRecordingPermission();
+        console.log('✅ Permiso de grabación móvil:', hasPermission.value);
+        return hasPermission.value;
       }
 
-      if (typeof navigator.mediaDevices.getUserMedia !== 'function') {
-        throw new Error('getUserMedia no esta disponible');
-      }
-
-      if (typeof window.MediaRecorder === 'undefined') {
-        throw new Error('MediaRecorder no esta disponible');
+      // WEB: Usar MediaRecorder
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('getUserMedia no disponible');
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -67,8 +70,6 @@ export class AudioService {
             }
           }
         }
-      } else {
-        mimeType = '';
       }
 
       const options = mimeType ? { mimeType } : {};
@@ -84,21 +85,16 @@ export class AudioService {
         this.processRecording();
       };
 
-      console.log('Microfono inicializado correctamente con tipo:', mimeType || 'predeterminado');
+      console.log('✅ Micrófono web inicializado');
       return true;
 
     } catch (error) {
-      console.error('Error al acceder al microfono:', error);
+      console.error('❌ Error al acceder al micrófono:', error);
       return false;
     }
   }
 
-  startRecording(): void {
-    if (!this.mediaRecorder) {
-      console.error('MediaRecorder no inicializado');
-      return;
-    }
-
+  async startRecording(): Promise<void> {
     this.audioChunks = [];
     this.startTime = Date.now();
 
@@ -110,22 +106,29 @@ export class AudioService {
       audioUrl: null
     });
 
-    this.mediaRecorder.start();
+    // MÓVIL
+    if (this.isMobile) {
+      await VoiceRecorder.startRecording();
+      console.log('🎤 Grabación móvil iniciada');
+    } 
+    // WEB
+    else {
+      if (!this.mediaRecorder) {
+        console.error('MediaRecorder no inicializado');
+        return;
+      }
+      this.mediaRecorder.start();
+      console.log('🎤 Grabación web iniciada');
+    }
 
+    // Timer común para ambos
     this.recordingTimer = setInterval(() => {
       const duration = Math.floor((Date.now() - this.startTime) / 1000);
       this.updateRecordingState({ recordingDuration: duration });
     }, 1000);
-
-    console.log('Grabacion iniciada');
   }
 
-  stopRecording(): void {
-    if (!this.mediaRecorder || this.mediaRecorder.state !== 'recording') {
-      return;
-    }
-
-    this.mediaRecorder.stop();
+  async stopRecording(): Promise<void> {
     clearInterval(this.recordingTimer);
 
     this.updateRecordingState({
@@ -133,17 +136,47 @@ export class AudioService {
       isProcessing: true
     });
 
-    console.log('Grabacion detenida');
+    // MÓVIL
+    if (this.isMobile) {
+      const result = await VoiceRecorder.stopRecording();
+      
+      if (result.value && result.value.recordDataBase64) {
+        const audioBlob = this.base64ToWavBlob(result.value.recordDataBase64);
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        this.updateRecordingState({
+          isProcessing: false,
+          audioBlob: audioBlob,
+          audioUrl: audioUrl
+        });
+
+        console.log('✅ Audio móvil procesado:', audioBlob.size, 'bytes');
+      }
+    } 
+    // WEB
+    else {
+      if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+        this.mediaRecorder.stop();
+      }
+    }
+  }
+
+  private base64ToWavBlob(base64: string): Blob {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: 'audio/wav' });
   }
 
   private processRecording(): void {
     if (this.audioChunks.length === 0) {
-      console.error('No hay datos de audio para procesar');
+      console.error('No hay datos de audio');
       return;
     }
 
     const mimeType = this.mediaRecorder?.mimeType || 'audio/webm';
-    
     const audioBlob = new Blob(this.audioChunks, { type: mimeType });
     const audioUrl = URL.createObjectURL(audioBlob);
 
@@ -153,11 +186,7 @@ export class AudioService {
       audioUrl: audioUrl
     });
 
-    console.log('Audio procesado:', {
-      size: audioBlob.size,
-      type: audioBlob.type,
-      duration: this.recordingStateSubject.value.recordingDuration
-    });
+    console.log('✅ Audio web procesado:', audioBlob.size, 'bytes');
   }
 
   async uploadAudio(
@@ -168,38 +197,34 @@ export class AudioService {
     tiempoRespuestaSegundos: number 
   ): Promise<any> {
     
-    console.log('🎤 Preparando audio para enviar:', {
-      originalType: audioBlob.type,
-      originalSize: audioBlob.size
+    console.log('📤 Enviando audio:', {
+      type: audioBlob.type,
+      size: audioBlob.size,
+      isMobile: this.isMobile
     });
 
-    // CONVERTIR A WAV antes de enviar
+    // En móvil ya viene en WAV, en web convertir si es necesario
     let audioToSend = audioBlob;
     
-    try {
-      // Si no es WAV, convertir
-      if (!audioBlob.type.includes('wav')) {
-        console.log('🔄 Convirtiendo audio a WAV...');
+    if (!this.isMobile && !audioBlob.type.includes('wav')) {
+      try {
+        console.log('🔄 Convirtiendo a WAV...');
         audioToSend = await this.convertToWav(audioBlob);
-        console.log('✅ Audio convertido a WAV:', audioToSend.size, 'bytes');
+        console.log('✅ Convertido:', audioToSend.size, 'bytes');
+      } catch (error) {
+        console.warn('⚠️ Conversión falló, enviando original:', error);
       }
-    } catch (conversionError) {
-      console.warn('⚠️ No se pudo convertir a WAV, enviando formato original:', conversionError);
-      // Continuar con el audio original si falla la conversión
     }
 
     const formData = new FormData();
-    
-    // Siempre usar .wav como extensión si logramos convertir
     const fileExtension = audioToSend.type.includes('wav') ? '.wav' : '.webm';
-    
     formData.append('audioFile', audioToSend, `recording_${questionId}${fileExtension}`);
     
     const testIdNumber = parseInt(sessionId, 10);
     const preguntaIdNumber = parseInt(questionId, 10);
     
     if (isNaN(testIdNumber) || isNaN(preguntaIdNumber)) {
-      throw new Error('IDs inválidos: testId y preguntaGeneradaId deben ser numéricos');
+      throw new Error('IDs inválidos');
     }
     
     formData.append('testId', testIdNumber.toString());
@@ -207,18 +232,9 @@ export class AudioService {
     formData.append('numeroOrden', numeroOrden.toString());
     formData.append('tiempoRespuestaSegundos', tiempoRespuestaSegundos.toString());
 
-    console.log('📤 Enviando al backend:', {
-      testId: testIdNumber,
-      preguntaGeneradaId: preguntaIdNumber,
-      numeroOrden: numeroOrden,
-      tiempoRespuestaSegundos: tiempoRespuestaSegundos,
-      audioSize: audioToSend.size,
-      audioType: audioToSend.type
-    });
-
     try {
       const response = await this.http.post(
-        'http://localhost:5183/api/Speech/speech-to-text', 
+        `${environment.apiUrl}/api/Speech/speech-to-text`,
         formData
       ).toPromise();
 
@@ -227,8 +243,6 @@ export class AudioService {
 
     } catch (error: any) {
       console.error('❌ Error enviando audio:', error);
-      console.error('Detalles completos:', error.error);
-      
       throw {
         error: true,
         message: error.error?.message || 'Error al procesar el audio',
@@ -237,7 +251,6 @@ export class AudioService {
     }
   }
 
-  // NUEVO MÉTODO: Convertir audio a WAV
   private async convertToWav(audioBlob: Blob): Promise<Blob> {
     return new Promise((resolve, reject) => {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -247,37 +260,33 @@ export class AudioService {
         try {
           const arrayBuffer = e.target?.result as ArrayBuffer;
           const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-          
-          // Convertir a WAV
           const wavBlob = this.audioBufferToWav(audioBuffer);
           resolve(wavBlob);
         } catch (error) {
-          console.error('Error decodificando audio:', error);
           reject(error);
         }
       };
 
-      fileReader.onerror = () => reject(new Error('Error leyendo el archivo'));
+      fileReader.onerror = () => reject(new Error('Error leyendo archivo'));
       fileReader.readAsArrayBuffer(audioBlob);
     });
   }
 
-  // Convertir AudioBuffer a WAV Blob
   private audioBufferToWav(audioBuffer: AudioBuffer): Blob {
-    const numChannels = audioBuffer.numberOfChannels;
-    const sampleRate = audioBuffer.sampleRate;
-    const format = 1; // PCM
+    const numChannels = 1; // MONO obligatorio
+    const sampleRate = 16000; // Azure prefiere 16kHz
+    const format = 1;
     const bitDepth = 16;
 
     const bytesPerSample = bitDepth / 8;
     const blockAlign = numChannels * bytesPerSample;
 
-    const samples = audioBuffer.getChannelData(0);
+    // Resamplear a 16kHz si es necesario
+    const samples = this.resample(audioBuffer.getChannelData(0), audioBuffer.sampleRate, sampleRate);
     const dataLength = samples.length * bytesPerSample;
     const buffer = new ArrayBuffer(44 + dataLength);
     const view = new DataView(buffer);
 
-    // WAV header
     this.writeString(view, 0, 'RIFF');
     view.setUint32(4, 36 + dataLength, true);
     this.writeString(view, 8, 'WAVE');
@@ -292,7 +301,6 @@ export class AudioService {
     this.writeString(view, 36, 'data');
     view.setUint32(40, dataLength, true);
 
-    // Escribir los samples
     let offset = 44;
     for (let i = 0; i < samples.length; i++) {
       const sample = Math.max(-1, Math.min(1, samples[i]));
@@ -303,6 +311,28 @@ export class AudioService {
     return new Blob([view], { type: 'audio/wav' });
   }
 
+  // Agregar este método
+  private resample(samples: Float32Array, fromRate: number, toRate: number): Float32Array {
+    if (fromRate === toRate) return samples;
+    
+    const ratio = fromRate / toRate;
+    const newLength = Math.round(samples.length / ratio);
+    const result = new Float32Array(newLength);
+    
+    for (let i = 0; i < newLength; i++) {
+      const srcIndex = i * ratio;
+      const index = Math.floor(srcIndex);
+      const fraction = srcIndex - index;
+      
+      if (index + 1 < samples.length) {
+        result[i] = samples[index] * (1 - fraction) + samples[index + 1] * fraction;
+      } else {
+        result[i] = samples[index];
+      }
+    }
+    
+    return result;
+  }
   private writeString(view: DataView, offset: number, string: string): void {
     for (let i = 0; i < string.length; i++) {
       view.setUint8(offset + i, string.charCodeAt(i));
@@ -311,11 +341,8 @@ export class AudioService {
 
   playRecording(audioUrl: string): void {
     if (!audioUrl) return;
-
     const audio = new Audio(audioUrl);
-    audio.play().catch(error => {
-      console.error('Error reproduciendo audio:', error);
-    });
+    audio.play().catch(error => console.error('Error reproduciendo:', error));
   }
 
   clearRecording(): void {
@@ -335,17 +362,14 @@ export class AudioService {
   }
 
   stopMediaStreams(): void {
-    if (this.mediaRecorder && this.mediaRecorder.stream) {
-      this.mediaRecorder.stream.getTracks().forEach(track => {
-        track.stop();
-      });
+    if (this.mediaRecorder?.stream) {
+      this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
   }
 
   private updateRecordingState(partialState: Partial<AudioRecordingState>): void {
     const currentState = this.recordingStateSubject.value;
-    const newState = { ...currentState, ...partialState };
-    this.recordingStateSubject.next(newState);
+    this.recordingStateSubject.next({ ...currentState, ...partialState });
   }
 
   getCurrentState(): AudioRecordingState {
@@ -353,12 +377,13 @@ export class AudioService {
   }
 
   isRecordingSupported(): boolean {
+    if (this.isMobile) return true;
+    
     try {
       return !!(navigator.mediaDevices && 
-                typeof navigator.mediaDevices.getUserMedia === 'function' && 
-                typeof window.MediaRecorder !== 'undefined' &&
-                typeof MediaRecorder.isTypeSupported === 'function');
-    } catch (error) {
+                typeof navigator.mediaDevices.getUserMedia === 'function' &&
+                typeof window.MediaRecorder !== 'undefined');
+    } catch {
       return false;
     }
   }
@@ -370,18 +395,12 @@ export class AudioService {
   }
 
   getSupportedMimeTypes(): string[] {
-    const types = [
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/mp4',
-      'audio/mpeg',
-      'audio/wav'
-    ];
-
-    if (typeof MediaRecorder === 'undefined' || typeof MediaRecorder.isTypeSupported !== 'function') {
-      return [];
-    }
-
+    if (this.isMobile) return ['audio/wav'];
+    
+    const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/wav'];
+    
+    if (typeof MediaRecorder?.isTypeSupported !== 'function') return [];
+    
     return types.filter(type => MediaRecorder.isTypeSupported(type));
   }
 }
