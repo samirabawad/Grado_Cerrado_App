@@ -606,66 +606,30 @@ isOptionSelected(option: string): boolean {
   }
 
   playExplanationAudio() {
-      if (!this.evaluationResult?.explanation) return;
+    if (!this.evaluationResult?.explanation) return;
 
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-        utterance.lang = 'es-CL';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.2;
-        utterance.volume = 1.0;
+    // Detener audios previos (pregunta, otros)
+    this.stopAllAudio();
 
-        utterance.onstart = () => {
-          this.isPlayingExplanation = true;
-          this.cdr.detectChanges();
-        };
+    const texto = this.evaluationResult.explanation;
+    console.log('🔊 Leyendo explicación:', texto.substring(0, 80));
 
-        utterance.onend = () => {
-          this.isPlayingExplanation = false;
-          this.cdr.detectChanges();
-        };
+    this.isPlayingExplanation = true;
+    this.cdr.detectChanges();
 
-        const loadVoices = () => {
-          const voices = window.speechSynthesis.getVoices();
-          
-          let selectedVoice = voices.find(voice => 
-            voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
-          );
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => 
-              voice.lang.includes('es') && (
-                voice.name.toLowerCase().includes('female') ||
-                voice.name.toLowerCase().includes('femenina') ||
-                voice.name.toLowerCase().includes('mónica') ||
-                voice.name.toLowerCase().includes('monica') ||
-                voice.name.toLowerCase().includes('paulina') ||
-                voice.name.toLowerCase().includes('lucia') ||
-                voice.name.toLowerCase().includes('paloma')
-              )
-            );
-          }
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => voice.lang.includes('es'));
-          }
-          
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-          }
-          
-          window.speechSynthesis.speak(utterance);
-        };
+    this.apiService.playTextToSpeech(texto)
+      .then(() => {
+        console.log('✅ Explicación leída completa');
+        this.isPlayingExplanation = false;
+        this.cdr.detectChanges();
+      })
+      .catch(err => {
+        console.error('❌ Error leyendo explicación:', err);
+        this.isPlayingExplanation = false;
+        this.cdr.detectChanges();
+      });
+  }
 
-        if (window.speechSynthesis.getVoices().length > 0) {
-          loadVoices();
-        } else {
-          window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
-      }
-    }
 
   pauseExplanationAudio() {
     if ('speechSynthesis' in window) {
@@ -678,16 +642,16 @@ isOptionSelected(option: string): boolean {
   
 
   stopAllAudio() {
-    // Detener síntesis de voz (pregunta o explicación)
+    // Ya no usamos speechSynthesis, lo puedes quitar si quieres
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
-    
-    // Actualizar estados
+
     this.isPlaying = false;
     this.isPlayingExplanation = false;
     this.cdr.detectChanges();
   }
+
 
   async submitVoiceAnswer() {
     if (!this.audioBlob) {
@@ -826,13 +790,29 @@ try {
     const bytesPerSample = bitDepth / 8;
     const blockAlign = numChannels * bytesPerSample;
 
+    // 🔊 Re-muestreo + NORMALIZACIÓN
     const samples = audioBuffer.getChannelData(0);
     const newLength = Math.floor(samples.length * (sampleRate / audioBuffer.sampleRate));
     const resampledData = new Float32Array(newLength);
-    
+
+    // Re-muestreo simple
     for (let i = 0; i < newLength; i++) {
       const index = i * (samples.length / newLength);
       resampledData[i] = samples[Math.floor(index)];
+    }
+
+    // NORMALIZAR VOLUMEN
+    let max = 0;
+    for (let i = 0; i < resampledData.length; i++) {
+      const v = Math.abs(resampledData[i]);
+      if (v > max) max = v;
+    }
+
+    if (max > 0) {
+      const gain = 0.99 / max; // un poco menos de 1 para no saturar
+      for (let i = 0; i < resampledData.length; i++) {
+        resampledData[i] = resampledData[i] * gain;
+      }
     }
 
     const dataLength = resampledData.length * bytesPerSample;
@@ -862,6 +842,7 @@ try {
 
     return new Blob([view], { type: 'audio/wav' });
   }
+
 
   private writeString(view: DataView, offset: number, string: string): void {
     for (let i = 0; i < string.length; i++) {
