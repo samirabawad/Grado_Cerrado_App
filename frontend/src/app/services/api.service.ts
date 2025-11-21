@@ -316,6 +316,16 @@ public toAbsoluteFileUrl(url?: string): string {
     const url = `${this.API_URL}/Notificaciones/${studentId}/config`;
     return this.http.put<any>(url, { enabled }, this.httpOptions);
   }
+
+  updateReminderTime(estudianteId: number, time: string) {
+  return this.http.put(
+    `${this.API_URL}/notificaciones/${estudianteId}/hora-recordatorio`,
+    { time }
+  );
+}
+
+
+
   logout(): void {
     localStorage.removeItem('currentUser');
     this.clearCurrentSession();

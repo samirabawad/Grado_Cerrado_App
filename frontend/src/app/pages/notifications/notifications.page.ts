@@ -275,9 +275,23 @@ export class NotificationsPage implements OnInit {
 
   onSettingChange() {
     this.saveSettings();
-
-    // Si están activadas las push → asegúrate de registrar el dispositivo
     this.ensurePushRegisteredIfNeeded();
+    
+    // Actualizar hora en backend
+    this.updateReminderTimeInBackend();
+  }
+
+  private updateReminderTimeInBackend() {
+    const user = this.apiService.getCurrentUser();
+    if (user?.id && this.notificationSettings.dailyReminder) {
+      this.apiService.updateReminderTime(
+        user.id,
+        this.notificationSettings.dailyReminderTime
+      ).subscribe({
+        next: () => console.log('✅ Hora actualizada en backend'),
+        error: (err) => console.error('❌ Error:', err)
+      });
+    }
   }
 
   onMasterSwitchChange() {
