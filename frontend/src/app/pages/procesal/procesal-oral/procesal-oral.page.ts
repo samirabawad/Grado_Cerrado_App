@@ -14,21 +14,21 @@ import { ApiService } from '../../../services/api.service';
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
 export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
-
+  
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
   responseMethod: 'voice' | 'selection' = 'voice';
 
   difficultyLevels = [
-    { value: 'basico', label: 'BÃ¡sico' },
+    { value: 'basico', label: 'Básico' },
     { value: 'intermedio', label: 'Intermedio' },
     { value: 'avanzado', label: 'Avanzado' },
     { value: 'mixto', label: 'Mixto (Todos)' }
   ];
 
   get infiniteLevels() {
-    return [...this.difficultyLevels, ...this.difficultyLevels, ...this.difficultyLevels];
+    return [...this.difficultyLevels,...this.difficultyLevels,...this.difficultyLevels];
   }
 
   @ViewChild('pickerWheel') pickerWheel?: ElementRef;
@@ -40,9 +40,11 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
     private apiService: ApiService
   ) { }
 
-  ngOnInit() {}
-
-  ngAfterViewInit() {}
+  ngOnInit() {
+  }
+  
+  ngAfterViewInit() {
+  }
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
@@ -113,7 +115,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
       this.selectDifficulty(level);
     }
   }
-
+  
   scrollDifficultyUp() {
     const currentIndex = this.difficultyLevels.findIndex(l => l.value === this.selectedDifficulty);
     if (currentIndex > 0) {
@@ -131,7 +133,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
       this.scrollToOption(0);
     }
   }
-
+  
   async startVoicePractice() {
     const loading = await this.loadingController.create({
       message: this.selectedQuantity === 1 ? 'Preparando tu pregunta...' : 'Preparando tu test...',
@@ -146,7 +148,7 @@ export class ProcesalOralPage implements OnInit, OnDestroy, AfterViewInit {
 
       if (!currentUser || !currentUser.id) {
         await loading.dismiss();
-        alert('Debes iniciar sesiÃ³n para hacer un test');
+        alert('Debes iniciar sesión para hacer un test');
         this.router.navigate(['/login']);
         return;
       }
