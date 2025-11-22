@@ -281,4 +281,48 @@ export class NotificationsPage implements OnInit {
   goBack() {
     this.router.navigate(['/home']);
   }
+  // ========================================
+  // SELECTOR DE HORA
+  // ========================================
+  showHourPicker: boolean = false;
+  availableHours: string[] = [
+    '12:00 AM', '1:00 AM', '2:00 AM', '3:00 AM', '4:00 AM', '5:00 AM',
+    '6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM',
+    '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM',
+    '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM', '11:00 PM'
+  ];
+
+  toggleHourPicker() {
+    this.showHourPicker = !this.showHourPicker;
+  }
+
+  getFormattedHour(): string {
+    const time = this.notificationSettings.dailyReminderTime;
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${displayHour}:00 ${period}`;
+  }
+
+  isHourSelected(hour: string): boolean {
+    return this.getFormattedHour() === hour;
+  }
+
+  selectHour(hour: string) {
+    const [time, period] = hour.split(' ');
+    const hourNum = parseInt(time.split(':')[0]);
+    let hour24 = hourNum;
+    
+    if (period === 'PM' && hourNum !== 12) {
+      hour24 = hourNum + 12;
+    } else if (period === 'AM' && hourNum === 12) {
+      hour24 = 0;
+    }
+    
+    this.notificationSettings.dailyReminderTime = `${hour24.toString().padStart(2, '0')}:00`;
+    this.showHourPicker = false;
+    this.onSettingChange();
+  }
+  
 }
