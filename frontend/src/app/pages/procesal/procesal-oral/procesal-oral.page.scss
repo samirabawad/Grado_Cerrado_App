@@ -51,6 +51,15 @@ ion-content.procesal-content {
     text-align: center;
   }
 
+  .section-description {
+    margin: -10px 0 20px 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.5;
+  }
+
   .quantity-selector {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

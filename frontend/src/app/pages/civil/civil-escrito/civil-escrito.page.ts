@@ -98,7 +98,14 @@ async loadQuestionCountByLevel(temaId: number) {
     }, 50);
   }
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    setTimeout(() => {
+      const mixtoIndex = this.difficultyLevels.findIndex(l => l.value === 'mixto');
+      if (mixtoIndex !== -1) {
+        this.scrollToOption(mixtoIndex);
+      }
+    }, 300);
+  }
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
