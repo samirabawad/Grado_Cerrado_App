@@ -25,13 +25,13 @@
             Elegir avatar
           </button>
           
-          <div class="upload-section">
-            <button class="avatar-btn" (click)="triggerFile()">
-              <ion-icon name="cloud-upload-outline"></ion-icon>
-              Subir foto
-            </button>
-            <p class="avatar-hint">Formatos: JPG/PNG/SVG • Máx 2MB</p>
-          </div>
+          <button class="avatar-btn upload-btn" (click)="triggerFile()">
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            <div class="btn-content">
+              <span class="btn-title">Subir foto</span>
+              <span class="btn-subtitle">JPG/PNG/SVG Máx 2MB</span>
+            </div>
+          </button>
           
           <button class="avatar-btn danger" (click)="removeAvatar()" [disabled]="user.avatarUrl === defaultAvatar">
             <ion-icon name="trash-outline"></ion-icon>
