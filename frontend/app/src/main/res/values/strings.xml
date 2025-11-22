@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GradoCerrado</string>
+    <string name="title_activity_main">GradoCerrado</string>
+    <string name="package_name">gradocerrado.app</string>
+    <string name="custom_url_scheme">gradocerrado.app</string>
+</resources>
