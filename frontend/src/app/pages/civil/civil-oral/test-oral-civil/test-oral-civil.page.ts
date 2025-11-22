@@ -413,8 +413,16 @@ isOptionSelected(option: string): boolean {
         return;
       }
 
-      // ⭐ CONSTRUIR TEXTO LIMPIO (SIN template literals con \n)
-      const textoCompleto = `${pregunta['questionText'] || pregunta['pregunta']}. Las opciones son: ${opciones.map((o: any, i: number) => `${i + 1}. ${o.text || o}`).join('. ')}`;
+      // 👇 Aquí cambiamos 1,2,3... por A,B,C...
+      const textoOpciones = opciones
+        .map((o: any, i: number) => {
+          const letra = String.fromCharCode(65 + i); // 65 = 'A'
+          const textoOpcion = o.text || o.texto || o.option || o;
+          return `Opción ${letra}: ${textoOpcion}`;
+        })
+        .join('. ');
+
+      const textoCompleto = `${pregunta['questionText'] || pregunta['pregunta']}. Las opciones son: ${textoOpciones}.`;
       
       console.log('🎵 Texto a reproducir:', textoCompleto);
       await this.apiService.playTextToSpeech(textoCompleto);
@@ -597,13 +605,30 @@ isOptionSelected(option: string): boolean {
     }
   }
 
-async playExplanationAudio() {
-  if (!this.evaluationResult?.explanation) return;
+  playExplanationAudio() {
+    if (!this.evaluationResult?.explanation) return;
 
-  console.log("🔊 Reproduciendo explicación con Azure TTS...");
+    // Detener audios previos (pregunta, otros)
+    this.stopAllAudio();
 
-  await this.apiService.playTextToSpeech(this.evaluationResult.explanation);  this.isPlayingExplanation = true;
-}
+    const texto = this.evaluationResult.explanation;
+    console.log('🔊 Leyendo explicación:', texto.substring(0, 80));
+
+    this.isPlayingExplanation = true;
+    this.cdr.detectChanges();
+
+    this.apiService.playTextToSpeech(texto)
+      .then(() => {
+        console.log('✅ Explicación leída completa');
+        this.isPlayingExplanation = false;
+        this.cdr.detectChanges();
+      })
+      .catch(err => {
+        console.error('❌ Error leyendo explicación:', err);
+        this.isPlayingExplanation = false;
+        this.cdr.detectChanges();
+      });
+  }
 
 
 pauseExplanationAudio() {
@@ -618,16 +643,16 @@ pauseExplanationAudio() {
   
 
   stopAllAudio() {
-    // Detener síntesis de voz (pregunta o explicación)
+    // Ya no usamos speechSynthesis, lo puedes quitar si quieres
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
-    
-    // Actualizar estados
+
     this.isPlaying = false;
     this.isPlayingExplanation = false;
     this.cdr.detectChanges();
   }
+
 
   async submitVoiceAnswer() {
     if (!this.audioBlob) {
@@ -766,13 +791,29 @@ try {
     const bytesPerSample = bitDepth / 8;
     const blockAlign = numChannels * bytesPerSample;
 
+    // 🔊 Re-muestreo + NORMALIZACIÓN
     const samples = audioBuffer.getChannelData(0);
     const newLength = Math.floor(samples.length * (sampleRate / audioBuffer.sampleRate));
     const resampledData = new Float32Array(newLength);
-    
+
+    // Re-muestreo simple
     for (let i = 0; i < newLength; i++) {
       const index = i * (samples.length / newLength);
       resampledData[i] = samples[Math.floor(index)];
+    }
+
+    // NORMALIZAR VOLUMEN
+    let max = 0;
+    for (let i = 0; i < resampledData.length; i++) {
+      const v = Math.abs(resampledData[i]);
+      if (v > max) max = v;
+    }
+
+    if (max > 0) {
+      const gain = 0.99 / max; // un poco menos de 1 para no saturar
+      for (let i = 0; i < resampledData.length; i++) {
+        resampledData[i] = resampledData[i] * gain;
+      }
     }
 
     const dataLength = resampledData.length * bytesPerSample;
@@ -802,6 +843,7 @@ try {
 
     return new Blob([view], { type: 'audio/wav' });
   }
+
 
   private writeString(view: DataView, offset: number, string: string): void {
     for (let i = 0; i < string.length; i++) {

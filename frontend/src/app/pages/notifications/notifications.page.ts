@@ -1,3 +1,5 @@
+// frontend/src/app/pages/notifications/notifications.page.ts
+
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
@@ -5,6 +7,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
+
+// IMPORTAR EL SERVICIO DE PUSH
+import { PushNotificationService } from '../../services/push-notification.service';
 
 @Component({
   selector: 'app-notifications',
@@ -28,7 +33,7 @@ export class NotificationsPage implements OnInit {
     advanced: false
   };
 
-  // Configuración de notificaciones
+  // Configuración de notificaciones (localStorage)
   notificationSettings = {
     masterSwitch: true,
     streakNotifications: true,
@@ -50,16 +55,46 @@ export class NotificationsPage implements OnInit {
 
   constructor(
     private router: Router,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private pushService: PushNotificationService   // 👈 INYECTAMOS PUSH
   ) { }
 
   ngOnInit() {
-    this.loadNotifications();
     this.loadSettings();
+    this.loadNotifications();
+
+    // Si ya están activadas las push en ajustes → intentamos registrar
+    this.ensurePushRegisteredIfNeeded();
   }
 
   ionViewWillEnter() {
     this.loadNotifications();
+  }
+
+  // ================================
+  // 🔔 INICIALIZAR PUSH SI HACE FALTA
+  // ================================
+  private async ensurePushRegisteredIfNeeded() {
+    try {
+      if (this.notificationSettings.masterSwitch && this.notificationSettings.pushNotifications) {
+        console.log('🔔 Notif. push activadas en ajustes → inicializando...');
+        await this.pushService.initPushNotifications();
+      } else {
+        console.log('ℹ️ Push desactivadas; no se inicializa FCM');
+      }
+    } catch (err) {
+      console.error('❌ Error inicializando push:', err);
+    }
+  }
+
+  // Puedes llamar esto desde un botón "Probar en este dispositivo" si quieres
+  async registerPushFromUI() {
+    try {
+      console.log('🧪 Usuario pidió probar notificaciones push');
+      await this.pushService.initPushNotifications();
+    } catch (err) {
+      console.error('❌ Error registrando push desde UI:', err);
+    }
   }
 
   // ========================================
@@ -84,7 +119,6 @@ export class NotificationsPage implements OnInit {
       const response = await this.apiService.getNotifications(studentId).toPromise();
       
       if (response && response.success) {
-        // Mapear notificaciones del backend al formato del frontend
         this.notifications = response.data.map((notif: any) => ({
           id: notif.id,
           type: this.getNotificationType(notif.titulo),
@@ -113,7 +147,6 @@ export class NotificationsPage implements OnInit {
   // ========================================
   // HELPERS PARA MAPEAR NOTIFICACIONES
   // ========================================
-  
   getNotificationType(titulo: string): string {
     if (titulo.toLowerCase().includes('racha')) return 'streak';
     if (titulo.toLowerCase().includes('logro') || titulo.toLowerCase().includes('meta')) return 'achievement';
@@ -169,7 +202,6 @@ export class NotificationsPage implements OnInit {
   // ========================================
   // ACCIONES DE NOTIFICACIONES
   // ========================================
-  
   async markAsRead(notification: any) {
     if (notification.read) return;
 
@@ -217,22 +249,18 @@ export class NotificationsPage implements OnInit {
     this.unreadCount = 0;
   }
 
-// ========================================
+  // ========================================
   // SECCIONES EXPANDIBLES
   // ========================================
   toggleSection(section: string) {
-    // Si la sección ya está abierta, la cerramos
     if (this.expandedSections[section]) {
       this.expandedSections[section] = false;
     } else {
-      // Cerrar todas las secciones principales
       Object.keys(this.expandedSections).forEach(key => {
-        // Solo cerrar secciones principales
         if (['lastNotifications', 'notificationTypes', 'reminders', 'channels', 'advanced'].includes(key)) {
           this.expandedSections[key] = false;
         }
       });
-      // Abrir la sección clickeada
       this.expandedSections[section] = true;
     }
   }
@@ -242,9 +270,8 @@ export class NotificationsPage implements OnInit {
   }
 
   // ========================================
-  // CONFIGURACIÓN
+  // CONFIGURACIÓN (localStorage)
   // ========================================
-  
   loadSettings() {
     const saved = localStorage.getItem('notificationSettings');
     if (saved) {
@@ -259,6 +286,23 @@ export class NotificationsPage implements OnInit {
 
   onSettingChange() {
     this.saveSettings();
+    this.ensurePushRegisteredIfNeeded();
+    
+    // Actualizar hora en backend
+    this.updateReminderTimeInBackend();
+  }
+
+  private updateReminderTimeInBackend() {
+    const user = this.apiService.getCurrentUser();
+    if (user?.id && this.notificationSettings.dailyReminder) {
+      this.apiService.updateReminderTime(
+        user.id,
+        this.notificationSettings.dailyReminderTime
+      ).subscribe({
+        next: () => console.log('✅ Hora actualizada en backend'),
+        error: (err) => console.error('❌ Error:', err)
+      });
+    }
   }
 
   onMasterSwitchChange() {
@@ -272,7 +316,11 @@ export class NotificationsPage implements OnInit {
       this.notificationSettings.motivationalMessages = false;
       this.notificationSettings.pushNotifications = false;
     }
+
     this.saveSettings();
+
+    // Si se volvió a encender el master → registrar push si corresponde
+    this.ensurePushRegisteredIfNeeded();
   }
 
   // ========================================

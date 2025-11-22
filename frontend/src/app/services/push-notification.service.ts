@@ -8,6 +8,8 @@ import { environment } from '../../environments/environment';
 })
 export class PushNotificationService {
   
+  private tokenRegistered = false; // 👈 Evitar duplicados
+
   constructor(private http: HttpClient) {}
 
   async initPushNotifications() {
@@ -22,7 +24,6 @@ export class PushNotificationService {
       console.log("🔎 Permiso luego de solicitud:", permStatus);
     }
 
-    // Si no se otorgaron permisos → cortar
     if (permStatus.receive !== 'granted') {
       console.warn("❌ Notificaciones bloqueadas. No se puede continuar.");
       return;
@@ -31,13 +32,16 @@ export class PushNotificationService {
     // 2️⃣ Registrar el dispositivo en FCM
     await PushNotifications.register();
 
-    // 3️⃣ Token recibido correctamente
+    // 3️⃣ Token recibido
     PushNotifications.addListener('registration', token => {
       console.log("📲 Token del dispositivo:", token.value);
-      this.sendTokenToBackend(token.value);
+      if (!this.tokenRegistered) {
+        this.sendTokenToBackend(token.value);
+        this.tokenRegistered = true;
+      }
     });
 
-    // 4️⃣ Manejo de errores de registro
+    // 4️⃣ Error de registro
     PushNotifications.addListener('registrationError', err => {
       console.error("❌ Error en registro de push:", err);
     });
@@ -45,11 +49,17 @@ export class PushNotificationService {
     // 5️⃣ Notificación recibida en foreground
     PushNotifications.addListener('pushNotificationReceived', notif => {
       console.log("📩 Notificación recibida:", notif);
+      // TODO: Mostrar notificación local o actualizar lista
     });
 
-    // 6️⃣ Notificación tocada por el usuario
-    PushNotifications.addListener('pushNotificationActionPerformed', notif => {
-      console.log("👉 Notificación tocada:", notif);
+    // 6️⃣ Notificación tocada
+    PushNotifications.addListener('pushNotificationActionPerformed', action => {
+      console.log("👉 Notificación tocada:", action);
+      // TODO: Navegar según tipo de notificación
+      const data = action.notification.data;
+      if (data?.type === 'welcome') {
+        // Navegar a home, etc.
+      }
     });
   }
 
@@ -57,18 +67,24 @@ export class PushNotificationService {
     const currentUser = localStorage.getItem('currentUser');
     
     if (!currentUser) {
-      console.log('No hay usuario logueado');
+      console.warn('⚠️ No hay usuario logueado, no se puede registrar token');
       return;
     }
 
     const user = JSON.parse(currentUser);
 
-    this.http.post(`${environment.apiUrl}/Notificaciones/registrar-token`, {
+    // ✅ URL CORREGIDA (sin mayúscula, sin guión)
+    this.http.post(`${environment.apiUrl}/notificaciones/registrar-token`, {
       estudianteId: user.id,
       token: token
     }).subscribe({
-      next: () => console.log('✅ Token enviado al backend'),
-      error: (err) => console.error('❌ Error enviando token:', err)
+      next: (response) => {
+        console.log('✅ Token registrado en backend:', response);
+      },
+      error: (err) => {
+        console.error('❌ Error enviando token:', err);
+        console.error('Detalles:', err.error);
+      }
     });
   }
 }
