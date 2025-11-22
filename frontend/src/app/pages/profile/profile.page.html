@@ -14,7 +14,6 @@
       <div class="avatar-section">
         <div class="avatar-preview">
           <img [src]="user.avatarUrl || defaultAvatar" alt="" />
-          <!-- FAB verde FUERA del círculo -->
           <button class="avatar-edit-fab" (click)="triggerFile()" aria-label="Subir foto">
             <ion-icon name="camera"></ion-icon>
           </button>
@@ -25,21 +24,24 @@
             <ion-icon name="sparkles-outline"></ion-icon>
             Elegir avatar
           </button>
-          <button class="avatar-btn" (click)="triggerFile()">
-            <ion-icon name="cloud-upload-outline"></ion-icon>
-            Subir foto
-          </button>
+          
+          <div class="upload-section">
+            <button class="avatar-btn" (click)="triggerFile()">
+              <ion-icon name="cloud-upload-outline"></ion-icon>
+              Subir foto
+            </button>
+            <p class="avatar-hint">Formatos: JPG/PNG/SVG • Máx 2MB</p>
+          </div>
+          
           <button class="avatar-btn danger" (click)="removeAvatar()" [disabled]="user.avatarUrl === defaultAvatar">
             <ion-icon name="trash-outline"></ion-icon>
             Quitar
           </button>
         </div>
-
-        <p class="avatar-hint">Formatos: JPG/PNG/SVG • Máx 2MB</p>
       </div>
     </ion-card-content>
   </ion-card>
-<!-- input de archivo -->
+
 <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
 
 <!-- Picker de avatares -->
@@ -146,7 +148,6 @@
           </div>
         </div>
 
-       <!-- ELIMINAR CUENTA (igual a Contraseña, pero rojo) -->
         <div class="info-card">
           <div class="info-item editable delete-account" (click)="deleteAccount()">
             <ion-icon name="trash-sharp"></ion-icon>
@@ -155,12 +156,8 @@
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
-
-
 
     <!-- MODO ADAPTATIVO -->
     <div class="section">
@@ -235,7 +232,6 @@
 
           <ion-card-content>
             
-            <!-- Mi Objetivo Semanal (desplegable) -->
             <div class="frequency-subsection">
               <div class="subsection-header" (click)="toggleSection('weeklyGoal')">
                 <div class="subsection-title">
@@ -292,7 +288,6 @@
               </div>
             </div>
 
-            <!-- Días Preferidos (desplegable) -->
             <div class="frequency-subsection">
               <div class="subsection-header" (click)="toggleSection('preferredDays')">
                 <div class="subsection-title">
@@ -323,7 +318,6 @@
               </div>
             </div>
 
-            <!-- Recordatorios (desplegable) -->
             <div class="frequency-subsection">
               <div class="subsection-header" (click)="toggleSection('reminders')">
                 <div class="subsection-title">
@@ -357,7 +351,6 @@
               </div>
             </div>
 
-            <!-- Botón guardar -->
             <button 
               class="save-button"
               [disabled]="isSaving || !hasUnsavedChanges"
@@ -417,7 +410,6 @@
       <ion-icon [name]="isSectionExpanded('configuration') ? 'chevron-up' : 'chevron-down'"></ion-icon>
     </div>
     
-    <!-- ✅ BADGE DENTRO DEL BOTÓN -->
     <div class="correction-status-badge" [class.green]="correctionConfig.immediate" [class.yellow]="!correctionConfig.immediate">
       <ion-icon [name]="correctionConfig.immediate ? 'flash' : 'document-text'"></ion-icon>
       <span>{{ correctionConfig.immediate ? 'Corrección Inmediata' : 'Corrección al Final' }}</span>
@@ -428,7 +420,6 @@
     <ion-card class="settings-card">
       <ion-card-content>
         
-    <!-- TÍTULO Y TOGGLE EN LA MISMA LÍNEA -->
         <div class="correction-header">
           <div class="correction-title">
             <ion-icon name="checkmark-done"></ion-icon>
@@ -441,7 +432,6 @@
           </ion-toggle>
         </div>
 
-        <!-- BOX VERDE - Corrección Inmediata -->
         <div class="correction-info correction-active-green" *ngIf="correctionConfig.immediate">
           <ion-note>
             <ion-icon name="flash"></ion-icon>
@@ -452,7 +442,6 @@
           </ion-note>
         </div>
 
-        <!-- BOX AMARILLO - Corrección al Final -->
         <div class="correction-info correction-active-yellow" *ngIf="!correctionConfig.immediate">
           <ion-note>
             <ion-icon name="document-text"></ion-icon>
@@ -468,14 +457,12 @@
   </div>
 </div>
 
-<!-- CERRAR SESIÓN (un solo botón, sin desplegable) -->
 <div class="section danger">
   <h2 class="section-title logout-header" (click)="logout()">
     <ion-icon name="log-out-sharp" class="danger-icon"></ion-icon>
     <span>Cerrar Sesión</span>
   </h2>
 </div>
-
 
 </div>
 
