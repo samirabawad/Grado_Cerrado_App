@@ -226,8 +226,14 @@ export class ResumenTestProcesalPage implements OnInit {
 
   isOptionSelected(question: QuestionResult, option: string): boolean {
     if (this.isTrueFalse(question.type)) {
-      const ua = this.normTF(question.userAnswer);
-      return (option === 'Verdadero' && ua === true) || (option === 'Falso' && ua === false);
+      // userAnswer viene como "A" o "B" desde el test
+      if ((question.userAnswer ?? '').toUpperCase() === 'A' && option === 'Verdadero') return true;
+      if ((question.userAnswer ?? '').toUpperCase() === 'B' && option === 'Falso') return true;
+      
+      // Compatibilidad con formato antiguo (V/F)
+      if ((question.userAnswer ?? '').toUpperCase() === 'V' && option === 'Verdadero') return true;
+      if ((question.userAnswer ?? '').toUpperCase() === 'F' && option === 'Falso') return true;
+      return false;
     }
 
     const options = this.getQuestionOptions(question);
@@ -272,8 +278,8 @@ export class ResumenTestProcesalPage implements OnInit {
    */
   private normTF(value: string | undefined | null): boolean | null {
     const v = (value ?? '').toString().trim().toLowerCase();
-    if (['true', 'v', 'verdadero', 't', '1', 'sí', 'si'].includes(v)) return true;
-    if (['false', 'f', 'falso', '0', 'no'].includes(v)) return false;
+    if (['true', 'v', 'verdadero', 't', '1', 'sí', 'si', 'a'].includes(v)) return true;
+    if (['false', 'f', 'falso', '0', 'no', 'b'].includes(v)) return false;
     return null;
   }
 }
