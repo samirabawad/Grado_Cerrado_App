@@ -7,7 +7,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService, StudyFrequencyConfig } from '../../services/api.service';
-import { PushNotificationService } from '../../services/push-notification.service'; // 👈 NUEVO
 
 @Component({
   selector: 'app-profile',
@@ -20,7 +19,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
   @ViewChild('timeInput') timeInput!: ElementRef<HTMLInputElement>;
 
-  // ======== input para subir foto ========
+  // ======== NUEVO: input para subir foto ========
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   // ============================================
@@ -33,42 +32,47 @@ export class ProfilePage implements OnInit, AfterViewInit {
     email: 'usuario@example.com',
     nivel_actual: 'basico',
     fecha_registro: new Date(),
+    // avatar original que tenías
     avatar: 'assets/image/msombra.png',
+    // ======== NUEVO: url unificada para mostrar en UI ========
     avatarUrl: '' as string,
     activo: true,
     verificado: false,
     last_profile_update: null as string | null
   };
 
-  // ======== AVATAR / INICIALES ========
-  defaultAvatar = 'assets/image/msombra.png';
 
-  getInitialAvatar(): string {
-    const name = this.user.nombre || this.user.nombreCompleto || 'U';
-    const initial = name.charAt(0).toUpperCase();
+// ======== NUEVO: configuración de avatares ========
+defaultAvatar = 'assets/image/msombra.png';
 
-    const svg = `
-      <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="50" fill="#9CA3AF"/>
-        <text x="50" y="50" font-family="Arial, sans-serif" font-size="48" 
-              font-weight="bold" fill="white" text-anchor="middle" 
-              dominant-baseline="central">${initial}</text>
-      </svg>
-    `;
+getInitialAvatar(): string {
+  const name = this.user.nombre || this.user.nombreCompleto || 'U';
+  const initial = name.charAt(0).toUpperCase();
+  
+  // SVG con inicial
+  const svg = `
+    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="50" fill="#9CA3AF"/>
+      <text x="50" y="50" font-family="Arial, sans-serif" font-size="48" 
+            font-weight="bold" fill="white" text-anchor="middle" 
+            dominant-baseline="central">${initial}</text>
+    </svg>
+  `;
+  
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
 
-    return 'data:image/svg+xml;base64,' + btoa(svg);
-  }
+raccoonAvatars: { id: number; url: string }[] = [
+  { id: 1, url: 'assets/avatars/racoon1.svg' },
+  { id: 2, url: 'assets/avatars/racoon2.svg' },
+  { id: 3, url: 'assets/avatars/pizza.svg' },
+  { id: 4, url: 'assets/avatars/gavel.svg' },
+  { id: 5, url: 'assets/avatars/egg.svg' },
+  { id: 5, url: 'assets/avatars/Flower.svg' },
+];
+avatarPickerOpen = false;
+pendingAvatar: { id: number; url: string } | null = null;
 
-  raccoonAvatars: { id: number; url: string }[] = [
-    { id: 1, url: 'assets/avatars/racoon1.svg' },
-    { id: 2, url: 'assets/avatars/racoon2.svg' },
-    { id: 3, url: 'assets/avatars/pizza.svg' },
-    { id: 4, url: 'assets/avatars/gavel.svg' },
-    { id: 5, url: 'assets/avatars/egg.svg' },
-    { id: 5, url: 'assets/avatars/flower.svg' },
-  ];
-  avatarPickerOpen = false;
-  pendingAvatar: { id: number; url: string } | null = null;
 
   stats = {
     racha_dias_actual: 0,
@@ -87,7 +91,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   };
 
   // ============================================
-  // FRECUENCIA DE ESTUDIO
+  // PROPIEDADES DE FRECUENCIA DE ESTUDIO
   // ============================================
   frecuenciaConfig: StudyFrequencyConfig = {
     frecuenciaSemanal: 3,
@@ -101,9 +105,10 @@ export class ProfilePage implements OnInit, AfterViewInit {
   isLoading: boolean = true;
   diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+  // Propiedades para el selector de hora
   horaSeleccionada: string = '19';
   minutoSeleccionado: string = '00';
-  horas: string[] = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  horas: string[] = Array.from({length: 24}, (_, i) => i.toString().padStart(2, '0'));
   minutos: string[] = ['00', '15', '30', '45'];
 
   // ============================================
@@ -147,25 +152,11 @@ export class ProfilePage implements OnInit, AfterViewInit {
   isSavingAdaptive: boolean = false;
   adaptiveConfig: any = { enabled: false };
 
-  // ============================================
-  // NOTIFICACIONES PUSH
-  // ============================================
-  pushEnabled: boolean = false;
-  isSavingPush: boolean = false;
-
-  // ============================================
-  // CONFIGURACIÓN DE CORRECCIÓN
-  // ============================================
-  correctionConfig: any = {
-    immediate: true
-  };
-
   constructor(
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
-    private apiService: ApiService,
-    private pushService: PushNotificationService // 👈 NUEVO
+    private apiService: ApiService
   ) {}
 
   ngOnInit() {
@@ -193,25 +184,19 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
       const studentId = currentUser.id;
 
+      // Usar los datos del usuario almacenados en localStorage
       this.user.id = currentUser.id;
       this.user.nombre = currentUser.name || 'Usuario';
       this.user.nombreCompleto = currentUser.name || 'Usuario';
       this.user.email = currentUser.email || 'usuario@example.com';
 
-      // Avatar unificado
+      // ======== NUEVO: setear avatarUrl desde localStorage o default ========
       const rawAvatar = currentUser.avatarUrl || currentUser.avatar || this.user.avatar;
       if (rawAvatar && rawAvatar !== this.defaultAvatar && !rawAvatar.includes('msombra')) {
         this.user.avatarUrl = rawAvatar;
       } else {
         this.user.avatarUrl = this.getInitialAvatar();
       }
-
-      // 🔔 Estado inicial del switch de notificaciones desde localStorage
-      const savedPush = localStorage.getItem('pushEnabled');
-      if (savedPush !== null) {
-        this.pushEnabled = savedPush === 'true';
-      }
-
       console.log('✅ Usuario cargado desde localStorage:', this.user);
 
       await this.loadDashboardStats(studentId);
@@ -228,7 +213,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   // ============================================
-  // DASHBOARD STATS
+  // CARGAR ESTADÍSTICAS DEL DASHBOARD
   // ============================================
   async loadDashboardStats(studentId: number) {
     try {
@@ -252,7 +237,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   // ============================================
-  // FRECUENCIA DE ESTUDIO
+  // MÉTODOS DE FRECUENCIA
   // ============================================
   increaseFrequency() {
     if (this.frecuenciaConfig.frecuenciaSemanal < 7) {
@@ -341,8 +326,8 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
             this.frecuenciaConfig = {
               frecuenciaSemanal: response.data.frecuenciaSemanal || 3,
-              objetivoDias: (objetivoDias === 'flexible' || objetivoDias === 'estricto' || objetivoDias === 'personalizado')
-                ? objetivoDias
+              objetivoDias: (objetivoDias === 'flexible' || objetivoDias === 'estricto' || objetivoDias === 'personalizado') 
+                ? objetivoDias 
                 : 'flexible',
               diasPreferidos: response.data.diasPreferidos || [],
               recordatorioActivo: response.data.recordatorioActivo !== false,
@@ -408,7 +393,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
       if (response && response.success) {
         this.adaptiveModeEnabled = this.adaptiveConfig.enabled;
         const message = this.adaptiveConfig.enabled
-          ? '✅ Modo adaptativo activado'
+          ? '✅ Modo adaptativo activado' 
           : '✅ Modo adaptativo desactivado';
         await this.showToast(message, 'success');
       } else {
@@ -425,51 +410,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   // ============================================
-  // NOTIFICACIONES PUSH
-  // ============================================
-  async onPushToggleChange(ev: any) {
-    const enabled = ev.detail.checked as boolean;
-    this.pushEnabled = enabled;
-    this.isSavingPush = true;
-
-    const currentUser = this.apiService.getCurrentUser();
-    if (!currentUser || !currentUser.id) {
-      await this.showToast('Error: Usuario no identificado', 'danger');
-      this.isSavingPush = false;
-      return;
-    }
-
-    try {
-      if (enabled) {
-        // Solicita permisos, obtiene token y lo manda al backend
-        await this.pushService.initPushNotifications();
-      }
-
-      // Actualizar preferencia en el backend
-      await this.apiService
-        .updateNotificationConfig(currentUser.id, enabled)
-        .toPromise();
-
-      // Guardar también en localStorage
-      localStorage.setItem('pushEnabled', String(enabled));
-
-      await this.showToast(
-        enabled ? '✅ Notificaciones activadas' : '✅ Notificaciones desactivadas',
-        'success'
-      );
-    } catch (err) {
-      console.error('❌ Error actualizando notificaciones:', err);
-      // Revertir switch
-      this.pushEnabled = !enabled;
-      localStorage.setItem('pushEnabled', String(this.pushEnabled));
-      await this.showToast('No se pudo actualizar las notificaciones', 'danger');
-    } finally {
-      this.isSavingPush = false;
-    }
-  }
-
-  // ============================================
-  // CONFIGURACIÓN APP
+  // CONFIGURACIÓN
   // ============================================
   loadSettings() {
     const saved = localStorage.getItem('appSettings');
@@ -484,17 +425,28 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   // ============================================
+  // CONFIGURACIÓN DE CORRECCIÓN
+  // ============================================
+  correctionConfig: any = {
+    immediate: true // Por defecto corrección inmediata
+  };
+
+// ============================================
   // SECCIONES
   // ============================================
   toggleSection(section: string) {
+    // Si la sección ya está abierta, la cerramos
     if (this.expandedSections[section]) {
       this.expandedSections[section] = false;
     } else {
+      // Cerrar todas las secciones principales
       Object.keys(this.expandedSections).forEach(key => {
+        // Solo cerrar secciones principales, no subsecciones
         if (['personalInfo', 'security', 'adaptiveMode', 'frequency', 'progress', 'settings'].includes(key)) {
           this.expandedSections[key] = false;
         }
       });
+      // Abrir la sección clickeada
       this.expandedSections[section] = true;
     }
   }
@@ -516,11 +468,16 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
   getFechaRegistroFormatted(): string {
-    return this.user.fecha_registro.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    try {
+      return this.user.fecha_registro.toLocaleDateString('es-CL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Santiago'
+      });
+    } catch (error) {
+      return 'Fecha no disponible';
+    }
   }
 
   canEditProfile(): boolean {
@@ -546,17 +503,19 @@ export class ProfilePage implements OnInit, AfterViewInit {
   getLastUpdateFormatted(): string {
     if (!this.user.last_profile_update) return 'Nunca';
 
-    const lastUpdate = new Date(this.user.last_profile_update);
-    return lastUpdate.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    try {
+      const lastUpdate = new Date(this.user.last_profile_update);
+      return lastUpdate.toLocaleDateString('es-CL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Santiago'
+      });
+    } catch (error) {
+      return 'Fecha no disponible';
+    }
   }
 
-  // ============================================
-  // EDICIÓN DE DATOS
-  // ============================================
   async editName() {
     const alert = await this.alertController.create({
       header: 'Editar Nombre',
@@ -567,7 +526,9 @@ export class ProfilePage implements OnInit, AfterViewInit {
           type: 'text',
           placeholder: 'Nombre *',
           value: this.user.nombre,
-          attributes: { required: true }
+          attributes: {
+            required: true
+          }
         },
         {
           name: 'segundoNombre',
@@ -580,7 +541,9 @@ export class ProfilePage implements OnInit, AfterViewInit {
           type: 'text',
           placeholder: 'Apellido paterno *',
           value: '',
-          attributes: { required: true }
+          attributes: {
+            required: true
+          }
         },
         {
           name: 'apellidoMaterno',
@@ -590,7 +553,10 @@ export class ProfilePage implements OnInit, AfterViewInit {
         }
       ],
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
         {
           text: 'Guardar',
           handler: async (data) => {
@@ -615,10 +581,12 @@ export class ProfilePage implements OnInit, AfterViewInit {
               const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
 
               if (response && response.success) {
+                // Actualizar datos locales
                 this.user.nombre = response.data.nombre;
                 this.user.nombreCompleto = response.data.nombreCompleto;
                 this.user.last_profile_update = response.data.fechaModificacion;
 
+                // Actualizar localStorage
                 const currentUser = this.apiService.getCurrentUser();
                 if (currentUser) {
                   currentUser.name = response.data.nombre;
@@ -651,11 +619,17 @@ export class ProfilePage implements OnInit, AfterViewInit {
           type: 'email',
           placeholder: 'nuevo@email.com',
           value: this.user.email,
-          attributes: { required: true, autocomplete: 'email' }
+          attributes: {
+            required: true,
+            autocomplete: 'email'
+          }
         }
       ],
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
         {
           text: 'Guardar',
           handler: async (data) => {
@@ -682,7 +656,9 @@ export class ProfilePage implements OnInit, AfterViewInit {
             }
 
             try {
-              const updates = { email: emailTrimmed };
+              const updates = {
+                email: emailTrimmed
+              };
 
               const response = await this.apiService.updateUserProfile(this.user.id, updates).toPromise();
 
@@ -721,23 +697,36 @@ export class ProfilePage implements OnInit, AfterViewInit {
           name: 'currentPassword',
           type: 'password',
           placeholder: 'Contraseña actual',
-          attributes: { required: true, autocomplete: 'current-password' }
+          attributes: {
+            required: true,
+            autocomplete: 'current-password'
+          }
         },
         {
           name: 'newPassword',
           type: 'password',
           placeholder: 'Nueva contraseña (mínimo 6 caracteres)',
-          attributes: { required: true, autocomplete: 'new-password', minlength: 6 }
+          attributes: {
+            required: true,
+            autocomplete: 'new-password',
+            minlength: 6
+          }
         },
         {
           name: 'confirmPassword',
           type: 'password',
           placeholder: 'Confirmar nueva contraseña',
-          attributes: { required: true, autocomplete: 'new-password' }
+          attributes: {
+            required: true,
+            autocomplete: 'new-password'
+          }
         }
       ],
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
         {
           text: 'Cambiar',
           handler: async (data) => {
@@ -782,9 +771,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
     await alert.present();
   }
 
-  // ============================================
-  // TOAST / NAVEGACIÓN
-  // ============================================
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastController.create({
       message,
@@ -800,7 +786,10 @@ export class ProfilePage implements OnInit, AfterViewInit {
       header: 'Cerrar Sesión',
       message: '¿Estás seguro que deseas cerrar sesión?',
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
         {
           text: 'Cerrar Sesión',
           role: 'confirm',
@@ -827,7 +816,10 @@ export class ProfilePage implements OnInit, AfterViewInit {
         }
       ],
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
         {
           text: 'Eliminar Cuenta',
           role: 'destructive',
@@ -903,6 +895,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     }
   }
 
+  
   // ============================================
   // AVATAR / FOTO DE PERFIL
   // ============================================
@@ -911,93 +904,97 @@ export class ProfilePage implements OnInit, AfterViewInit {
   selectAvatar(a: { id: number; url: string }) { this.pendingAvatar = a; }
 
   triggerFile() {
-    if (this.fileInput?.nativeElement) {
-      this.fileInput.nativeElement.click();
-    }
+  if (this.fileInput?.nativeElement) {
+    this.fileInput.nativeElement.click();
+  }
+}
+
+async saveSelectedAvatar() {
+  if (!this.pendingAvatar) return;
+  try {
+    const current = this.apiService.getCurrentUser();
+    await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
+
+    this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
+    current.avatarUrl = this.user.avatarUrl;
+    current.avatar = this.user.avatarUrl;
+    localStorage.setItem('currentUser', JSON.stringify(current));
+
+    await this.showToast('✅ Avatar actualizado', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('No se pudo actualizar el avatar', 'danger');
+  } finally {
+    this.closeAvatarPicker();
+  }
+}
+
+async onFileSelected(ev: any) {
+  const file: File | undefined = ev?.target?.files?.[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    await this.showToast('La imagen excede 2MB', 'danger');
+    ev.target.value = '';
+    return;
   }
 
-  async saveSelectedAvatar() {
-    if (!this.pendingAvatar) return;
-    try {
-      const current = this.apiService.getCurrentUser();
-      await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
+  try {
+    const current = this.apiService.getCurrentUser();
+    const form = new FormData();
+    form.append('file', file);
+    const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
 
-      this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
-      current.avatarUrl = this.user.avatarUrl;
-      current.avatar = this.user.avatarUrl;
-      localStorage.setItem('currentUser', JSON.stringify(current));
+    const rawUrl = resp?.data?.url as string;
+    const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
 
-      await this.showToast('✅ Avatar actualizado', 'success');
+    this.user.avatarUrl = absoluteUrl;
+    current.avatarUrl = absoluteUrl;
+    current.avatar = absoluteUrl;
+    localStorage.setItem('currentUser', JSON.stringify(current));
 
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('avatarUpdated'));
-      }, 100);
-
-    } catch (e) {
-      console.error(e);
-      await this.showToast('No se pudo actualizar el avatar', 'danger');
-    } finally {
-      this.closeAvatarPicker();
-    }
+    await this.showToast('✅ Foto de perfil actualizada', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('Error subiendo la imagen', 'danger');
+  } finally {
+    ev.target.value = '';
   }
+}
 
-  async onFileSelected(ev: any) {
-    const file: File | undefined = ev?.target?.files?.[0];
-    if (!file) return;
+async removeAvatar() {
+  try {
+    const current = this.apiService.getCurrentUser();
+    await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
 
-    if (file.size > 2 * 1024 * 1024) {
-      await this.showToast('La imagen excede 2MB', 'danger');
-      ev.target.value = '';
-      return;
-    }
+    this.user.avatarUrl = this.getInitialAvatar();
+    current.avatarUrl = '';
+    current.avatar = '';
+    localStorage.setItem('currentUser', JSON.stringify(current));
 
-    try {
-      const current = this.apiService.getCurrentUser();
-      const form = new FormData();
-      form.append('file', file);
-      const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
-
-      const rawUrl = resp?.data?.url as string;
-      const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
-
-      this.user.avatarUrl = absoluteUrl;
-      current.avatarUrl = absoluteUrl;
-      current.avatar = absoluteUrl;
-      localStorage.setItem('currentUser', JSON.stringify(current));
-
-      await this.showToast('✅ Foto de perfil actualizada', 'success');
-
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('avatarUpdated'));
-      }, 100);
-
-    } catch (e) {
-      console.error(e);
-      await this.showToast('Error subiendo la imagen', 'danger');
-    } finally {
-      ev.target.value = '';
-    }
+    await this.showToast('Avatar quitado', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('No se pudo quitar el avatar', 'danger');
   }
+}
 
-  async removeAvatar() {
-    try {
-      const current = this.apiService.getCurrentUser();
-      await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
-
-      this.user.avatarUrl = this.getInitialAvatar();
-      current.avatarUrl = '';
-      current.avatar = '';
-      localStorage.setItem('currentUser', JSON.stringify(current));
-
-      await this.showToast('Avatar quitado', 'success');
-
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('avatarUpdated'));
-      }, 100);
-
-    } catch (e) {
-      console.error(e);
-      await this.showToast('No se pudo quitar el avatar', 'danger');
-    }
-  }
 }

@@ -239,7 +239,7 @@
                 class="green-toggle">
               </ion-toggle>
             </div>
-
+            
             <div class="setting-item time-picker-item" *ngIf="notificationSettings.dailyReminder">
               <div class="setting-info">
                 <ion-icon name="time" style="color: #10b981; font-size: 24px;"></ion-icon>
@@ -248,11 +248,23 @@
                   <p>¿A qué hora prefieres estudiar?</p>
                 </div>
               </div>
-              <input 
-                type="time" 
-                [(ngModel)]="notificationSettings.dailyReminderTime"
-                (change)="onSettingChange()"
-                class="time-input">
+              <div class="hour-select-container" (click)="toggleHourPicker()">
+                <span class="selected-hour">{{ getFormattedHour() }}</span>
+                <ion-icon name="chevron-down" class="dropdown-icon"></ion-icon>
+              </div>
+            </div>
+
+            <!-- Dropdown de horas (aparece al hacer click) -->
+            <div class="hour-dropdown" *ngIf="showHourPicker && notificationSettings.dailyReminder">
+              <div class="hour-options">
+                <div 
+                  *ngFor="let hour of availableHours" 
+                  class="hour-option"
+                  [class.selected]="isHourSelected(hour)"
+                  (click)="selectHour(hour)">
+                  {{ hour }}
+                </div>
+              </div>
             </div>
 
           </div>
