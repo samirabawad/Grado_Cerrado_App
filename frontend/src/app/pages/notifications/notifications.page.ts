@@ -20,12 +20,12 @@ export class NotificationsPage implements OnInit {
   isLoading: boolean = true;
 
   // Secciones expandibles
-  expandedSections: { [key: string]: boolean } = {
+    expandedSections: { [key: string]: boolean } = {
     lastNotifications: true,
+    settings: false,
     notificationTypes: false,
     reminders: false,
-    channels: false,
-    advanced: false
+    channels: false
   };
 
   // Configuración de notificaciones
@@ -48,6 +48,19 @@ export class NotificationsPage implements OnInit {
     doNotDisturbEnd: '08:00'
   };
 
+  // Selectores de hora para recordatorios
+  hours: string[] = [];
+  minutes: string[] = [];
+  reminderHour: string = '20';
+  reminderMinute: string = '00';
+
+  // Selectores de hora para "No molestar"
+  dndStartHour: string = '22';
+  dndStartMinute: string = '00';
+  dndEndHour: string = '08';
+  dndEndMinute: string = '00';
+
+
   constructor(
     private router: Router,
     private apiService: ApiService
@@ -56,6 +69,7 @@ export class NotificationsPage implements OnInit {
   ngOnInit() {
     this.loadNotifications();
     this.loadSettings();
+    this.initializeTimeSelectors();
   }
 
   ionViewWillEnter() {
@@ -286,11 +300,15 @@ export class NotificationsPage implements OnInit {
   // ========================================
   showHourPicker: boolean = false;
   availableHours: string[] = [
-    '12:00 AM', '1:00 AM', '2:00 AM', '3:00 AM', '4:00 AM', '5:00 AM',
-    '6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM',
-    '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM',
-    '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM', '11:00 PM'
+    '00:00', '01:00', '02:00', '03:00', '04:00', '05:00',
+    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+    '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
   ];
+
+  showReminderDropdown = false;
+  showDndStartDropdown = false;
+  showDndEndDropdown = false;
 
   toggleHourPicker() {
     this.showHourPicker = !this.showHourPicker;
@@ -325,4 +343,96 @@ export class NotificationsPage implements OnInit {
     this.onSettingChange();
   }
   
+  // ========================================
+// INICIALIZAR SELECTORES DE HORA
+// ========================================
+initializeTimeSelectors() {
+  // Generar horas (00-23)
+  for (let i = 0; i < 24; i++) {
+    this.hours.push(i.toString().padStart(2, '0'));
+  }
+  
+  // Generar minutos (00, 15, 30, 45)
+  this.minutes = ['00', '15', '30', '45'];
+  
+  // Inicializar desde los valores guardados
+  if (this.notificationSettings.dailyReminderTime) {
+    const [h, m] = this.notificationSettings.dailyReminderTime.split(':');
+    this.reminderHour = h;
+    this.reminderMinute = m;
+  }
+  
+  if (this.notificationSettings.doNotDisturbStart) {
+    const [h, m] = this.notificationSettings.doNotDisturbStart.split(':');
+    this.dndStartHour = h;
+    this.dndStartMinute = m;
+  }
+  
+  if (this.notificationSettings.doNotDisturbEnd) {
+    const [h, m] = this.notificationSettings.doNotDisturbEnd.split(':');
+    this.dndEndHour = h;
+    this.dndEndMinute = m;
+  }
+}
+
+// ========================================
+// ACTUALIZAR HORA DE RECORDATORIO
+// ========================================
+  updateReminderTime() {
+    this.notificationSettings.dailyReminderTime = `${this.reminderHour}:${this.reminderMinute}`;
+    this.onSettingChange();
+  }
+
+  // ========================================
+  // ACTUALIZAR HORA DE INICIO NO MOLESTAR
+  // ========================================
+  updateDndStartTime() {
+    this.notificationSettings.doNotDisturbStart = `${this.dndStartHour}:${this.dndStartMinute}`;
+    this.onSettingChange();
+  }
+
+  // ========================================
+  // ACTUALIZAR HORA DE FIN NO MOLESTAR
+  // ========================================
+  updateDndEndTime() {
+    this.notificationSettings.doNotDisturbEnd = `${this.dndEndHour}:${this.dndEndMinute}`;
+    this.onSettingChange();
+  }
+
+  toggleReminderDropdown() {
+    this.showReminderDropdown = !this.showReminderDropdown;
+    this.showDndStartDropdown = false;
+    this.showDndEndDropdown = false;
+  }
+
+  toggleDndStartDropdown() {
+    this.showDndStartDropdown = !this.showDndStartDropdown;
+    this.showReminderDropdown = false;
+    this.showDndEndDropdown = false;
+  }
+
+  toggleDndEndDropdown() {
+    this.showDndEndDropdown = !this.showDndEndDropdown;
+    this.showReminderDropdown = false;
+    this.showDndStartDropdown = false;
+  }
+
+  selectReminderHour(hour: string) {
+    this.notificationSettings.dailyReminderTime = hour;
+    this.showReminderDropdown = false;
+    this.onSettingChange();
+  }
+
+  selectDndStartHour(hour: string) {
+    this.notificationSettings.doNotDisturbStart = hour;
+    this.showDndStartDropdown = false;
+    this.onSettingChange();
+  }
+
+  selectDndEndHour(hour: string) {
+    this.notificationSettings.doNotDisturbEnd = hour;
+    this.showDndEndDropdown = false;
+    this.onSettingChange();
+  }
+
 }

@@ -58,7 +58,7 @@
     background: white;
     padding: 20px;
     margin: 0;
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 700;
     color: #1f2937;
     border-radius: 16px;
@@ -137,7 +137,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 12px;
+  background: white;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 0 20px 20px 20px;
 }
 
 .notification-card {
@@ -154,8 +157,7 @@
   position: relative;
   
   &.unread {
-    background: #f0f9ff;
-    border-left: 4px solid #10b981;
+    background: #f9fafb;
   }
   
   &:hover {
@@ -391,6 +393,10 @@
 // TOGGLES VERDES
 // ========================================
 .green-toggle {
+  --width: 44px;
+  --height: 24px;
+  --handle-width: 20px;
+  --handle-height: 20px;
   --background: #cbd5e1;
   --background-checked: #10b981;
   --handle-background: white;
@@ -492,5 +498,267 @@ ion-toggle {
         font-weight: 600;
       }
     }
+  }
+  
+}
+
+// ========================================
+// BLOQUE DE ÚLTIMAS NOTIFICACIONES
+// ========================================
+.section-title-static {
+  background: white;
+  padding: 20px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+  border-radius: 16px 16px 0 0;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid #f1f5f9;
+
+  ion-icon {
+    font-size: 24px;
+    color: #10b981;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  background: white;
+  
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    background: #f3f4f6;
+    color: #111827;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex: 1;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 16px;
+      color: #10b981;
+    }
+
+    &:active {
+      background: #e5e7eb;
+      transform: scale(0.98);
+    }
+
+    &.danger {
+      ion-icon {
+        color: #ef4444;
+      }
+    }
+  }
+}
+
+.notifications-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: white;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 0 20px 20px 20px;
+}// ========================================
+// BLOQUE DE ÚLTIMAS NOTIFICACIONES
+// ========================================
+.section-title-static {
+  background: white;
+  padding: 20px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+  border-radius: 16px 16px 0 0;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid #f1f5f9;
+
+  ion-icon {
+    font-size: 24px;
+    color: #10b981;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  background: white;
+  
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    background: #f3f4f6;
+    color: #111827;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex: 1;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 16px;
+      color: #10b981;
+    }
+
+    &:active {
+      background: #e5e7eb;
+      transform: scale(0.98);
+    }
+
+    &.danger {
+      ion-icon {
+        color: #ef4444;
+      }
+    }
+  }
+}
+
+.notifications-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: white;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 0 20px 20px 20px;
+}
+
+// ========================================
+// SUBSECCIONES
+// ========================================
+.subsection {
+  margin-top: 12px;
+  
+  .subsection-title {
+    background: #f9fafb;
+    padding: 16px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+    border-radius: 12px;
+    border-left: 3px solid #9ca3af;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    span {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      
+      ion-icon {
+        font-size: 20px;
+        color: #9ca3af;
+      }
+    }
+    
+    > ion-icon {
+      font-size: 20px;
+      color: #6b7280;
+    }
+    
+    &:active {
+      background: #f3f4f6;
+      transform: scale(0.98);
+    }
+  }
+}
+
+// ========================================
+// SELECTORES DE HORA (ESTILO PROFILE)
+// ========================================
+.time-picker-container {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  
+  .time-label {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .time-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    
+    .time-select {
+      padding: 10px 16px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      background: #fff;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      
+      &:focus {
+        outline: none;
+        border-color: #10b981;
+      }
+    }
+    
+    .time-separator {
+      font-size: 24px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    
+    .time-icon {
+      font-size: 24px;
+      color: #10b981;
+      margin-left: 8px;
+    }
+  }
+}
+
+// ========================================
+// INPUT DE HORA PERSONALIZADO
+// ========================================
+.time-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #10b981;
+    background: white;
   }
 }
