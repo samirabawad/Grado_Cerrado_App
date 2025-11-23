@@ -176,6 +176,59 @@
       </div>
     </div>
 
+      <!-- PUNTOS FUERTES -->
+    <div class="strong-points-section">
+      <h2 class="section-title-strong">
+        <ion-icon name="trending-up"></ion-icon>
+        Puntos más fuertes
+      </h2>
+
+      <!-- Civil -->
+      <div class="strong-area-container" *ngIf="getTop3StrongTopicsCivil().length > 0">
+        <h3 class="strong-area-title civil">
+          <ion-icon name="scale"></ion-icon>
+          Derecho Civil
+        </h3>
+        <div class="strong-topics-list">
+          <div *ngFor="let topic of getTop3StrongTopicsCivil(); let i = index"
+               class="strong-topic-card civil">
+            <div class="strong-topic-rank">{{ i + 1 }}</div>
+            <div class="strong-topic-content">
+              <h4 class="strong-topic-name">{{ topic.nombre }}</h4>
+              <p class="strong-topic-stats">{{ topic.totalCorrectas }} de {{ topic.totalIntentos }} correctas ({{ topic.tasaAcierto }}%)</p>
+            </div>
+            <ion-icon name="trophy" class="strong-topic-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Procesal -->
+      <div class="strong-area-container" *ngIf="getTop3StrongTopicsProcesal().length > 0">
+        <h3 class="strong-area-title procesal">
+          <ion-icon name="book"></ion-icon>
+          Derecho Procesal
+        </h3>
+        <div class="strong-topics-list">
+          <div *ngFor="let topic of getTop3StrongTopicsProcesal(); let i = index"
+               class="strong-topic-card procesal">
+            <div class="strong-topic-rank">{{ i + 1 }}</div>
+            <div class="strong-topic-content">
+              <h4 class="strong-topic-name">{{ topic.nombre }}</h4>
+              <p class="strong-topic-stats">{{ topic.totalCorrectas }} de {{ topic.totalIntentos }} correctas ({{ topic.tasaAcierto }}%)</p>
+            </div>
+            <ion-icon name="trophy" class="strong-topic-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Si no hay puntos fuertes -->
+      <div class="no-strong-points"
+           *ngIf="getTop3StrongTopicsCivil().length === 0 && getTop3StrongTopicsProcesal().length === 0">
+        <ion-icon name="information-circle"></ion-icon>
+        <p>Aún no tienes suficientes datos para mostrar puntos fuertes</p>
+      </div>
+    </div>
+
     <!-- PUNTOS DÉBILES -->
     <div class="weak-points-section">
       <h2 class="section-title-weak">

@@ -35,6 +35,7 @@ currentWeekLabel: string = '';
   chartData: any[] = [];
   areaStats: any[] = [];
   allWeakTopics: any[] = [];
+  allStrongTopics: any[] = [];
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -202,6 +203,26 @@ currentWeekLabel: string = '';
         this.allWeakTopics = [];
       }
 
+      // Cargar puntos fuertes
+      try {
+        const strongResponse = await this.apiService.getTopTemasFuertes(studentId).toPromise();
+        if (strongResponse && strongResponse.success && strongResponse.data) {
+          this.allStrongTopics = strongResponse.data.map((item: any) => ({
+            area: item.area,
+            tema: item.tema,
+            tasaAcierto: parseFloat(item.tasaAcierto),
+            intentos: item.intentos,
+            nombre: item.tema,
+            totalIntentos: item.intentos,
+            totalCorrectas: Math.round((parseFloat(item.tasaAcierto) / 100) * item.intentos)
+          }));
+          console.log('✅ Puntos fuertes cargados:', this.allStrongTopics);
+        }
+      } catch (error) {
+        console.error('Error cargando temas fuertes:', error);
+        this.allStrongTopics = [];
+      }
+      
       await this.generateChartData();
 
       this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
@@ -798,6 +819,30 @@ getTop3WeakTopicsCivil(): any[] {
     .slice(0, 3);
 
   return civilWeakTopics;
+}
+
+// =====================
+// PUNTOS FUERTES
+// =====================
+
+getTop3StrongTopicsCivil(): any[] {
+  if (!this.allStrongTopics || this.allStrongTopics.length === 0) return [];
+  
+  const civilStrongTopics = this.allStrongTopics
+    .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('civil'))
+    .slice(0, 1);  // ✅ CAMBIO: solo 1 tema
+
+  return civilStrongTopics;
+}
+
+getTop3StrongTopicsProcesal(): any[] {
+  if (!this.allStrongTopics || this.allStrongTopics.length === 0) return [];
+  
+  const procesalStrongTopics = this.allStrongTopics
+    .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('procesal'))
+    .slice(0, 1);  // ✅ CAMBIO: solo 1 tema
+
+  return procesalStrongTopics;
 }
 
 getTop3WeakTopicsProcesal(): any[] {

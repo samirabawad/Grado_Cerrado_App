@@ -611,6 +611,168 @@
 }
 
 // ========================================
+// PUNTOS MÁS FUERTES
+// ========================================
+.strong-points-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 0 0 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .section-title-strong {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px 0;
+
+    ion-icon {
+      font-size: 24px;
+      color: #fbbf24;
+    }
+  }
+
+  .motivational-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border-left: 4px solid #fbbf24;
+
+    ion-icon {
+      font-size: 28px;
+      color: #f59e0b;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #92400e;
+      line-height: 1.4;
+    }
+  }
+
+  .strong-area-container {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .strong-area-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+
+      ion-icon {
+        font-size: 20px;
+      }
+
+      &.civil {
+        color: #f97316;
+      }
+
+      &.procesal {
+        color: #3b82f6;
+      }
+    }
+
+    .strong-topics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .strong-topic-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      background: white;
+      border: 1.5px solid #e5e7eb;
+
+      .strong-topic-rank {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      &.civil .strong-topic-rank {
+        color: #f97316;
+        background: #fff7ed;
+      }
+
+      &.procesal .strong-topic-rank {
+        color: #3b82f6;
+        background: #eff6ff;
+      }
+
+      .strong-topic-content {
+        flex: 1;
+
+        .strong-topic-name {
+          margin: 0 0 4px 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: #1e293b;
+        }
+
+        .strong-topic-stats {
+          margin: 0;
+          font-size: 13px;
+          color: #10b981;
+          font-weight: 600;
+        }
+      }
+
+      .strong-topic-icon {
+        font-size: 24px;
+        color: #fbbf24;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .no-strong-points {
+    text-align: center;
+    padding: 40px 20px;
+
+    ion-icon {
+      font-size: 64px;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      color: #64748b;
+      font-weight: 500;
+    }
+  }
+}
+
+// ========================================
 // PUNTOS MÁS DÉBILES
 // ========================================
 .weak-points-section {
@@ -751,6 +913,7 @@
     }
   }
 }
+
 
 // ========================================
 // ESTADÍSTICAS POR ÁREA
