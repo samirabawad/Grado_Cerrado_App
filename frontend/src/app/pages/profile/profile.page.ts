@@ -392,40 +392,46 @@ pendingAvatar: { id: number; url: string } | null = null;
     }
   }
 
-  async onAdaptiveModeChange() {
-    this.isSavingAdaptive = true;
+async onAdaptiveModeChange() {
+  this.isSavingAdaptive = true;
 
-    try {
-      const currentUser = this.apiService.getCurrentUser();
-      if (!currentUser || !currentUser.id) {
-        await this.showToast('Error: Usuario no identificado', 'danger');
-        this.isSavingAdaptive = false;
-        return;
-      }
-
-      const response = await this.apiService.updateAdaptiveModeConfig(
-        currentUser.id,
-        this.adaptiveConfig.enabled
-      ).toPromise();
-
-      if (response && response.success) {
-        this.adaptiveModeEnabled = this.adaptiveConfig.enabled;
-        const message = this.adaptiveConfig.enabled
-          ? '✅ Modo adaptativo activado' 
-          : '✅ Modo adaptativo desactivado';
-        await this.showToast(message, 'success');
-      } else {
-        this.adaptiveConfig.enabled = !this.adaptiveConfig.enabled;
-        await this.showToast('❌ Error al cambiar el modo adaptativo', 'danger');
-      }
-    } catch (error: any) {
-      console.error('Error guardando modo adaptativo:', error);
-      this.adaptiveConfig.enabled = !this.adaptiveConfig.enabled;
-      await this.showToast('❌ Error al guardar la configuración', 'danger');
-    } finally {
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      await this.showToast('Error: Usuario no identificado', 'danger');
       this.isSavingAdaptive = false;
+      return;
     }
+
+    // 1️⃣ Guardar en BD
+    const response = await this.apiService.updateAdaptiveModeConfig(
+      currentUser.id,
+      this.adaptiveConfig.enabled
+    ).toPromise();
+
+    if (response && response.success) {
+      this.adaptiveModeEnabled = this.adaptiveConfig.enabled;
+      
+      // 2️⃣ ✅ CRÍTICO: Guardar en localStorage
+      const key = `adaptive_mode_${currentUser.id}`;
+      const value = JSON.stringify({ enabled: this.adaptiveConfig.enabled });
+      localStorage.setItem(key, value);
+      
+      console.log('✅ Guardado en localStorage:', key, '=', value);
+      
+      const message = this.adaptiveConfig.enabled
+        ? '✅ Modo adaptativo activado' 
+        : '✅ Modo adaptativo desactivado';
+      await this.showToast(message, 'success');
+    }
+  } catch (error: any) {
+    console.error('Error guardando modo adaptativo:', error);
+    this.adaptiveConfig.enabled = !this.adaptiveConfig.enabled;
+    await this.showToast('❌ Error al guardar la configuración', 'danger');
+  } finally {
+    this.isSavingAdaptive = false;
   }
+}
 
   // ============================================
   // CONFIGURACIÓN
