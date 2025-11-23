@@ -22,7 +22,7 @@ ion-content.test-content {
   left: 0;
   right: 0;
   height: 60px;
-  background: #FF6F00;
+  background: #d1d5db;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -31,19 +31,18 @@ ion-content.test-content {
 
   .back-icon {
     font-size: 24px;
-    color: white;
+    color: #000000;
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: white;
+    color: #000000;
     font-size: 18px;
     font-weight: 600;
     margin: 0;
   }
 }
-
 // ========================================
 // CONTENIDO PRINCIPAL
 // ========================================
@@ -628,13 +627,8 @@ ion-content.test-content {
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  cursor: default;
   position: relative;
-
-  &:active {
-    transform: scale(0.98);
-  }
 
   &.correct {
     border-color: #4CAF50;
@@ -679,7 +673,6 @@ ion-content.test-content {
     font-weight: 700;
     font-size: 16px;
     flex-shrink: 0;
-    transition: all 0.2s ease;
   }
 
   .option-text {
