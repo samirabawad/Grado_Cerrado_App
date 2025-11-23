@@ -96,8 +96,7 @@ export class RachaPage implements OnInit {
           console.log('Datos de racha cargados:', { current: this.currentStreak });
         }
 
-const sessionsResponse = await this.apiService.getRecentSessions(studentId, 250).toPromise();
-        if (sessionsResponse && sessionsResponse.success && sessionsResponse.data && sessionsResponse.data.length > 0) {
+        const sessionsResponse = await this.apiService.getRecentSessions(studentId, 250).toPromise();        if (sessionsResponse && sessionsResponse.success && sessionsResponse.data && sessionsResponse.data.length > 0) {
           const dates: Date[] = [];
           
           sessionsResponse.data.forEach((session: any) => {

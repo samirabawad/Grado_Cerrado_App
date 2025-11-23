@@ -316,38 +316,7 @@
               </div>
             </div>
 
-            <div class="frequency-subsection">
-              <div class="subsection-header" (click)="toggleSection('reminders')">
-                <div class="subsection-title">
-                  <ion-icon name="notifications-outline"></ion-icon>
-                  <span>Recordatorios de estudio</span>
-                </div>
-                <ion-toggle 
-                  [(ngModel)]="frecuenciaConfig.recordatorioActivo"
-                  (ionChange)="onFrequencyChange()"
-                  color="success"
-                  (click)="$event.stopPropagation()">
-                </ion-toggle>
-              </div>
-
-              <div *ngIf="frecuenciaConfig.recordatorioActivo && isSectionExpanded('reminders')" class="subsection-content">
-                <p class="subsection-description">Configura la hora de tus recordatorios</p>
-                
-                <div class="time-picker-container">
-                  <h4 class="time-label">Hora preferida</h4>
-                  <div class="time-picker">
-                    <select [(ngModel)]="horaSeleccionada" (change)="updateTimeFromPicker()" class="time-select">
-                      <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
-                    </select>
-                    <span class="time-separator">:</span>
-                    <select [(ngModel)]="minutoSeleccionado" (change)="updateTimeFromPicker()" class="time-select">
-                      <option *ngFor="let m of minutos" [value]="m">{{ m }}</option>
-                    </select>
-                    <ion-icon name="time" class="time-icon"></ion-icon>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
 
             <button 
               class="save-button"

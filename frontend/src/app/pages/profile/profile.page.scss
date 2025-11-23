@@ -485,8 +485,33 @@
 }
 
 .avatar-picker-actions{
-  display:flex; justify-content:flex-end; gap:8px;
-  .avatar-btn{ padding:10px 14px; }
+  display:flex; justify-content:flex-end; gap:12px;
+  
+  .avatar-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f3f4f6;
+    color: #374151;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    &.primary {
+      background: #10b981;
+      color: white;
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
 }
 
 .section .section-title {

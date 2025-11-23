@@ -68,7 +68,7 @@ raccoonAvatars: { id: number; url: string }[] = [
   { id: 3, url: 'assets/avatars/pizza.svg' },
   { id: 4, url: 'assets/avatars/gavel.svg' },
   { id: 5, url: 'assets/avatars/egg.svg' },
-  { id: 5, url: 'assets/avatars/Flower.svg' },
+  { id: 6, url: 'assets/avatars/Flower.svg' },
 ];
 avatarPickerOpen = false;
 pendingAvatar: { id: number; url: string } | null = null;
@@ -184,11 +184,29 @@ pendingAvatar: { id: number; url: string } | null = null;
 
       const studentId = currentUser.id;
 
-      // Usar los datos del usuario almacenados en localStorage
+  // Usar los datos del usuario almacenados en localStorage
       this.user.id = currentUser.id;
       this.user.nombre = currentUser.name || 'Usuario';
-      this.user.nombreCompleto = currentUser.name || 'Usuario';
       this.user.email = currentUser.email || 'usuario@example.com';
+      
+    // Obtener el nombre completo del backend
+      try {
+        console.log('🔍 Obteniendo perfil completo para estudiante:', studentId);
+        const profileResponse = await this.apiService.getUserProfile(studentId).toPromise();
+        console.log('📋 Respuesta getUserProfile:', profileResponse);
+        
+        if (profileResponse && profileResponse.success && profileResponse.data) {
+          console.log('✅ Datos del perfil:', profileResponse.data);
+          this.user.nombreCompleto = profileResponse.data.nombreCompleto || profileResponse.data.nombre_completo || currentUser.name || 'Usuario';
+          console.log('👤 Nombre completo asignado:', this.user.nombreCompleto);
+        } else {
+          console.warn('⚠️ No se recibieron datos del perfil');
+          this.user.nombreCompleto = currentUser.name || 'Usuario';
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo nombre completo:', error);
+        this.user.nombreCompleto = currentUser.name || 'Usuario';
+      }
 
       // ======== NUEVO: setear avatarUrl desde localStorage o default ========
       const rawAvatar = currentUser.avatarUrl || currentUser.avatar || this.user.avatar;
