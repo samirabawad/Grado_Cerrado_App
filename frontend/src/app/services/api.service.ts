@@ -324,6 +324,38 @@ public toAbsoluteFileUrl(url?: string): string {
   );
 }
 
+deleteNotification(notificationId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${notificationId}`;
+  
+  return this.http.delete<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificación eliminada');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error eliminando notificación:', error);
+        throw error;
+      })
+    );
+}
+
+clearAllNotifications(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}/limpiar`;
+  
+  return this.http.delete<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificaciones limpiadas');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error limpiando notificaciones:', error);
+        throw error;
+      })
+    );
+}
+
 
 
   logout(): void {
@@ -434,39 +466,63 @@ public toAbsoluteFileUrl(url?: string): string {
   /**
    * ✅ Iniciar sesión ORAL
    */
-  startOralStudySession(sessionData: any): Observable<any> {
-    const url = `${this.API_URL}/Study/start-oral-session`;
-    
-    const requestData = {
-      studentId: sessionData.studentId || 1,
-      difficulty: sessionData.difficulty || "intermedio",
-      legalAreas: sessionData.legalAreas || ["Derecho Civil"],
-      questionCount: sessionData.questionCount || 5
-    };
-    
-    console.log('🎤 Iniciando sesión ORAL:', requestData);
-    
-    return this.http.post<any>(url, requestData, this.httpOptions)
-      .pipe(
-        tap(response => {
-          if (response.success) {
-            console.log('✅ Sesión ORAL iniciada:', response);
-            
-            if (response.questions && response.questions.length > 0) {
-              console.log('📋 Tipo de preguntas recibidas:', response.questions[0].type);
-            }
-            
-            this.currentSession$.next(response);
-            this.saveSessionToStorage(response);
-          }
-        }),
-        catchError(error => {
-          console.error('❌ Error iniciando sesión ORAL:', error);
-          throw error;
-        })
-      );
+startOralStudySession(sessionData: any): Observable<any> {
+  const url = `${this.API_URL}/Study/start-oral-session`;
+  
+  const currentUser = this.getCurrentUser();
+  
+  // ✅ Obtener configuración adaptativa
+  const adaptiveConfig = localStorage.getItem(`adaptive_mode_${currentUser?.id}`);
+  let adaptiveEnabled = false;
+  
+  if (adaptiveConfig) {
+    try {
+      const parsed = JSON.parse(adaptiveConfig);
+      adaptiveEnabled = parsed.enabled || false;
+    } catch (error) {
+      console.error('Error parseando adaptive config:', error);
+    }
   }
-
+  
+  // Si se pasa explícitamente en sessionData, usar ese valor
+  if (sessionData.adaptiveMode !== undefined) {
+    adaptiveEnabled = sessionData.adaptiveMode;
+  }
+  
+  const requestData = {
+    studentId: sessionData.studentId || currentUser?.id || 1,
+    difficulty: sessionData.difficulty,  // ✅ Viene del componente
+    legalAreas: sessionData.legalAreas,  // ✅ Viene del componente
+    questionCount: sessionData.questionCount || 5,
+    adaptiveMode: adaptiveEnabled,
+    responseMethod: sessionData.responseMethod || 'voice'  // ✅ Método de respuesta
+  };
+  
+  console.log('🎤 Iniciando sesión ORAL:', requestData);
+  console.log('🎯 Modo adaptativo:', adaptiveEnabled);
+  
+  return this.http.post<any>(url, requestData, this.httpOptions)
+    .pipe(
+      tap(response => {
+        if (response.success) {
+          console.log('✅ Sesión ORAL iniciada:', response);
+          console.log('🎯 Modo adaptativo activo:', response.adaptiveEnabled);
+          
+          // ✅ Agregar responseMethod a la sesión si no viene del backend
+          if (response && !response.responseMethod) {
+            response.responseMethod = sessionData.responseMethod || 'voice';
+          }
+          
+          this.currentSession$.next(response);
+          this.saveSessionToStorage(response);
+        }
+      }),
+      catchError(error => {
+        console.error('❌ Error iniciando sesión ORAL:', error);
+        throw error;
+      })
+    );
+}
 
   getCurrentSession(): any {
     return this.currentSession$.value;
