@@ -324,6 +324,38 @@ public toAbsoluteFileUrl(url?: string): string {
   );
 }
 
+deleteNotification(notificationId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${notificationId}`;
+  
+  return this.http.delete<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificación eliminada');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error eliminando notificación:', error);
+        throw error;
+      })
+    );
+}
+
+clearAllNotifications(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}/limpiar`;
+  
+  return this.http.delete<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificaciones limpiadas');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error limpiando notificaciones:', error);
+        throw error;
+      })
+    );
+}
+
 
 
   logout(): void {
