@@ -224,7 +224,7 @@ uploadProfilePhoto(userId: number, formData: FormData) {
   return this.http.post<any>(`${this.API_URL}/study/users/${userId}/avatar/upload`, formData);
 }
 getUserProfile(userId: number) {
-  return this.http.get<any>(`${this.API_URL}/study/users/${userId}/profile`);
+  return this.http.get<any>(`${this.API_URL}/auth/current-user/${userId}`);
 }
 
 private getFilesBase(): string {
