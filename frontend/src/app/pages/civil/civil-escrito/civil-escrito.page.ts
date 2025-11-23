@@ -33,11 +33,12 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   isLoading: boolean = false;
 
   difficultyLevels = [
-    { value: 'basico', label: 'Básico' },
-    { value: 'intermedio', label: 'Intermedio' },
-    { value: 'avanzado', label: 'Avanzado' },
-    { value: 'mixto', label: 'Mixto (Todos)' }
+    { index: 0, value: 'basico', label: 'Básico' },
+    { index: 1, value: 'intermedio', label: 'Intermedio' },
+    { index: 2, value: 'avanzado', label: 'Avanzado' },
+    { index: 3, value: 'mixto', label: 'Mixto (Todos)' }
   ];
+
 
   get infiniteLevels() {
     return [...this.difficultyLevels, ...this.difficultyLevels, ...this.difficultyLevels];
@@ -57,13 +58,54 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     this.loadTemas();
   }
 
+async loadQuestionCountByLevel(temaId: number) {
+  try {
+    const tema = this.temas.find(t => t.id === temaId);
+    if (!tema) return;
+
+    console.log('🔍 Cargando preguntas activas por nivel para tema:', temaId);
+
+    const response = await this.apiService.getQuestionCountByLevel(temaId).toPromise();
+    console.log('📥 Respuesta del servidor:', response);
+
+    if (response?.success) {
+      tema.preguntasPorNivel = response.data;
+
+      // ⭐ NUEVO: calcular total basado SOLO en preguntas activas
+      tema.cantidadPreguntas =
+        (tema.preguntasPorNivel.basico || 0) +
+        (tema.preguntasPorNivel.intermedio || 0) +
+        (tema.preguntasPorNivel.avanzado || 0);
+
+      console.log('✨ Total de preguntas activas:', tema.cantidadPreguntas);
+
+      // ⭐ NUEVO: si NO hay preguntas activas, eliminar el tema
+      if (tema.cantidadPreguntas === 0) {
+        console.warn('❌ Tema sin preguntas activas, removiendo:', tema.nombre);
+        this.temas = this.temas.filter(t => t.id !== temaId);
+        this.selectedTemaId = null;
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error cargando preguntas por nivel:', error);
+  }
+}
+
+
   ionViewWillEnter() {
     setTimeout(() => {
       this.content?.scrollToTop(300);
     }, 50);
   }
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    setTimeout(() => {
+      const mixtoIndex = this.difficultyLevels.findIndex(l => l.value === 'mixto');
+      if (mixtoIndex !== -1) {
+        this.scrollToOption(mixtoIndex);
+      }
+    }, 300);
+  }
 
   ngOnDestroy() {
     if (this.scrollTimeout) {
@@ -85,57 +127,76 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
 
       const studentId = currentUser.id;
 
-      try {
-        const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
+      const statsResponse = await this.apiService.getHierarchicalStats(studentId).toPromise();
 
-        if (statsResponse && statsResponse.success && statsResponse.data) {
-          const civilArea = statsResponse.data.find(
-            (item: any) => item.type === 'area' && item.area === 'Derecho Civil'
-          );
+      if (statsResponse?.success && statsResponse.data) {
+        const civilArea = statsResponse.data.find(
+          (item: any) => item.type === 'area' && item.area === 'Derecho Civil'
+        );
 
-          if (civilArea && civilArea.temas && civilArea.temas.length > 0) {
-            this.temas = civilArea.temas
-              .map((tema: any) => ({
-                id: tema.temaId,
-                nombre: tema.temaNombre,
-                cantidadPreguntas: tema.totalPreguntas || 0
-              }))
-              .filter((tema: any) => tema.cantidadPreguntas > 0);
+        if (civilArea?.temas) {
+          // Cargar lista base
+          this.temas = civilArea.temas.map((tema: any) => ({
+            id: tema.temaId,
+            nombre: tema.temaNombre,
+            cantidadPreguntas: 0,     // este se reemplaza luego con preguntas activas
+            preguntasPorNivel: null   // lo llenaremos abajo
+          }));
 
-            console.log('✅ Temas cargados para selector:', this.temas);
-          } else {
-            console.log('⚠️ No hay temas en civil');
-            this.temas = [];
+          console.log('🟡 Temas iniciales (sin filtro activo):', this.temas);
+
+          // ⭐ AGREGADO CRÍTICO: para cada tema cargamos su conteo REAL (solo activas)
+          for (let tema of this.temas) {
+            const levelData = await this.apiService.getQuestionCountByLevel(tema.id).toPromise();
+
+            if (levelData?.success) {
+              tema.preguntasPorNivel = levelData.data;
+
+              // Calcular cantidad total de preguntas activas
+              tema.cantidadPreguntas =
+                (tema.preguntasPorNivel.basico ?? 0) +
+                (tema.preguntasPorNivel.intermedio ?? 0) +
+                (tema.preguntasPorNivel.avanzado ?? 0);
+            }
           }
+
+          // ⭐ FILTRAR SOLO LOS TEMAS CON ≥ 1 PREGUNTA ACTIVA
+          this.temas = this.temas.filter(t => t.cantidadPreguntas > 0);
+
+          console.log('🟢 Temas finales (solo activos):', this.temas);
         }
-      } catch (error) {
-        console.error('Error cargando temas:', error);
-        this.temas = [];
       }
     } catch (error) {
-      console.error('Error general cargando temas:', error);
+      console.error('❌ Error cargando temas:', error);
+      this.temas = [];
     } finally {
       this.isLoading = false;
     }
   }
 
+// ✅ Método para saber cuántas preguntas permite el tema seleccionado Y nivel
+
   getMaxQuestionsForSelectedTema(): number {
-    if (this.scopeType === 'all') {
-      return 7;
+    if (this.scopeType === 'all') return 7;
+
+    if (!this.selectedTemaId) return 0;
+
+    const tema = this.temas.find(t => t.id === this.selectedTemaId);
+    if (!tema || !tema.preguntasPorNivel) return 0;
+
+    if (this.selectedDifficulty === 'mixto') {
+      return tema.cantidadPreguntas || 0;
     }
 
-    if (this.selectedTemaId) {
-      const tema = this.temas.find(t => t.id === this.selectedTemaId);
-      return tema ? tema.cantidadPreguntas : 0;
-    }
-
-    return 0;
+    return tema.preguntasPorNivel[this.selectedDifficulty] || 0;
   }
 
-  canSelectQuantity(quantity: number): boolean {
-    const max = this.getMaxQuestionsForSelectedTema();
-    return quantity <= max;
+
+  canSelectQuantity(q: number) {
+    const disponibles = this.getMaxQuestionsForSelectedTema();
+    return q <= disponibles;
   }
+
 
   selectScope(type: 'all' | 'tema') {
     this.scopeType = type;
@@ -153,16 +214,19 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  selectTema(temaId: number) {
+  async selectTema(temaId: number) {
     this.selectedTemaId = temaId;
     this.scopeType = 'tema';
 
-    const maxQuestions = this.getMaxQuestionsForSelectedTema();
-    if (this.selectedQuantity > maxQuestions) {
-      this.selectedQuantity = Math.min(maxQuestions, 1);
-    }
+    await this.loadQuestionCountByLevel(temaId);
 
-    console.log('✅ Tema seleccionado:', temaId, 'Máx preguntas:', maxQuestions);
+    // recalcular después de cargar
+    const maxQuestions = this.getMaxQuestionsForSelectedTema();
+    console.log('📊 Máximo disponible:', maxQuestions);
+
+    if (this.selectedQuantity > maxQuestions && maxQuestions > 0) {
+      this.selectedQuantity = 1;
+    }
   }
 
   getSelectedTemaName(): string {
@@ -177,6 +241,14 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
   selectDifficulty(level: any) {
     this.selectedDifficulty = level.value;
     this.selectedDifficultyLabel = level.label;
+    
+    // ✅ Ajustar cantidad inmediatamente
+    const maxQuestions = this.getMaxQuestionsForSelectedTema();
+    console.log('🔄 Nivel:', level.value, '| Máximo:', maxQuestions);
+    
+    if (this.selectedQuantity > maxQuestions && maxQuestions > 0) {
+      this.selectedQuantity = 1;
+    }
   }
 
   onPickerScroll() {
@@ -212,11 +284,13 @@ export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
     });
 
     if (closestOption) {
-      const value = closestOption.getAttribute('data-value');
-      const level = this.difficultyLevels.find(l => l.value === value);
-      if (level) {
-        this.selectDifficulty(level);
-      }
+    const index = parseInt(closestOption.getAttribute('data-index'));
+    const level = this.difficultyLevels[index];
+
+    if (level) {
+      this.selectDifficulty(level);
+    }
+
 
       closestOption.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }

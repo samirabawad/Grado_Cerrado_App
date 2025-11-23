@@ -8,10 +8,24 @@ const config: CapacitorConfig = {
     androidScheme: 'http',
     cleartext: true
   },
-  // ⬇️ AGREGAR ESTO
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
+    },
+    VoiceRecorder: {
+      audioSource: 'MIC'
+    },
+    CapacitorHttp: {
+      enabled: true
+    }
+  },
+  ios: {
+    contentInset: 'always'
+  },
+  android: {
+    buildOptions: {
+      keystorePath: undefined,
+      keystoreAlias: undefined
     }
   }
 };

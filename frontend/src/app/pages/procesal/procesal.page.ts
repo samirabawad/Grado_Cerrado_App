@@ -55,8 +55,9 @@ export class ProcesalPage implements OnInit, OnDestroy {
       const currentUser = this.apiService.getCurrentUser();
       
       if (!currentUser || !currentUser.id) {
-        console.warn('No hay usuario logueado');
+        console.warn('⚠️ No hay usuario logueado, redirigiendo a login');
         this.isLoading = false;
+        await this.router.navigate(['/login']);
         return;
       }
 

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 
 // ========================================
 // INTERFACES 
@@ -63,6 +64,8 @@ export interface CumplimientoResponse {
 export class ApiService {
   private API_URL = environment.apiUrl;
   private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
+
+  private ttsAudio: HTMLAudioElement | null = null;
   
   // ✅ NUEVO: BehaviorSubject para manejar la sesión actual
   private currentSession$ = new BehaviorSubject<any>(null);
@@ -82,24 +85,29 @@ export class ApiService {
   }
 
 
-  // ========================================
+// ========================================
   // TEMAS Y SUBTEMAS
   // ========================================
-
 
   getTemasByArea(areaId: number) {
     return this.http.get<any>(`${this.API_URL}/study/areas/${areaId}/temas-subtemas`);
   }
 
-  // (Opcional) helpers para no estar recordando el número de área
   getTemasCivil() {
-    // area_id = 1 → Derecho Civil
     return this.getTemasByArea(1);
   }
 
   getTemasProcesal() {
-    // area_id = 2 → Derecho Procesal
     return this.getTemasByArea(2);
+  }
+
+  getQuestionCountByLevel(temaId?: number, areaId?: number, modalidadId?: number): Observable<any> {
+    let params = new HttpParams();
+    if (temaId) params = params.set('temaId', temaId.toString());
+    if (areaId) params = params.set('areaId', areaId.toString());
+    if (modalidadId) params = params.set('modalidadId', modalidadId.toString());
+    
+    return this.http.get(`${this.API_URL}/study/questions/count-by-level`, { params });
   }
 
   // ========================================
@@ -216,12 +224,13 @@ uploadProfilePhoto(userId: number, formData: FormData) {
   return this.http.post<any>(`${this.API_URL}/study/users/${userId}/avatar/upload`, formData);
 }
 getUserProfile(userId: number) {
-  return this.http.get<any>(`${this.API_URL}/study/users/${userId}/profile`);
+  return this.http.get<any>(`${this.API_URL}/auth/current-user/${userId}`);
 }
 
 private getFilesBase(): string {
   return this.API_URL.replace(/\/api\/?$/, '');
 }
+
 
 // Convierte rutas relativas del backend a absolutas con el host del API
 public toAbsoluteFileUrl(url?: string): string {
@@ -237,6 +246,82 @@ public toAbsoluteFileUrl(url?: string): string {
 
   // para "assets/..." u otras rutas relativas, lo dejo tal cual (sirve para assets locales)
   return url;
+}
+
+
+  //Audio TTS
+  async playTextToSpeech(text: string): Promise<void> {
+    try {
+      console.log('🎵 Solicitando TTS (BASE64):', text.substring(0, 50));
+
+      // Limpiar texto
+      const cleanText = text
+        .trim()
+        .replace(/\s+/g, ' ')
+        .replace(/\n/g, ' ')
+        .replace(/\r/g, '');
+
+      console.log('🧹 Texto limpio:', cleanText.substring(0, 50));
+
+      const response = await fetch(`${this.API_URL}/Speech/text-to-speech-base64`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: cleanText })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('📥 Respuesta TTS base64:', data);
+
+      const base64 =
+        data.audioBase64 ||
+        data.audio ||
+        data.data?.audioBase64 ||
+        '';
+
+      if (!base64) {
+        console.error('❌ No se encontró audioBase64 en la respuesta');
+        return;
+      }
+
+      // Construir data URL
+      const src = `data:audio/mpeg;base64,${base64}`;
+
+      const audio = new Audio(src);
+      console.log('▶️ Reproduciendo audio base64...');
+
+      audio.oncanplaythrough = () => {
+        audio.play().catch(err => {
+          console.error('❌ Error reproduciendo audio TTS:', err);
+        });
+      };
+
+      audio.onerror = (ev) => {
+        console.error('❌ Error TTS (onerror):', ev);
+      };
+    } catch (error) {
+      console.error('❌ Error TTS (try/catch):', error);
+      throw error;
+    }
+  }
+
+      // NOTIFICACIONES
+
+  updateNotificationConfig(studentId: number, enabled: boolean) {
+    const url = `${this.API_URL}/Notificaciones/${studentId}/config`;
+    return this.http.put<any>(url, { enabled }, this.httpOptions);
+  }
+
+  updateReminderTime(estudianteId: number, time: string) {
+  return this.http.put(
+    `${this.API_URL}/notificaciones/${estudianteId}/hora-recordatorio`,
+    { time }
+  );
 }
 
 
@@ -381,6 +466,7 @@ public toAbsoluteFileUrl(url?: string): string {
         })
       );
   }
+
 
   getCurrentSession(): any {
     return this.currentSession$.value;

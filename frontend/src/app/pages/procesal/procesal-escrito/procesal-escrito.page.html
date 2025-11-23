@@ -56,16 +56,17 @@
       </div>
 
       <!-- Nivel de dificultad -->
-      <h2>Nivel de dificultad</h2>
-      
+    <h2>Nivel de dificultad</h2>
+    <p class="section-description">Selecciona el nivel de dificultad para tu test</p>
       <div class="inline-picker-container">
         <div class="picker-wheel" #pickerWheel (scroll)="onPickerScroll()">
-          <div 
+          <div
             class="picker-option"
-            *ngFor="let level of infiniteLevels; let i = index"
+            *ngFor="let level of infiniteLevels"
             [class.selected]="selectedDifficulty === level.value"
-            [attr.data-value]="level.value"
-            (click)="selectDifficulty(level)">
+            [attr.data-index]="level.index"
+            (click)="selectDifficulty(level)"
+          >
             {{ level.label }}
           </div>
         </div>
@@ -123,7 +124,7 @@
       <!-- ✅ Mensaje informativo sobre límite -->
       <div class="info-message" *ngIf="scopeType === 'tema' && selectedTemaId">
         <ion-icon name="information-circle"></ion-icon>
-        <span>Este tema tiene {{ getMaxQuestionsForSelectedTema() }} pregunta(s) disponible(s)</span>
+        <span>Este tema y nivel tienen {{ getMaxQuestionsForSelectedTema() }} pregunta(s) disponible(s)</span>
       </div>
 
       <!-- ✅ Agregar espacio extra si es necesario -->
