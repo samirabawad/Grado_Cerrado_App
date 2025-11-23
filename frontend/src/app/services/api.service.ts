@@ -872,6 +872,24 @@ startOralStudySession(sessionData: any): Observable<any> {
       );
   }
 
+
+getTopTemasFuertes(studentId: number): Observable<any> {
+    const url = `${this.API_URL}/Weakness/top-fuertes/${studentId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Top temas fuertes:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo temas fuertes:', error);
+          throw error;
+        })
+      );
+  }
+  
+
   getResumenDebilidades(studentId: number): Observable<any> {
     const url = `${this.API_URL}/Weakness/resumen/${studentId}`;
     
