@@ -213,22 +213,42 @@ export class NotificationsPage implements OnInit {
     console.log('✅ Todas las notificaciones marcadas como leídas');
   }
 
-  deleteNotification(notification: any, event: any) {
+  async deleteNotification(notification: any, event: any) {
     event.stopPropagation();
     
-    const index = this.notifications.indexOf(notification);
-    if (index > -1) {
-      this.notifications.splice(index, 1);
+    try {
+      await this.apiService.deleteNotification(notification.id).toPromise();
       
-      if (!notification.read) {
-        this.unreadCount = Math.max(0, this.unreadCount - 1);
+      const index = this.notifications.indexOf(notification);
+      if (index > -1) {
+        this.notifications.splice(index, 1);
+        
+        if (!notification.read) {
+          this.unreadCount = Math.max(0, this.unreadCount - 1);
+        }
       }
+      
+      console.log('✅ Notificación eliminada');
+    } catch (error) {
+      console.error('❌ Error eliminando notificación:', error);
     }
   }
 
-  clearAll() {
-    this.notifications = [];
-    this.unreadCount = 0;
+  // Reemplazar clearAll
+  async clearAll() {
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+      if (!currentUser || !currentUser.id) return;
+      
+      await this.apiService.clearAllNotifications(currentUser.id).toPromise();
+      
+      this.notifications = [];
+      this.unreadCount = 0;
+      
+      console.log('✅ Todas las notificaciones eliminadas');
+    } catch (error) {
+      console.error('❌ Error eliminando notificaciones:', error);
+    }
   }
 
 // ========================================

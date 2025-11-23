@@ -2,8 +2,9 @@
   <!-- Header -->
   <div class="dashboard-header">
     <ion-icon name="chevron-back" class="back-icon" (click)="confirmExit()"></ion-icon>
-    <h1 class="header-title">Derecho Procesal Oral</h1>
+    <h1 class="header-title">Derecho Civil Oral</h1>
   </div>
+  
 
   <!-- Contenido principal -->
   <div class="content-area" *ngIf="!isLoading && !loadingError && getCurrentQuestion()">
@@ -17,26 +18,21 @@
         [class.current]="i === (currentQuestionNumber - 1)">
       </div>
     </div>
-
-    <!-- Categoría y contador -->
+ <!-- Categoría y contador -->
     <div class="category-row">
       <div class="category-chip">
-        {{ getCurrentQuestionCategory() }}
-        <span *ngIf="shouldShowDifficultyLevel()" class="difficulty-badge">
-          {{ getCurrentQuestionDifficulty() }}
-        </span>
+        {{ getCurrentQuestion()?.category || 'Derecho Civil' }}
       </div>
       <div class="question-counter">
         {{ currentQuestionNumber }} de {{ totalQuestions }}
       </div>
     </div>
-
     <!-- Texto de la pregunta -->
     <div class="question-text">
       <p><strong>{{ getCurrentQuestion()?.questionText }}</strong></p>
     </div>
 
-    <!-- Control de audio para escuchar pregunta -->
+   <!-- Control de audio para escuchar pregunta -->
     <div class="audio-section">
       <div 
         class="audio-player" 
@@ -101,6 +97,7 @@
           <div class="recording-text">
             <span class="recording-status">{{ getRecordingStatus() }}</span>
             <span class="recording-timer" *ngIf="isRecording || hasRecording">{{ recordingTime }}</span>
+            <span class="recording-hint" *ngIf="hasRecording && !isRecording">Toca el micrófono para volver a grabar</span>
           </div>
         </div>
 
@@ -115,7 +112,8 @@
       </div>
     </div>
 
-    <!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
+    
+<!-- ✅ PANEL DE EVALUACIÓN DESPLEGABLE -->
     <div class="evaluation-panel" *ngIf="showEvaluation" [@slideDown]>
       <div class="evaluation-header" [class.correct]="evaluationResult?.isCorrect" [class.incorrect]="!evaluationResult?.isCorrect">
         <ion-icon [name]="evaluationResult?.isCorrect ? 'checkmark-circle' : 'close-circle'"></ion-icon>
@@ -141,7 +139,7 @@
     </div>
 
     <!-- Botón para enviar respuesta -->
-    <div class="submit-section" *ngIf="hasRecording && !showEvaluation">
+    <div class="submit-section" *ngIf="responseMethod === 'voice' && hasRecording && !showEvaluation">
       <button class="submit-voice-button" (click)="submitVoiceAnswer()">
         <ion-icon name="send"></ion-icon>
         <span>Enviar Respuesta</span>
