@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, LoadingController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -13,7 +13,7 @@ import { ApiService } from '../../../services/api.service';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
-export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
+export class CivilOralPage implements OnInit, OnDestroy {
   
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
@@ -41,15 +41,6 @@ export class CivilOralPage implements OnInit, OnDestroy, AfterViewInit {
   ) { }
 
   ngOnInit() {
-  }
-  
-  ngAfterViewInit() {
-    setTimeout(() => {
-      const mixtoIndex = this.difficultyLevels.findIndex(l => l.value === 'mixto');
-      if (mixtoIndex !== -1) {
-        this.scrollToOption(mixtoIndex);
-      }
-    }, 300);
   }
 
   ngOnDestroy() {

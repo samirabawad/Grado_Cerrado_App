@@ -3,8 +3,7 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
-  ElementRef,
-  AfterViewInit
+  ElementRef
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, LoadingController, IonContent } from '@ionic/angular';
@@ -20,7 +19,7 @@ import { ApiService } from '../../../services/api.service';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
-export class ProcesalEscritoPage implements OnInit, OnDestroy, AfterViewInit {
+export class ProcesalEscritoPage implements OnInit, OnDestroy {
   selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
@@ -96,15 +95,6 @@ async loadQuestionCountByLevel(temaId: number) {
     setTimeout(() => {
       this.content?.scrollToTop(300);
     }, 50);
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => {
-      const mixtoIndex = this.difficultyLevels.findIndex(l => l.value === 'mixto');
-      if (mixtoIndex !== -1) {
-        this.scrollToOption(mixtoIndex);
-      }
-    }, 300);
   }
 
   ngOnDestroy() {

@@ -3,8 +3,7 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
-  ElementRef,
-  AfterViewInit
+  ElementRef
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule, LoadingController, IonContent } from '@ionic/angular';
@@ -20,8 +19,7 @@ import { ApiService } from '../../../services/api.service';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, BottomNavComponent]
 })
-export class CivilEscritoPage implements OnInit, OnDestroy, AfterViewInit {
-  selectedQuantity: number = 1;
+export class CivilEscritoPage implements OnInit, OnDestroy {  selectedQuantity: number = 1;
   selectedDifficulty: string = 'mixto';
   selectedDifficultyLabel: string = 'Mixto (Todos)';
 
@@ -90,22 +88,6 @@ async loadQuestionCountByLevel(temaId: number) {
     console.error('❌ Error cargando preguntas por nivel:', error);
   }
 }
-
-
-  ionViewWillEnter() {
-    setTimeout(() => {
-      this.content?.scrollToTop(300);
-    }, 50);
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => {
-      const mixtoIndex = this.difficultyLevels.findIndex(l => l.value === 'mixto');
-      if (mixtoIndex !== -1) {
-        this.scrollToOption(mixtoIndex);
-      }
-    }, 300);
-  }
 
   ngOnDestroy() {
     if (this.scrollTimeout) {

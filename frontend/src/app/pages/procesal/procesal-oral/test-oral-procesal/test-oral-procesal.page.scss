@@ -9,7 +9,7 @@
 }
 
 ion-content.test-content {
-  --overflow: auto;
+  --overflow: hidden;
   height: 100%;
 }
 
@@ -48,12 +48,17 @@ ion-content.test-content {
 // CONTENIDO PRINCIPAL
 // ========================================
 .content-area {
-  margin-top: 80px;
-  padding: 20px 16px 100px 16px;
+  padding: 80px 16px 100px 16px;
   position: relative;
   z-index: 2;
   background: transparent;
   min-height: calc(100vh - 100px);
+}
+
+.content-area {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 // ========================================
