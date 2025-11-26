@@ -748,8 +748,9 @@ startOralStudySession(sessionData: any): Observable<any> {
   }
 
   getRecentSessions(studentId: number, limit: number = 10): Observable<any> {
-    const url = `${this.API_URL}/Dashboard/recent-sessions/${studentId}?limit=${limit}`;
-    
+    const timestamp = new Date().getTime();
+    const url = `${this.API_URL}/Dashboard/recent-sessions/${studentId}?limit=${limit}&t=${timestamp}`;
+
     return this.http.get<any>(url, this.httpOptions)
       .pipe(
         map((response: any) => {

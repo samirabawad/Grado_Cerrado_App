@@ -343,7 +343,7 @@ async loadQuestionCountByLevel(temaId: number) {
       const sessionData: any = {
         studentId: Number(currentUser.id),
         difficulty: difficultyToSend,
-        legalAreas: ['Derecho procesal'],
+        legalAreas: ['Derecho Procesal'],
         questionCount: Number(this.selectedQuantity)
       };
 
