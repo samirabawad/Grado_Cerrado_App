@@ -458,18 +458,35 @@ async onAdaptiveModeChange() {
 // ============================================
   // SECCIONES
   // ============================================
-  toggleSection(section: string) {
+toggleSection(section: string) {
+    // Lista de secciones principales
+    const mainSections = ['personalInfo', 'security', 'adaptiveMode', 'frequency', 'progress', 'settings', 'configuration'];
+    
+    // Subsecciones de frecuencia
+    const frequencySubsections = ['weeklyGoal', 'preferredDays'];
+    
     // Si la sección ya está abierta, la cerramos
     if (this.expandedSections[section]) {
       this.expandedSections[section] = false;
     } else {
-      // Cerrar todas las secciones principales
-      Object.keys(this.expandedSections).forEach(key => {
-        // Solo cerrar secciones principales, no subsecciones
-        if (['personalInfo', 'security', 'adaptiveMode', 'frequency', 'progress', 'settings'].includes(key)) {
-          this.expandedSections[key] = false;
-        }
-      });
+      // Si es una sección principal, cerrar todas las otras principales
+      if (mainSections.includes(section)) {
+        Object.keys(this.expandedSections).forEach(key => {
+          if (mainSections.includes(key)) {
+            this.expandedSections[key] = false;
+          }
+        });
+      }
+      
+      // Si es una subsección de frecuencia, cerrar las otras subsecciones
+      if (frequencySubsections.includes(section)) {
+        frequencySubsections.forEach(sub => {
+          if (sub !== section) {
+            this.expandedSections[sub] = false;
+          }
+        });
+      }
+      
       // Abrir la sección clickeada
       this.expandedSections[section] = true;
     }
