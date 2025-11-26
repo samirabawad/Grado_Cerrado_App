@@ -250,8 +250,16 @@ public toAbsoluteFileUrl(url?: string): string {
 
 
   //Audio TTS
+private currentTTSAudio: HTMLAudioElement | null = null;
+
   async playTextToSpeech(text: string): Promise<void> {
     try {
+      // Detener audio anterior si existe
+      if (this.currentTTSAudio) {
+        this.currentTTSAudio.pause();
+        this.currentTTSAudio = null;
+      }
+
       console.log('🎵 Solicitando TTS (BASE64):', text.substring(0, 50));
 
       // Limpiar texto
@@ -292,17 +300,21 @@ public toAbsoluteFileUrl(url?: string): string {
       // Construir data URL
       const src = `data:audio/mpeg;base64,${base64}`;
 
-      const audio = new Audio(src);
+      this.currentTTSAudio = new Audio(src);
       console.log('▶️ Reproduciendo audio base64...');
 
-      audio.oncanplaythrough = () => {
-        audio.play().catch(err => {
+      this.currentTTSAudio.oncanplaythrough = () => {
+        this.currentTTSAudio?.play().catch(err => {
           console.error('❌ Error reproduciendo audio TTS:', err);
         });
       };
 
-      audio.onerror = (ev) => {
+      this.currentTTSAudio.onerror = (ev) => {
         console.error('❌ Error TTS (onerror):', ev);
+      };
+
+      this.currentTTSAudio.onended = () => {
+        this.currentTTSAudio = null;
       };
     } catch (error) {
       console.error('❌ Error TTS (try/catch):', error);
@@ -310,6 +322,30 @@ public toAbsoluteFileUrl(url?: string): string {
     }
   }
 
+stopTextToSpeech(): void {
+    console.log('⏹️ Deteniendo TTS...');
+    
+    // Detener el audio HTML5
+    if (this.currentTTSAudio) {
+      this.currentTTSAudio.pause();
+      this.currentTTSAudio.currentTime = 0;
+      this.currentTTSAudio = null;
+    }
+    
+    // CRÍTICO: También detener Web Audio API si existe
+    if (typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined') {
+      try {
+        const audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+        if (audioCtx.state !== 'closed') {
+          audioCtx.close();
+        }
+      } catch (e) {
+        console.log('No hay AudioContext activo');
+      }
+    }
+    
+    console.log('✅ TTS detenido');
+  }
       // NOTIFICACIONES
 
   updateNotificationConfig(studentId: number, enabled: boolean) {

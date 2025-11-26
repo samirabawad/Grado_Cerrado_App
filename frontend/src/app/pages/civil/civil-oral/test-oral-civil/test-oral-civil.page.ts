@@ -216,6 +216,11 @@ async loadQuestionsFromBackend() {
           this.isLoading = false;
           this.cdr.detectChanges();
           
+          // Reproducir automáticamente en Android
+          setTimeout(() => {
+            this.playAudio();
+          }, 500);
+          
         } catch (error) {
           console.error('❌ Error procesando preguntas:', error);
           this.loadingError = true;
@@ -252,6 +257,19 @@ async loadQuestionsFromBackend() {
     
     this.audioService.clearRecording();
     this.stopResponseTimer();
+  }
+
+  ionViewWillLeave() {
+    // Detener el audio TTS cuando se abandona la página
+    this.apiService.stopTextToSpeech();
+    this.isPlaying = false;
+    
+    // Detener también el audio de la grabación si está reproduciéndose
+    if (this.recordingAudio) {
+      this.recordingAudio.pause();
+      this.recordingAudio = null;
+      this.isPlayingRecording = false;
+    }
   }
 
   getCurrentQuestion(): Question | null {
@@ -391,8 +409,17 @@ isOptionSelected(option: string): boolean {
     return this.currentQuestionNumber === this.totalQuestions;
   }
 
-  async playAudio() {
-    if (this.isPlaying) return;
+async playAudio() {
+    if (this.isPlaying) {
+      console.log('⏸️ Audio ya está reproduciéndose');
+      return;
+    }
+    
+    // Detener cualquier audio previo
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
     
     try {
       this.isPlaying = true;
@@ -433,13 +460,15 @@ isOptionSelected(option: string): boolean {
       this.isPlaying = false;
     }
   }
+
   pauseAudio() {
-    if (this.currentAudio && this.isPlaying) {
-      this.currentAudio.pause();
+      this.apiService.stopTextToSpeech();
       this.isPlaying = false;
       this.cdr.detectChanges();
     }
-  }
+  
+
+  
 
   getAudioIcon(): string {
     if (this.isPlaying) {
@@ -461,13 +490,24 @@ isOptionSelected(option: string): boolean {
     return 'Escuchar pregunta';
   }
 
-  async toggleRecording() {
+async toggleRecording() {
+    console.log('🎤 Toggle grabación - isPlaying:', this.isPlaying);
+    
+    // Detener audio de la pregunta si está reproduciéndose
+    if (this.isPlaying) {
+      console.log('⏸️ Deteniendo audio antes de grabar');
+      this.apiService.stopTextToSpeech();
+      this.isPlaying = false;
+      this.cdr.detectChanges();
+    }
+    
     if (this.isRecording) {
       await this.stopRecording();
     } else {
       await this.startRecording();
     }
   }
+  
 
   // Pedir permisos
   async requestPermissions() {
@@ -478,6 +518,12 @@ isOptionSelected(option: string): boolean {
 
   async startRecording() {
     console.log('🎤 Iniciando grabación...');
+    
+    // Detener audio de la pregunta si está reproduciéndose
+    if (this.isPlaying) {
+      this.apiService.stopTextToSpeech();
+      this.isPlaying = false;
+    }
     
     this.audioService.clearRecording();
     this.hasRecording = false;
