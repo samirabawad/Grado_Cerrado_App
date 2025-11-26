@@ -1,11 +1,7 @@
 <ion-content class="results-content">
   <!-- HEADER -->
   <div class="dashboard-header">
-    <ion-icon
-      name="chevron-back"
-      class="back-icon"
-      (click)="goBack()">
-    </ion-icon>
+    <ion-icon name="chevron-back" class="back-icon" (click)="goBack()"></ion-icon>
     <h1 class="header-title">Derecho Civil</h1>
   </div>
 
@@ -14,30 +10,25 @@
 
     <!-- MENSAJE MOTIVACIONAL DINÁMICO -->
     <div class="motivational-section" [class.success]="percentage >= 70">
+      <ion-icon *ngIf="percentage < 70" name="sad-outline" class="result-icon"></ion-icon>
+      <ion-icon *ngIf="percentage >= 70" name="happy-outline" class="result-icon"></ion-icon>
+      
       <p class="message-small">{{ getSmallMessage() }}</p>
-      <h1 class="message-large">{{ getLargeMessage() }}</h1>
+      <h1 class="message-large" [class.danger-text]="percentage < 70">{{ getLargeMessage() }}</h1>
     </div>
 
     <!-- BLOQUES DE CORRECTAS E INCORRECTAS -->
     <div class="stats-grid">
-      <div class="stat-item correct">
-        <div class="stat-icon">
-          <ion-icon name="checkmark-circle"></ion-icon>
-        </div>
-        <div class="stat-info">
-          <span class="stat-number">{{ correctAnswers }}</span>
-          <span class="stat-label">Correctas</span>
-        </div>
+      <div class="stat-card correct">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <span class="stat-number">{{ correctAnswers }}</span>
+        <span class="stat-label">Correctas</span>
       </div>
 
-      <div class="stat-item incorrect">
-        <div class="stat-icon">
-          <ion-icon name="close-circle"></ion-icon>
-        </div>
-        <div class="stat-info">
-          <span class="stat-number">{{ incorrectAnswers }}</span>
-          <span class="stat-label">Incorrectas</span>
-        </div>
+      <div class="stat-card incorrect">
+        <ion-icon name="close-circle"></ion-icon>
+        <span class="stat-number">{{ incorrectAnswers }}</span>
+        <span class="stat-label">Incorrectas</span>
       </div>
     </div>
 
@@ -46,12 +37,8 @@
       <h3 class="section-title">Resumen de preguntas</h3>
 
       <div class="questions-container">
-        <div
-          *ngFor="let question of questionsDetails; let i = index"
-          class="question-wrapper">
-
-          <!-- CÍRCULO -->
-          <div
+        <div *ngFor="let question of questionsDetails; let i = index" class="question-wrapper">
+          <div 
             class="question-circle"
             [class.correct]="question.correct"
             [class.incorrect]="!question.correct"
@@ -63,37 +50,57 @@
       </div>
 
       <!-- DESPLEGABLE FUERA DEL LOOP -->
-      <div
-        class="question-dropdown-global"
-        *ngIf="expandedQuestionIndex !== null"
-        [@slideDown]>
-
+      <div class="question-dropdown-global" *ngIf="expandedQuestionIndex !== null" [@slideDown]>
         <div class="dropdown-content">
-          <!-- TEXTO DE LA PREGUNTA -->
           <p class="question-text">
             {{ questionsDetails[expandedQuestionIndex].questionText }}
           </p>
 
-          <!-- TU RESPUESTA -->
-          <div class="answer-detail your-answer">
+<!-- ALTERNATIVAS (si existen) -->
+          <div class="alternatives-list" *ngIf="questionsDetails[expandedQuestionIndex].options && questionsDetails[expandedQuestionIndex].options!.length > 0">
+            <div 
+              *ngFor="let option of questionsDetails[expandedQuestionIndex].options; let optIndex = index"
+              class="alternative-item"
+              [class.alt-selected]="isOptionSelected(questionsDetails[expandedQuestionIndex], getOptionText(option))"
+              [class.alt-correct]="isOptionCorrect(questionsDetails[expandedQuestionIndex], getOptionText(option))">
+              
+              <div class="alt-icon">
+                <ion-icon 
+                  *ngIf="isOptionCorrect(questionsDetails[expandedQuestionIndex], getOptionText(option))" 
+                  name="checkmark-circle">
+                </ion-icon>
+                <ion-icon 
+                  *ngIf="!isOptionCorrect(questionsDetails[expandedQuestionIndex], getOptionText(option)) && isOptionSelected(questionsDetails[expandedQuestionIndex], getOptionText(option))" 
+                  name="close-circle">
+                </ion-icon>
+                <ion-icon 
+                  *ngIf="!isOptionCorrect(questionsDetails[expandedQuestionIndex], getOptionText(option)) && !isOptionSelected(questionsDetails[expandedQuestionIndex], getOptionText(option))" 
+                  name="ellipse-outline">
+                </ion-icon>
+              </div>
+              
+              <div class="alt-text">
+                {{ getOptionLetter(optIndex) }}. {{ getOptionText(option) }}
+              </div>
+            </div>
+          </div>
+          <!-- TU RESPUESTA (solo si NO hay alternativas - modo voz) -->
+          <div class="answer-detail your-answer" *ngIf="!questionsDetails[expandedQuestionIndex].options || questionsDetails[expandedQuestionIndex].options!.length === 0">
             <p class="label">Tu respuesta:</p>
             <p class="content">
               {{ questionsDetails[expandedQuestionIndex].userAnswer }}
             </p>
           </div>
 
-          <!-- RESPUESTA ESPERADA -->
-          <div class="answer-detail expected-answer">
+<!-- RESPUESTA ESPERADA (solo si NO hay alternativas - modo voz) -->
+          <div class="answer-detail expected-answer" *ngIf="!questionsDetails[expandedQuestionIndex].options || questionsDetails[expandedQuestionIndex].options!.length === 0">
             <p class="label">Respuesta esperada:</p>
             <p class="content">
-              {{ questionsDetails[expandedQuestionIndex].expectedAnswer }}
+              {{ getCorrectAnswerText(questionsDetails[expandedQuestionIndex]) }}
             </p>
           </div>
 
-          <!-- EXPLICACIÓN -->
-          <div
-            class="explanation-detail"
-            *ngIf="questionsDetails[expandedQuestionIndex].explanation">
+          <div class="explanation-detail" *ngIf="questionsDetails[expandedQuestionIndex].explanation">
             <p class="label">Explicación:</p>
             <p class="content">
               {{ questionsDetails[expandedQuestionIndex].explanation }}
@@ -105,37 +112,24 @@
 
     <!-- BOTONES DE ACCIÓN -->
     <div class="action-buttons">
-      <!-- Primera fila: Reforzar y Nuevo Test -->
       <div class="buttons-row">
-        <ion-button
-          expand="block"
-          class="btn-reforzar"
-          (click)="reviewIncorrect()">
-          <ion-icon name="fitness-outline" slot="start"></ion-icon>
+        <button class="action-btn" (click)="reviewIncorrect()">
+          <ion-icon name="fitness-outline"></ion-icon>
           Reforzar
-        </ion-button>
+        </button>
 
-        <ion-button
-          expand="block"
-          class="btn-nuevo-test"
-          (click)="takeNewTest()">
-          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        <button class="action-btn" (click)="takeNewTest()">
+          <ion-icon name="refresh-outline"></ion-icon>
           Nuevo test
-        </ion-button>
+        </button>
       </div>
 
-      <!-- Segunda fila: Volver al inicio -->
-      <ion-button
-        expand="block"
-        fill="outline"
-        class="btn-home"
-        (click)="goBack()">
-        <ion-icon name="home-outline" slot="start"></ion-icon>
+      <button class="action-btn outline" (click)="goBack()">
+        <ion-icon name="home-outline"></ion-icon>
         Volver a Civil
-      </ion-button>
+      </button>
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
   <app-bottom-nav></app-bottom-nav>
 </ion-content>

@@ -1036,7 +1036,8 @@ async completeTest() {
             questionText: q.questionText || q.text || '',
             userAnswer: q.userAnswer || '',
             expectedAnswer: evaluation.correctAnswer || q.correctAnswer || '',
-            explanation: evaluation.explanation || q.explanation || ''
+            explanation: evaluation.explanation || q.explanation || '',
+            options: q.options || []
           });
         } else {
           incorrectCount++;
@@ -1046,7 +1047,8 @@ async completeTest() {
             questionText: q.questionText || q.text || '',
             userAnswer: '',
             expectedAnswer: q.correctAnswer || '',
-            explanation: q.explanation || ''
+            explanation: q.explanation || '',
+            options: q.options || []
           });
         }
       });
