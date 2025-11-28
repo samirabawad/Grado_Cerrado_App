@@ -9,8 +9,7 @@
 }
 
 ion-content.results-content {
-  --overflow: auto;
-  height: 100%;
+  --overflow: scroll;
 }
 
 // ========================================
@@ -47,12 +46,11 @@ ion-content.results-content {
 // CONTENIDO PRINCIPAL
 // ========================================
 .content-area {
-  margin-top: 80px;
-  padding: 20px 16px 100px 16px;
+  margin-top: 55px !important;
+  padding: 16px 16px 120px 16px;
   position: relative;
   z-index: 2;
   background: transparent;
-  min-height: calc(100vh - 100px);
 }
 
 // ========================================
@@ -60,31 +58,54 @@ ion-content.results-content {
 // ========================================
 .motivational-section {
   text-align: center;
-  padding: 20px;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  padding: 24px 20px;
+  margin-bottom: 20px;
+  background: transparent;
   border-radius: 16px;
+  border: 2px solid #e5e7eb;
   transition: all 0.3s ease;
 
   &.success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #bbf7d0;
+  }
+
+  &:not(.success) {
+    border-color: #dc2626;
+  }
+
+  .result-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    color: #64748b;
+  }
+
+  &.success .result-icon {
+    color: #16a34a;
+  }
+
+  &:not(.success) .result-icon {
+    color: #dc2626;
   }
 
   .message-small {
     margin: 0 0 8px 0;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
   }
 
   .message-large {
     margin: 0;
-    font-size: 28px;
-    font-weight: 800;
-    color: white;
-    line-height: 1.2;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+
+    &.danger-text {
+      color: #dc2626;
+    }
   }
 }
 
@@ -94,75 +115,60 @@ ion-content.results-content {
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 24px;
 
-  .stat-item {
+  .stat-card {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 20px;
+    justify-content: center;
+    padding: 20px 12px;
     border-radius: 12px;
     background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
 
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      ion-icon {
-        font-size: 28px;
-      }
+    ion-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
     }
 
-    .stat-info {
-      display: flex;
-      flex-direction: column;
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
 
-      .stat-number {
-        font-size: 32px;
-        font-weight: 800;
-        line-height: 1;
-      }
-
-      .stat-label {
-        font-size: 13px;
-        font-weight: 600;
-        margin-top: 4px;
-      }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
     }
 
     &.correct {
-      .stat-icon {
-        background: rgba(76, 175, 80, 0.15);
-        ion-icon {
-          color: #4CAF50;
-        }
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+      
+      ion-icon {
+        color: #16a34a;
       }
       .stat-number {
-        color: #4CAF50;
-      }
-      .stat-label {
-        color: #2E7D32;
+        color: #16a34a;
       }
     }
 
     &.incorrect {
-      .stat-icon {
-        background: rgba(244, 67, 54, 0.15);
-        ion-icon {
-          color: #F44336;
-        }
+      border-color: #fecaca;
+      background: #fef2f2;
+      
+      ion-icon {
+        color: #dc2626;
       }
       .stat-number {
-        color: #F44336;
-      }
-      .stat-label {
-        color: #C62828;
+        color: #dc2626;
       }
     }
   }
@@ -236,7 +242,7 @@ ion-content.results-content {
       background: #f8f9fa;
       border-radius: 12px;
       padding: 16px;
-      border-left: 4px solid #F44336;
+      border-left: 4px solid #3b82f6;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
       .question-text {
@@ -246,111 +252,194 @@ ion-content.results-content {
         margin: 0 0 16px 0;
         line-height: 1.5;
       }
-
-      .answer-detail {
-        margin-bottom: 16px;
-        padding: 12px;
-        border-radius: 8px;
-        border-left: 4px solid;
-
-        &.your-answer {
-          background: #eff6ff;
-          border-left-color: #3b82f6;
-        }
-
-        &.expected-answer {
-          background: #f0fdf4;
-          border-left-color: #10b981;
-        }
-
-        .label {
-          font-size: 13px;
-          font-weight: 600;
-          color: #374151;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin: 0 0 8px 0;
-        }
-
-        .content {
-          font-size: 14px;
-          color: #1f2937;
-          margin: 0;
-          line-height: 1.5;
-        }
-      }
-
-      .explanation-detail {
-        background: #fffbeb;
-        border-left: 4px solid #f59e0b;
-        padding: 12px;
-        border-radius: 8px;
-
-        .label {
-          font-size: 13px;
-          font-weight: 600;
-          color: #374151;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin: 0 0 8px 0;
-        }
-
-        .content {
-          font-size: 14px;
-          color: #1f2937;
-          margin: 0;
-          line-height: 1.5;
-        }
-      }
     }
   }
 }
 
 // ========================================
-// BOTONES DE ACCIÓN
+// ALTERNATIVAS
+// ========================================
+.alternatives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.alternative-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+
+  &.alt-selected {
+    border-color: #FF6F00;
+    background: #fff3e0;
+  }
+
+  &.alt-correct {
+    border-color: #4CAF50;
+    background: #f0fdf4;
+  }
+
+  &.alt-selected.alt-correct {
+    border-color: #4CAF50;
+    background: #dcfce7;
+  }
+
+  .alt-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 22px;
+
+      &[name="checkmark-circle"] {
+        color: #4CAF50;
+      }
+
+      &[name="close-circle"] {
+        color: #F44336;
+      }
+
+      &[name="ellipse-outline"] {
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .alt-text {
+    flex: 1;
+    font-size: 14px;
+    color: #1f2937;
+    line-height: 1.5;
+  }
+}
+
+// ========================================
+// EXPLANATION DETAIL
+// ========================================
+.explanation-detail {
+  margin-top: 16px;
+  padding: 14px;
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+
+  .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+  }
+
+  .content {
+    font-size: 15px;
+    color: #78350f;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+// ========================================
+// BOTONES DE ACCIÓN (ESTILO PROFILE)
 // ========================================
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  margin-top: 24px;
+  padding-bottom: 20px;
 
   .buttons-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 8px;
   }
 
-  ion-button {
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 10px;
     font-weight: 600;
-    font-size: 15px;
-    height: 50px;
-    --border-radius: 12px;
-    text-transform: none;
+    font-size: 13px;
+    border: none;
+    background: #ffffff;
+    color: #111827;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 
     ion-icon {
-      font-size: 20px;
+      font-size: 18px;
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+
+    &:active {
+      background: #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transform: scale(0.98);
+      
+      ion-icon {
+        color: #374151;
+      }
+    }
+
+    &.outline {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
     }
   }
+}
 
-  .btn-reforzar {
-    --background: #FF6F00;
-    --background-activated: #FF6F00;
-    --color: white;
+// ========================================
+// ANSWER DETAIL (para modo voz)
+// ========================================
+.answer-detail {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  border-left: 4px solid #e5e7eb;
+
+  &.your-answer {
+    background: #f1f5f9;
+    border-left-color: #64748b;
   }
 
-  .btn-nuevo-test {
-    --background: #FF6F00;
-    --background-activated: #E65100;
-    --color: white;
+  &.expected-answer {
+    background: #f0fdf4;
+    border-left-color: #16a34a;
   }
 
-  .btn-home {
-    --border-color: #FF6F00;
-    --color: #FF6F00;
-    
-    &:hover {
-      --background: rgba(255, 111, 0, 0.05);
-    }
+  .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+  }
+
+  .content {
+    font-size: 15px;
+    color: #1e293b;
+    line-height: 1.6;
+    margin: 0;
   }
 }
 
@@ -360,7 +449,7 @@ ion-content.results-content {
 @media (max-width: 374px) {
   .motivational-section {
     .message-large {
-      font-size: 24px;
+      font-size: 20px;
     }
   }
 

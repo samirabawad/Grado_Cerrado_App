@@ -79,6 +79,13 @@ export class ProcesalReforzarPage implements OnInit {
     });
   }
 
+    ionViewWillEnter() {
+      // Recargar datos cada vez que entramos a la página
+      const currentUser = this.apiService.getCurrentUser();
+      if (currentUser && currentUser.id) {
+        this.loadData();
+      }
+    }
   // =====================
   // UI helpers
   // =====================

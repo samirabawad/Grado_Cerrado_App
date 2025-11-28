@@ -10,30 +10,25 @@
     
     <!-- MENSAJE MOTIVACIONAL DINÁMICO -->
     <div class="motivational-section" [class.success]="percentage >= 70">
+      <ion-icon *ngIf="percentage < 70" name="sad-outline" class="result-icon"></ion-icon>
+      <ion-icon *ngIf="percentage >= 70" name="happy-outline" class="result-icon"></ion-icon>
+      
       <p class="message-small">{{ getSmallMessage() }}</p>
-      <h1 class="message-large">{{ getLargeMessage() }}</h1>
+      <h1 class="message-large" [class.danger-text]="percentage < 70">{{ getLargeMessage() }}</h1>
     </div>
 
     <!-- BLOQUES DE CORRECTAS E INCORRECTAS -->
     <div class="stats-grid">
-      <div class="stat-item correct">
-        <div class="stat-icon">
-          <ion-icon name="checkmark-circle"></ion-icon>
-        </div>
-        <div class="stat-info">
-          <span class="stat-number">{{ correctAnswers }}</span>
-          <span class="stat-label">Correctas</span>
-        </div>
+      <div class="stat-card correct">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <span class="stat-number">{{ correctAnswers }}</span>
+        <span class="stat-label">Correctas</span>
       </div>
 
-      <div class="stat-item incorrect">
-        <div class="stat-icon">
-          <ion-icon name="close-circle"></ion-icon>
-        </div>
-        <div class="stat-info">
-          <span class="stat-number">{{ incorrectAnswers }}</span>
-          <span class="stat-label">Incorrectas</span>
-        </div>
+      <div class="stat-card incorrect">
+        <ion-icon name="close-circle"></ion-icon>
+        <span class="stat-number">{{ incorrectAnswers }}</span>
+        <span class="stat-label">Incorrectas</span>
       </div>
     </div>
 
@@ -113,37 +108,24 @@
 
     <!-- BOTONES DE ACCIÓN -->
     <div class="action-buttons">
-      <!-- Primera fila: Reforzar y Nuevo Test -->
       <div class="buttons-row">
-        <ion-button 
-          expand="block" 
-          class="btn-reforzar"
-          (click)="reviewIncorrect()">
-          <ion-icon name="fitness-outline" slot="start"></ion-icon>
+        <button class="action-btn" (click)="reviewIncorrect()">
+          <ion-icon name="fitness-outline"></ion-icon>
           Reforzar
-        </ion-button>
+        </button>
 
-        <ion-button 
-          expand="block" 
-          class="btn-nuevo-test"
-          (click)="takeNewTest()">
-          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        <button class="action-btn" (click)="takeNewTest()">
+          <ion-icon name="refresh-outline"></ion-icon>
           Nuevo test
-        </ion-button>
+        </button>
       </div>
 
-      <!-- Segunda fila: Volver al inicio -->
-      <ion-button 
-        expand="block" 
-        fill="outline"
-        class="btn-home"
-        (click)="goBack()">
-        <ion-icon name="home-outline" slot="start"></ion-icon>
+      <button class="action-btn outline" (click)="goBack()">
+        <ion-icon name="home-outline"></ion-icon>
         Volver a Civil
-      </ion-button>
+      </button>
     </div>
   </div>
 
-  <!-- Bottom Navigation Component -->
   <app-bottom-nav></app-bottom-nav>
-</ion-content>
+</ion-content>s

@@ -5,12 +5,6 @@
   --background: #ffffff;
   background-color: #ffffff;
   background-image: none;
-  min-height: 100vh;
-}
-
-ion-content.test-content {
-  --overflow: auto;
-  height: 100%;
 }
 
 // ========================================
@@ -49,11 +43,10 @@ ion-content.test-content {
 // ========================================
 .content-area {
   margin-top: 80px;
-  padding: 20px 16px 100px 16px;
+  padding: 20px 16px 120px 16px;
   position: relative;
   z-index: 2;
   background: transparent;
-  min-height: calc(100vh - 100px);
 }
 
 // ========================================
@@ -652,7 +645,7 @@ ion-content.test-content {
 // ========================================
 @media (max-width: 480px) {
   .content-area {
-    padding: 20px 12px 100px 12px;
+    padding: 20px 12px 120px 12px;
   }
 
   .recording-button-container .recording-button {
@@ -788,8 +781,9 @@ ion-content.test-content {
       opacity: 1;
     }
   }
+}
 
-  // ========================================
+// ========================================
 // PANEL DE EVALUACIÓN DESPLEGABLE
 // ========================================
 .evaluation-panel {
@@ -886,6 +880,7 @@ ion-content.test-content {
     background: #1e40af;
   }
 }
+
 // ========================================
 // OPCIONES DE RESPUESTA
 // ========================================
@@ -977,5 +972,4 @@ ion-content.test-content {
   font-size: 11px;
   font-weight: 600;
   opacity: 0.9;
-}
 }
