@@ -8,7 +8,7 @@
   <!-- Contenido principal -->
   <div class="content-area">
     
-<!-- MENSAJE MOTIVACIONAL DINÁMICO -->
+    <!-- MENSAJE MOTIVACIONAL DINÁMICO -->
     <div class="motivational-section" [class.success]="percentage >= 70">
       <ion-icon *ngIf="percentage < 70" name="sad-outline" class="result-icon"></ion-icon>
       <ion-icon *ngIf="percentage >= 70" name="happy-outline" class="result-icon"></ion-icon>
@@ -106,7 +106,7 @@
       </div>
     </div>
 
- <!-- BOTONES DE ACCIÓN -->
+    <!-- BOTONES DE ACCIÓN -->
     <div class="action-buttons">
       <div class="buttons-row">
         <button class="action-btn" (click)="reviewIncorrect()">
@@ -125,3 +125,7 @@
         Volver a Civil
       </button>
     </div>
+  </div>
+
+  <app-bottom-nav></app-bottom-nav>
+</ion-content>s

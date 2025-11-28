@@ -232,6 +232,9 @@ async loadQuestionsFromBackend() {
 
 
   ngOnDestroy() {
+    // Detener reproducción de audio TTS
+    this.apiService.stopTextToSpeech();
+    
     if (this.recordingStateSubscription) {
       this.recordingStateSubscription.unsubscribe();
     }
@@ -1087,6 +1090,12 @@ async completeTest() {
       this.apiService.clearCurrentSession();
       
       console.log('🎯 Navegando a resumen...');
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      this.apiService.stopTextToSpeech();
+      this.isPlaying = false;
+      this.isPlayingExplanation = false;
       await this.router.navigate(['/procesal/procesal-oral/resumen-test-procesal-oral']);
       
     } catch (error) {
@@ -1153,8 +1162,14 @@ async completeTest() {
   }
 
   exitTest() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    this.apiService.stopTextToSpeech();
+    this.isPlaying = false;
+    this.isPlayingExplanation = false;
     this.router.navigate(['/procesal/procesal-oral']);
-  }
+  } 
 
 convertBackendQuestions(backendQuestions: any[]): Question[] {
     console.log('🔄 Convirtiendo preguntas del backend...');

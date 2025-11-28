@@ -9,8 +9,7 @@
 }
 
 ion-content.results-content {
-  --overflow: auto;
-  height: 100%;
+  --overflow: scroll;
 }
 
 // ========================================
@@ -48,12 +47,11 @@ ion-content.results-content {
 // ========================================
 .content-area {
   margin-top: 55px !important;
-  padding: 16px 16px 20px 16px;
+  padding: 16px 16px 120px 16px;
   position: relative;
   z-index: 2;
   background: transparent;
 }
-
 // ========================================
 // MENSAJE MOTIVACIONAL
 // ========================================

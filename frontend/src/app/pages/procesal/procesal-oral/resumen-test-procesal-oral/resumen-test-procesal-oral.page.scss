@@ -5,11 +5,11 @@
   --background: #ffffff;
   background-color: #ffffff;
   background-image: none;
+  min-height: 100vh;
 }
 
 ion-content.results-content {
-  --overflow: auto;
-  height: 100%;
+  --overflow: scroll;
 }
 
 // ========================================
