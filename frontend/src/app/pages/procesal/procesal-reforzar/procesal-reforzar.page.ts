@@ -493,12 +493,12 @@ async startTest() {
     if (hasErrorsInScope) {
       loading.message = 'Preparando test de reforzamiento...';
       
-      // ✅ Para reforzamiento, usar formato diferente
       const reinforcementData = {
         studentId: currentUser.id,
         questionCount: this.selectedQuantity,
         ...(this.selectedSubtemaId && { SubtemaId: this.selectedSubtemaId }),
-        ...(this.selectedTemaId && { TemaId: this.selectedTemaId })
+        ...(this.selectedTemaId && { TemaId: this.selectedTemaId }),
+        AreaId: 2  // 🆕 Derecho Procesal
       };
       
       sessionResponse = await this.apiService.startReinforcementSession(reinforcementData).toPromise();

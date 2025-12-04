@@ -483,14 +483,14 @@ export class CivilReforzarPage implements OnInit {
       // ✅ Usar endpoint correcto según si hay errores
       if (hasErrorsInScope) {
         loading.message = 'Preparando test de reforzamiento...';
-
-        // ✅ Para reforzamiento, usar formato diferente
-        const reinforcementData = {
-          studentId: currentUser.id,
-          questionCount: this.selectedQuantity,
-          ...(this.selectedSubtemaId && { SubtemaId: this.selectedSubtemaId }),
-          ...(this.selectedTemaId && { TemaId: this.selectedTemaId })
-        };
+      // ✅ Para reforzamiento, usar formato diferente
+      const reinforcementData = {
+        studentId: currentUser.id,
+        questionCount: this.selectedQuantity,
+        ...(this.selectedSubtemaId && { SubtemaId: this.selectedSubtemaId }),
+        ...(this.selectedTemaId && { TemaId: this.selectedTemaId }),
+        AreaId: 1  // 🆕 Derecho Civil
+      };
 
         sessionResponse = await this.apiService.startReinforcementSession(reinforcementData).toPromise();
 
@@ -603,24 +603,36 @@ export class CivilReforzarPage implements OnInit {
     return [];
   }
 
-  isOptionSelected(question: any, option: string): boolean {
-    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-      return question.selectedAnswer === (option === 'Verdadero' ? 'true' : 'false');
-    }
-    return question.selectedAnswer === option;
+isOptionSelected(question: any, option: string): boolean {
+  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+    if (question.selectedAnswer === 'A' && option === 'Verdadero') return true;
+    if (question.selectedAnswer === 'B' && option === 'Falso') return true;
+    return false;
   }
 
-  isOptionCorrect(question: any, option: string): boolean {
-    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-      const correctBool =
-        question.questionText.toLowerCase().includes('verdader') ||
-        question.answers?.some((a: any) => a.text.toLowerCase() === 'verdadero' && a.isCorrect);
-      return (option === 'Verdadero') === correctBool;
-    }
 
+  const options = this.getQuestionOptions(question);
+  const optionIndex = options.indexOf(option);
+  if (optionIndex !== -1) {
+    const letter = String.fromCharCode(65 + optionIndex);
+    return question.selectedAnswer === letter;
+  }
+
+  return false;
+}
+
+isOptionCorrect(question: any, option: string): boolean {
+  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
     const correctAnswer = question.answers?.find((a: any) => a.isCorrect);
-    return correctAnswer?.text === option;
+    if (correctAnswer) {
+      return correctAnswer.text === option;
+    }
+    return false;
   }
+
+  const correctAnswer = question.answers?.find((a: any) => a.isCorrect);
+  return correctAnswer?.text === option;
+}
 
   // ✅ Validar si una cantidad está disponible
   canSelectQuantity(quantity: number): boolean {
