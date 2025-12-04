@@ -830,7 +830,8 @@ getTop3StrongTopicsCivil(): any[] {
   
   const civilStrongTopics = this.allStrongTopics
     .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('civil'))
-    .slice(0, 1);  // ✅ CAMBIO: solo 1 tema
+    .sort((a, b) => b.tasaAcierto - a.tasaAcierto)  // ✅ Ordenar de mayor a menor
+    .slice(0, 1);
 
   return civilStrongTopics;
 }
@@ -840,7 +841,8 @@ getTop3StrongTopicsProcesal(): any[] {
   
   const procesalStrongTopics = this.allStrongTopics
     .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('procesal'))
-    .slice(0, 1);  // ✅ CAMBIO: solo 1 tema
+    .sort((a, b) => b.tasaAcierto - a.tasaAcierto)  // ✅ Ordenar de mayor a menor
+    .slice(0, 1);
 
   return procesalStrongTopics;
 }
