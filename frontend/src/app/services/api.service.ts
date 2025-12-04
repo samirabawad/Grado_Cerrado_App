@@ -361,6 +361,44 @@ stopTextToSpeech(): void {
   );
 }
 
+// ========================================
+// CONFIGURACIÓN DE NOTIFICACIONES
+// ========================================
+
+updateNotificationSettings(studentId: number, settings: any): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}/settings`;
+  
+  console.log('⚙️ Actualizando configuración de notificaciones:', settings);
+  
+  return this.http.put<any>(url, settings, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Configuración guardada en BD');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error guardando configuración:', error);
+        throw error;
+      })
+    );
+}
+
+getNotificationSettings(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}/settings`;
+  
+  return this.http.get<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Configuración de notificaciones obtenida');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error obteniendo configuración:', error);
+        return of({ success: false, data: null });
+      })
+    );
+}
+
 deleteNotification(notificationId: number): Observable<any> {
   const url = `${this.API_URL}/Notificaciones/${notificationId}`;
   

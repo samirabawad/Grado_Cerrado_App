@@ -66,9 +66,9 @@ export class NotificationsPage implements OnInit {
     private apiService: ApiService
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.loadSettings(); // Cambiar a async
     this.loadNotifications();
-    this.loadSettings();
     this.initializeTimeSelectors();
   }
 
@@ -279,16 +279,46 @@ export class NotificationsPage implements OnInit {
   // CONFIGURACIÓN
   // ========================================
   
-  loadSettings() {
-    const saved = localStorage.getItem('notificationSettings');
-    if (saved) {
-      this.notificationSettings = JSON.parse(saved);
+  async saveSettings() {
+    // Guardar localmente
+    localStorage.setItem('notificationSettings', JSON.stringify(this.notificationSettings));
+    
+    // Guardar solo la hora en backend
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+      if (!currentUser || !currentUser.id) return;
+      
+      await this.apiService.updateReminderTime(
+        currentUser.id, 
+        this.notificationSettings.dailyReminderTime
+      ).toPromise();
+      
+      console.log('⚙️ Hora guardada en BD');
+    } catch (error) {
+      console.error('❌ Error guardando hora:', error);
     }
   }
 
-  saveSettings() {
-    localStorage.setItem('notificationSettings', JSON.stringify(this.notificationSettings));
-    console.log('⚙️ Configuración guardada:', this.notificationSettings);
+  async loadSettings() {
+    try {
+      const currentUser = this.apiService.getCurrentUser();
+      if (currentUser && currentUser.id) {
+        // Cargar hora desde el usuario actual
+        const userProfile = await this.apiService.getUserProfile(currentUser.id).toPromise();
+        if (userProfile?.success && userProfile.data?.horaRecordatorio) {
+          this.notificationSettings.dailyReminderTime = userProfile.data.horaRecordatorio;
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error cargando hora:', error);
+    }
+    
+    // Cargar el resto desde localStorage
+    const saved = localStorage.getItem('notificationSettings');
+    if (saved) {
+      const savedSettings = JSON.parse(saved);
+      this.notificationSettings = { ...this.notificationSettings, ...savedSettings };
+    }
   }
 
   onSettingChange() {
