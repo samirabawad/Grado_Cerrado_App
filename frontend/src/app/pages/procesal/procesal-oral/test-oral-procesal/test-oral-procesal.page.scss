@@ -5,12 +5,6 @@
   --background: #ffffff;
   background-color: #ffffff;
   background-image: none;
-  min-height: 100vh;
-}
-
-ion-content.test-content {
-  --overflow: auto;
-  height: 100%;
 }
 
 // ========================================
@@ -22,7 +16,7 @@ ion-content.test-content {
   left: 0;
   right: 0;
   height: 60px;
-  background: #2563eb;
+  background: #d1d5db;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -31,18 +25,17 @@ ion-content.test-content {
 
   .back-icon {
     font-size: 24px;
-    color: white;
+    color: #000000;
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: white;
+    color: #000000;
     font-size: 18px;
     font-weight: 600;
     margin: 0;
   }
-  
 }
 
 // ========================================
@@ -50,11 +43,10 @@ ion-content.test-content {
 // ========================================
 .content-area {
   margin-top: 80px;
-  padding: 20px 16px 100px 16px;
+  padding: 20px 16px 120px 16px;
   position: relative;
   z-index: 2;
   background: transparent;
-  min-height: calc(100vh - 100px);
 }
 
 // ========================================
@@ -653,7 +645,7 @@ ion-content.test-content {
 // ========================================
 @media (max-width: 480px) {
   .content-area {
-    padding: 20px 12px 100px 12px;
+    padding: 20px 12px 120px 12px;
   }
 
   .recording-button-container .recording-button {
@@ -789,8 +781,9 @@ ion-content.test-content {
       opacity: 1;
     }
   }
+}
 
-  // ========================================
+// ========================================
 // PANEL DE EVALUACIÓN DESPLEGABLE
 // ========================================
 .evaluation-panel {
@@ -887,6 +880,7 @@ ion-content.test-content {
     background: #1e40af;
   }
 }
+
 // ========================================
 // OPCIONES DE RESPUESTA
 // ========================================
@@ -905,14 +899,8 @@ ion-content.test-content {
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  cursor: default;
   position: relative;
-
-  &:active {
-    transform: scale(0.98);
-  }
-
 
   &.correct {
     border-color: #4CAF50;
@@ -957,7 +945,6 @@ ion-content.test-content {
     font-weight: 700;
     font-size: 16px;
     flex-shrink: 0;
-    transition: all 0.2s ease;
   }
 
   .option-text {
@@ -985,5 +972,4 @@ ion-content.test-content {
   font-size: 11px;
   font-weight: 600;
   opacity: 0.9;
-}
 }

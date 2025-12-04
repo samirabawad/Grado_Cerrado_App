@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { BottomNavComponent } from '../../../../shared/components/bottom-nav/bottom-nav.component';
-import { trigger, style, transition, animate } from '@angular/animations';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 interface QuestionDetail {
   questionNumber: number;
@@ -12,6 +12,7 @@ interface QuestionDetail {
   expectedAnswer: string;
   explanation: string;
   correct: boolean;
+  options?: string[];
 }
 
 @Component({
@@ -148,5 +149,71 @@ export class ResumenTestProcesalOralPage implements OnInit {
   goBack() {
     localStorage.removeItem('current_oral_test_results');
     this.router.navigate(['/procesal']);
+  }
+
+  getOptionLetter(index: number): string {
+    return String.fromCharCode(65 + index); // A, B, C, D...
+  }
+
+  getOptionText(option: any): string {
+    if (typeof option === 'string') {
+      return option;
+    }
+    if (typeof option === 'object' && option !== null) {
+      return option.texto || option.text || option.option || String(option);
+    }
+    return String(option);
+  }
+
+  isOptionSelected(question: QuestionDetail, optionText: string): boolean {
+    if (!question.userAnswer || !question.options) return false;
+    
+    const options = question.options.map(opt => this.getOptionText(opt));
+    const index = options.indexOf(optionText);
+    
+    if (index === -1) return false;
+    
+    const expectedLetter = String.fromCharCode(65 + index);
+    return question.userAnswer.toUpperCase() === expectedLetter;
+  }
+
+  isOptionCorrect(question: QuestionDetail, optionText: string): boolean {
+    if (!question.expectedAnswer || !question.options) return false;
+    
+    const options = question.options.map(opt => this.getOptionText(opt));
+    const index = options.indexOf(optionText);
+    
+    if (index === -1) return false;
+    
+    const correctLetter = String.fromCharCode(65 + index);
+    return question.expectedAnswer.toUpperCase() === correctLetter;
+  }
+
+  getCorrectAnswerText(question: QuestionDetail): string {
+    // Si hay opciones, convertir la letra a texto
+    if (question.options && question.options.length > 0) {
+      const correctAnswer = question.expectedAnswer?.toUpperCase().trim();
+      
+      // Buscar por letra (A, B, C, D)
+      const letterMatch = correctAnswer?.match(/^[A-D]$/);
+      if (letterMatch) {
+        const index = correctAnswer.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+        if (index >= 0 && index < question.options.length) {
+          const optionText = this.getOptionText(question.options[index]);
+          return `${correctAnswer}. ${optionText}`;
+        }
+      }
+      
+      // Si es V/F
+      if (correctAnswer === 'V' || correctAnswer === 'VERDADERO') {
+        return 'A. Verdadero';
+      }
+      if (correctAnswer === 'F' || correctAnswer === 'FALSO') {
+        return 'B. Falso';
+      }
+    }
+    
+    // Si no hay opciones, devolver tal cual
+    return question.expectedAnswer || '';
   }
 }

@@ -11,7 +11,7 @@ ion-content.procesal-content {
   left: 0;
   right: 0;
   height: 60px;
-  background: #3b82f6;
+  background: #d1d5db;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -20,13 +20,13 @@ ion-content.procesal-content {
 
   .back-icon {
     font-size: 24px;
-    color: white;
+    color: #000000;
     cursor: pointer;
     margin-right: 12px;
   }
 
   .header-title {
-    color: white;
+    color: #000000;
     font-size: 18px;
     font-weight: 600;
     margin: 0;
@@ -49,6 +49,15 @@ ion-content.procesal-content {
     font-weight: 700;
     color: #1f2937;
     text-align: center;
+  }
+
+  .section-description {
+    margin: -10px 0 20px 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.5;
   }
 
   .quantity-selector {

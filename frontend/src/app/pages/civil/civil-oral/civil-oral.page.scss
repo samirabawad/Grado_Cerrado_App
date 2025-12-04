@@ -10,31 +10,30 @@ ion-content.civil-content {
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: #FF6F00;
+  z-index: 1000;
+  background: #d1d5db;
+  padding: max(env(safe-area-inset-top), 16px) 20px 16px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   .back-icon {
-    font-size: 24px;
-    color: white;
+    font-size: 28px;
+    color: #000000;
     cursor: pointer;
-    margin-right: 12px;
   }
 
   .header-title {
-    color: white;
-    font-size: 18px;
-    font-weight: 600;
     margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #000000;
   }
 }
 
 .content-area {
-  padding: calc(env(safe-area-inset-top) + 100px) 20px 100px;
+  padding: calc(env(safe-area-inset-top) + 80px) 20px 100px;
 }
 
 .selector-card {
@@ -49,6 +48,15 @@ ion-content.civil-content {
     font-weight: 700;
     color: #1f2937;
     text-align: center;
+  }
+
+  .section-description {
+    margin: -10px 0 20px 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.5;
   }
 
   .quantity-selector {

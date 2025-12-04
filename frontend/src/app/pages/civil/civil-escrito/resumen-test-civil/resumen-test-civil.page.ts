@@ -213,6 +213,11 @@ export class ResumenTestCivilPage implements OnInit {
       question.type === 2 ||
       question.type === '2'
     ) {
+      // userAnswer viene como "A" o "B" desde el test
+      if (question.userAnswer === 'A' && option === 'Verdadero') return true;
+      if (question.userAnswer === 'B' && option === 'Falso') return true;
+      
+      // Compatibilidad con formato antiguo (V/F)
       if (question.userAnswer === 'V' && option === 'Verdadero') return true;
       if (question.userAnswer === 'F' && option === 'Falso') return true;
       return false;

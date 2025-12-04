@@ -11,30 +11,31 @@ ion-content.civil-content {
   left: 0;
   right: 0;
   height: 60px;
-  background: #FF6F00;
+  z-index: 1000;
+  background: #d1d5db;
+  padding: 0 20px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   .back-icon {
-    font-size: 24px;
-    color: white;
+    font-size: 28px;
+    color: #000000;
     cursor: pointer;
-    margin-right: 12px;
   }
 
   .header-title {
-    color: white;
-    font-size: 18px;
-    font-weight: 600;
     margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #000000;
   }
 }
 
 .content-area {
-  padding: calc(env(safe-area-inset-top) + 100px) 20px 100px;
+  margin-top: 60px;
+  padding: 20px 20px 100px 20px;
 }
 
 .selector-card {
@@ -49,6 +50,15 @@ ion-content.civil-content {
     font-weight: 700;
     color: #1f2937;
     text-align: center;
+  }
+
+  .section-description {
+    margin: -10px 0 20px 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.5;
   }
 
   .quantity-selector {
@@ -366,7 +376,7 @@ ion-button.start-button[disabled] {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: rgba(33, 150, 243, 0.1);
+  background: rgba(255, 111, 0, 0.1);
   border-left: 3px solid #FF6F00;
   border-radius: 8px;
   margin-top: 12px;

@@ -35,6 +35,7 @@ currentWeekLabel: string = '';
   chartData: any[] = [];
   areaStats: any[] = [];
   allWeakTopics: any[] = [];
+  allStrongTopics: any[] = [];
   
   isLoading: boolean = true;
   selectedTimeFrame: string = 'week';
@@ -108,7 +109,7 @@ currentWeekLabel: string = '';
                 const subtemasConPorcentaje = tema.subtemas.map((subtema: any) => ({
                   subtemaId: subtema.subtemaId,
                   subtemaNombre: subtema.subtemaNombre,
-                  totalPreguntas: subtema.totalPreguntas,
+                  totalPreguntas: subtema.preguntasPracticadas,
                   preguntasCorrectas: subtema.preguntasCorrectas,
                   porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema)
                 }));
@@ -118,7 +119,7 @@ currentWeekLabel: string = '';
                 return {
                   temaId: tema.temaId,
                   temaNombre: tema.temaNombre,
-                  totalPreguntas: tema.totalPreguntas,
+                  totalPreguntas: tema.preguntasPracticadas,
                   preguntasCorrectas: tema.preguntasCorrectas,
                   porcentajeAcierto: porcentajeTema,
                   subtemas: subtemasConPorcentaje
@@ -202,6 +203,26 @@ currentWeekLabel: string = '';
         this.allWeakTopics = [];
       }
 
+      // Cargar puntos fuertes
+      try {
+        const strongResponse = await this.apiService.getTopTemasFuertes(studentId).toPromise();
+        if (strongResponse && strongResponse.success && strongResponse.data) {
+          this.allStrongTopics = strongResponse.data.map((item: any) => ({
+            area: item.area,
+            tema: item.tema,
+            tasaAcierto: parseFloat(item.tasaAcierto),
+            intentos: item.intentos,
+            nombre: item.tema,
+            totalIntentos: item.intentos,
+            totalCorrectas: Math.round((parseFloat(item.tasaAcierto) / 100) * item.intentos)
+          }));
+          console.log('✅ Puntos fuertes cargados:', this.allStrongTopics);
+        }
+      } catch (error) {
+        console.error('Error cargando temas fuertes:', error);
+        this.allStrongTopics = [];
+      }
+      
       await this.generateChartData();
 
       this.currentGoal = this.calculateProgressiveGoal(this.totalQuestions);
@@ -320,7 +341,8 @@ isTemaExpanded(temaNombre: string): boolean {
 
 getTemasForArea(areaName: string): any[] {
   const area = this.areaStats.find(a => a.area === areaName && !a.isGeneral);
-  return area && area.temas ? area.temas : [];
+  const temas = area && area.temas ? area.temas : [];
+  return temas.filter((tema: any) => !tema.temaNombre?.toLowerCase().includes('auto-generado'));
 }
 
 getSubtemasForTema(tema: any): any[] {
@@ -349,8 +371,16 @@ async generateChartData() {
   try {
     const currentUser = this.apiService.getCurrentUser();
     if (!currentUser || !currentUser.id) return;
+    // Formatear fechas para el backend
+    const startDate = this.currentWeekStart.toISOString().split('T')[0];
+    const endDate = this.currentWeekEnd.toISOString().split('T')[0];
 
-    const progressResponse = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
+    const progressResponse = await this.apiService.getWeeklyProgress(
+      currentUser.id, 
+      startDate, 
+      endDate
+    ).toPromise();
+    
     if (progressResponse && progressResponse.success) {
       this.filterWeeklyData(progressResponse.data);
     }
@@ -798,6 +828,32 @@ getTop3WeakTopicsCivil(): any[] {
     .slice(0, 3);
 
   return civilWeakTopics;
+}
+
+// =====================
+// PUNTOS FUERTES
+// =====================
+
+getTop3StrongTopicsCivil(): any[] {
+  if (!this.allStrongTopics || this.allStrongTopics.length === 0) return [];
+  
+  const civilStrongTopics = this.allStrongTopics
+    .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('civil'))
+    .sort((a, b) => b.tasaAcierto - a.tasaAcierto)  // ✅ Ordenar de mayor a menor
+    .slice(0, 1);
+
+  return civilStrongTopics;
+}
+
+getTop3StrongTopicsProcesal(): any[] {
+  if (!this.allStrongTopics || this.allStrongTopics.length === 0) return [];
+  
+  const procesalStrongTopics = this.allStrongTopics
+    .filter((topic: any) => topic.area && topic.area.toLowerCase().includes('procesal'))
+    .sort((a, b) => b.tasaAcierto - a.tasaAcierto)  // ✅ Ordenar de mayor a menor
+    .slice(0, 1);
+
+  return procesalStrongTopics;
 }
 
 getTop3WeakTopicsProcesal(): any[] {

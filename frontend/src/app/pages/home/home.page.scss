@@ -124,18 +124,18 @@
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
-    .stat-icon {
-      font-size: 28px;
-      color: #10b981;
-      margin-bottom: 8px;
-    }
+  .stat-icon {
+    font-size: 28px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+  }
 
-    .stat-value {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 800;
-      color: #1f2937;
-    }
+  .stat-value {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: #6b7280;
+  }
 
     .stat-label {
       margin: 4px 0 0 0;
@@ -155,13 +155,13 @@
   width: 100%;
   box-sizing: border-box;
 
-.section-title-large {
-  margin: 0 0 20px 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: #1f2937;
-  text-align: center;
-}
+  .section-title-large {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+  }
 }
 
 .area-cards {

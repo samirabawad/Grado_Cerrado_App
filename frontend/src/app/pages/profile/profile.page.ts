@@ -65,6 +65,10 @@ getInitialAvatar(): string {
 raccoonAvatars: { id: number; url: string }[] = [
   { id: 1, url: 'assets/avatars/racoon1.svg' },
   { id: 2, url: 'assets/avatars/racoon2.svg' },
+  { id: 3, url: 'assets/avatars/pizza.svg' },
+  { id: 4, url: 'assets/avatars/gavel.svg' },
+  { id: 5, url: 'assets/avatars/egg.svg' },
+  { id: 6, url: 'assets/avatars/Flower.svg' },
 ];
 avatarPickerOpen = false;
 pendingAvatar: { id: number; url: string } | null = null;
@@ -180,11 +184,29 @@ pendingAvatar: { id: number; url: string } | null = null;
 
       const studentId = currentUser.id;
 
-      // Usar los datos del usuario almacenados en localStorage
+  // Usar los datos del usuario almacenados en localStorage
       this.user.id = currentUser.id;
       this.user.nombre = currentUser.name || 'Usuario';
-      this.user.nombreCompleto = currentUser.name || 'Usuario';
       this.user.email = currentUser.email || 'usuario@example.com';
+      
+    // Obtener el nombre completo del backend
+      try {
+        console.log('🔍 Obteniendo perfil completo para estudiante:', studentId);
+        const profileResponse = await this.apiService.getUserProfile(studentId).toPromise();
+        console.log('📋 Respuesta getUserProfile:', profileResponse);
+        
+        if (profileResponse && profileResponse.success && profileResponse.data) {
+          console.log('✅ Datos del perfil:', profileResponse.data);
+          this.user.nombreCompleto = profileResponse.data.nombreCompleto || profileResponse.data.nombre_completo || currentUser.name || 'Usuario';
+          console.log('👤 Nombre completo asignado:', this.user.nombreCompleto);
+        } else {
+          console.warn('⚠️ No se recibieron datos del perfil');
+          this.user.nombreCompleto = currentUser.name || 'Usuario';
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo nombre completo:', error);
+        this.user.nombreCompleto = currentUser.name || 'Usuario';
+      }
 
       // ======== NUEVO: setear avatarUrl desde localStorage o default ========
       const rawAvatar = currentUser.avatarUrl || currentUser.avatar || this.user.avatar;
@@ -370,40 +392,46 @@ pendingAvatar: { id: number; url: string } | null = null;
     }
   }
 
-  async onAdaptiveModeChange() {
-    this.isSavingAdaptive = true;
+async onAdaptiveModeChange() {
+  this.isSavingAdaptive = true;
 
-    try {
-      const currentUser = this.apiService.getCurrentUser();
-      if (!currentUser || !currentUser.id) {
-        await this.showToast('Error: Usuario no identificado', 'danger');
-        this.isSavingAdaptive = false;
-        return;
-      }
-
-      const response = await this.apiService.updateAdaptiveModeConfig(
-        currentUser.id,
-        this.adaptiveConfig.enabled
-      ).toPromise();
-
-      if (response && response.success) {
-        this.adaptiveModeEnabled = this.adaptiveConfig.enabled;
-        const message = this.adaptiveConfig.enabled
-          ? '✅ Modo adaptativo activado' 
-          : '✅ Modo adaptativo desactivado';
-        await this.showToast(message, 'success');
-      } else {
-        this.adaptiveConfig.enabled = !this.adaptiveConfig.enabled;
-        await this.showToast('❌ Error al cambiar el modo adaptativo', 'danger');
-      }
-    } catch (error: any) {
-      console.error('Error guardando modo adaptativo:', error);
-      this.adaptiveConfig.enabled = !this.adaptiveConfig.enabled;
-      await this.showToast('❌ Error al guardar la configuración', 'danger');
-    } finally {
+  try {
+    const currentUser = this.apiService.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      await this.showToast('Error: Usuario no identificado', 'danger');
       this.isSavingAdaptive = false;
+      return;
     }
+
+    // 1️⃣ Guardar en BD
+    const response = await this.apiService.updateAdaptiveModeConfig(
+      currentUser.id,
+      this.adaptiveConfig.enabled
+    ).toPromise();
+
+    if (response && response.success) {
+      this.adaptiveModeEnabled = this.adaptiveConfig.enabled;
+      
+      // 2️⃣ ✅ CRÍTICO: Guardar en localStorage
+      const key = `adaptive_mode_${currentUser.id}`;
+      const value = JSON.stringify({ enabled: this.adaptiveConfig.enabled });
+      localStorage.setItem(key, value);
+      
+      console.log('✅ Guardado en localStorage:', key, '=', value);
+      
+      const message = this.adaptiveConfig.enabled
+        ? '✅ Modo adaptativo activado' 
+        : '✅ Modo adaptativo desactivado';
+      await this.showToast(message, 'success');
+    }
+  } catch (error: any) {
+    console.error('Error guardando modo adaptativo:', error);
+    this.adaptiveConfig.enabled = !this.adaptiveConfig.enabled;
+    await this.showToast('❌ Error al guardar la configuración', 'danger');
+  } finally {
+    this.isSavingAdaptive = false;
   }
+}
 
   // ============================================
   // CONFIGURACIÓN
@@ -430,18 +458,35 @@ pendingAvatar: { id: number; url: string } | null = null;
 // ============================================
   // SECCIONES
   // ============================================
-  toggleSection(section: string) {
+toggleSection(section: string) {
+    // Lista de secciones principales
+    const mainSections = ['personalInfo', 'security', 'adaptiveMode', 'frequency', 'progress', 'settings', 'configuration'];
+    
+    // Subsecciones de frecuencia
+    const frequencySubsections = ['weeklyGoal', 'preferredDays'];
+    
     // Si la sección ya está abierta, la cerramos
     if (this.expandedSections[section]) {
       this.expandedSections[section] = false;
     } else {
-      // Cerrar todas las secciones principales
-      Object.keys(this.expandedSections).forEach(key => {
-        // Solo cerrar secciones principales, no subsecciones
-        if (['personalInfo', 'security', 'adaptiveMode', 'frequency', 'progress', 'settings'].includes(key)) {
-          this.expandedSections[key] = false;
-        }
-      });
+      // Si es una sección principal, cerrar todas las otras principales
+      if (mainSections.includes(section)) {
+        Object.keys(this.expandedSections).forEach(key => {
+          if (mainSections.includes(key)) {
+            this.expandedSections[key] = false;
+          }
+        });
+      }
+      
+      // Si es una subsección de frecuencia, cerrar las otras subsecciones
+      if (frequencySubsections.includes(section)) {
+        frequencySubsections.forEach(sub => {
+          if (sub !== section) {
+            this.expandedSections[sub] = false;
+          }
+        });
+      }
+      
       // Abrir la sección clickeada
       this.expandedSections[section] = true;
     }
@@ -464,11 +509,16 @@ pendingAvatar: { id: number; url: string } | null = null;
   }
 
   getFechaRegistroFormatted(): string {
-    return this.user.fecha_registro.toLocaleDateString('es-ES', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    });
+    try {
+      return this.user.fecha_registro.toLocaleDateString('es-CL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Santiago'
+      });
+    } catch (error) {
+      return 'Fecha no disponible';
+    }
   }
 
   canEditProfile(): boolean {
@@ -494,12 +544,17 @@ pendingAvatar: { id: number; url: string } | null = null;
   getLastUpdateFormatted(): string {
     if (!this.user.last_profile_update) return 'Nunca';
 
-    const lastUpdate = new Date(this.user.last_profile_update);
-    return lastUpdate.toLocaleDateString('es-ES', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    });
+    try {
+      const lastUpdate = new Date(this.user.last_profile_update);
+      return lastUpdate.toLocaleDateString('es-CL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Santiago'
+      });
+    } catch (error) {
+      return 'Fecha no disponible';
+    }
   }
 
   async editName() {
@@ -889,86 +944,98 @@ pendingAvatar: { id: number; url: string } | null = null;
   closeAvatarPicker() { this.avatarPickerOpen = false; this.pendingAvatar = null; }
   selectAvatar(a: { id: number; url: string }) { this.pendingAvatar = a; }
 
-  async saveSelectedAvatar() {
-    if (!this.pendingAvatar) return;
-    try {
-      const current = this.apiService.getCurrentUser();
-      await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
-
-      // Refresca UI (el back mapeará id->url pública si aplica). Para assets locales, queda igual.
-      this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
-
-      // Sincroniza localStorage
-      current.avatarUrl = this.user.avatarUrl;
-      current.avatar = this.user.avatarUrl;
-      localStorage.setItem('currentUser', JSON.stringify(current));
-
-      await this.showToast('✅ Avatar actualizado', 'success');
-    } catch (e) {
-      console.error(e);
-      await this.showToast('No se pudo actualizar el avatar', 'danger');
-    } finally {
-      this.closeAvatarPicker();
-    }
-  }
-
   triggerFile() {
-    if (this.fileInput?.nativeElement) this.fileInput.nativeElement.click();
+  if (this.fileInput?.nativeElement) {
+    this.fileInput.nativeElement.click();
+  }
+}
+
+async saveSelectedAvatar() {
+  if (!this.pendingAvatar) return;
+  try {
+    const current = this.apiService.getCurrentUser();
+    await this.apiService.updateUserAvatar(current.id, { avatarId: this.pendingAvatar.id, avatarUrl: null }).toPromise();
+
+    this.user.avatarUrl = this.apiService.toAbsoluteFileUrl(this.pendingAvatar.url);
+    current.avatarUrl = this.user.avatarUrl;
+    current.avatar = this.user.avatarUrl;
+    localStorage.setItem('currentUser', JSON.stringify(current));
+
+    await this.showToast('✅ Avatar actualizado', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('No se pudo actualizar el avatar', 'danger');
+  } finally {
+    this.closeAvatarPicker();
+  }
+}
+
+async onFileSelected(ev: any) {
+  const file: File | undefined = ev?.target?.files?.[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    await this.showToast('La imagen excede 2MB', 'danger');
+    ev.target.value = '';
+    return;
   }
 
-  async onFileSelected(ev: any) {
-    const file: File | undefined = ev?.target?.files?.[0];
-    if (!file) return;
+  try {
+    const current = this.apiService.getCurrentUser();
+    const form = new FormData();
+    form.append('file', file);
+    const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
 
-    if (file.size > 2 * 1024 * 1024) {
-      await this.showToast('La imagen excede 2MB', 'danger');
-      ev.target.value = '';
-      return;
-    }
+    const rawUrl = resp?.data?.url as string;
+    const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
 
-    try {
-      const current = this.apiService.getCurrentUser();
+    this.user.avatarUrl = absoluteUrl;
+    current.avatarUrl = absoluteUrl;
+    current.avatar = absoluteUrl;
+    localStorage.setItem('currentUser', JSON.stringify(current));
 
-      // Subir al backend
-      const form = new FormData();
-      form.append('file', file);
-      const resp = await this.apiService.uploadProfilePhoto(current.id, form).toPromise();
-
-      // El back responde { data: { url: "/avatars/xxxxx.png" } }
-      const rawUrl = resp?.data?.url as string;
-      const absoluteUrl = this.apiService.toAbsoluteFileUrl(rawUrl);
-
-      // Refrescar UI / localStorage
-      this.user.avatarUrl = absoluteUrl;
-      current.avatarUrl = absoluteUrl;
-      current.avatar = absoluteUrl;
-      localStorage.setItem('currentUser', JSON.stringify(current));
-
-      await this.showToast('✅ Foto de perfil actualizada', 'success');
-    } catch (e) {
-      console.error(e);
-      await this.showToast('Error subiendo la imagen', 'danger');
-    } finally {
-      ev.target.value = '';
-    }
+    await this.showToast('✅ Foto de perfil actualizada', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('Error subiendo la imagen', 'danger');
+  } finally {
+    ev.target.value = '';
   }
+}
 
-  async removeAvatar() {
-    try {
-      const current = this.apiService.getCurrentUser();
-      await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
+async removeAvatar() {
+  try {
+    const current = this.apiService.getCurrentUser();
+    await this.apiService.updateUserAvatar(current.id, { avatarId: null, avatarUrl: null }).toPromise();
 
-      // Volver al avatar con inicial
-      this.user.avatarUrl = this.getInitialAvatar();
-      current.avatarUrl = '';
-      current.avatar = '';
-      localStorage.setItem('currentUser', JSON.stringify(current));
+    this.user.avatarUrl = this.getInitialAvatar();
+    current.avatarUrl = '';
+    current.avatar = '';
+    localStorage.setItem('currentUser', JSON.stringify(current));
 
-      await this.showToast('Avatar quitado', 'success');
-    } catch (e) {
-      console.error(e);
-      await this.showToast('No se pudo quitar el avatar', 'danger');
-    }
+    await this.showToast('Avatar quitado', 'success');
+    
+    // ⭐ MOVER AL FINAL
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('avatarUpdated'));
+    }, 100);
+    
+  } catch (e) {
+    console.error(e);
+    await this.showToast('No se pudo quitar el avatar', 'danger');
   }
+}
 
 }

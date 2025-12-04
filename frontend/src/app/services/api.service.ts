@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 
 // ========================================
 // INTERFACES 
@@ -63,6 +64,8 @@ export interface CumplimientoResponse {
 export class ApiService {
   private API_URL = environment.apiUrl;
   private readonly SESSION_STORAGE_KEY = 'grado_cerrado_session';
+
+  private ttsAudio: HTMLAudioElement | null = null;
   
   // ✅ NUEVO: BehaviorSubject para manejar la sesión actual
   private currentSession$ = new BehaviorSubject<any>(null);
@@ -82,24 +85,29 @@ export class ApiService {
   }
 
 
-  // ========================================
+// ========================================
   // TEMAS Y SUBTEMAS
   // ========================================
-
 
   getTemasByArea(areaId: number) {
     return this.http.get<any>(`${this.API_URL}/study/areas/${areaId}/temas-subtemas`);
   }
 
-  // (Opcional) helpers para no estar recordando el número de área
   getTemasCivil() {
-    // area_id = 1 → Derecho Civil
     return this.getTemasByArea(1);
   }
 
   getTemasProcesal() {
-    // area_id = 2 → Derecho Procesal
     return this.getTemasByArea(2);
+  }
+
+  getQuestionCountByLevel(temaId?: number, areaId?: number, modalidadId?: number): Observable<any> {
+    let params = new HttpParams();
+    if (temaId) params = params.set('temaId', temaId.toString());
+    if (areaId) params = params.set('areaId', areaId.toString());
+    if (modalidadId) params = params.set('modalidadId', modalidadId.toString());
+    
+    return this.http.get(`${this.API_URL}/study/questions/count-by-level`, { params });
   }
 
   // ========================================
@@ -158,6 +166,7 @@ export class ApiService {
           console.log('Login exitoso:', response);
           
           if (response.success && response.user) {
+            localStorage.clear();
             localStorage.setItem('currentUser', JSON.stringify(response.user));
           }
           
@@ -216,12 +225,13 @@ uploadProfilePhoto(userId: number, formData: FormData) {
   return this.http.post<any>(`${this.API_URL}/study/users/${userId}/avatar/upload`, formData);
 }
 getUserProfile(userId: number) {
-  return this.http.get<any>(`${this.API_URL}/study/users/${userId}/profile`);
+  return this.http.get<any>(`${this.API_URL}/auth/current-user/${userId}`);
 }
 
 private getFilesBase(): string {
   return this.API_URL.replace(/\/api\/?$/, '');
 }
+
 
 // Convierte rutas relativas del backend a absolutas con el host del API
 public toAbsoluteFileUrl(url?: string): string {
@@ -237,6 +247,150 @@ public toAbsoluteFileUrl(url?: string): string {
 
   // para "assets/..." u otras rutas relativas, lo dejo tal cual (sirve para assets locales)
   return url;
+}
+
+
+  //Audio TTS
+private currentTTSAudio: HTMLAudioElement | null = null;
+
+  async playTextToSpeech(text: string): Promise<void> {
+    try {
+      // Detener audio anterior si existe
+      if (this.currentTTSAudio) {
+        this.currentTTSAudio.pause();
+        this.currentTTSAudio = null;
+      }
+
+      console.log('🎵 Solicitando TTS (BASE64):', text.substring(0, 50));
+
+      // Limpiar texto
+      const cleanText = text
+        .trim()
+        .replace(/\s+/g, ' ')
+        .replace(/\n/g, ' ')
+        .replace(/\r/g, '');
+
+      console.log('🧹 Texto limpio:', cleanText.substring(0, 50));
+
+      const response = await fetch(`${this.API_URL}/Speech/text-to-speech-base64`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: cleanText })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('📥 Respuesta TTS base64:', data);
+
+      const base64 =
+        data.audioBase64 ||
+        data.audio ||
+        data.data?.audioBase64 ||
+        '';
+
+      if (!base64) {
+        console.error('❌ No se encontró audioBase64 en la respuesta');
+        return;
+      }
+
+      // Construir data URL
+      const src = `data:audio/mpeg;base64,${base64}`;
+
+      this.currentTTSAudio = new Audio(src);
+      console.log('▶️ Reproduciendo audio base64...');
+
+      this.currentTTSAudio.oncanplaythrough = () => {
+        this.currentTTSAudio?.play().catch(err => {
+          console.error('❌ Error reproduciendo audio TTS:', err);
+        });
+      };
+
+      this.currentTTSAudio.onerror = (ev) => {
+        console.error('❌ Error TTS (onerror):', ev);
+      };
+
+      this.currentTTSAudio.onended = () => {
+        this.currentTTSAudio = null;
+      };
+    } catch (error) {
+      console.error('❌ Error TTS (try/catch):', error);
+      throw error;
+    }
+  }
+
+stopTextToSpeech(): void {
+    console.log('⏹️ Deteniendo TTS...');
+    
+    // Detener el audio HTML5
+    if (this.currentTTSAudio) {
+      this.currentTTSAudio.pause();
+      this.currentTTSAudio.currentTime = 0;
+      this.currentTTSAudio = null;
+    }
+    
+    // CRÍTICO: También detener Web Audio API si existe
+    if (typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined') {
+      try {
+        const audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+        if (audioCtx.state !== 'closed') {
+          audioCtx.close();
+        }
+      } catch (e) {
+        console.log('No hay AudioContext activo');
+      }
+    }
+    
+    console.log('✅ TTS detenido');
+  }
+      // NOTIFICACIONES
+
+  updateNotificationConfig(studentId: number, enabled: boolean) {
+    const url = `${this.API_URL}/Notificaciones/${studentId}/config`;
+    return this.http.put<any>(url, { enabled }, this.httpOptions);
+  }
+
+  updateReminderTime(estudianteId: number, time: string) {
+  return this.http.put(
+    `${this.API_URL}/notificaciones/${estudianteId}/hora-recordatorio`,
+    { time }
+  );
+}
+
+deleteNotification(notificationId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${notificationId}`;
+  
+  return this.http.delete<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificación eliminada');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error eliminando notificación:', error);
+        throw error;
+      })
+    );
+}
+
+clearAllNotifications(studentId: number): Observable<any> {
+  const url = `${this.API_URL}/Notificaciones/${studentId}/limpiar`;
+  
+  return this.http.delete<any>(url, this.httpOptions)
+    .pipe(
+      map((response: any) => {
+        console.log('✅ Notificaciones limpiadas');
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('❌ Error limpiando notificaciones:', error);
+        throw error;
+      })
+    );
 }
 
 
@@ -349,38 +503,63 @@ public toAbsoluteFileUrl(url?: string): string {
   /**
    * ✅ Iniciar sesión ORAL
    */
-  startOralStudySession(sessionData: any): Observable<any> {
-    const url = `${this.API_URL}/Study/start-oral-session`;
-    
-    const requestData = {
-      studentId: sessionData.studentId || 1,
-      difficulty: sessionData.difficulty || "intermedio",
-      legalAreas: sessionData.legalAreas || ["Derecho Civil"],
-      questionCount: sessionData.questionCount || 5
-    };
-    
-    console.log('🎤 Iniciando sesión ORAL:', requestData);
-    
-    return this.http.post<any>(url, requestData, this.httpOptions)
-      .pipe(
-        tap(response => {
-          if (response.success) {
-            console.log('✅ Sesión ORAL iniciada:', response);
-            
-            if (response.questions && response.questions.length > 0) {
-              console.log('📋 Tipo de preguntas recibidas:', response.questions[0].type);
-            }
-            
-            this.currentSession$.next(response);
-            this.saveSessionToStorage(response);
-          }
-        }),
-        catchError(error => {
-          console.error('❌ Error iniciando sesión ORAL:', error);
-          throw error;
-        })
-      );
+startOralStudySession(sessionData: any): Observable<any> {
+  const url = `${this.API_URL}/Study/start-oral-session`;
+  
+  const currentUser = this.getCurrentUser();
+  
+  // ✅ Obtener configuración adaptativa
+  const adaptiveConfig = localStorage.getItem(`adaptive_mode_${currentUser?.id}`);
+  let adaptiveEnabled = false;
+  
+  if (adaptiveConfig) {
+    try {
+      const parsed = JSON.parse(adaptiveConfig);
+      adaptiveEnabled = parsed.enabled || false;
+    } catch (error) {
+      console.error('Error parseando adaptive config:', error);
+    }
   }
+  
+  // Si se pasa explícitamente en sessionData, usar ese valor
+  if (sessionData.adaptiveMode !== undefined) {
+    adaptiveEnabled = sessionData.adaptiveMode;
+  }
+  
+  const requestData = {
+    studentId: sessionData.studentId || currentUser?.id || 1,
+    difficulty: sessionData.difficulty,  // ✅ Viene del componente
+    legalAreas: sessionData.legalAreas,  // ✅ Viene del componente
+    questionCount: sessionData.questionCount || 5,
+    adaptiveMode: adaptiveEnabled,
+    responseMethod: sessionData.responseMethod || 'voice'  // ✅ Método de respuesta
+  };
+  
+  console.log('🎤 Iniciando sesión ORAL:', requestData);
+  console.log('🎯 Modo adaptativo:', adaptiveEnabled);
+  
+  return this.http.post<any>(url, requestData, this.httpOptions)
+    .pipe(
+      tap(response => {
+        if (response.success) {
+          console.log('✅ Sesión ORAL iniciada:', response);
+          console.log('🎯 Modo adaptativo activo:', response.adaptiveEnabled);
+          
+          // ✅ Agregar responseMethod a la sesión si no viene del backend
+          if (response && !response.responseMethod) {
+            response.responseMethod = sessionData.responseMethod || 'voice';
+          }
+          
+          this.currentSession$.next(response);
+          this.saveSessionToStorage(response);
+        }
+      }),
+      catchError(error => {
+        console.error('❌ Error iniciando sesión ORAL:', error);
+        throw error;
+      })
+    );
+}
 
   getCurrentSession(): any {
     return this.currentSession$.value;
@@ -606,8 +785,9 @@ public toAbsoluteFileUrl(url?: string): string {
   }
 
   getRecentSessions(studentId: number, limit: number = 10): Observable<any> {
-    const url = `${this.API_URL}/Dashboard/recent-sessions/${studentId}?limit=${limit}`;
-    
+    const timestamp = new Date().getTime();
+    const url = `${this.API_URL}/Dashboard/recent-sessions/${studentId}?limit=${limit}&t=${timestamp}`;
+
     return this.http.get<any>(url, this.httpOptions)
       .pipe(
         map((response: any) => {
@@ -700,10 +880,13 @@ public toAbsoluteFileUrl(url?: string): string {
     );
   }
 
-  getWeeklyProgress(studentId: number): Observable<any> {
-    const url = `${this.API_URL}/Dashboard/weekly-progress/${studentId}`;
-    return this.http.get(url, this.httpOptions);
+getWeeklyProgress(studentId: number, startDate?: string, endDate?: string): Observable<any> {
+  let url = `${this.API_URL}/Dashboard/weekly-progress/${studentId}`;
+  if (startDate && endDate) {
+    url += `?startDate=${startDate}&endDate=${endDate}`;
   }
+  return this.http.get(url, this.httpOptions);
+}
 
  getMonthlyProgress(studentId: number, semester: number = 1): Observable<any> {
     const url = `${this.API_URL}/Dashboard/monthly-progress/${studentId}/${semester}`;
@@ -729,6 +912,24 @@ public toAbsoluteFileUrl(url?: string): string {
         })
       );
   }
+
+
+getTopTemasFuertes(studentId: number): Observable<any> {
+    const url = `${this.API_URL}/Weakness/top-fuertes/${studentId}`;
+    
+    return this.http.get<any>(url, this.httpOptions)
+      .pipe(
+        map((response: any) => {
+          console.log('Top temas fuertes:', response);
+          return response;
+        }),
+        catchError((error: any) => {
+          console.error('Error obteniendo temas fuertes:', error);
+          throw error;
+        })
+      );
+  }
+  
 
   getResumenDebilidades(studentId: number): Observable<any> {
     const url = `${this.API_URL}/Weakness/resumen/${studentId}`;

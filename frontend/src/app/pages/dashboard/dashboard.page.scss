@@ -4,7 +4,7 @@
 }
 
 // ========================================
-// HEADER FIJO - FONDO GRIS SÓLIDO
+// HEADER FIJO - FONDO GRIS SÃ“LIDO
 // ========================================
 .dashboard-header {
   position: fixed;
@@ -215,7 +215,7 @@
 }
 
 // ========================================
-// ESTADÍSTICAS GENERALES - SOLO SESIONES
+// ESTADÃSTICAS GENERALES - SOLO SESIONES
 // ========================================
 .stats-overview {
   padding: 0 0 20px 0;
@@ -249,7 +249,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 20px;
     padding: 16px;
     background: #ffffff;
@@ -261,6 +261,7 @@
       align-items: center;
       gap: 12px;
       flex: 1;
+      min-width: 0;
 
       .achievement-icon {
         width: 56px;
@@ -269,6 +270,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
         
         ion-icon {
           font-size: 32px;
@@ -277,9 +279,14 @@
       }
 
       .achievement-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        
         .achievement-level {
-          margin: 0 0 2px 0;
-          font-size: 12px;
+          margin: 0;
+          font-size: 11px;
           font-weight: 700;
           color: #065f46;
           text-transform: uppercase;
@@ -288,7 +295,7 @@
 
         .achievement-name {
           margin: 0;
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 800;
           color: #047857;
         }
@@ -296,32 +303,42 @@
     }
 
     .achievement-right {
-      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 2px;
+      flex-shrink: 0;
 
       .sessions-progress-inline {
         margin: 0;
-        font-size: 14px;
-        color: #065f46;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0;
 
         .sessions-current {
-          font-size: 33px;
+          font-size: 32px;
           font-weight: 700;
           color: #047857;
+          line-height: 1;
         }
 
         .sessions-de {
-          font-size: 14px;
-          color: #065f46;
-          margin: 0 4px;
+          display: none;
         }
 
-      .sessions-total {
-          font-size: 20px;
+        .sessions-total {
+          font-size: 16px;
           font-weight: 600;
           color: #065f46;
-          margin-left: 2px;
-          vertical-align: baseline;
-          line-height: 33px;
+          line-height: 1;
+        }
+
+        .sessions-total::before {
+          content: "de ";
+          font-size: 12px;
+          color: #065f46;
         }
       }
     }
@@ -397,7 +414,7 @@
 }
 
 // ========================================
-// GRÁFICO SEMANAL
+// GRÃFICO SEMANAL
 // ========================================
 .weekly-chart-container {
   background: white;
@@ -611,7 +628,169 @@
 }
 
 // ========================================
-// PUNTOS MÁS DÉBILES
+// PUNTOS MÃS FUERTES
+// ========================================
+.strong-points-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 0 0 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .section-title-strong {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px 0;
+
+    ion-icon {
+      font-size: 24px;
+      color: #fbbf24;
+    }
+  }
+
+  .motivational-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border-left: 4px solid #fbbf24;
+
+    ion-icon {
+      font-size: 28px;
+      color: #f59e0b;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #92400e;
+      line-height: 1.4;
+    }
+  }
+
+  .strong-area-container {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .strong-area-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+
+      ion-icon {
+        font-size: 20px;
+      }
+
+      &.civil {
+        color: #f97316;
+      }
+
+      &.procesal {
+        color: #3b82f6;
+      }
+    }
+
+    .strong-topics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .strong-topic-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      background: white;
+      border: 1.5px solid #e5e7eb;
+
+      .strong-topic-rank {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      &.civil .strong-topic-rank {
+        color: #f97316;
+        background: #fff7ed;
+      }
+
+      &.procesal .strong-topic-rank {
+        color: #3b82f6;
+        background: #eff6ff;
+      }
+
+      .strong-topic-content {
+        flex: 1;
+
+        .strong-topic-name {
+          margin: 0 0 4px 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: #1e293b;
+        }
+
+        .strong-topic-stats {
+          margin: 0;
+          font-size: 13px;
+          color: #10b981;
+          font-weight: 600;
+        }
+      }
+
+      .strong-topic-icon {
+        font-size: 24px;
+        color: #fbbf24;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .no-strong-points {
+    text-align: center;
+    padding: 40px 20px;
+
+    ion-icon {
+      font-size: 64px;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      color: #64748b;
+      font-weight: 500;
+    }
+  }
+}
+
+// ========================================
+// PUNTOS MÃS DÃ‰BILES
 // ========================================
 .weak-points-section {
   background: white;
@@ -752,8 +931,9 @@
   }
 }
 
+
 // ========================================
-// ESTADÍSTICAS POR ÁREA
+// ESTADÃSTICAS POR ÃREA
 // ========================================
 .area-stats-container {
   margin-bottom: 30px;
@@ -1089,7 +1269,7 @@
 }
 
 // ========================================
-// BOTÓN ACCIÓN
+// BOTÃ“N ACCIÃ“N
 // ========================================
 .action-section {
   padding: 0 0 0 0;
@@ -1143,7 +1323,7 @@
 }
 
 // ========================================
-// RESPONSIVE - PANTALLAS PEQUEÑAS
+// RESPONSIVE - PANTALLAS PEQUEÃ‘AS
 // ========================================
 @media (max-width: 380px) {
   .scrollable-content {

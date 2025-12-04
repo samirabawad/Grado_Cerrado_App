@@ -5,7 +5,10 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AudioService, AudioRecordingState } from '../../../../services/audio';
+import { VoiceRecorder, VoiceRecorderPlugin, RecordingData, GenericResponse } from 'capacitor-voice-recorder';
 import { ApiService } from '../../../../services/api.service';
+
+
 
 interface Question {
   id: string;
@@ -209,10 +212,11 @@ async loadQuestionsFromBackend() {
           
           console.log('✅ Preguntas cargadas:', this.questions.length);
           console.log('✅ Método de respuesta activo:', this.responseMethod);
-          
+                    
           this.isLoading = false;
           this.cdr.detectChanges();
           
+          // Reproducir automáticamente en Android
           setTimeout(() => {
             this.playAudio();
           }, 500);
@@ -253,6 +257,19 @@ async loadQuestionsFromBackend() {
     
     this.audioService.clearRecording();
     this.stopResponseTimer();
+  }
+
+  ionViewWillLeave() {
+    // Detener el audio TTS cuando se abandona la página
+    this.apiService.stopTextToSpeech();
+    this.isPlaying = false;
+    
+    // Detener también el audio de la grabación si está reproduciéndose
+    if (this.recordingAudio) {
+      this.recordingAudio.pause();
+      this.recordingAudio = null;
+      this.isPlayingRecording = false;
+    }
   }
 
   getCurrentQuestion(): Question | null {
@@ -392,109 +409,66 @@ isOptionSelected(option: string): boolean {
     return this.currentQuestionNumber === this.totalQuestions;
   }
 
-  playAudio() {
-    const question = this.getCurrentQuestion();
-    if (!question || !question.questionText) {
-      console.warn('⚠️ No hay pregunta para reproducir');
+async playAudio() {
+    if (this.isPlaying) {
+      console.log('⏸️ Audio ya está reproduciéndose');
       return;
     }
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
+    
+    // Detener cualquier audio previo
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
+    
+    try {
       this.isPlaying = true;
       this.audioCompleted = false;
-      this.cdr.detectChanges();
-
-      let fullText = question.questionText;
       
-      const options = this.getCurrentQuestionOptions();
-      if (options.length > 0) {
-        fullText += '. Las alternativas son: ';
-        options.forEach((option, index) => {
-          const letter = this.getOptionLetter(index);
-          fullText += `${letter}, ${option}. `;
-        });
+      const pregunta = this.getCurrentQuestion();
+      if (!pregunta) {
+        console.error('❌ No hay pregunta actual');
+        return;
       }
 
-      const utterance = new SpeechSynthesisUtterance(fullText);
-      utterance.lang = 'es-CL';
-      utterance.rate = 1.0;
-      utterance.pitch = 1.2;
-      utterance.volume = 1.0;
-
-      utterance.onstart = () => {
-        console.log('🎙️ Iniciando reproducción de audio');
-        this.isPlaying = true;
-        this.cdr.detectChanges();
-      };
-
-      utterance.onend = () => {
-        console.log('✅ Audio completado');
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        
-        this.questionReadyTime = Date.now();
-        console.log('⏱️ Pregunta lista en:', new Date(this.questionReadyTime).toLocaleTimeString());
-        
-        this.cdr.detectChanges();
-      };
-
-      utterance.onerror = (event) => {
-        console.error('❌ Error en síntesis de voz:', event);
-        this.isPlaying = false;
-        this.audioCompleted = true;
-        this.cdr.detectChanges();
-      };
-
-      const loadVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        
-        let selectedVoice = voices.find(voice => 
-          voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
-        );
-        
-        if (!selectedVoice) {
-          selectedVoice = voices.find(voice => 
-            voice.lang.includes('es') && (
-              voice.name.toLowerCase().includes('female') ||
-              voice.name.toLowerCase().includes('femenina') ||
-              voice.name.toLowerCase().includes('mónica') ||
-              voice.name.toLowerCase().includes('monica') ||
-              voice.name.toLowerCase().includes('paulina') ||
-              voice.name.toLowerCase().includes('lucia') ||
-              voice.name.toLowerCase().includes('paloma')
-            )
-          );
-        }
-        
-        if (!selectedVoice) {
-          selectedVoice = voices.find(voice => voice.lang.includes('es'));
-        }
-        
-        if (selectedVoice) {
-          utterance.voice = selectedVoice;
-          console.log('🎤 Voz seleccionada:', selectedVoice.name, selectedVoice.lang);
-        }
-        
-        window.speechSynthesis.speak(utterance);
-      };
-
-      if (window.speechSynthesis.getVoices().length > 0) {
-        loadVoices();
-      } else {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
+      const opciones = pregunta['options'] || pregunta['opciones'] || [];
+      
+      if (opciones.length === 0) {
+        console.error('❌ No hay opciones disponibles');
+        return;
       }
+
+      // ✅ CONSTRUIR TEXTO CON LETRAS (A, B, C, D)
+      const opcionesTexto = opciones
+        .map((o: any, i: number) => {
+          const letra = String.fromCharCode(65 + i); // A, B, C, D...
+          const texto = o.text || o.texto || o;
+          return `${letra}. ${texto}`;
+        })
+        .join('. ');
+      
+      const textoCompleto = `${pregunta['questionText'] || pregunta['pregunta']}. Las opciones son: ${opcionesTexto}`;
+      
+      console.log('🎵 Texto a reproducir:', textoCompleto);
+      await this.apiService.playTextToSpeech(textoCompleto);
+      
+      this.isPlaying = false;
+      this.audioCompleted = true;
+      
+    } catch (error: any) {
+      console.error('❌ Error reproduciendo:', error.message || error);
+      this.isPlaying = false;
     }
   }
 
   pauseAudio() {
-    if ('speechSynthesis' in window && this.isPlaying) {
-      window.speechSynthesis.cancel();
+      this.apiService.stopTextToSpeech();
       this.isPlaying = false;
       this.cdr.detectChanges();
     }
-  }
+  
+
+  
 
   getAudioIcon(): string {
     if (this.isPlaying) {
@@ -516,16 +490,40 @@ isOptionSelected(option: string): boolean {
     return 'Escuchar pregunta';
   }
 
-  async toggleRecording() {
+async toggleRecording() {
+    console.log('🎤 Toggle grabación - isPlaying:', this.isPlaying);
+    
+    // Detener audio de la pregunta si está reproduciéndose
+    if (this.isPlaying) {
+      console.log('⏸️ Deteniendo audio antes de grabar');
+      this.apiService.stopTextToSpeech();
+      this.isPlaying = false;
+      this.cdr.detectChanges();
+    }
+    
     if (this.isRecording) {
       await this.stopRecording();
     } else {
       await this.startRecording();
     }
   }
+  
+
+  // Pedir permisos
+  async requestPermissions() {
+    const result = await VoiceRecorder.requestAudioRecordingPermission();
+    return result.value;
+  }
+
 
   async startRecording() {
     console.log('🎤 Iniciando grabación...');
+    
+    // Detener audio de la pregunta si está reproduciéndose
+    if (this.isPlaying) {
+      this.apiService.stopTextToSpeech();
+      this.isPlaying = false;
+    }
     
     this.audioService.clearRecording();
     this.hasRecording = false;
@@ -650,75 +648,25 @@ isOptionSelected(option: string): boolean {
     }
   }
 
-  playExplanationAudio() {
-      if (!this.evaluationResult?.explanation) return;
+async playExplanationAudio() {
+  if (!this.evaluationResult?.explanation) return;
 
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(this.evaluationResult.explanation);
-        utterance.lang = 'es-CL';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.2;
-        utterance.volume = 1.0;
+  console.log("🔊 Reproduciendo explicación con Azure TTS...");
 
-        utterance.onstart = () => {
-          this.isPlayingExplanation = true;
-          this.cdr.detectChanges();
-        };
+  await this.apiService.playTextToSpeech(this.evaluationResult.explanation);  this.isPlayingExplanation = true;
+}
 
-        utterance.onend = () => {
-          this.isPlayingExplanation = false;
-          this.cdr.detectChanges();
-        };
 
-        const loadVoices = () => {
-          const voices = window.speechSynthesis.getVoices();
-          
-          let selectedVoice = voices.find(voice => 
-            voice.lang.includes('es-CL') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('femenina'))
-          );
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => 
-              voice.lang.includes('es') && (
-                voice.name.toLowerCase().includes('female') ||
-                voice.name.toLowerCase().includes('femenina') ||
-                voice.name.toLowerCase().includes('mónica') ||
-                voice.name.toLowerCase().includes('monica') ||
-                voice.name.toLowerCase().includes('paulina') ||
-                voice.name.toLowerCase().includes('lucia') ||
-                voice.name.toLowerCase().includes('paloma')
-              )
-            );
-          }
-          
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => voice.lang.includes('es'));
-          }
-          
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-          }
-          
-          window.speechSynthesis.speak(utterance);
-        };
-
-        if (window.speechSynthesis.getVoices().length > 0) {
-          loadVoices();
-        } else {
-          window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
-      }
-    }
-
-  pauseExplanationAudio() {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      this.isPlayingExplanation = false;
-      this.cdr.detectChanges();
-    }
+pauseExplanationAudio() {
+  if (this.currentAudio) {
+    this.currentAudio.pause();
+    this.isPlayingExplanation = false;
+    this.cdr.detectChanges();
   }
+}
+
+
+  
 
   stopAllAudio() {
     // Detener síntesis de voz (pregunta o explicación)
@@ -1099,11 +1047,6 @@ detectOptionFromTranscription(transcription: string): string | null {
     console.log('🔄 Estado reseteado para pregunta', this.currentQuestionNumber);
     
     this.cdr.detectChanges();
-    
-    setTimeout(() => {
-      this.playAudio();
-      console.log('🔊 Reproduciendo automáticamente pregunta', this.currentQuestionNumber);
-    }, 300);
   }
 
 async completeTest() {
@@ -1138,7 +1081,8 @@ async completeTest() {
             questionText: q.questionText || q.text || '',
             userAnswer: q.userAnswer || '',
             expectedAnswer: evaluation.correctAnswer || q.correctAnswer || '',
-            explanation: evaluation.explanation || q.explanation || ''
+            explanation: evaluation.explanation || q.explanation || '',
+            options: q.options || []
           });
         } else {
           incorrectCount++;
@@ -1148,7 +1092,8 @@ async completeTest() {
             questionText: q.questionText || q.text || '',
             userAnswer: '',
             expectedAnswer: q.correctAnswer || '',
-            explanation: q.explanation || ''
+            explanation: q.explanation || '',
+            options: q.options || []
           });
         }
       });

@@ -2,43 +2,46 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 import { ApiService } from '../../services/api.service';
+import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
+
+interface SessionGroup {
+  date: string;
+  sessions: any[];
+  expanded: boolean;
+}
 
 @Component({
   selector: 'app-historial',
   templateUrl: './historial.page.html',
   styleUrls: ['./historial.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, BottomNavComponent],
+  imports: [IonicModule, CommonModule, BottomNavComponent]
 })
 export class HistorialPage implements OnInit {
+
+  isLoading: boolean = true;
   recentSessions: any[] = [];
-  groupedSessions: { date: string; sessions: any[]; expanded: boolean }[] = [];
+  groupedSessions: SessionGroup[] = [];
   expandedSession: number | null = null;
   expandedQuestion: number | null = null;
   sessionDetails: any = null;
-  isLoading: boolean = true;
   isLoadingDetails: boolean = false;
 
-  constructor(private router: Router, private apiService: ApiService) {}
+  constructor(
+    private router: Router,
+    private apiService: ApiService
+  ) { }
 
-  ngOnInit() {
-    this.loadRecentSessions();
+  async ngOnInit() {
+    await this.loadHistory();
   }
 
-    convertUTCToChileTime(utcDateString: string): Date {
-      // Convertir string UTC a Date
-      const utcDate = new Date(utcDateString);
-      
-      // Chile está en UTC-3 (horario de verano) o UTC-4 (horario normal)
-      // Ajustar 3 horas hacia atrás
-      const chileDate = new Date(utcDate.getTime() - (3 * 60 * 60 * 1000));
-      
-      return chileDate;
-    }
+  ionViewWillEnter() {
+    this.loadHistory();
+  }
 
-  async loadRecentSessions() {
+  async loadHistory() {
     this.isLoading = true;
 
     try {
@@ -68,92 +71,103 @@ export class HistorialPage implements OnInit {
             difficulty: session.difficulty || 'intermedio',
           }));
 
-          // Agrupar sesiones por día
           this.groupSessionsByDate();
 
           console.log('Sesiones recientes cargadas:', this.recentSessions.length);
         }
+
       } catch (error) {
-        console.error('Error cargando sesiones:', error);
+        console.error('Error cargando sesiones recientes:', error);
       }
+
     } catch (error) {
-      console.error('Error general en loadRecentSessions:', error);
+      console.error('Error en loadHistory:', error);
     } finally {
       this.isLoading = false;
     }
   }
 
-  groupSessionsByDate() {
-    const grouped = new Map<string, any[]>();
+  convertUTCToChileTime(utcDate: string): Date {
+    const date = new Date(utcDate);
+    return date;
+  }
 
-    this.recentSessions.forEach((session) => {
-      const dateKey = this.getDateKey(session.date);
-      if (!grouped.has(dateKey)) {
-        grouped.set(dateKey, []);
+  groupSessionsByDate() {
+    const groups: { [key: string]: any[] } = {};
+
+    this.recentSessions.forEach(session => {
+      const dateKey = this.formatDateKey(session.date);
+      
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
       }
-      grouped.get(dateKey)!.push(session);
+      
+      groups[dateKey].push(session);
     });
 
-    // Ordenar por fecha (más reciente primero)
-    this.groupedSessions = Array.from(grouped.entries())
+    this.groupedSessions = Object.keys(groups)
       .sort((a, b) => {
-        const dateA = a[1][0].date;
-        const dateB = b[1][0].date;
+        const dateA = this.parseDateKey(a);
+        const dateB = this.parseDateKey(b);
         return dateB.getTime() - dateA.getTime();
       })
-      .map(([date, sessions]) => ({
-        date,
-        sessions,
-        expanded: false,
+      .map(dateKey => ({
+        date: dateKey,
+        sessions: groups[dateKey].sort((a, b) => b.date.getTime() - a.date.getTime()),
+        expanded: true
       }));
+
+    console.log('Sesiones agrupadas:', this.groupedSessions);
   }
 
-  toggleGroup(group: any) {
-    group.expanded = !group.expanded;
-  }
-
-  getDateKey(date: Date): string {
-    const months = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre',
-    ];
-
+  formatDateKey(date: Date): string {
     const today = new Date();
-    const isCurrentYear = date.getFullYear() === today.getFullYear();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    if (isCurrentYear) {
-      return months[date.getMonth()];
+    today.setHours(0, 0, 0, 0);
+    yesterday.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+
+    if (date.getTime() === today.getTime()) {
+      return 'Hoy';
+    } else if (date.getTime() === yesterday.getTime()) {
+      return 'Ayer';
     } else {
-      return `${months[date.getMonth()]} ${date.getFullYear()}`;
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      return `${date.getDate()} de ${months[date.getMonth()]}`;
     }
   }
 
-  isSameDay(date1: Date, date2: Date): boolean {
-    return (
-      date1.getDate() === date2.getDate() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getFullYear() === date2.getFullYear()
-    );
+  parseDateKey(dateKey: string): Date {
+    if (dateKey === 'Hoy') {
+      return new Date();
+    } else if (dateKey === 'Ayer') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      return yesterday;
+    } else {
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const parts = dateKey.split(' de ');
+      const day = parseInt(parts[0]);
+      const monthIndex = months.indexOf(parts[1]);
+      const currentYear = new Date().getFullYear();
+      return new Date(currentYear, monthIndex, day);
+    }
+  }
+
+  toggleGroup(group: SessionGroup) {
+    group.expanded = !group.expanded;
   }
 
   viewSessionDetail(session: any) {
     if (this.expandedSession === session.testId) {
-      // Si ya está abierta, cerrarla
       this.expandedSession = null;
       this.sessionDetails = null;
       this.expandedQuestion = null;
     } else {
-      // Abrir y cargar detalles
       this.expandedSession = session.testId;
       this.loadSessionDetails(session.testId);
     }
@@ -186,11 +200,7 @@ export class HistorialPage implements OnInit {
   }
 
   getQuestionOptions(question: any): string[] {
-    if (
-      question.questionType === 'verdadero_falso' ||
-      question.questionType === 2 ||
-      question.questionType === '2'
-    ) {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
       return ['Verdadero', 'Falso'];
     }
 
@@ -201,12 +211,10 @@ export class HistorialPage implements OnInit {
     return [];
   }
 
-  isOptionSelected(question: any, option: string): boolean {
-    if (
-      question.questionType === 'verdadero_falso' ||
-      question.questionType === 2 ||
-      question.questionType === '2'
-    ) {
+isOptionSelected(question: any, option: string): boolean {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+      if (question.selectedAnswer === 'A' && option === 'Verdadero') return true;
+      if (question.selectedAnswer === 'B' && option === 'Falso') return true;
       if (question.selectedAnswer === 'V' && option === 'Verdadero') return true;
       if (question.selectedAnswer === 'F' && option === 'Falso') return true;
       return false;
@@ -223,11 +231,7 @@ export class HistorialPage implements OnInit {
   }
 
   isOptionCorrect(question: any, option: string): boolean {
-    if (
-      question.questionType === 'verdadero_falso' ||
-      question.questionType === 2 ||
-      question.questionType === '2'
-    ) {
+    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
       if (Array.isArray(question.answers)) {
         const correctAnswer = question.answers.find((a: any) => a.isCorrect);
         if (correctAnswer) {
@@ -253,14 +257,10 @@ export class HistorialPage implements OnInit {
   }
 
   formatDate(date: Date): string {
-    return date
-      .toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-      .replace(',', ' ·');
+    return date.toLocaleTimeString('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   }
 
   getSuccessRateColor(rate: number): string {

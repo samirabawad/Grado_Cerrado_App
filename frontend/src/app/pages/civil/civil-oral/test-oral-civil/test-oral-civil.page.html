@@ -18,7 +18,6 @@
         [class.current]="i === (currentQuestionNumber - 1)">
       </div>
     </div>
-
  <!-- Categoría y contador -->
     <div class="category-row">
       <div class="category-chip">
@@ -77,7 +76,7 @@
     </div>
 
     <!-- Sección de grabación con micrófono a la izquierda y reproducir a la derecha -->
-      <div class="recording-section" *ngIf="responseMethod === 'voice'">
+    <div class="recording-section" *ngIf="responseMethod === 'voice'">
       <div class="recording-controls-inline">
         
         <!-- Botón de grabación (izquierda) -->
@@ -98,6 +97,7 @@
           <div class="recording-text">
             <span class="recording-status">{{ getRecordingStatus() }}</span>
             <span class="recording-timer" *ngIf="isRecording || hasRecording">{{ recordingTime }}</span>
+            <span class="recording-hint" *ngIf="hasRecording && !isRecording">Toca el micrófono para volver a grabar</span>
           </div>
         </div>
 
