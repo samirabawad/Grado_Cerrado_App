@@ -346,7 +346,8 @@ isTemaExpanded(temaNombre: string): boolean {
 
 getTemasForArea(areaName: string): any[] {
   const area = this.areaStats.find(a => a.area === areaName && !a.isGeneral);
-  return area && area.temas ? area.temas : [];
+  const temas = area && area.temas ? area.temas : [];
+  return temas.filter((tema: any) => !tema.temaNombre?.toLowerCase().includes('auto-generado'));
 }
 
 getSubtemasForTema(tema: any): any[] {
