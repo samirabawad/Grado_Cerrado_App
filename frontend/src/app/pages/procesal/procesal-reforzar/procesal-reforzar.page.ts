@@ -493,12 +493,12 @@ async startTest() {
     if (hasErrorsInScope) {
       loading.message = 'Preparando test de reforzamiento...';
       
-      // ✅ Para reforzamiento, usar formato diferente
       const reinforcementData = {
         studentId: currentUser.id,
         questionCount: this.selectedQuantity,
         ...(this.selectedSubtemaId && { SubtemaId: this.selectedSubtemaId }),
-        ...(this.selectedTemaId && { TemaId: this.selectedTemaId })
+        ...(this.selectedTemaId && { TemaId: this.selectedTemaId }),
+        AreaId: 2  // 🆕 Derecho Procesal
       };
       
       sessionResponse = await this.apiService.startReinforcementSession(reinforcementData).toPromise();
@@ -626,18 +626,18 @@ isOptionSelected(question: any, option: string): boolean {
 
 isOptionCorrect(question: any, option: string): boolean {
   if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-    const correctBool = question.questionText.toLowerCase().includes('verdader') || 
-                       question.answers?.some((a: any) => a.text.toLowerCase() === 'verdadero' && a.isCorrect);
+    const correctBool =
+      question.questionText.toLowerCase().includes('verdader') ||
+      question.answers?.some((a: any) => a.text.toLowerCase() === 'verdadero' && a.isCorrect);
     return (option === 'Verdadero') === correctBool;
   }
-  
+
   const correctAnswer = question.answers?.find((a: any) => a.isCorrect);
   return correctAnswer?.text === option;
 }
 
 // ✅ Validar si una cantidad está disponible
 canSelectQuantity(quantity: number): boolean {
-  // Si no hay modo seleccionado, permitir todas las cantidades
   if (!this.practiceMode) {
     return true;
   }
@@ -645,6 +645,7 @@ canSelectQuantity(quantity: number): boolean {
   const max = this.getMaxAvailableQuestions();
   return quantity <= max;
 }
+
 
 // ✅ Método para obtener el máximo de preguntas disponibles según el modo
 getMaxAvailableQuestions(): number {

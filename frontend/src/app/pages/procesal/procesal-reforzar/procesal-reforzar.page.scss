@@ -1034,7 +1034,6 @@ ion-content.procesal-content {
     text-align: center;
   }
 }
-
 // ✅ Animación de rebote
 @keyframes bounce {
   0%, 100% {
@@ -1042,5 +1041,114 @@ ion-content.procesal-content {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+// Estilos para opciones en detalle de sesiones
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s;
+
+  .option-letter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #6b7280;
+    flex-shrink: 0;
+  }
+
+  .option-text {
+    flex: 1;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.5;
+  }
+
+  .option-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+
+    &.correct-icon {
+      color: #10b981;
+    }
+
+    &.incorrect-icon {
+      color: #ef4444;
+    }
+  }
+
+  &.correct {
+    background: #d1fae5;
+    border-color: #10b981;
+
+    .option-letter {
+      background: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+
+    .option-text {
+      color: #065f46;
+      font-weight: 600;
+    }
+  }
+
+  &.incorrect {
+    background: #fee2e2;
+    border-color: #ef4444;
+
+    .option-letter {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: white;
+    }
+
+    .option-text {
+      color: #991b1b;
+      font-weight: 600;
+    }
+  }
+}
+
+.explanation-box {
+  background: #ccddff;
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 4px solid #1976D2;
+
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1976D2;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #374151;
   }
 }

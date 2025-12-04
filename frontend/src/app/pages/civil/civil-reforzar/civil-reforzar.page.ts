@@ -359,17 +359,32 @@ export class CivilReforzarPage implements OnInit {
   // SELECCIÓN DE ALCANCE
   // =====================
 
-  // Cuando haces clic en un "tema débil"
-  selectWeakTopic(topic: any) {
-    console.log('🎯 Tema débil seleccionado:', topic);
-    this.selectedTemaId = topic.temaId;
-    this.selectedSubtemaId = null;
-    this.scopeType = 'tema';
-    this.showThemeSelector = true;
-
-    // ir a la sección de Test
-    this.scrollToTestSection();
+// Cuando haces clic en un "tema débil"
+selectWeakTopic(topic: any) {
+  console.log('🎯 Tema débil seleccionado:', topic);
+  
+  // ✅ Activar modo TEMA automáticamente
+  this.practiceMode = 'tema';
+  this.selectedTemaId = topic.temaId;
+  this.selectedSubtemaId = null;
+  this.scopeType = 'tema';
+  this.showThemeSelector = true;
+  
+  // ✅ Ajustar cantidad si excede el límite del tema
+  const maxAvailable = this.getMaxAvailableQuestions();
+  if (this.selectedQuantity > maxAvailable) {
+    this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
   }
+
+  // ✅ Hacer scroll a la sección de Test
+  setTimeout(() => {
+    const el = document.querySelector('.section-block-primary');
+    if (el && this.ionContent) {
+      const y = (el as HTMLElement).offsetTop - 80;
+      this.ionContent.scrollToPoint(0, y, 500);
+    }
+  }, 100);
+}
 
   toggleTemaExpansion(temaId: number) {
     this.expandedTema = this.expandedTema === temaId ? null : temaId;
@@ -483,14 +498,14 @@ export class CivilReforzarPage implements OnInit {
       // ✅ Usar endpoint correcto según si hay errores
       if (hasErrorsInScope) {
         loading.message = 'Preparando test de reforzamiento...';
-
-        // ✅ Para reforzamiento, usar formato diferente
-        const reinforcementData = {
-          studentId: currentUser.id,
-          questionCount: this.selectedQuantity,
-          ...(this.selectedSubtemaId && { SubtemaId: this.selectedSubtemaId }),
-          ...(this.selectedTemaId && { TemaId: this.selectedTemaId })
-        };
+      // ✅ Para reforzamiento, usar formato diferente
+      const reinforcementData = {
+        studentId: currentUser.id,
+        questionCount: this.selectedQuantity,
+        ...(this.selectedSubtemaId && { SubtemaId: this.selectedSubtemaId }),
+        ...(this.selectedTemaId && { TemaId: this.selectedTemaId }),
+        AreaId: 1  // 🆕 Derecho Civil
+      };
 
         sessionResponse = await this.apiService.startReinforcementSession(reinforcementData).toPromise();
 
@@ -603,24 +618,36 @@ export class CivilReforzarPage implements OnInit {
     return [];
   }
 
-  isOptionSelected(question: any, option: string): boolean {
-    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-      return question.selectedAnswer === (option === 'Verdadero' ? 'true' : 'false');
-    }
-    return question.selectedAnswer === option;
+isOptionSelected(question: any, option: string): boolean {
+  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
+    if (question.selectedAnswer === 'A' && option === 'Verdadero') return true;
+    if (question.selectedAnswer === 'B' && option === 'Falso') return true;
+    return false;
   }
 
-  isOptionCorrect(question: any, option: string): boolean {
-    if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
-      const correctBool =
-        question.questionText.toLowerCase().includes('verdader') ||
-        question.answers?.some((a: any) => a.text.toLowerCase() === 'verdadero' && a.isCorrect);
-      return (option === 'Verdadero') === correctBool;
-    }
 
+  const options = this.getQuestionOptions(question);
+  const optionIndex = options.indexOf(option);
+  if (optionIndex !== -1) {
+    const letter = String.fromCharCode(65 + optionIndex);
+    return question.selectedAnswer === letter;
+  }
+
+  return false;
+}
+
+isOptionCorrect(question: any, option: string): boolean {
+  if (question.questionType === 'verdadero_falso' || question.questionType === 2 || question.questionType === '2') {
     const correctAnswer = question.answers?.find((a: any) => a.isCorrect);
-    return correctAnswer?.text === option;
+    if (correctAnswer) {
+      return correctAnswer.text === option;
+    }
+    return false;
   }
+
+  const correctAnswer = question.answers?.find((a: any) => a.isCorrect);
+  return correctAnswer?.text === option;
+}
 
   // ✅ Validar si una cantidad está disponible
   canSelectQuantity(quantity: number): boolean {
