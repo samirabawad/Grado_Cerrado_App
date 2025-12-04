@@ -880,10 +880,13 @@ startOralStudySession(sessionData: any): Observable<any> {
     );
   }
 
-  getWeeklyProgress(studentId: number): Observable<any> {
-    const url = `${this.API_URL}/Dashboard/weekly-progress/${studentId}`;
-    return this.http.get(url, this.httpOptions);
+getWeeklyProgress(studentId: number, startDate?: string, endDate?: string): Observable<any> {
+  let url = `${this.API_URL}/Dashboard/weekly-progress/${studentId}`;
+  if (startDate && endDate) {
+    url += `?startDate=${startDate}&endDate=${endDate}`;
   }
+  return this.http.get(url, this.httpOptions);
+}
 
  getMonthlyProgress(studentId: number, semester: number = 1): Observable<any> {
     const url = `${this.API_URL}/Dashboard/monthly-progress/${studentId}/${semester}`;

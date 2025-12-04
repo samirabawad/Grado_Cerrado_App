@@ -370,8 +370,16 @@ async generateChartData() {
   try {
     const currentUser = this.apiService.getCurrentUser();
     if (!currentUser || !currentUser.id) return;
+    // Formatear fechas para el backend
+    const startDate = this.currentWeekStart.toISOString().split('T')[0];
+    const endDate = this.currentWeekEnd.toISOString().split('T')[0];
 
-    const progressResponse = await this.apiService.getWeeklyProgress(currentUser.id).toPromise();
+    const progressResponse = await this.apiService.getWeeklyProgress(
+      currentUser.id, 
+      startDate, 
+      endDate
+    ).toPromise();
+    
     if (progressResponse && progressResponse.success) {
       this.filterWeeklyData(progressResponse.data);
     }
