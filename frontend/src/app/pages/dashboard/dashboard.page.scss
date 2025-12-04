@@ -4,7 +4,7 @@
 }
 
 // ========================================
-// HEADER FIJO - FONDO GRIS SÓLIDO
+// HEADER FIJO - FONDO GRIS SÃ“LIDO
 // ========================================
 .dashboard-header {
   position: fixed;
@@ -215,7 +215,7 @@
 }
 
 // ========================================
-// ESTADÍSTICAS GENERALES - SOLO SESIONES
+// ESTADÃSTICAS GENERALES - SOLO SESIONES
 // ========================================
 .stats-overview {
   padding: 0 0 20px 0;
@@ -249,7 +249,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 20px;
     padding: 16px;
     background: #ffffff;
@@ -261,6 +261,7 @@
       align-items: center;
       gap: 12px;
       flex: 1;
+      min-width: 0;
 
       .achievement-icon {
         width: 56px;
@@ -269,6 +270,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
         
         ion-icon {
           font-size: 32px;
@@ -277,9 +279,14 @@
       }
 
       .achievement-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        
         .achievement-level {
-          margin: 0 0 2px 0;
-          font-size: 12px;
+          margin: 0;
+          font-size: 11px;
           font-weight: 700;
           color: #065f46;
           text-transform: uppercase;
@@ -288,7 +295,7 @@
 
         .achievement-name {
           margin: 0;
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 800;
           color: #047857;
         }
@@ -296,32 +303,42 @@
     }
 
     .achievement-right {
-      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 2px;
+      flex-shrink: 0;
 
       .sessions-progress-inline {
         margin: 0;
-        font-size: 14px;
-        color: #065f46;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0;
 
         .sessions-current {
-          font-size: 33px;
+          font-size: 32px;
           font-weight: 700;
           color: #047857;
+          line-height: 1;
         }
 
         .sessions-de {
-          font-size: 14px;
-          color: #065f46;
-          margin: 0 4px;
+          display: none;
         }
 
-      .sessions-total {
-          font-size: 20px;
+        .sessions-total {
+          font-size: 16px;
           font-weight: 600;
           color: #065f46;
-          margin-left: 2px;
-          vertical-align: baseline;
-          line-height: 33px;
+          line-height: 1;
+        }
+
+        .sessions-total::before {
+          content: "de ";
+          font-size: 12px;
+          color: #065f46;
         }
       }
     }
@@ -397,7 +414,7 @@
 }
 
 // ========================================
-// GRÁFICO SEMANAL
+// GRÃFICO SEMANAL
 // ========================================
 .weekly-chart-container {
   background: white;
@@ -611,7 +628,7 @@
 }
 
 // ========================================
-// PUNTOS MÁS FUERTES
+// PUNTOS MÃS FUERTES
 // ========================================
 .strong-points-section {
   background: white;
@@ -773,7 +790,7 @@
 }
 
 // ========================================
-// PUNTOS MÁS DÉBILES
+// PUNTOS MÃS DÃ‰BILES
 // ========================================
 .weak-points-section {
   background: white;
@@ -916,7 +933,7 @@
 
 
 // ========================================
-// ESTADÍSTICAS POR ÁREA
+// ESTADÃSTICAS POR ÃREA
 // ========================================
 .area-stats-container {
   margin-bottom: 30px;
@@ -1252,7 +1269,7 @@
 }
 
 // ========================================
-// BOTÓN ACCIÓN
+// BOTÃ“N ACCIÃ“N
 // ========================================
 .action-section {
   padding: 0 0 0 0;
@@ -1306,7 +1323,7 @@
 }
 
 // ========================================
-// RESPONSIVE - PANTALLAS PEQUEÑAS
+// RESPONSIVE - PANTALLAS PEQUEÃ‘AS
 // ========================================
 @media (max-width: 380px) {
   .scrollable-content {
