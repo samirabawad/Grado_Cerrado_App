@@ -448,7 +448,7 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       return this.isOptionSelected(optionText) ? 'selected' : 'default';
     }
 
-    if (this.isTrueFalseQuestion()) {
+ if (this.isTrueFalseQuestion()) {
       const correctAnswerNorm = question.correctAnswer.toLowerCase().trim();
       const isVerdaderoCorrect = correctAnswerNorm === 'true' || 
                                  correctAnswerNorm === 'v' || 
@@ -457,14 +457,17 @@ export class TestEscritoProcesalPage implements OnInit, OnDestroy {
       const optionIsVerdadero = optionText === 'Verdadero';
       const optionIsFalso = optionText === 'Falso';
       
+      // Mostrar la correcta en verde
       if ((optionIsVerdadero && isVerdaderoCorrect) || (optionIsFalso && !isVerdaderoCorrect)) {
         return 'correct';
       }
       
-      if (question.userAnswer === 'V' && optionIsVerdadero && !isVerdaderoCorrect) {
+      // Mostrar la incorrecta en rojo (soportando múltiples formatos)
+      const userAnswer = question.userAnswer?.toUpperCase();
+      if ((userAnswer === 'V' || userAnswer === 'A') && optionIsVerdadero && !isVerdaderoCorrect) {
         return 'incorrect';
       }
-      if (question.userAnswer === 'F' && optionIsFalso && isVerdaderoCorrect) {
+      if ((userAnswer === 'F' || userAnswer === 'B') && optionIsFalso && isVerdaderoCorrect) {
         return 'incorrect';
       }
       
