@@ -114,7 +114,12 @@ currentWeekLabel: string = '';
                   porcentajeAcierto: this.calculateSubtemaSuccessRate(subtema)
                 }));
 
-                const porcentajeTema = this.calculateTemaSuccessRate(subtemasConPorcentaje);
+              // ✅ CORRECTO - Calcula basándose en totales reales
+              const totalPreguntasTema = tema.totalPreguntas || 0;
+              const totalCorrectasTema = tema.preguntasCorrectas || 0;
+              const porcentajeTema = totalPreguntasTema > 0 
+                ? Math.round((totalCorrectasTema / totalPreguntasTema) * 100)
+                : 0;
 
                 return {
                   temaId: tema.temaId,
