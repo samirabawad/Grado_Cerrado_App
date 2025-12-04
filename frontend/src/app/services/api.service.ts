@@ -166,6 +166,7 @@ export class ApiService {
           console.log('Login exitoso:', response);
           
           if (response.success && response.user) {
+            localStorage.clear();
             localStorage.setItem('currentUser', JSON.stringify(response.user));
           }
           
