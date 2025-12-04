@@ -168,7 +168,7 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
       category: q.tema || q.category || 'Derecho Civil',
       tema: q.tema || q.category || 'Derecho Civil',
       legalArea: q.legalArea || 'Derecho Civil',
-      difficulty: q.nivel || q.difficulty || 2,
+      difficulty: q.nivel || q.level || q.difficulty || 2,
       correctAnswer: q.respuesta_correcta || q.correctAnswer || '',
       explanation: q.explicacion || q.explanation || 'Sin explicación disponible',
       options: q.opciones || q.options || [],
@@ -177,7 +177,6 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
       wasCorrect: undefined
     };
   }
-
   getCurrentQuestion(): Question | null {
     if (this.currentQuestionIndex >= 0 && this.currentQuestionIndex < this.questions.length) {
       return this.questions[this.currentQuestionIndex];
@@ -802,10 +801,14 @@ export class TestEscritoCivilPage implements OnInit, OnDestroy {
 
   getCurrentQuestionDifficulty(): string {
     const question = this.getCurrentQuestion();
-    const difficulty = question?.difficulty || 2;
+    const difficulty = question?.difficulty || question?.['level'];
     
-    if (difficulty === 1 || difficulty === 'basico') return 'Básico';
-    if (difficulty === 3 || difficulty === 'avanzado') return 'Avanzado';
+    if (!difficulty) return 'Intermedio';
+    
+    const diffStr = difficulty.toString().toLowerCase();
+    
+    if (diffStr === '1' || diffStr === 'basico' || diffStr === 'básico') return 'Básico';
+    if (diffStr === '3' || diffStr === 'avanzado') return 'Avanzado';
     return 'Intermedio';
   }
 
