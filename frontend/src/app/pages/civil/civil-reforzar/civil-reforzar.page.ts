@@ -359,17 +359,32 @@ export class CivilReforzarPage implements OnInit {
   // SELECCIÓN DE ALCANCE
   // =====================
 
-  // Cuando haces clic en un "tema débil"
-  selectWeakTopic(topic: any) {
-    console.log('🎯 Tema débil seleccionado:', topic);
-    this.selectedTemaId = topic.temaId;
-    this.selectedSubtemaId = null;
-    this.scopeType = 'tema';
-    this.showThemeSelector = true;
-
-    // ir a la sección de Test
-    this.scrollToTestSection();
+// Cuando haces clic en un "tema débil"
+selectWeakTopic(topic: any) {
+  console.log('🎯 Tema débil seleccionado:', topic);
+  
+  // ✅ Activar modo TEMA automáticamente
+  this.practiceMode = 'tema';
+  this.selectedTemaId = topic.temaId;
+  this.selectedSubtemaId = null;
+  this.scopeType = 'tema';
+  this.showThemeSelector = true;
+  
+  // ✅ Ajustar cantidad si excede el límite del tema
+  const maxAvailable = this.getMaxAvailableQuestions();
+  if (this.selectedQuantity > maxAvailable) {
+    this.selectedQuantity = Math.max(1, Math.min(maxAvailable, 7));
   }
+
+  // ✅ Hacer scroll a la sección de Test
+  setTimeout(() => {
+    const el = document.querySelector('.section-block-primary');
+    if (el && this.ionContent) {
+      const y = (el as HTMLElement).offsetTop - 80;
+      this.ionContent.scrollToPoint(0, y, 500);
+    }
+  }, 100);
+}
 
   toggleTemaExpansion(temaId: number) {
     this.expandedTema = this.expandedTema === temaId ? null : temaId;
